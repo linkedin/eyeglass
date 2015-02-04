@@ -1,0 +1,15 @@
+{
+  "name": "eyeglass",
+  "version": "0.0.1",
+  "description": "Sass modules for NPM.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sass",
+    "compass"
+  ],
+  "author": "chris@eppsteins.net",
+  "license": "Apache License 2.0"
+}
