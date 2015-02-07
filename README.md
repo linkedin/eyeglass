@@ -28,9 +28,10 @@ To create an eyeglass module with Sass files, place the files inside of a `sass`
 
 ```
 |- /
+  |- eyeglass-exports.js
   |- package.json
   |- sass
-    |- _my_file.scss (or .sass)
+    |- index.scss (or .sass)
 ```
 
 eyeglass will automatically map `@import` calls containing angle brackets `<` and `>` into the corresponding node module directory. Because Sass uses a global namespace, it's recommended that you namespace-prefix any mixins you create in order to avoid collisions.
@@ -42,31 +43,26 @@ node-sass allows you to register custom functions for advanced functionality. Ey
 {
   ...
   "keywords": ["eyeglass-module", "sass", ...],
-  "main": "index.js",
+  "main": "eyeglass-exports.js",
   ...
 }
 ```
 
-Your requirable module exports a function which receives the eyeglass object. Inside the function, you can call the eyeglass module API. Below is an example eyeglass module which emulates the [compass headings](http://compass-style.org/reference/compass/helpers/selectors/#append-selector) functionality.
+Your requirable module exports an object that describes your module's
+structure and can expose javascript functions as sass functions. Below
+is an example eyeglass exports file:
 
 ```
-module.exports = function(eyeglass, Sass) {
-  eyeglass.function('headings($from: 0, $to: 6)', function(from, to, done) {
-    var i,
-    f = from.getValue(),
-    t = to.getValue(),
-    list = new Sass.types.List(t - f + 1);
-    
-    for (i = f; i <= t; i++) {
-      list.setValue(i - f, new Sass.types.String('h' + i));
+var path = require('path');
+
+module.exports = function(Eyeglass, Sass) {
+  return {
+    sass_dir: path.join(__dirname, 'sass'),
+    functions: {
+      'hello($name: 'World')': function(name, done) {
+        done(Sass.types.String('Hello, " + name.getValue()));
+      }
     }
-    
-    done(list);
-  });
+  }
 };
 ```
-
-* **eyeglass.function(signature, function)**: This registers a function with eyeglass, making it available to node_sass. The eyeglass interface will check for collisions in custom function names, and when the function is defined multiple times will compare the two functions for similarity. If you attempt to register two different functions with an identical signature, eyeglass will provide you an error and warn you about the collision. While it is possible to run Sass functions synchronously by returning a value instead of providing a `done()` method, we strongly encourage the async nature of node.js and use the callback.
-* **eyeglass.isFunction(signature)**: Returns a boolean `true` if this signature has already been registered to eyeglass.
-* **Sass.XNXX**: This is a node-sass object. Functions specific to sass' function registration system are removed and their usage is discouraged. If the functions are absolutely necessary, a 3rd paramter (_sass) is available in the exports function and contains the removed functions.
-
