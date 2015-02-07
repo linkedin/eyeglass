@@ -61,12 +61,12 @@ is an example eyeglass exports file:
 ```
 var path = require('path');
 
-module.exports = function(Eyeglass, Sass) {
+module.exports = function(eyeglass, sass) {
   return {
     sass_dir: path.join(__dirname, 'sass'),
     functions: {
       'hello($name: 'World')': function(name, done) {
-        done(Sass.types.String('Hello, " + name.getValue()));
+        done(sass.types.String('Hello, " + name.getValue()));
       }
     }
   }
