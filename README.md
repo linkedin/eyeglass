@@ -36,6 +36,12 @@ To create an eyeglass module with Sass files, place the files inside of a `sass`
 
 eyeglass will automatically map `@import` calls containing angle brackets `<` and `>` into the corresponding node module directory. Because Sass uses a global namespace, it's recommended that you namespace-prefix any mixins you create in order to avoid collisions.
 
+In keeping with node's conventions, eyeglass modules can create an
+`index.scss` file in any folder instead of defining a file of the same
+name as a folder in order to be the main entry point for a sass module having
+submodules.
+
+
 # Writing an eyeglass module with Custom Functions
 node-sass allows you to register custom functions for advanced functionality. Eyeglass allows any node modules that are tagged with `eyeglass-module` to be automatically loaded into eyeglass. To tag your module as an eyeglass module, add the `eyeglass-module` keyword to your `package.json`
 
