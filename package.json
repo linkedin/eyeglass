@@ -13,8 +13,7 @@
     "compass"
   ],
   "dependencies": {
-    "node-sass": "*",
-    "resolve": "^1.1.0"
+    "node-sass": "*"
   },
   "devDependencies": {
     "mocha": "*",
