@@ -13,7 +13,8 @@
     "compass"
   ],
   "dependencies": {
-    "node-sass": "*"
+    "node-sass": "*",
+    "semver": "^4.2.0"
   },
   "devDependencies": {
     "mocha": "*",
