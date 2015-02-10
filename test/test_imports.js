@@ -9,7 +9,7 @@ function fixtureDirectory(subpath) {
   return path.join(__dirname, "fixtures", subpath);
 }
 
-describe('eyeglass setup', function () {
+describe('core api', function () {
 
  it('should compile a sass file', function (done) {
     var result = sass.render({
@@ -68,7 +68,11 @@ describe('eyeglass setup', function () {
     }));
  });
 
- it('lets you import module sass files', function (done) {
+});
+
+describe('eyeglass importer', function () {
+
+ it('lets you import sass files from npm modules', function (done) {
     var result = sass.render(eyeglass({
       root: fixtureDirectory("basic_modules"),
       data: '@import "<module_a>";',
@@ -79,7 +83,7 @@ describe('eyeglass setup', function () {
     }));
  });
 
- it('lets you import a submodule from a sass module', function (done) {
+ it('lets you import from a subdirectory from a sass npm module', function (done) {
     var result = sass.render(eyeglass({
       root: fixtureDirectory("basic_modules"),
       data: '@import "<module_a>/submodule";',
@@ -90,7 +94,7 @@ describe('eyeglass setup', function () {
     }));
  });
 
- it('lets you import module sass files', function (done) {
+ it('lets you import explicitly from a subdirectory from a sass npm module', function (done) {
     var result = sass.render(eyeglass({
       root: fixtureDirectory("basic_modules"),
       data: '@import "<module_a>/submodule/_index.scss";',

@@ -1,0 +1,8 @@
+{
+  "name": "function_modules",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "fn_module_a": "*"
+  }
+}
