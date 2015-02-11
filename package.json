@@ -20,6 +20,7 @@
     "eslint": "^0.14.1",
     "gulp": "^3.8.11",
     "gulp-eslint": "0.4.0",
+    "gulp-mocha": "^2.0.0",
     "mocha": "*",
     "should": ">= 0.0.1"
   },
