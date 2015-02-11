@@ -46,17 +46,23 @@ describe("function loading", function () {
  });
 
  it("should let local functions override imported functions", function (done) {
+   var output = "";
+   var release = capture(function(string) {
+     output = output + string;
+   });
    sass.render(eyeglass({
      root: fixtureDirectory("function_modules"),
      data: "#hello { greeting: hello(Chris); }\n",
      functions: {
-       "hello($name: 'World')": function(name) {
+       "hello($name: \"World\")": function(name) {
          return sass.types.String("Goodbye, " + name.getValue() + "!");
        }
      },
      success: function(result) {
+       release();
        assert.equal("#hello {\n  greeting: Goodbye, Chris!; }\n",
                     result.css);
+       assert.equal("", output);
        done();
      }
    }));
