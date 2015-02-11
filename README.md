@@ -9,13 +9,13 @@ eyeglass is a node-sass ([github](https://github.com/sass/node-sass)) extension 
 npm install -g eyeglass
 
 # for programatic functionality
-npm install eyeglass --save
+npm install eyeglass --save-dev
 ```
 
 # Adding eyeglass modules to your project
 eyeglass modules are regular npm modules. Install them into your project just like any other item.
 
-`npm install my_eyeglass_module --save`
+`npm install my_eyeglass_module --save-dev`
 
 Once installed, a module can:
 * Provide stylesheets that you can import with special node_module syntax
@@ -59,14 +59,16 @@ structure and can expose javascript functions as sass functions. Below
 is an example eyeglass exports file:
 
 ```
-var path = require('path');
+"use strict";
+
+var path = require("path");
 
 module.exports = function(eyeglass, sass) {
   return {
-    sass_dir: path.join(__dirname, 'sass'),
+    sassDir: path.join(__dirname, "sass"),
     functions: {
-      'hello($name: 'World')': function(name, done) {
-        done(sass.types.String('Hello, " + name.getValue()));
+      "hello($name: 'World')": function(name, done) {
+        done(sass.types.String("Hello, " + name.getValue()));
       }
     }
   }
