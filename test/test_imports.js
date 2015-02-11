@@ -136,4 +136,17 @@ describe("eyeglass importer", function () {
      }
    }));
  });
+
+ it("only imports a module dependency once.", function (done) {
+    sass.render(eyeglass({
+      root: fixtureDirectory("basic_modules"),
+      data: '@import "<module_a>"; @import "<module_a>";',
+      success: function(result) {
+        assert.equal(".module-a {\n  greeting: hello world; }\n\n" +
+                     ".sibling-in-module-a {\n  sibling: yes; }\n", result.css);
+        done();
+      }
+    }));
+ });
+
 });

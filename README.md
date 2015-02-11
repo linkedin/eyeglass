@@ -72,3 +72,9 @@ module.exports = function(eyeglass, sass) {
   }
 };
 ```
+
+### Import-Once
+
+Any sass files imported from your node modules will only ever be
+imported once per CSS output file. Note that Sass files imported
+from the Sass load path will have the standard sass import behavior.
