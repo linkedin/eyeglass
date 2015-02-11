@@ -19,7 +19,7 @@ eyeglass modules are regular npm modules. Install them into your project just li
 
 Once installed, a module can:
 * Provide stylesheets that you can import with special node_module syntax
-* Add additional custom functions to SASS, leveraging the power of npm's small, discrete module philosophy
+* Add additional custom functions to Sass, leveraging the power of npm's small, discrete module philosophy
 
 In Sass, you can reference the eyeglass module with standard Sass import syntax: `@import "<my_eyeglass_module>/file"; The `<my_eyeglass_module>` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
