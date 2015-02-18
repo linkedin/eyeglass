@@ -72,7 +72,7 @@ describe("function loading", function () {
    var output = "";
    var release = capture(function(string) {
      output = output + string;
-   });
+   }, "stderr");
    sass.render(eyeglass({
      root: fixtureDirectory("function_modules"),
      data: "#hello { greeting: hello(Chris); }\n",
