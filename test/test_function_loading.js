@@ -7,7 +7,8 @@ var eyeglass = require("../lib");
 var capture = require("../lib/util/capture");
 
 function fixtureDirectory(subpath) {
-  return path.join(__dirname, "fixtures", subpath);
+  var p = path.join(__dirname, "fixtures", subpath);
+  return p;
 }
 
 describe("function loading", function () {
@@ -92,4 +93,18 @@ describe("function loading", function () {
      }
    }));
  });
+
+ it("load functions from modules if they are themselves a npm eyeglass module.",
+    function (done) {
+      sass.render(eyeglass({
+        root: fixtureDirectory("is_a_module"),
+        data: "#hello { greeting: hello(); }\n",
+        success: function(result) {
+          assert.equal("#hello {\n  greeting: Hello, Myself!; }\n",
+                       result.css);
+                       done();
+        }
+      }));
+  });
+
 });

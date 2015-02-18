@@ -130,8 +130,8 @@ describe("eyeglass importer", function () {
        release();
        // TODO This should not be a successful compile (libsass issue?)
        assert.equal("", result.css);
-       assert.equal("{ [Error: Cannot find module 'transitive_module']" +
-                    " code: 'MODULE_NOT_FOUND' }\n", output);
+       assert.equal("No Eyeglass module named 'transitive_module' could be " +
+                    "found while importing '<transitive_module>'.\n", output);
        done();
      }
    }));
@@ -148,5 +148,18 @@ describe("eyeglass importer", function () {
       }
     }));
  });
+
+ it("imports modules if they are themselves a npm eyeglass module.",
+    function (done) {
+      sass.render(eyeglass({
+        root: fixtureDirectory("is_a_module"),
+        data: '@import "<is_a_module>";',
+        success: function(result) {
+          assert.equal(".is-a-module {\n  this: is a module; }\n", result.css);
+          done();
+        }
+      }));
+    }
+ );
 
 });
