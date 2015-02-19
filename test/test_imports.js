@@ -162,4 +162,18 @@ describe("eyeglass importer", function () {
     }
  );
 
+ it("eyeglass exports can be specified through the " +
+    "eyeglass property of package.json.",
+    function (done) {
+      sass.render(eyeglass({
+        root: fixtureDirectory("has_a_main_already"),
+        data: '@import "<has_a_main_already>";',
+        success: function(result) {
+          assert.equal(".has-a-main {\n  main: already; }\n", result.css);
+          done();
+        }
+      }));
+    }
+ );
+
 });

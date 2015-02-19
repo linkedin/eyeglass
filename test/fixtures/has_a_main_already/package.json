@@ -1,0 +1,7 @@
+{
+  "name": "has_a_main_already",
+  "main": "main.js",
+  "eyeglass": "eyeglass-exports.js",
+  "keywords": ["eyeglass-module"],
+  "private": true
+}
