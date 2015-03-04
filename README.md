@@ -75,6 +75,38 @@ module.exports = function(eyeglass, sass) {
 };
 ```
 
+If your package.json main file is already in use for something else, you
+can still export eyeglass functions by specifying `eyeglass: 'path/to/eyeglass-exports.js'`
+or by specifying an eyeglass object with an `exports` attribute:
+
+```
+{
+  ...
+  "main": "lib/my-awesome-main-file.js",
+  "eyeglass": {
+    "exports": "lib/eyeglass-exports.js"
+  }
+  ...
+}
+```
+
+If you need the top level import to be named differently than the name
+of your npm module (this is not best practice) then you can specify a
+`name` attribute for the eyeglass object in your package.json. The
+following example would allow `@import "<foo>";` to import from your
+package's sass directory.
+
+```
+{
+  ...
+  "name": "eyeglass-foo",
+  "eyeglass": {
+    "name": "foo"
+  }
+  ...
+}
+```
+
 ### Import-Once
 
 Any sass files imported from your node modules will only ever be
