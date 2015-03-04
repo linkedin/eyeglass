@@ -3,6 +3,27 @@
 
 eyeglass is a node-sass ([github](https://github.com/sass/node-sass)) extension manager built on top of npm. Using eyeglass, you can bring the power of node modules to your Sass files.
 
+# Status: Developer Preview
+
+Eyeglass is using cutting edge features from node-sass that won't be
+released until node-sass 3.0. If you want to develop on or with eyeglass
+you'll need to build a custom version of node-sass for the time being:
+
+```
+$ git clone https://github.com/sass/node-sass.git
+$ cd node-sass
+$ git remote add matryo https://github.com/matryo/node-sass.git
+$ git fetch matryo
+$ git checkout custom_functions 
+$ git submodule update --init --recursive
+$ npm install
+$ npm install -g node-gyp
+$ node-gyp rebuild
+$ npm link
+$ cd ../eyeglass
+$ npm link node-sass
+```
+
 # Installing eyeglass
 ```
 # for cli functionality
