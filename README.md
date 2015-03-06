@@ -9,6 +9,12 @@ Eyeglass is using cutting edge features from node-sass that won't be
 released until node-sass 3.0. If you want to develop on or with eyeglass
 you'll need to build a custom version of node-sass for the time being:
 
+If you've not already done so:
+```
+$ git clone git@github.com:sass-eyeglass/eyeglass.git
+```
+Then:
+
 ```
 $ git clone https://github.com/sass/node-sass.git
 $ cd node-sass
