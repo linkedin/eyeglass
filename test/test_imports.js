@@ -107,6 +107,17 @@ describe("eyeglass importer", function () {
     }));
  });
 
+ it("lets you import css files", function (done) {
+    sass.render(eyeglass({
+      root: fixtureDirectory("basic_modules"),
+      data: '@import "<module_a>/css_file";',
+      success: function(result) {
+        assert.equal(".css-file {\n  hello: world; }\n", result.css);
+        done();
+      }
+    }));
+ });
+
  it("lets you import sass files from a transitive dependency", function (done) {
     sass.render(eyeglass({
       root: fixtureDirectory("basic_modules"),
