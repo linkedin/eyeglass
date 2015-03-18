@@ -24,9 +24,10 @@
     "exports": "lib/eyeglass-exports"
   },
   "dependencies": {
+    "tmp": "0.0.25",
+    "deasync": "0.0.10",
     "node-sass": "^3.0.0-beta.5",
-    "semver": "^4.2.0",
-    "tmp": "0.0.25"
+    "semver": "^4.2.0"
   },
   "devDependencies": {
     "eslint": "^0.14.1",

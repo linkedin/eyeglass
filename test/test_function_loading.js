@@ -1,12 +1,14 @@
 "use strict";
 
+var assert = require("assert");
 var sass = require("node-sass");
 var testutils = require("./testutils");
+
+var eyeglass = require("../lib/options_decorator");
 
 describe("function loading", function () {
 
   it("should discover sass functions", function (done) {
-    console.log("1");
     var options = {
       root: testutils.fixtureDirectory("function_modules"),
       data: "#hello { greeting: hello(Chris); }\n" +
@@ -18,7 +20,6 @@ describe("function loading", function () {
   });
 
   it("should let me define my own sass functions too", function (done) {
-    console.log("2");
     var input = "#hello { greeting: hello(Chris); }\n" +
                 "#mine { something: add-one(3em); }\n";
     var options = {
@@ -36,7 +37,6 @@ describe("function loading", function () {
   });
 
   it("should let local functions override imported functions", function (done) {
-    console.log("3");
     testutils.assertStdout(function(checkOutput) {
       var input = "#hello { greeting: hello(Chris); }\n";
       var expectedOutput = "#hello {\n  greeting: Goodbye, Chris!; }\n";
@@ -57,7 +57,6 @@ describe("function loading", function () {
   });
 
   it("should warn about conflicting function signatures", function (done) {
-    console.log("4");
     testutils.assertStderr(function(checkStderr) {
       var input = "#hello { greeting: hello(Chris); }\n";
       var options = {
@@ -81,7 +80,6 @@ describe("function loading", function () {
 
  it("load functions from modules if they are themselves a npm eyeglass module.",
     function (done) {
-   console.log("5");
       var options = {
         root: testutils.fixtureDirectory("is_a_module"),
         data: "#hello { greeting: hello(); }\n"
@@ -89,4 +87,17 @@ describe("function loading", function () {
       var expectedOutput = "#hello {\n  greeting: Hello, Myself!; }\n";
       testutils.assertCompiles(options, expectedOutput, done);
   });
+
+  it("will always block and masquerade as an asynchronous function",
+    function(done) {
+      var input = "#hello { greeting: hello(); }\n";
+      var expected = "#hello {\n  greeting: Hello, Myself!; }\n";
+      var result = sass.renderSync(eyeglass({
+        root: testutils.fixtureDirectory("is_a_module"),
+        data: input
+      }));
+      assert.equal(expected, result.css);
+      done();
+  });
+
 });
