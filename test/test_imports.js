@@ -3,7 +3,7 @@
 var assert = require("assert");
 var sass = require("node-sass");
 var path = require("path");
-var eyeglass = require("../lib");
+var eyeglass = require("../lib/options_decorator");
 var capture = require("../lib/util/capture");
 
 function fixtureDirectory(subpath) {
