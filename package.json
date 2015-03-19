@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "node-sass": "*",
-    "semver": "^4.2.0"
+    "semver": "^4.2.0",
+    "tmp": "0.0.25"
   },
   "devDependencies": {
     "eslint": "^0.14.1",

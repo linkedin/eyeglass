@@ -1,0 +1,3 @@
+@function asset-url($relative-path) {
+  @return url(eyeglass-asset-uri($relative-path));
+}
