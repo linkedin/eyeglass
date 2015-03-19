@@ -18,8 +18,11 @@
   },
   "keywords": [
     "sass",
-    "compass"
+    "eyeglass-module"
   ],
+  "eyeglass": {
+    "exports": "lib/eyeglass-exports"
+  },
   "dependencies": {
     "node-sass": "*",
     "semver": "^4.2.0"
