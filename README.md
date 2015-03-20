@@ -19,7 +19,7 @@ Once installed via npm, an eyeglass module can:
 * Provide stylesheets that you can import with special node_module syntax.
 * Add additional custom functions to Sass that are written in javascript.
 
-In Sass files, you can reference the eyeglass module with standard Sass import syntax: `@import "<my_eyeglass_module>/file";`. The `<my_eyeglass_module>` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
+In Sass files, you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
 # Writing an eyeglass module with Sass files
 To create an eyeglass module with Sass files, place the files inside of a `sass` directory in your npm module.
@@ -32,7 +32,11 @@ To create an eyeglass module with Sass files, place the files inside of a `sass`
     |- index.scss (or .sass)
 ```
 
-eyeglass will automatically map `@import` calls containing angle brackets `<` and `>` into the corresponding node module directory. Because Sass uses a global namespace, it's recommended that you namespace-prefix any mixins you create in order to avoid collisions.
+eyeglass will automatically map the first directory of `@import`
+statements to the correct node-module directory if there is a eyeglass
+module with that eyeglass name. Because Sass uses a global namespace,
+it's recommended that you namespace-prefix any mixins you create in
+order to avoid collisions.
 
 In keeping with node's conventions, eyeglass modules can create an
 `index.scss` file in any folder instead of defining a file of the same
@@ -139,8 +143,8 @@ or by specifying an eyeglass object with an `exports` attribute:
 If you need the top level import to be named differently than the name
 of your npm module (this is not best practice) then you can specify a
 `name` attribute for the eyeglass object in your package.json. The
-following example would allow `@import "<foo>";` to import from your
-package's sass directory.
+following example would allow `@import "foo";` to import `index.scss`
+from your package's sass directory.
 
 ```
 {

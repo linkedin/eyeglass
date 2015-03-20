@@ -11,12 +11,12 @@ describe("assets", function () {
  it("should give an error when an asset is not found", function (done) {
    testutils.assertStderr(function(checkStderr) {
      var options = {
-       data: "@import '<eyeglass>/assets'; div { background-image: asset-url('fake.png'); }"
+       data: "@import 'eyeglass/assets'; div { background-image: asset-url('fake.png'); }"
      };
      var expectedError = "error in C function eyeglass-asset-uri: Asset not found: fake.png\n" +
                          "Backtrace:\n" +
-                         "	<eyeglass>/assets:1, in function `eyeglass-asset-uri`\n" +
-                         "	<eyeglass>/assets:1, in function `asset-url`\n" +
+                         "	eyeglass/assets:1, in function `eyeglass-asset-uri`\n" +
+                         "	eyeglass/assets:1, in function `asset-url`\n" +
                          "	stdin:0";
      testutils.assertCompilationError(options, expectedError, function() {
        checkStderr("");
@@ -26,7 +26,7 @@ describe("assets", function () {
  });
 
  it("should let an app refer to it's own assets", function (done) {
-   var input = "@import '<eyeglass>/assets'; div { background-image: asset-url('foo.png'); font: asset-url('foo.woff'); }";
+   var input = "@import 'eyeglass/assets'; div { background-image: asset-url('foo.png'); font: asset-url('foo.woff'); }";
    var expected = "div {\n  background-image: url(/assets/images/foo.png);\n  font: url(/assets/fonts/foo.woff); }\n";
    var rootDir = testutils.fixtureDirectory("app_assets");
    var distDir = tmp.dirSync();
