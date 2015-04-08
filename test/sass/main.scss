@@ -1,0 +1,7 @@
+@import "partial";
+
+$test: world;
+.test {
+  hello: $test;
+  from-partial: $partial;
+}

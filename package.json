@@ -1,0 +1,30 @@
+{
+  "name": "broccoli-eyeglass",
+  "description": "Sass compiler for Broccoli with Eyeglass Integration",
+  "version": "0.1.0",
+  "author": "Chris Eppstein <chris@eppsteins.net>",
+  "main": "index.js",
+  "license": "Apache License 2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eyeglass/broccoli-eyeglass"
+  },
+  "keywords": [
+    "broccoli-plugin",
+    "sass",
+    "scss",
+    "css",
+    "eyeglass"
+  ],
+  "dependencies": {
+    "broccoli-caching-writer": "^0.5.0",
+    "colors": "^1.0.3",
+    "glob": "^5.0.3",
+    "mkdirp": "^0.3.5",
+    "node-sass": "3.0.0-beta.4",
+    "pad": "0.0.8"
+  },
+  "devDependencies": {
+    "broccoli": "^0.15.3"
+  }
+}
