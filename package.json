@@ -24,7 +24,7 @@
     "exports": "lib/eyeglass-exports"
   },
   "dependencies": {
-    "node-sass": "*",
+    "node-sass": "^3.0.0-beta.5",
     "semver": "^4.2.0",
     "tmp": "0.0.25"
   },
