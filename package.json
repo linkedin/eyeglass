@@ -21,10 +21,11 @@
     "colors": "^1.0.3",
     "glob": "^5.0.3",
     "mkdirp": "^0.3.5",
-    "node-sass": "3.0.0-beta.4",
-    "pad": "0.0.8"
+    "node-sass": "^3.0.0-beta.5",
+    "rsvp": "^3.0.18"
   },
   "devDependencies": {
-    "broccoli": "^0.15.3"
+    "broccoli": "^0.15.3",
+    "broccoli-cli": "^1.0.0"
   }
 }

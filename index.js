@@ -5,6 +5,7 @@ var CachingWriter = require('broccoli-caching-writer');
 var sass = require('node-sass');
 var glob = require("glob");
 var colors = require('colors/safe');
+var RSVP = require('rsvp');
 
 // Simple copy for options hashes.
 function copyObject(obj) {
@@ -103,6 +104,7 @@ var EyeglassCompiler = CachingWriter.extend({
     forbidNodeSassOption(this.options, "outFile");
   },
 
+  // Ugh. This method needs to be decomposed into smaller parts.
   updateCache: function(srcPaths, destDir) {
     var self = this;
     var files = {};
@@ -113,6 +115,9 @@ var EyeglassCompiler = CachingWriter.extend({
       files[srcPaths[i]] = removePathPrefix(srcPaths[i], glob.sync(pattern));
     }
 
+    var promises = [];
+
+    // TODO: limit concurrency?
     for (var i = 0; i < srcPaths.length; i++) {
       var sassFiles = files[srcPaths[i]];
       for (var j = 0; j < sassFiles.length; j++) {
@@ -124,23 +129,49 @@ var EyeglassCompiler = CachingWriter.extend({
         parsedName.base = parsedName.name + ".css";
         var cssFileName = path.join(this.cssDir, formatPath(parsedName));
         this.optionsGenerator(sassFiles[j], cssFileName, sassOptions, function(resolvedCssFileName, resolvedOptions) {
+          var ii = i;
+          var jj = j;
+          resolvedOptions = copyObject(resolvedOptions);
           resolvedOptions.outFile = resolvedCssFileName;
           var actualOutputPath = path.join(destDir, resolvedCssFileName);
-          mkdirp.sync(path.dirname(actualOutputPath));
-          var startTime = new Date();
-          var result = sass.renderSync(resolvedOptions)
-          var endTime = new Date();
-          if (self.verbose) {
-            var timeInSeconds = (endTime - startTime) * 10 / 10000.0;
-            if (timeInSeconds == 0) timeInSeconds = "0.001" // nothing takes zero seconds.
-            var action = colors.inverse.green("compile" + " (" + timeInSeconds + "s)");
-            var message = sassFiles[j] + " => " + resolvedCssFileName;
-            console.log(action + " " + message);
-          }
-          fs.writeFileSync(actualOutputPath, result.css)
+          var promise = new RSVP.Promise(function(resolve, reject) {
+            mkdirp.sync(path.dirname(actualOutputPath));
+            var result = sass.render(resolvedOptions, function(err, result) {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(result);
+              }
+            });
+          });
+          promise.then(function(result) {
+            var sassFile = path.join(srcPaths[ii], files[srcPaths[ii]][jj])
+            fs.writeFileSync(actualOutputPath, result.css)
+            if (self.verbose) {
+              var timeInSeconds = result.stats.duration / 1000.0;
+              if (timeInSeconds == 0) timeInSeconds = "0.001" // nothing takes zero seconds.
+              var action = colors.inverse.green("compile" + " (" + timeInSeconds + "s)");
+              var message = sassFile + " => " + resolvedCssFileName;
+              console.log(action + " " + message);
+            }
+          }, function(error) {
+            if (self.verbose) {
+              var sassFile = path.join(srcPaths[ii], files[srcPaths[ii]][jj])
+              var action = colors.bgRed.white("error");
+              var message = colors.red(error.message);
+              var location = "Line " + error.line + ", Column " + error.column;
+              if (error.file.substring(error.file.length - sassFile.length) != sassFile) {
+                location = location + " of " + error.file;
+              }
+              console.log(action + " " + sassFile + " (" + location + "): " + message);
+            }
+            RSVP.rethrow(new Error(error.message))
+          });
+          promises[promises.length] = promise;
         });
       }
     }
+    return RSVP.allSettled(promises);
   }
 });
 
