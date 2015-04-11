@@ -3,7 +3,6 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     release: {
       options: {
-        bump: false
       }
     }
   });
