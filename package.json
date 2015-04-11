@@ -28,6 +28,8 @@
   },
   "devDependencies": {
     "broccoli": "^0.15.3",
-    "broccoli-cli": "^1.0.0"
+    "broccoli-cli": "^1.0.0",
+    "grunt": "^0.4.5",
+    "grunt-release": "^0.12.0"
   }
 }
