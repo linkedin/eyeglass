@@ -1,7 +1,7 @@
 {
   "name": "eyeglass",
   "description": "Sass modules for npm.",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "author": {
     "name": "The eyeglass team and contributors",
     "url": "https://github.com/sass-eyeglass/eyeglass/graphs/contributors"
@@ -32,6 +32,8 @@
   "devDependencies": {
     "eslint": "^0.14.1",
     "eyeglass-dev-eslint": "0.0.2",
+    "grunt": "^0.4.5",
+    "grunt-release": "^0.12.0",
     "gulp": "^3.8.11",
     "gulp-eslint": "0.4.0",
     "gulp-mocha": "^2.0.0",
