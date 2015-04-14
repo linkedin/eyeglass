@@ -4,10 +4,8 @@
 eyeglass is a node-sass ([github](https://github.com/sass/node-sass)) extension manager built on top of npm. Using eyeglass, you can bring the power of node modules to your Sass files.
 
 # Installing eyeglass
-```
-# for cli functionality
-npm install -g eyeglass
 
+```
 # for programatic functionality
 npm install eyeglass --save-dev
 ```
