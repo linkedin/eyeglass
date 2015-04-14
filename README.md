@@ -47,6 +47,8 @@ The following options are specific to this plugin:
 
 * `cssDir` - Required. The directory where CSS files should be written
   relative to the build output directory.
+* `renderSync` - Force sass rendering to use node-sass's synchronous
+  rendering. Defaults to `false`.
 * `fullException` - When set to true, instead of generating a build
   error, the css output file will be written such that it displays a
   compilation failure in the browser. This is useful during development
