@@ -12,7 +12,7 @@ module.exports = {
   },
   assertCompiles: function(options, expectedOutput, done) {
     this.compile(options, function(err, result) {
-      assert(!err);
+      assert(!err, err && err.message);
       assert.equal(expectedOutput, result.css.toString());
       done();
     });
