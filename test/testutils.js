@@ -10,6 +10,14 @@ module.exports = {
   fixtureDirectory: function(subpath) {
     return path.join(__dirname, "fixtures", subpath);
   },
+  assertCompilesSync: function(options, expectedOutput) {
+    try {
+      var result = this.compileSync(options);
+      assert.equal(expectedOutput, result.css.toString());
+    } catch (err) {
+      assert(!err, err.toString());
+    }
+  },
   assertCompiles: function(options, expectedOutput, done) {
     this.compile(options, function(err, result) {
       assert(!err, err && err.message);
@@ -27,12 +35,17 @@ module.exports = {
     });
   },
   compile: function(options, cb) {
+    sass.render(this.sassOptions(options), cb);
+  },
+  compileSync: function(options) {
+    return sass.renderSync(this.sassOptions(options));
+  },
+  sassOptions: function(options) {
     if (typeof options.sassOptions === "function") {
-      options = options.sassOptions();
+      return options.sassOptions();
     } else {
-      options = eyeglass(options);
+      return eyeglass(options);
     }
-    sass.render(options, cb);
   },
   assertStdout: function(work) {
     this.assertCapture(work, "stdout");
