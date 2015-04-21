@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-eyeglass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Use eyeglass and node-sass to compile Sass files.",
   "directories": {
     "doc": "doc",
@@ -37,10 +37,8 @@
     "ember-addon", "sass", "eyeglass", "scss", "css", "broccoli"
   ],
   "dependencies": {
-    "ember-cli-babel": "^5.0.0",
     "broccoli-eyeglass": "^0.1.0",
-    "broccoli-stew": "^0.2.1",
-    "broccoli-asset-rev": "^2.0.2"
+    "broccoli-stew": "^0.2.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
