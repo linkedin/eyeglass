@@ -1,22 +1,20 @@
-# Ember-cli-eyeglass
+# `ember-cli-eyeglass`
 
-This README outlines the details of collaborating on this Ember addon.
+This Ember CLI Addon makes it trivial to compile your sass files with
+eyeglass support via node-sass.
 
 ## Installation
 
-* `git clone` this repository
-* `npm install`
-* `bower install`
+`npm install --save-dev ember-cli-eyeglass`
 
-## Running
+Then rename all your `.css` files so they have the `.scss` extension.
 
-* `ember server`
-* Visit your app at http://localhost:4200.
+## Configuration
 
-## Running Tests
-
-* `ember test`
-* `ember test --server`
+In your application's config/environment.js the key `"eyeglass"` can be
+set to an options object that will be passed to broccoli-eyeglass. For
+details on the options available, please read the [broccoli-eyeglass
+options documentation](https://github.com/sass-eyeglass/broccoli-eyeglass#options).
 
 ## Building
 
