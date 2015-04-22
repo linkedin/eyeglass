@@ -68,6 +68,16 @@ describe("eyeglass importer", function () {
    testutils.assertCompiles(options, expected, done);
  });
 
+ it("lets you import sass files from dev dependencies", function (done) {
+   var options = {
+     root: testutils.fixtureDirectory("dev_deps"),
+     data: '@import "module_a";'
+   };
+   var expected = ".module-a {\n  greeting: hello world; }\n\n" +
+                  ".sibling-in-module-a {\n  sibling: yes; }\n";
+   testutils.assertCompiles(options, expected, done);
+ });
+
  it("lets you import from a subdir in a npm module", function (done) {
    var options = {
      root: testutils.fixtureDirectory("basic_modules"),
