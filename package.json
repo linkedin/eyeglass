@@ -31,10 +31,17 @@
     "ember-disable-prototype-extensions": "^1.0.0",
     "ember-export-application-global": "^1.0.2",
     "ember-try": "0.0.4",
-    "eyeglass": "^0.1.1"
+    "eyeglass": "^0.1.1",
+    "grunt": "^0.4.5",
+    "grunt-release": "^0.12.0"
   },
   "keywords": [
-    "ember-addon", "sass", "eyeglass", "scss", "css", "broccoli"
+    "ember-addon",
+    "sass",
+    "eyeglass",
+    "scss",
+    "css",
+    "broccoli"
   ],
   "dependencies": {
     "broccoli-eyeglass": "^0.1.3",
