@@ -58,8 +58,8 @@ The following options are specific to this plugin:
 * `discover` - When `true`, will discover sass files to compile that are
   found in the sass directory. Defaults to true unless `sourceFiles` are
   specified.
-* `sourceFiles` - Array of file names (relative to the sass directory)
-  that should be compiled.
+* `sourceFiles` - Array of file names or glob patterns (relative to the
+  sass directory) that should be compiled.
 * `optionsGenerator` - Function that accepts four arguments:
 
   * `sassFile` - The sass file being compiled.
