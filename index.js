@@ -12,6 +12,9 @@ module.exports = {
     if (env != "production") {
       defaults.eyeglass.verbose = false
     }
+    if (baseConfig.eyeglass && !(baseConfig.eyeglass.sourceFiles || baseConfig.eyeglass.discover)) {
+      defaults.eyeglass.sourceFiles = ["app.s[ac]ss"]
+    }
     return defaults;
   },
 
