@@ -15,9 +15,9 @@ describe("assets", function () {
      };
      var expectedError = "error in C function eyeglass-asset-uri: Asset not found: fake.png\n" +
                          "Backtrace:\n" +
-                         "	eyeglass/assets:1, in function `eyeglass-asset-uri`\n" +
-                         "	eyeglass/assets:1, in function `asset-url`\n" +
-                         "	stdin:0";
+                         "	eyeglass/assets:2, in function `eyeglass-asset-uri`\n" +
+                         "	eyeglass/assets:2, in function `asset-url`\n" +
+                         "	stdin:1";
      testutils.assertCompilationError(options, expectedError, function() {
        checkStderr("");
        done();

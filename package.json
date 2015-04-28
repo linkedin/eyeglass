@@ -6,6 +6,9 @@
     "name": "The eyeglass team and contributors",
     "url": "https://github.com/sass-eyeglass/eyeglass/graphs/contributors"
   },
+  "engines": {
+    "node" : ">=0.12"
+  },
   "license": "Apache License 2.0",
   "main": "lib/index.js",
   "README": "README.md",
