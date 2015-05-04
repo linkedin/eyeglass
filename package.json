@@ -11,7 +11,7 @@
     "build": "ember build",
     "test": "ember try:testall"
   },
-  "repository": "",
+  "repository": "https://github.com/sass-eyeglass/ember-cli-eyeglass",
   "engines": {
     "node": ">= 0.10.0"
   },
