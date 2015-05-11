@@ -86,6 +86,23 @@ sass.render(eyeglass.sassOptions(), function(error, result) {
 });
 ```
 
+### Example: integration with grunt and grunt-sass
+
+```js
+...
+sass: {
+    options: require("eyeglass")({
+        sourceMap: true
+    }).sassOptions(),
+    dist: {
+        files: {
+            'public/css/main.css': 'sass/main.scss'
+        }
+    }
+}
+...
+```
+
 ### TODO: Detailed build integration guide as details emerge.
 
 * Assets integration
