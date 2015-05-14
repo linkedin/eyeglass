@@ -14,6 +14,7 @@ describe("assets", function () {
        data: "@import 'eyeglass/assets'; div { background-image: asset-url('fake.png'); }"
      };
      var expectedError = "error in C function eyeglass-asset-uri: Asset not found: fake.png\n" +
+                         "\n" +
                          "Backtrace:\n" +
                          "	eyeglass/assets:2, in function `eyeglass-asset-uri`\n" +
                          "	eyeglass/assets:2, in function `asset-url`\n" +

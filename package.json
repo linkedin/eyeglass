@@ -7,7 +7,7 @@
     "url": "https://github.com/sass-eyeglass/eyeglass/graphs/contributors"
   },
   "engines": {
-    "node" : ">=0.12"
+    "node": ">=0.12"
   },
   "license": "Apache License 2.0",
   "main": "lib/index.js",
@@ -27,14 +27,14 @@
     "exports": "lib/eyeglass-exports"
   },
   "dependencies": {
-    "tmp": "0.0.25",
     "deasync": "0.0.10",
-    "node-sass": "^3.0.0-beta.5",
-    "semver": "^4.2.0"
+    "node-sass": "^3.1.0",
+    "semver": "^4.2.0",
+    "tmp": "0.0.25"
   },
   "devDependencies": {
     "eslint": "^0.14.1",
-    "eyeglass-dev-eslint": "0.0.2",
+    "eyeglass-dev-eslint": "^1.0.1",
     "grunt": "^0.4.5",
     "grunt-release": "^0.12.0",
     "gulp": "^3.8.11",
