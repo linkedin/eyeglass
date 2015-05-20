@@ -24,7 +24,8 @@
     "eyeglass-module"
   ],
   "eyeglass": {
-    "exports": "lib/eyeglass-exports"
+    "exports": "lib/eyeglass-exports",
+    "engine": "*"
   },
   "dependencies": {
     "deasync": "0.0.10",
