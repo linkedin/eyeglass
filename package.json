@@ -9,7 +9,7 @@
   "engines": {
     "node": ">=0.12"
   },
-  "license": "Apache License 2.0",
+  "license": "Apache-2.0",
   "main": "lib/index.js",
   "README": "README.md",
   "scripts": {
@@ -24,7 +24,8 @@
     "eyeglass-module"
   ],
   "eyeglass": {
-    "exports": "lib/eyeglass-exports"
+    "exports": "lib/eyeglass-exports",
+    "engine": "*"
   },
   "dependencies": {
     "deasync": "0.0.10",
