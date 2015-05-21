@@ -22,11 +22,11 @@ describe("semver checking", function () {
     });
   });
 
-  it("will throw if eyeglassEngineStrict is set", function (done) {
+  it("will throw if strictModuleVersions is set", function (done) {
     var options = {
       root: testutils.fixtureDirectory("bad_engine"),
       data: "#hello { greeting: hello(Chris); }",
-      eyeglassStrictVersions: true
+      strictModuleVersions: true
     };
 
     testutils.assertStderr(function(check) {

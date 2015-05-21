@@ -25,7 +25,7 @@
   ],
   "eyeglass": {
     "exports": "lib/eyeglass-exports",
-    "engine": "*"
+    "needs": "*"
   },
   "dependencies": {
     "deasync": "0.0.10",
