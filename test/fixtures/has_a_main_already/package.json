@@ -3,7 +3,7 @@
   "main": "main.js",
   "eyeglass": {
     "exports": "eyeglass-exports.js",
-    "engine": "*"
+    "needs": "*"
   },
   "keywords": ["eyeglass-module"],
   "private": true
