@@ -27,8 +27,10 @@ describe("assets", function () {
  });
 
  it("should let an app refer to it's own assets", function (done) {
-   var input = "@import 'eyeglass/assets'; div { background-image: asset-url('foo.png'); font: asset-url('foo.woff'); }";
-   var expected = "div {\n  background-image: url(/assets/images/foo.png);\n  font: url(/assets/fonts/foo.woff); }\n";
+   var input = "@import 'eyeglass/assets'; div { background-image: asset-url('foo.png');" +
+               "font: asset-url('foo.woff'); }";
+   var expected = "div {\n  background-image: url(/assets/images/foo.png);\n" +
+                  "  font: url(/assets/fonts/foo.woff); }\n";
    var rootDir = testutils.fixtureDirectory("app_assets");
    var distDir = tmp.dirSync();
    var eg = new Eyeglass({

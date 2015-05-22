@@ -6,7 +6,8 @@ var testutils = require("./testutils");
 
 describe("sass version function", function () {
  it("should return the eyeglass version", function (done) {
-   var eyeglassVersion = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"))).version;
+   var packageContents = fs.readFileSync(path.resolve(__dirname, "../package.json"));
+   var eyeglassVersion = JSON.parse(packageContents).version;
    var options = {
      data: "/* Eyeglass version is #{eyeglass-version()} */"
    };

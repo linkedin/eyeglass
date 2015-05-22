@@ -6,7 +6,8 @@ var testutils = require("./testutils");
 
 describe("synchronous rendering", function () {
  it("compiles basic file synchronously", function (done) {
-   var eyeglassVersion = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"))).version;
+   var packageContents = fs.readFileSync(path.resolve(__dirname, "../package.json"));
+   var eyeglassVersion = JSON.parse(packageContents).version;
    var options = {
      root: testutils.fixtureDirectory("function_modules"),
      data: "/* Eyeglass version is #{eyeglass-version()} */ .test { a: read('a'); }"

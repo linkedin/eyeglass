@@ -68,7 +68,8 @@ module.exports = {
     var lines2 = string2.split("\n");
     assert.equal(lines1.length, lines2.length, "Number of lines differ.");
     for (var lineNumber = 0; lineNumber < lines1.length; lineNumber++) {
-      assert.equal(lines1[lineNumber], lines2[lineNumber], "Line #" + lineNumber + " differs: " + lines1[lineNumber] + " != " + lines2[lineNumber]);
+      assert.equal(lines1[lineNumber], lines2[lineNumber],
+        "Line #" + lineNumber + " differs: " + lines1[lineNumber] + " != " + lines2[lineNumber]);
     }
   }
 };
