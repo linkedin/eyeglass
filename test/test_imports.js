@@ -149,6 +149,15 @@ describe("eyeglass importer", function () {
    testutils.assertCompiles(options, expected, done);
  });
 
+ it("imports for modules such as foo/bar/_foo.scss wanting foo/bar (#37)", function (done) {
+   var options = {
+     root: testutils.fixtureDirectory("redundantly_named_modules"),
+     data: '@import "module_a";'
+   };
+   var expected = ".nested-module-a {\n  greeting: hello world; }\n";
+   testutils.assertCompiles(options, expected, done);
+ });
+
  it("eyeglass exports can be specified through the " +
     "eyeglass property of package.json.",
    function (done) {

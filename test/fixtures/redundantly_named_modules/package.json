@@ -1,0 +1,9 @@
+{
+  "name": "redundantly_named_modules",
+  "version": "0.0.1",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "module_a": "*"
+  }
+}
