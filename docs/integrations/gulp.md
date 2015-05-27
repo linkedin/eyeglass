@@ -9,6 +9,10 @@ var eyeglass = require("eyeglass")({
   // ... node-sass options
 });
 
+// Disable import once with gulp until we
+// figure out how to make them work together.
+eyeglass.enableImportOnce = false
+
 gulp.task("sass", function () {
   gulp.src("./sass/**/*.scss")
     .pipe(sass(eyeglass.sassOptions()).on("error", sass.logError))
