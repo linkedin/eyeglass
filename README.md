@@ -1,3 +1,5 @@
+![CI Status](https://travis-ci.org/sass-eyeglass/eyeglass.svg?branch=master)
+
 # eyeglass
 ## Getting some npm in your Sass
 
