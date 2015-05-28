@@ -2,10 +2,13 @@ language: node_js
 node_js:
 - '0.12'
 - iojs
+env:
+- COVERAGE=true
+- COVERAGE=false
 matrix:
-  include:
+  exclude:
     env: COVERAGE=true
-    node_js: '0.12'
+    node_js: 'iojs'
 notifications:
   slack:
     secure: UYwnLYQ+Zt3BGQpYg4uWcbI8cs5+iWh1CWyvrMkYsnJ5vnyuF02kNWhpegawFqy6O0rEbOPcvgw+rsmr2a7x7SIHQ4Ej19rnbIHZEGJDJwd636FnCLzzS9m1fwmAa2cbIa0VufzTyrJwiibC05l31J9/mfSXwo7yZEmPahmlstU=
