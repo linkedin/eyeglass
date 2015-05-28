@@ -2,3 +2,7 @@ language: node_js
 node_js:
   - "0.12"
   - "iojs"
+matrix:
+  include:
+    env: COVERAGE=true
+    node_js: "0.12"
