@@ -6,7 +6,7 @@ var gulp = require("gulp");
 var sass = require("gulp-sass");
 
 var eyeglass = require("eyeglass")({
-// ... node-sass options
+  // ... node-sass options
     importer: function(uri, prev, done) {
         done(sass.NULL);
     }
