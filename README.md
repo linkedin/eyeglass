@@ -114,7 +114,7 @@ sass: {
 # Writing an eyeglass module with Custom Functions
 node-sass allows you to register custom functions for advanced functionality. Eyeglass allows any node modules that are tagged with `eyeglass-module` to be automatically loaded into eyeglass. To tag your module as an eyeglass module, add the `eyeglass-module` keyword to your `package.json`
 
-```
+```js
 {
   ...
   "keywords": ["eyeglass-module", "sass", ...],
@@ -127,7 +127,7 @@ Your requirable module exports an object that describes your module's
 structure and can expose javascript functions as sass functions. Below
 is an example eyeglass exports file:
 
-```
+```js
 "use strict";
 
 var path = require("path");
@@ -148,7 +148,7 @@ If your package.json main file is already in use for something else, you
 can still export eyeglass functions by specifying `eyeglass: 'path/to/eyeglass-exports.js'`
 or by specifying an eyeglass object with an `exports` attribute:
 
-```
+```js
 {
   ...
   "main": "lib/my-awesome-main-file.js",
@@ -165,7 +165,7 @@ of your npm module (this is not best practice) then you can specify a
 following example would allow `@import "foo";` to import `index.scss`
 from your package's sass directory.
 
-```
+```js
 {
   ...
   "name": "eyeglass-foo",
@@ -180,4 +180,4 @@ from your package's sass directory.
 
 Any sass files imported from your node modules will only ever be
 imported once per CSS output file. Note that Sass files imported
-from the Sass load path will have the standard sass import behavior.
+from the Sass load path will have the standard Sass `@import` behavior.
