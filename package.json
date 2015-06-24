@@ -7,7 +7,7 @@
   "license": "Apache License 2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eyeglass/broccoli-eyeglass"
+    "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "keywords": [
     "broccoli-plugin",
