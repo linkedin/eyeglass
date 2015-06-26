@@ -5,5 +5,8 @@
   "private": true,
   "dependencies": {
     "fn_module_a": "*"
+  },
+  "devDependencies": {
+    "fn_module_b": "*"
   }
 }

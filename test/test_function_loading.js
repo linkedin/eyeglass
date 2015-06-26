@@ -19,6 +19,15 @@ describe("function loading", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+  it("should include devDependencies in its list", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("function_modules"),
+      data: "#hello { greeting: hellob(Chris); }\n"
+    };
+    var expected = "#hello {\n  greeting: Hello, Chris!; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   it("should let me define my own sass functions too", function (done) {
     var input = "#hello { greeting: hello(Chris); }\n" +
                 "#mine { something: add-one(3em); }\n";
