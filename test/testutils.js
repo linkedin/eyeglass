@@ -47,20 +47,21 @@ module.exports = {
       return eyeglass(options);
     }
   },
-  assertStdout: function(work) {
-    this.assertCapture(work, "stdout");
+  assertStdout: function(work, check) {
+    this.assertCapture(work, "stdout", check);
   },
-  assertStderr: function(work) {
-    this.assertCapture(work, "stderr");
+  assertStderr: function(work, check) {
+    this.assertCapture(work, "stderr", check);
   },
-  assertCapture: function(work, stream) {
+  assertCapture: function(work, stream, check) {
+    check = check || assert.equal;
     var output = "";
     var release = capture(function(string) {
       output = output + string;
     }, stream);
     work(function(expectedOutput) {
       release();
-      assert.equal(output, expectedOutput);
+      check(output, expectedOutput);
     });
   },
   assertMultilineEqual: function(string1, string2) {
