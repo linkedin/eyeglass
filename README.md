@@ -35,7 +35,7 @@ var outputTree = compileSass(inputTrees, options);
   all your eyeglass-compatible sass modules can be imported.
 
 * **`options`**: Except for the options that are specific to this plugin. All
-   the rest are passed through [eyeglass]() and then to
+   the rest are passed through [eyeglass](https://github.com/sass-eyeglass/eyeglass) and then to
    [node-sass](https://github.com/sass/node-sass#options).
 
 **Note:** that the following node-sass options are managed by this plugin and
