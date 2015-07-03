@@ -35,7 +35,13 @@ module.exports = {
     });
   },
   compile: function(options, cb) {
-    sass.render(this.sassOptions(options), cb);
+    try {
+      var sassOpts = this.sassOptions(options);
+      sass.render(sassOpts, cb);
+    } catch (err) {
+      console.log(err, err.stack.split("\n"));
+      cb(err, null);
+    }
   },
   compileSync: function(options) {
     return sass.renderSync(this.sassOptions(options));

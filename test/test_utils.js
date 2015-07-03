@@ -3,7 +3,9 @@
 var assert = require("assert");
 var hash = require("../lib/util/hash");
 var unquote = require("../lib/util/unquote");
+var discover = require("../lib/util/discover");
 var sass = require("node-sass");
+var testutils = require("./testutils");
 
 describe("utilities", function () {
 
@@ -41,5 +43,24 @@ describe("utilities", function () {
    assert.equal("'asdf\"", unquote(s("'asdf\"")).getValue());
    assert.equal("asdf", unquote(s("asdf")).getValue());
    done();
+ });
+
+ it("loads a package.json for an eyeglass module", function(done) {
+    var dir = testutils.fixtureDirectory("is_a_module");
+    var eyeglass = {};
+    var egModule = discover.getEyeglassModuleDef(dir);
+    var egExports = require(egModule.main)(eyeglass, sass);
+    assert(egExports);
+    assert.equal(egExports.sassDir, dir);
+    assert(egExports.functions);
+    done();
+ });
+
+ it("populates the eyeglass name for a module into the module definition", function(done) {
+    var dir = testutils.fixtureDirectory("is_a_module");
+    var egModule = discover.getEyeglassModuleDef(dir);
+    assert(egModule);
+    assert.equal(egModule.eyeglassName, "is-a-module");
+    done();
  });
 });

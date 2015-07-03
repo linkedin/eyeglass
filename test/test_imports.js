@@ -143,7 +143,7 @@ describe("eyeglass importer", function () {
  it("imports modules if they are themselves a npm eyeglass module.", function(done) {
     var options = {
       root: testutils.fixtureDirectory("is_a_module"),
-      data: '@import "is_a_module";'
+      data: '@import "is-a-module";'
     };
    var expected = ".is-a-module {\n  this: is a module; }\n";
    testutils.assertCompiles(options, expected, done);

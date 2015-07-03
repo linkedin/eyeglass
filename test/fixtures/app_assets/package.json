@@ -1,0 +1,10 @@
+{
+  "name": "app_assets",
+  "version": "0.0.1",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "asset_mod_1": "*"
+  }
+}
+

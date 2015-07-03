@@ -2,5 +2,8 @@
   "name": "is_a_module",
   "main": "eyeglass-exports.js",
   "keywords": ["eyeglass-module"],
-  "private": true
+  "private": true,
+  "eyeglass": {
+    "name": "is-a-module"
+  }
 }
