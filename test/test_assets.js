@@ -67,4 +67,87 @@ describe("assets", function () {
 
    testutils.assertCompiles(eg, expected, done);
  });
+
+ it("should allow httpPrefix for app assets", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     file: path.join(rootDir, "sass", "app_assets.scss")
+   }, sass);
+
+   // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+   eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "assets"});
+   // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*", httpPrefix: "assets"});
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("should allow a global httpPrefix for all assets", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "app_assets.scss")
+   }, sass);
+
+   // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("should allow a global httpPrefix for all assets", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff);\n";
+                  "  background: url(/assets/mod-one/mod-one.jpg);\n" +
+                  "  background: url(/assets/mod-one/subdir/sub.png); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("should nest a asset path entry http prefix inside the global httpPrefix", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/whoa/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff);\n";
+                  "  background: url(/assets/mod-one/mod-one.jpg);\n" +
+                  "  background: url(/assets/mod-one/subdir/sub.png); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+   eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "whoa"});
+   // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   testutils.assertCompiles(eg, expected, done);
+ });
 });

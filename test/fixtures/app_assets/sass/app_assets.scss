@@ -1,0 +1,6 @@
+@import "assets";
+
+.test {
+  background: asset-url("images/foo.png");
+  background: asset-url("fonts/foo.woff");
+}
