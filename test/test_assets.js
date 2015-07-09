@@ -5,6 +5,8 @@ var path = require("path");
 var tmp = require("tmp");
 var Eyeglass = require("../lib");
 var testutils = require("./testutils");
+var assert = require("assert");
+var fse = require("fs-extra");
 
 describe("assets", function () {
 
@@ -175,6 +177,94 @@ describe("assets", function () {
    });
 
    testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("allows installing assets", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff);\n" +
+                  "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
+                  "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+     if (assetUri.indexOf("mod-one") > 0) {
+       finished(null, {
+         path: assetUri,
+         query: "12345678"
+       });
+     } else {
+       oldResolver(assetFile, assetUri, finished);
+     }
+   });
+
+   var installedAssets = [];
+
+   eg.assets.installer(function(assetFile, assetUri, oldInstaller, finished) {
+    testutils.assertFileExists(assetFile);
+    installedAssets[assetUri] = true;
+    finished(null, assetFile);
+   });
+
+   testutils.assertCompiles(eg, expected, function() {
+    assert(installedAssets["/assets/images/foo.png"]);
+    assert(installedAssets["/assets/fonts/foo.woff"]);
+    assert(installedAssets["/assets/mod-one/mod-one.jpg"]);
+    assert(installedAssets["/assets/mod-one/subdir/sub.png"]);
+    done();
+   });
+ });
+
+ it("allows installing assets", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff);\n" +
+                  "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
+                  "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     buildDir: path.join(rootDir, "dist"),
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+     if (assetUri.indexOf("mod-one") > 0) {
+       finished(null, {
+         path: assetUri,
+         query: "12345678"
+       });
+     } else {
+       oldResolver(assetFile, assetUri, finished);
+     }
+   });
+
+   testutils.assertCompiles(eg, expected, function() {
+    try {
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/images/foo.png"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/fonts/foo.woff"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/mod-one/mod-one.jpg"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/mod-one/subdir/sub.png"));
+    } finally {
+      fse.remove(path.join(rootDir, "dist"), function(error) {
+        done();
+      });
+    }
+   });
  });
 
 });

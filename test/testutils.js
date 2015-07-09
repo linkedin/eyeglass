@@ -5,6 +5,7 @@ var sass = require("node-sass");
 var path = require("path");
 var assert = require("assert");
 var capture = require("../lib/util/capture");
+var fs = require("fs");
 
 module.exports = {
   fixtureDirectory: function(subpath) {
@@ -77,5 +78,8 @@ module.exports = {
       assert.equal(lines1[lineNumber], lines2[lineNumber],
         "Line #" + lineNumber + " differs: " + lines1[lineNumber] + " != " + lines2[lineNumber]);
     }
+  },
+  assertFileExists: function(filename) {
+    assert(fs.existsSync(filename));
   }
 };
