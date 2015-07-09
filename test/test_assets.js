@@ -145,4 +145,36 @@ describe("assets", function () {
 
    testutils.assertCompiles(eg, expected, done);
  });
+
+ it("allows url mangling", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/assets/images/foo.png);\n" +
+                  "  background: url(/assets/fonts/foo.woff);\n" +
+                  "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
+                  "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+     if (assetUri.indexOf("mod-one") > 0) {
+       finished(null, {
+         path: assetUri,
+         query: "12345678"
+       });
+     } else {
+       oldResolver(assetFile, assetUri, finished);
+     }
+   });
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
 });
