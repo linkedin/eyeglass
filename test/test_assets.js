@@ -130,4 +130,19 @@ describe("assets", function () {
 
    testutils.assertCompiles(eg, expected, done);
  });
+
+ it("register-asset() works", function (done) {
+   var input = "@import 'eyeglass/assets';" +
+              "@include register-asset(module-a, 'foo/bar.png', 'images/foo/bar.png', $uri: 'assets/foo/bar.png');" +
+              ".test { foo: inspect($eg-registered-assets); }";
+   var expected = '.test {\n  foo: (module-a: ("foo/bar.png": (filepath: "images/foo/bar.png", uri: "assets/foo/bar.png"))); }\n';
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
 });
