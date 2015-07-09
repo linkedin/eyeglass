@@ -51,6 +51,7 @@ describe("assets", function () {
                   "  background: url(/mod-one/subdir/sub.png); }\n" +
                   "\n" +
                   ".all-assets {\n" +
+                  "  app-assets: \"images/foo.png\", \"fonts/foo.woff\";\n" +
                   "  mod-assets: \"mod-one/mod-one.jpg\", \"mod-one/subdir/sub.png\"; }\n";
    var rootDir = testutils.fixtureDirectory("app_assets");
    //var distDir = tmp.dirSync();
@@ -58,6 +59,11 @@ describe("assets", function () {
      root: rootDir,
      file: path.join(rootDir, "sass", "uses_mod_1.scss")
    }, sass);
+
+   // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
    testutils.assertCompiles(eg, expected, done);
  });
