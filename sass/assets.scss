@@ -11,19 +11,29 @@ $eg-registered-assets: () !default;
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
 // @param $assets map<string => string> maps source urls to the full path of the asset.
-@mixin register-asset($module, $url, $path, $uri: null) {
+@function register-asset($module, $url, $path, $uri: null) {
   $mod-assets: map-get($eg-registered-assets, $module) or ();
   $mod-assets: map-merge($mod-assets, ($url: (filepath: $path, uri: $uri or $url)));
   $eg-registered-assets: map-merge($eg-registered-assets, ($module: $mod-assets)) !global;
+  @return null;
+}
+
+@mixin register-asset($module, $url, $path, $uri: null) {
+  $discarded-value: register-asset($module, $url, $path, $uri);
 }
 
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
 // @param $assets map<string => string> maps source urls to the full path of the asset.
-@mixin register-assets($module, $assets) {
+@function register-assets($module, $assets) {
   $mod-assets: map-get($eg-registered-assets, $module) or ();
   $mod-assets: map-merge($mod-assets, $assets);
   $eg-registered-assets: map-merge($eg-registered-assets, ($module: $mod-assets)) !global;
+  @return null;
+}
+
+@mixin register-assets($module, $assets) {
+  $discarded-value: register-assets($module, $assets);
 }
 
 // Returns a URL to the asset wrapped.
