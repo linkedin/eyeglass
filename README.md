@@ -23,7 +23,7 @@ var options = {
   cssDir: "assets/css",
   fullException: false
 }
-var outputTree = compileSass(inputTrees, options);
+var outputTree = new compileSass(inputTrees, options);
 ```
 
 * **`inputTrees`**: An array of trees that act as the include paths for
@@ -47,6 +47,8 @@ The following options are specific to this plugin:
 
 * `cssDir` - Required. The directory where CSS files should be written
   relative to the build output directory.
+* `sassDir` - The directory to look for scss files to compile. Defaults
+  to tree root.
 * `renderSync` - Force sass rendering to use node-sass's synchronous
   rendering. Defaults to `false`.
 * `fullException` - When set to true, instead of generating a build
