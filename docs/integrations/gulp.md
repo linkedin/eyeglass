@@ -6,8 +6,9 @@ Additionally, to avoid any problems with `node-sass`, you should provide a defau
 ```js
 var gulp = require("gulp");
 var sass = require("gulp-sass");
+var Eyeglass = require("eyeglass").Eyeglass;
 
-var eyeglass = require("eyeglass")({
+var eyeglass = new Eyeglass({
   // ... node-sass options
     importer: function(uri, prev, done) {
         done(sass.compiler.types.NULL);

@@ -4,9 +4,9 @@
 ```js
 // ...
 sass: {
-  options: require("eyeglass")({
+  options: require("eyeglass").decorate({
     sourceMap: true
-  }).sassOptions(),
+  }),
   dist: {
     files: {
       'public/css/main.css': 'sass/main.scss'
