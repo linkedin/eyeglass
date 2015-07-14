@@ -4,7 +4,7 @@ var assert = require("assert");
 var sass = require("node-sass");
 var testutils = require("./testutils");
 
-var eyeglass = require("../lib/options_decorator");
+var eyeglass = require("../lib").decorate;
 
 describe("function loading", function () {
 
