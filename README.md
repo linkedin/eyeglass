@@ -1,6 +1,7 @@
 ![CI Status](https://travis-ci.org/sass-eyeglass/eyeglass.svg?branch=master)
 
 # eyeglass
+
 ## Getting some npm in your Sass
 
 eyeglass is a node-sass ([github](https://github.com/sass/node-sass)) extension manager built on top of npm. Using eyeglass, you can bring the power of node modules to your Sass files.
@@ -23,7 +24,189 @@ Once installed via npm, an eyeglass module can:
 
 In Sass files, you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
+# Working with assets
+
+It's quite common to need to refer to assets from within your
+stylesheets. Eyeglass provides core support for exposing assets to your
+stylesheets for your application or from an eyeglass module and
+generating urls to those assets as well as making sure only those assets
+that you actually use end up in your built application.
+
+## Exposing assets
+
+The `addSource` method on `eyeglass.assets` is how you add assets to
+your application. The path passed to `asset-url()` is going to be
+relative to the directory that you pass to addSource.
+
+Given the following assets directory structure:
+
+```
+myproject/
+└── assets/
+    ├── images/
+    │   ├── foo/
+    │   │   └── image1.png
+    │   └── unused.gif
+    ├── js/
+    │   └── app.js
+    └── scss/
+        └── app.scss
+```
+
+The simplest way to expose your assets to eyeglass is to add your assets
+directory as an eyeglass asset source. Using a simple node script we can
+compile a Sass file.
+
+```js
+#!/usr/bin/env node
+var sass = require("node-sass");
+var Eyeglass = require("eyeglass").Eyeglass;
+var rootDir = __dirname;
+var assetsDir = path.join(rootDir, "assets");
+
+var options = { ... node-sass options ... };
+ 
+
+// specifying root lets the script run from any directory instead of having to be in the same directory.
+options.root = rootDir;
+
+// where assets are installed by eyeglass to expose them according to their output url.
+// If not provided, assets are not installed unless you provide a custom installer.
+options.buildDir = path.join(rootDir, "dist");
+
+// prefix to give assets for their output url.
+options.assetsHttpPrefix: "assets";
+ 
+var eyeglass = new Eyeglass(options, sass);
+ 
+// Add assets except for js and sass files
+// The url passed to asset-url should be
+// relative to the assets directory specified.
+eyeglass.assets.addSource(assetsDir, {
+  globOpts: { ignore: ["**/*.js", "**/*.scss"] }
+});
+ 
+// Standard node-sass rendering of a single file.
+sass.render(eyeglass.sassOptions(), function(err, result) {
+  // handle results
+});
+```
+
+## Referencing Assets
+
+To reference an asset in your application or within your own module you
+can simply `@import "assets"`. To reference assets that are in a module
+that you have a direct dependency on, you can `@import "<module>/assets"`.
+For example: `@import "my-theme/assets"` would import the assets from
+the `my-theme` eyeglass module.
+
+Importing assets for an application or module returns an automatically
+generated Sass file that registers asset information with the eyeglass
+assets Sass module.
+
+Then you can refer to that asset using the fully qualified source url of
+the asset. This url must include the module prefix when referencing the
+asset. For example `background: asset-url("images/foo.png")` would
+import a file `images/foo.png` that is relative to the `assetsDir`. 
+
+To refer to an asset in your module, include the module name as a
+directory prefix when invoking `asset-url`. For example
+`asset-url("my-theme/icons/party.png")` would import the file
+`icons/party.png` that is exposed by the `my-theme` module. Even within
+the my-theme module, this prefix must be used when referring to the
+assets of that module.
+
+Astute readers will have noted that there is a possible namespace
+collision if you have a directory in your application with the same name
+as a module. This is on purpose: it lets you replace module assets
+with your own assets if you need to do so by overriding them in your own
+application.
+
+## Asset URL Manipulation
+
+By default, eyeglass will namespace module asset urls according to their
+eyeglass module name and both application and module assets urls will be
+placed within folder specified by the `assetsHttpPrefix` option.
+However, an application or framework can chose to override the url
+scheme for assets by defining an asset resolver.
+
+### Example: Adding a modification timestamp to assets as a query parameter.
+
+```js
+  eyeglass.assets.resolver(function(assetFile, assetUri, oldResolver, done) {
+    var fs = require("fs");
+    var mtime = fs.statSync(assetFile).mtime.getTime();
+    done(null, {
+      path: assetUri,
+      query: mtime.toString()
+    });
+  });
+```
+
+### Example: hashing assets by md5sum.
+
+```js
+eyeglass.assets.resolver(function(assetFile, assetUri, oldResolver, done) {
+  var path = require("path");
+  var fs = require("fs");
+  var md5 = require("MD5");
+  var prefix = "/" + eyeglass.options.assetsHttpPrefix + "/";
+  fs.readFile(assetFile, function(err, buffer) {
+    if (err) {
+      done(err);
+    } else {
+      done(null, {
+        path: prefix + md5(buffer) + path.extname(assetFile)
+      });
+    }
+  });
+});
+```
+
+## Asset Installation
+
+By using Eyeglass's asset installation system, you can ensure that only
+those assets that are referenced in your stylesheets will be part of
+your application when it is built.
+
+Once an asset's url is fully resolved, the asset probably needs to be
+installed into a location from where it can be served as that url. The
+simplest way to do this is to specify the `buildDir` option to eyeglass.
+Once that is specified the resolved url will be used to copy the file to
+a location relative to the build directory.
+
+In order to allow for asset pipeline integration (E.g. writing to a
+Vinyl file) and more complex application needs, it's possible to chain
+or override the default eyeglass asset installer. 
+
+### Installer Example: Logging installed assets:
+
+```js
+eyeglass.assets.installer(function(assetFile, assetUri, oldInstaller, cb) {
+  // oldInstaller is the standard eyeglass installer in this case.
+  // We proxy to it for logging purposes.
+  oldInstaller(assetFile, assetUri, function(err, result) {
+    if (err) {
+      console.log("Error installing '" + assetFile + "': " + err.toString());
+    } else {
+      console.log("Installed Asset '" + assetFile + "' => '" + result + "'");
+    }
+    cb(err, result);
+  });
+});
+```
+
+## More on Assets
+
+The code samples here are actually derived from a simple eyeglass
+project. You can view the [actual code](https://gist.github.com/chriseppstein/bcc1a50e01384f82e7e0)
+as a gist.
+
+Assets are complex and the asset configuration of Eyeglass is very
+flexible. For more documentation see the [asset documentation](docs/assets/index.md).
+
 # Writing an eyeglass module with Sass files
+
 To create an eyeglass module with Sass files, place the files inside of a `sass` directory in your npm module.
 
 ```

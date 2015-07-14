@@ -4,13 +4,19 @@
 // belong to the application itself. Application assets take priority
 // over module assets, that is, "foo/bar.png" in the application will
 // take priority over "bar.png" in the "foo" module.
-// The values of this map is another map of source urls to the full
-// path on disk where the asset resides.
+//
+// The values of this map is another map of source urls (as is passed to
+// asset-url()) to a map with two keys: filepath and uri. The filepath is the
+// path on disk where the asset resides and the uri is the asset's preferred
+// output URL which is namespaced to avoid conflicts with application urls.
 $eg-registered-assets: () !default;
 
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
-// @param $assets map<string => string> maps source urls to the full path of the asset.
+// @param $url the source url of the asset. This is what is passed to asset-url().
+// @param $path the fully qualified filesystem path of the asset.
+// @param $uri [Optional] the preferred output url of the asset. Defaults to the url
+//   if not provided.
 @function register-asset($module, $url, $path, $uri: null) {
   $mod-assets: map-get($eg-registered-assets, $module) or ();
   $mod-assets: map-merge($mod-assets, ($url: (filepath: $path, uri: $uri or $url)));
@@ -24,7 +30,8 @@ $eg-registered-assets: () !default;
 
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
-// @param $assets map<string => string> maps source urls to the full path of the asset.
+// @param $assets map<string => map> maps source urls to the asset information
+//   as described in the docs for `$eg-registered-assets` above.
 @function register-assets($module, $assets) {
   $mod-assets: map-get($eg-registered-assets, $module) or ();
   $mod-assets: map-merge($mod-assets, $assets);
