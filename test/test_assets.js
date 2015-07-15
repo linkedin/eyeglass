@@ -55,9 +55,9 @@ describe("assets", function () {
    var eg = new Eyeglass({
      root: rootDir,
      data: input,
-     importer: function(uri, prev, done) {
+     importer: function(uri, prev, importerDone) {
        if (uri === "custom") {
-         done({
+         importerDone({
            contents: ".custom { importer: invoked; }",
            file: "custom"
          });
