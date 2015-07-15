@@ -4,7 +4,8 @@
   "main": "package.json",
   "private": true,
   "dependencies": {
-    "asset_mod_1": "*"
+    "asset_mod_1": "*",
+    "non_asset_mod": "*"
   }
 }
 

@@ -29,8 +29,8 @@ module.exports = {
   assertCompilationError: function(options, expectedError, done) {
     var testutils = this;
     this.compile(options, function(err, result) {
+      assert(!result, result ? "Should not have compiled to: " + result.css : "");
       assert(err);
-      assert(!result);
       testutils.assertMultilineEqual(err.message, expectedError);
       done();
     });

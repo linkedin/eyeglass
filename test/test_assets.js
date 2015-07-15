@@ -47,6 +47,27 @@ describe("assets", function () {
    testutils.assertCompiles(eg, expected, done);
  });
 
+ it("asset importer should delegate to custom importer", function (done) {
+   var input = "@import 'custom';";
+   var expected = ".custom {\n" +
+                  "  importer: invoked; }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     importer: function(uri, prev, done) {
+       if (uri === "custom") {
+         done({
+           contents: ".custom { importer: invoked; }",
+           file: "custom"
+         });
+       }
+     }
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
  it("should import a module's assets", function (done) {
    var expected = ".test {\n" +
                   "  background: url(/mod-one/mod-one.jpg);\n" +
@@ -266,5 +287,40 @@ describe("assets", function () {
     }
    });
  });
+
+ it("should give an error when a module does not have assets", function (done) {
+   testutils.assertStderr(function(checkStderr) {
+     var options = {
+       root: testutils.fixtureDirectory("app_assets"),
+       data: '@import "non-asset-mod/assets";'
+     };
+     var expectedError = "No assets specified for eyeglass plugin non-asset-mod";
+     testutils.assertCompilationError(options, expectedError, function() {
+       checkStderr("");
+       done();
+     });
+   });
+ });
+
+ it("should give an error when a module does not exist", function (done) {
+   testutils.assertStderr(function(checkStderr) {
+     var options = {
+       root: testutils.fixtureDirectory("app_assets"),
+       data: '@import "no-such-mod/assets";'
+     };
+     var expectedError = "No eyeglass plugin named: no-such-mod";
+     //+
+                         //"\n" +
+                         //"Backtrace:\n" +
+                         //"	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
+                         //"	eyeglass/assets:53, in function `asset-url`\n" +
+                         //"	stdin:1";
+     testutils.assertCompilationError(options, expectedError, function() {
+       checkStderr("");
+       done();
+     });
+   });
+ });
+
 
 });
