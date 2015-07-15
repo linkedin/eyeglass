@@ -4,7 +4,7 @@ var eyeglass = require("../lib").decorate;
 var sass = require("node-sass");
 var path = require("path");
 var assert = require("assert");
-var capture = require("../lib/util/capture");
+var capture = require("./capture");
 var fs = require("fs");
 
 module.exports = {

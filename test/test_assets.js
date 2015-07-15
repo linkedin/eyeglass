@@ -288,6 +288,60 @@ describe("assets", function () {
    });
  });
 
+ it("should handle an error in a resolver", function (done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eg = new Eyeglass({
+       root: rootDir,
+       data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }'
+   });
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+       finished(new Error("oops I did it again."));
+   });
+
+   testutils.assertStderr(function(checkStderr) {
+     var expectedError = "error in C function eyeglass-asset-uri: oops I did it again.\n" +
+                         "\n" +
+                         "Backtrace:\n" +
+                         "	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
+                         "	eyeglass/assets:53, in function `asset-url`\n" +
+                         "	stdin:1";
+     testutils.assertCompilationError(eg, expectedError, function() {
+       checkStderr("");
+       done();
+     });
+   });
+ });
+
+ it("should handle a sass error in a resolver", function (done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eg = new Eyeglass({
+       root: rootDir,
+       data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }'
+   });
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+       finished(sass.types.Error("oops I did it again."));
+   });
+
+   testutils.assertStderr(function(checkStderr) {
+     var expectedError = "error in C function eyeglass-asset-uri: oops I did it again.\n" +
+                         "\n" +
+                         "Backtrace:\n" +
+                         "	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
+                         "	eyeglass/assets:53, in function `asset-url`\n" +
+                         "	stdin:1";
+     testutils.assertCompilationError(eg, expectedError, function() {
+       checkStderr("");
+       done();
+     });
+   });
+ });
+
  it("should give an error when a module does not have assets", function (done) {
    testutils.assertStderr(function(checkStderr) {
      var options = {
@@ -309,12 +363,6 @@ describe("assets", function () {
        data: '@import "no-such-mod/assets";'
      };
      var expectedError = "No eyeglass plugin named: no-such-mod";
-     //+
-                         //"\n" +
-                         //"Backtrace:\n" +
-                         //"	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
-                         //"	eyeglass/assets:53, in function `asset-url`\n" +
-                         //"	stdin:1";
      testutils.assertCompilationError(options, expectedError, function() {
        checkStderr("");
        done();
@@ -322,5 +370,36 @@ describe("assets", function () {
    });
  });
 
+ it("can pretty print an asset path entry", function(done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eyeglass = new Eyeglass({root: rootDir});
+   var AssetPathEntry = eyeglass.assets.AssetPathEntry;
+   var entry = new AssetPathEntry(rootDir, {
+     pattern: "images/**/*"
+   });
+   assert.equal(entry.toString(), rootDir + "/images/**/*");
+   done();
+ });
 
+ it("can assign custom glob opts to an asset path entry", function(done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eyeglass = new Eyeglass({root: rootDir});
+   var AssetPathEntry = eyeglass.assets.AssetPathEntry;
+   var entry = new AssetPathEntry(rootDir, {
+     pattern: "images/**/*",
+     globOpts: {dot: true}
+   });
+   assert.equal(entry.globOpts.dot, true);
+   done();
+ });
+
+ it("asset path entries must be directories", function(done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eyeglass = new Eyeglass({root: rootDir});
+   var AssetPathEntry = eyeglass.assets.AssetPathEntry;
+   assert.throws(function() {
+     var ape = new AssetPathEntry(path.join(rootDir, "package.json"));
+   });
+   done();
+ });
 });

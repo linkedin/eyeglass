@@ -2,6 +2,7 @@
 
 var sass = require("node-sass");
 var testutils = require("./testutils");
+var path = require("path");
 
 describe("core api", function () {
 
@@ -169,5 +170,17 @@ describe("eyeglass importer", function () {
      testutils.assertCompiles(options, expected, done);
    }
  );
+
+ it("errors when no sass directory is specified", function (done) {
+   var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
+   var options = {
+     root: rootDir,
+     data: '@import "malformed_module"; .foo {}'
+   };
+   var expectedError = "sassDir is not specified in " +
+     path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
+
+   testutils.assertCompilationError(options, expectedError, done);
+ });
 
 });

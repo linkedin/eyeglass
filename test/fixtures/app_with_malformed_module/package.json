@@ -1,0 +1,9 @@
+{
+  "name": "app_with_malformed_module",
+  "version": "0.0.1",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "malformed_module": "*"
+  }
+}

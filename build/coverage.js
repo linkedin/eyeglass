@@ -15,10 +15,10 @@ module.exports = function(gulp, depends) {
       .pipe(istanbul.enforceThresholds({
         thresholds: {
           global: {
-            statements: 94.35,
-            branches: 83.82,
-            functions: 97.1,
-            lines: 94.35
+            statements: 95.05,
+            branches: 86.64,
+            functions: 97.14,
+            lines: 95.05
           }
         }})) // Enforce a coverage of at least 90%
       .on("end", cb)
