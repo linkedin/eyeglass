@@ -35,6 +35,7 @@ module.exports = {
         var config = addon.project.config(addon.app.env).eyeglass || {};
         config.cssDir = cssDir;
         config.sassDir = sassDir;
+        config.assets = "public"
 
         // rename app.css to <project>.css per ember conventions.
         var originalGenerator = config.optionsGenerator;
