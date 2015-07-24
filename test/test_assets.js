@@ -288,6 +288,50 @@ describe("assets", function () {
    });
  });
 
+ it("Doesn't install into the httpRoot", function (done) {
+   var expected = ".test {\n" +
+                  "  background: url(/my-app/assets/images/foo.png);\n" +
+                  "  background: url(/my-app/assets/fonts/foo.woff);\n" +
+                  "  background: url(/my-app/assets/mod-one/mod-one.jpg?12345678);\n" +
+                  "  background: url(/my-app/assets/mod-one/subdir/sub.png?12345678); }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   //var distDir = tmp.dirSync();
+   var eg = new Eyeglass({
+     root: rootDir,
+     buildDir: path.join(rootDir, "dist"),
+     httpRoot: "/my-app",
+     assetsHttpPrefix: "assets",
+     file: path.join(rootDir, "sass", "both_assets.scss")
+   }, sass);
+
+   eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+   eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+   eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
+     if (assetUri.indexOf("mod-one") > 0) {
+       finished(null, {
+         path: assetUri,
+         query: "12345678"
+       });
+     } else {
+       oldResolver(assetFile, assetUri, finished);
+     }
+   });
+
+   testutils.assertCompiles(eg, expected, function() {
+    try {
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/images/foo.png"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/fonts/foo.woff"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/mod-one/mod-one.jpg"));
+      testutils.assertFileExists(path.join(rootDir, "dist/assets/mod-one/subdir/sub.png"));
+    } finally {
+      fse.remove(path.join(rootDir, "dist"), function(error) {
+        done();
+      });
+    }
+   });
+ });
+
  it("should handle an error in a resolver", function (done) {
    var rootDir = testutils.fixtureDirectory("app_assets");
    var eg = new Eyeglass({
