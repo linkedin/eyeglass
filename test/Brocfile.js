@@ -5,7 +5,9 @@ var EyeglassCompiler = require("..");
 var tree = new EyeglassCompiler(["sass"], {
   cssDir: "css",
   verbose: true,
-  assets: "assets"
+  assets: "assets",
+  assetsHttpPrefix: "assets",
+  relativeAssets: true
 });
 
 if (debug) {
