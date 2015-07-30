@@ -31,12 +31,14 @@ module.exports = {
         // limit to only files in the sass directory.
         tree = stew.find(tree, {include: [sassDir + "/**/*"]});
 
+        var projectConfig = addon.project.config(addon.app.env);
         // setup eyeglass for this project's configuration
-        var config = addon.project.config(addon.app.env).eyeglass || {};
+        var config = projectConfig.eyeglass || {};
         config.cssDir = cssDir;
         config.sassDir = sassDir;
-        config.assets = ["public", "app"];
-        config.assetsHttpPrefix = "assets";
+        config.assets = ["public", "app"].concat(config.assets || []);
+        config.httpRoot = projectConfig.baseURL;
+        config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
 
         // rename app.css to <project>.css per ember conventions.
         var originalGenerator = config.optionsGenerator;
