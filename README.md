@@ -59,6 +59,7 @@ compile a Sass file.
 
 ```js
 #!/usr/bin/env node
+var path = require("path");
 var sass = require("node-sass");
 var Eyeglass = require("eyeglass").Eyeglass;
 var rootDir = __dirname;
@@ -75,7 +76,7 @@ options.root = rootDir;
 options.buildDir = path.join(rootDir, "dist");
 
 // prefix to give assets for their output url.
-options.assetsHttpPrefix: "assets";
+options.assetsHttpPrefix = "assets";
  
 var eyeglass = new Eyeglass(options, sass);
  
