@@ -82,3 +82,40 @@ The following options are specific to this plugin:
   include A/B testing or localization specific output. Note: if you
   invoke the callback more than once, you should change the output
   filename to avoid overwriting previous invocations' output.
+
+
+## Examples
+
+Consider the trivial project:
+
+```
+myproject
+└─ src
+    ├─ bar.scss
+    ├─ foo.scss
+    └─ _config.scss
+```
+
+With this `Brocfile.js`:
+
+```js
+
+```
+
+And built with the command `broccoli build dist` (after an `npm install`, of course).
+
+What should we expect?
+
+```
+myproject
+├─ src
+│   ├─ bar.scss
+│   ├─ foo.scss
+│   └─ _config.scss
+└─ dist
+   └─ css
+      ├─ bar.css
+      └─ foo.css
+```
+
+With the default options, Broccoli-Eyeglass will discover all the Sass files that don’t start with an underscore, and compile them.
