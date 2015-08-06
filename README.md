@@ -94,6 +94,8 @@ Consider the trivial project:
 
 ```
 myproject
+├── Brocfile.js
+├── package.json
 └── src
      ├── bar.scss
      ├── foo.scss
@@ -153,6 +155,8 @@ The result should be exactly this:
 
 ```
 myproject
+├── Brocfile.js
+├── package.json
 ├── src
 │    ├── bar.scss
 │    ├── foo.scss
