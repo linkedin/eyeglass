@@ -1,0 +1,15 @@
+{
+  "name": "example-2",
+  "version": "1.0.0",
+  "description": "example broccoli-eyeglass project 1",
+  "main": "Brocfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alan Hogan",
+  "license": "SAX-PD",
+  "devDependencies": {
+    "broccoli": "^0.16.5",
+    "broccoli-eyeglass": "^1.1.1"
+  }
+}
