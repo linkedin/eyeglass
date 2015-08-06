@@ -6,4 +6,4 @@ var options = {
   cssDir: 'css'
 };
 
-var outputTree = new BroccoliEyeglass('src', options);
+var outputTree = new BroccoliEyeglass(['src'], options);
