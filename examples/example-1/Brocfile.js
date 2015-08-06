@@ -5,3 +5,5 @@ var options = {
 };
 
 var outputTree = new BroccoliEyeglass(['src'], options);
+
+module.exports = outputTree;

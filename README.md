@@ -106,6 +106,8 @@ var options = {
 };
 
 var outputTree = new BroccoliEyeglass(['src'], options);
+
+module.exports = outputTree;
 ```
 
 And built with the command `broccoli build dist` (after an `npm install`, of course).
