@@ -86,6 +86,9 @@ The following options are specific to this plugin:
 
 ## Examples
 
+You can run any of these examples yourself! Find them under the `examples` folder.
+
+### Example 1: As Little Configuration as Possible
 Consider the trivial project:
 
 ```
@@ -102,7 +105,7 @@ With this `Brocfile.js`:
 var BroccoliEyeglass = require('broccoli-eyeglass');
 
 var options = {
-  cssDir: 'css'
+  cssDir: 'css' /* This is the only required option */
 };
 
 var outputTree = new BroccoliEyeglass(['src'], options);
