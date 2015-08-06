@@ -1,7 +1,5 @@
 var BroccoliEyeglass = require('broccoli-eyeglass');
 
-var outputDirectory = "dist";
-
 var options = {
   cssDir: 'css'
 };

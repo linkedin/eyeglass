@@ -99,7 +99,13 @@ myproject
 With this `Brocfile.js`:
 
 ```js
+var BroccoliEyeglass = require('broccoli-eyeglass');
 
+var options = {
+  cssDir: 'css'
+};
+
+var outputTree = new BroccoliEyeglass(['src'], options);
 ```
 
 And built with the command `broccoli build dist` (after an `npm install`, of course).
