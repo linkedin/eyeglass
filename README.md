@@ -61,7 +61,8 @@ The following options are specific to this plugin:
   found in the sass directory. Defaults to true unless `sourceFiles` are
   specified.
 * `sourceFiles` - Array of file names or glob patterns (relative to the
-  sass directory) that should be compiled.
+  sass directory) that should be compiled. Note that file names must include
+  the file extension (unlike `@import` in Sass). E.g.: `['application.scss']`
 * `optionsGenerator` - Function that accepts four arguments:
 
   * `sassFile` - The sass file being compiled.
