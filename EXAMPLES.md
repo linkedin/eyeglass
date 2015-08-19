@@ -147,31 +147,6 @@ var BroccoliEyeglass = require('broccoli-eyeglass');
 var options = {
   cssDir: 'stylesheets',
   discover: false, // Don't automatically find & convert sass files in the trees
-  sourceFiles: ['master']
-};
-
-var outputTree = new BroccoliEyeglass(['src'], options);
-
-module.exports = outputTree;
-```
-
-And built with the command
-```sh
-broccoli build public
-```
-
-Okay, got the situation? If we used the `Brocfile.js` from example 1, we’d get a compilation error since `$badass-green` would be undefined in `my-module.scss`.
-
-So let’s change our configuration!
-
-```js
-/* Brocfile.js */
-
-var BroccoliEyeglass = require('broccoli-eyeglass');
-
-var options = {
-  cssDir: 'stylesheets',
-  discover: false, // Don't automatically find & convert sass files in the trees
   sourceFiles: ['master.scss'] // Array of files (or glob string) to compile
 };
 
