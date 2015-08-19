@@ -86,47 +86,28 @@ The following options are specific to this plugin:
 
 ## Examples
 
-You can run any of these examples yourself! Find them under the `examples` folder.
+Do you like examples? You’re in luck!
 
-### Example 1: As Little Configuration as Possible
+1. Read through a number of example project set-ups [in EXAMPLES.md].
+
+2. Run those examples yourself by `cd`ing into an example underneath the `examples` folder.
+
+[examples-on-gh]: https://github.com/sass-eyeglass/broccoli-eyeglass/blob/master/EXAMPLES.md
+
+Here’s a preview:
+
+### Example 1: The Simplest Possible Project
 
 Consider the trivial project:
 
 ```
-myproject
+.
 ├── Brocfile.js
 ├── package.json
 └── src
      ├── bar.scss
      ├── foo.scss
      └── _config.scss
-```
-
-```scss
-/* bar.scss */
-
-@import "config";
-
-.bar {
-  color: $badass-green;
-}
-```
-
-```scss
-/* foo.scss */
-
-@import "config";
-
-.foo {
-  background-color: $badass-green;
-  color: white;
-}
-```
-
-```scss
-/* _config.scss */
-
-$badass-green: #8AD455;
 ```
 
 With this `Brocfile.js`:
@@ -143,7 +124,7 @@ var outputTree = new BroccoliEyeglass(['src'], options);
 module.exports = outputTree;
 ```
 
-And built with the command
+You can build the project with the command
 ```sh
 broccoli build dist
 ```
@@ -154,7 +135,7 @@ With the default options, Broccoli-Eyeglass will discover all the Sass files tha
 The result should be exactly this:
 
 ```
-myproject
+.
 ├── Brocfile.js
 ├── package.json
 ├── src
@@ -167,127 +148,6 @@ myproject
         └── foo.css
 ```
 
-```css
-/* bar.css */
+### More Examples
 
-.bar {
-  color: #8AD455 }
-```
-
-```css
-/* foo.css */
-
-.bar {
-  background-color: #8AD455;
-  color: #fff; }
-```
-
-### Example 2: One Sassy Master File
-
-Okay, imagine this is some sort of legacy project and we _can’t_ just compile some file, say, `my-module.scss`. We could rename it to start with an underscore, and it would be available for `@import`-ing into other Sass files without being directly compiled by default. But let’s further imagine we _can’t_ rename it to start with an underscore. What would we do then?
-
-```
-myproject
-├── Brocfile.js
-├── package.json
-└── src
-    ├── _config.scss
-    ├── master.scss
-    └── my-module.scss
-```
-
-```scss
-/* master.scss */
-
-@import "config";
-@import "my-module";
-```
-
-```scss
-/* my-module.scss */
-
-// Note: This file depends on variables from `_config.scss`, but does not itself
-// @import that file. Instead, we rely on `master.scss` including both of us.
-
-.my-module {
-  color: $badass-green;
-}
-```
-
-```scss
-/* _config.scss */
-
-$badass-green: #8AD455;
-```
-
-Okay, got the situation? If we used the `Brocfile.js` from example 1, we’d get a compilation error since `$badass-green` would be undefined in `my-module.scss`.
-
-So let’s change our configuration!
-
-```js
-/* Brocfile.js */
-
-var BroccoliEyeglass = require('broccoli-eyeglass');
-
-var options = {
-  cssDir: 'stylesheets',
-  discover: false, // Don't automatically find & convert sass files in the trees
-  sourceFiles: ['master']
-};
-
-var outputTree = new BroccoliEyeglass(['src'], options);
-
-module.exports = outputTree;
-```
-
-And built with the command
-```sh
-broccoli build public
-```
-
-Okay, got the situation? If we used the `Brocfile.js` from example 1, we’d get a compilation error since `$badass-green` would be undefined in `my-module.scss`.
-
-So let’s change our configuration!
-
-```js
-/* Brocfile.js */
-
-var BroccoliEyeglass = require('broccoli-eyeglass');
-
-var options = {
-  cssDir: 'stylesheets',
-  discover: false, // Don't automatically find & convert sass files in the trees
-  sourceFiles: ['master.scss'] // Array of files (or glob string) to compile
-};
-
-var outputTree = new BroccoliEyeglass(['src'], options);
-
-module.exports = outputTree;
-```
-
-Build the project into a folder called `public` with the command
-```sh
-broccoli build public
-```
-
-And our project should look like this:
-
-```
-myproject
-├── Brocfile.js
-├── package.json
-├── public
-│   └── stylesheets
-│       └── master.css
-└── src
-    ├── _config.scss
-    ├── master.scss
-    └── my-module.scss
-```
-
-And our solitary CSS file will be just what we wanted:
-
-```scss
-.my-module {
-  color: #8AD455; }
-```
+Go ahead and take a look at [EXAMPLES.md]!
