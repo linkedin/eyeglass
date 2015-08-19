@@ -88,7 +88,7 @@ The following options are specific to this plugin:
 
 Do you like examples? You’re in luck!
 
-1. Read through a number of example project set-ups [in EXAMPLES.md].
+1. Read through a number of example project set-ups [in EXAMPLES.md][examples-on-gh].
 
 2. Run those examples yourself by `cd`ing into an example underneath the `examples` folder.
 
@@ -150,4 +150,4 @@ The result should be exactly this:
 
 ### More Examples
 
-Go ahead and take a look at [EXAMPLES.md]!
+Go ahead and take a look at [EXAMPLES.md][examples-on-gh]!
