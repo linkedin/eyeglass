@@ -8,6 +8,7 @@
   },
   "author": "Alan Hogan",
   "license": "Apache-2.0",
+  "private": true,
   "devDependencies": {
     "broccoli": "^0.16.5",
     "broccoli-eyeglass": "^1.1.1"
