@@ -82,3 +82,72 @@ The following options are specific to this plugin:
   include A/B testing or localization specific output. Note: if you
   invoke the callback more than once, you should change the output
   filename to avoid overwriting previous invocations' output.
+
+
+## Examples
+
+Do you like examples? You’re in luck!
+
+1. Read through a number of example project set-ups [in EXAMPLES.md][examples-on-gh].
+
+2. Run those examples yourself by `cd`ing into an example underneath the `examples` folder.
+
+[examples-on-gh]: https://github.com/sass-eyeglass/broccoli-eyeglass/blob/master/EXAMPLES.md
+
+Here’s a preview:
+
+### Example 1: The Simplest Possible Project
+
+Consider the trivial project:
+
+```
+.
+├── Brocfile.js
+├── package.json
+└── src
+     ├── bar.scss
+     ├── foo.scss
+     └── _config.scss
+```
+
+With this `Brocfile.js`:
+
+```js
+var BroccoliEyeglass = require('broccoli-eyeglass');
+
+var options = {
+  cssDir: 'css' /* This is the only required option */
+};
+
+var outputTree = new BroccoliEyeglass(['src'], options);
+
+module.exports = outputTree;
+```
+
+You can build the project with the command
+```sh
+broccoli build dist
+```
+(after an `npm install`, of course).
+
+With the default options, Broccoli-Eyeglass will discover all the Sass files that don’t start with an underscore, and compile them.
+
+The result should be exactly this:
+
+```
+.
+├── Brocfile.js
+├── package.json
+├── src
+│    ├── bar.scss
+│    ├── foo.scss
+│    └── _config.scss
+└── dist
+    └── css
+        ├── bar.css
+        └── foo.css
+```
+
+### More Examples
+
+Go ahead and take a look at [EXAMPLES.md][examples-on-gh]!
