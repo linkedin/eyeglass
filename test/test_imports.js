@@ -1,6 +1,7 @@
 "use strict";
 
 var sass = require("node-sass");
+var Eyeglass = require("../lib").Eyeglass;
 var testutils = require("./testutils");
 var path = require("path");
 
@@ -13,6 +14,20 @@ describe("core api", function () {
    var expected = "div {\n  color: red; }\n";
    testutils.assertCompiles(options, expected, done);
  });
+
+ it("should compile a sass file honoring includePaths", function(done) {
+   var expected = ".foo {\n" +
+                  "  color: #112358; }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eg = new Eyeglass({
+     root: rootDir,
+     includePaths: ["../this-folder-does-not-exist", "../../includable_scss", "../this-does-not-exist-either"],
+     file: path.join(rootDir, "sass", "uses_includePaths.scss")
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
 
  it("should compile a sass file with a custom function", function (done) {
    var options = {
