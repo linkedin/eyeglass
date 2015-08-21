@@ -244,7 +244,7 @@ Eyeglass is designed to be easy to use with any node-sass based
 compilation system.
 
 ```js
-var Eyeglass = require("eyeglass");
+var Eyeglass = require("eyeglass").Eyeglass;
 var sass = require("node-sass")
 var sassOptions = { ... } ; // options for node-sass
 var eyeglass = new Eyeglass(sassOptions);
@@ -277,7 +277,7 @@ sass.render(eyeglass.sassOptions(), function(error, result) {
 ```js
 ...
 sass: {
-    options: require("eyeglass")({
+    options: require("eyeglass").Eyeglass({
         sourceMap: true
     }).sassOptions(),
     dist: {
