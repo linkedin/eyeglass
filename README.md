@@ -23,7 +23,7 @@ var options = {
   cssDir: "assets/css",
   fullException: false
 }
-var outputTree = compileSass(inputTrees, options);
+var outputTree = new compileSass(inputTrees, options);
 ```
 
 * **`inputTrees`**: An array of trees that act as the include paths for
@@ -35,7 +35,7 @@ var outputTree = compileSass(inputTrees, options);
   all your eyeglass-compatible sass modules can be imported.
 
 * **`options`**: Except for the options that are specific to this plugin. All
-   the rest are passed through [eyeglass]() and then to
+   the rest are passed through [eyeglass](https://github.com/sass-eyeglass/eyeglass) and then to
    [node-sass](https://github.com/sass/node-sass#options).
 
 **Note:** that the following node-sass options are managed by this plugin and
@@ -66,6 +66,8 @@ The following options are specific to this plugin:
 * `discover` - When `true`, will discover sass files to compile that are
   found in the sass directory. Defaults to true unless `sourceFiles` are
   specified.
+* `sassDir` - The directory to look for scss files to compile. Defaults
+  to tree root.
 * `fullException` - When set to true, instead of generating a build
   error, the css output file will be written such that it displays a
   compilation failure in the browser. This is useful during development
@@ -75,7 +77,8 @@ The following options are specific to this plugin:
 * `relativeAssets` - Whether to render relative links to assets.
   Defaults to `false`.
 * `sourceFiles` - Array of file names or glob patterns (relative to the
-  sass directory) that should be compiled.
+  sass directory) that should be compiled. Note that file names must include
+  the file extension (unlike `@import` in Sass). E.g.: `['application.scss']`
 * `optionsGenerator` - Function that accepts four arguments:
 
   * `sassFile` - The sass file being compiled.
@@ -113,3 +116,71 @@ intelligent decisions about how to handle it.
 * `cssFilename`: The CSS filename relative to the `destDir`.
 * `fullCssFilename`: The absolute path of the CSS file. (note: the file is not there yet, obviously)
 * `options`: The sassOptions as returned by the options generator (if provided).
+
+## Examples
+
+Do you like examples? You’re in luck!
+
+1. Read through a number of example project set-ups [in EXAMPLES.md][examples-on-gh].
+
+2. Run those examples yourself by `cd`ing into an example underneath the `examples` folder.
+
+[examples-on-gh]: https://github.com/sass-eyeglass/broccoli-eyeglass/blob/master/EXAMPLES.md
+
+Here’s a preview:
+
+### Example 1: The Simplest Possible Project
+
+Consider the trivial project:
+
+```
+.
+├── Brocfile.js
+├── package.json
+└── src
+     ├── bar.scss
+     ├── foo.scss
+     └── _config.scss
+```
+
+With this `Brocfile.js`:
+
+```js
+var BroccoliEyeglass = require('broccoli-eyeglass');
+
+var options = {
+  cssDir: 'css' /* This is the only required option */
+};
+
+var outputTree = new BroccoliEyeglass(['src'], options);
+
+module.exports = outputTree;
+```
+
+You can build the project with the command
+```sh
+broccoli build dist
+```
+(after an `npm install`, of course).
+
+With the default options, Broccoli-Eyeglass will discover all the Sass files that don’t start with an underscore, and compile them.
+
+The result should be exactly this:
+
+```
+.
+├── Brocfile.js
+├── package.json
+├── src
+│    ├── bar.scss
+│    ├── foo.scss
+│    └── _config.scss
+└── dist
+    └── css
+        ├── bar.css
+        └── foo.css
+```
+
+### More Examples
+
+Go ahead and take a look at [EXAMPLES.md][examples-on-gh]!
