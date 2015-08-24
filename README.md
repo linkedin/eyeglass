@@ -276,10 +276,12 @@ sass.render(eyeglass.sassOptions(), function(error, result) {
 
 ```js
 ...
+var eyeglassDecorator = require("eyeglass").decorate;
+...
 sass: {
-    options: require("eyeglass").Eyeglass({
+    options: eyeglassDecorator({
         sourceMap: true
-    }).sassOptions(),
+    }),
     dist: {
         files: {
             'public/css/main.css': 'sass/main.scss'
