@@ -42,6 +42,19 @@ describe("core api", function () {
     testutils.assertCompiles(eg, expected, done);
   });
 
+  it("should be able to @import a sass file with a dots in its directory name and file name", function(done) {
+    var expected = ".bat-noise {\n" +
+                   "  color: #eee; }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      root: rootDir,
+      includePaths: ["../../includable_scss"],
+      file: path.join(rootDir, "sass", "dot_include.scss")
+    }, sass);
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
  it("should compile a sass file with a custom function", function (done) {
    var options = {
      data: "div { content: hello-world(); }",
