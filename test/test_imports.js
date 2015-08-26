@@ -21,7 +21,11 @@ describe("core api", function () {
    var rootDir = testutils.fixtureDirectory("app_assets");
    var eg = new Eyeglass({
      root: rootDir,
-     includePaths: ["../this-folder-does-not-exist", "../../includable_scss", "../this-does-not-exist-either"],
+     includePaths: [
+       "../this-folder-does-not-exist",
+       "../../includable_scss",
+       "../this-does-not-exist-either"
+     ],
      file: path.join(rootDir, "sass", "uses_includePaths.scss")
    }, sass);
 
