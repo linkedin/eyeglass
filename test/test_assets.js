@@ -2,7 +2,6 @@
 
 var sass = require("node-sass");
 var path = require("path");
-var tmp = require("tmp");
 var Eyeglass = require("../lib").Eyeglass;
 var testutils = require("./testutils");
 var assert = require("assert");
@@ -34,7 +33,6 @@ describe("assets", function () {
    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
                   "  font: url(/fonts/foo.woff); }\n";
    var rootDir = testutils.fixtureDirectory("app_assets");
-   var distDir = tmp.dirSync();
    var eg = new Eyeglass({
      root: rootDir,
      data: input
@@ -180,11 +178,12 @@ describe("assets", function () {
 
  it("register-asset() works", function (done) {
    var input = "@import 'eyeglass/assets';" +
-              "@include asset-register(module-a, 'foo/bar.png', 'images/foo/bar.png', $uri: 'assets/foo/bar.png');" +
+              "@include asset-register(module-a, 'foo/bar.png', 'images/foo/bar.png', " +
+              "$uri: 'assets/foo/bar.png');" +
               ".test { foo: inspect($eg-registered-assets); }";
-   var expected = '.test {\n  foo: (module-a: ("foo/bar.png": (filepath: "images/foo/bar.png", uri: "assets/foo/bar.png"))); }\n';
+   var expected = '.test {\n  foo: (module-a: ("foo/bar.png": (filepath: "images/foo/bar.png", ' +
+                  'uri: "assets/foo/bar.png"))); }\n';
    var rootDir = testutils.fixtureDirectory("app_assets");
-   var distDir = tmp.dirSync();
    var eg = new Eyeglass({
      root: rootDir,
      data: input
@@ -467,6 +466,7 @@ describe("assets", function () {
    var AssetPathEntry = eyeglass.assets.AssetPathEntry;
    assert.throws(function() {
      var ape = new AssetPathEntry(path.join(rootDir, "package.json"));
+     ape = ape; // TODO: Why is this not returned or used?
    });
    done();
  });
