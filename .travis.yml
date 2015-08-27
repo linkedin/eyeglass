@@ -1,13 +1,12 @@
 language: node_js
 node_js:
 - '0.12'
-- iojs
+#- iojs
 env:
 - COVERAGE=true
 - COVERAGE=false
 matrix:
   exclude:
-    env: COVERAGE=true
     node_js: 'iojs'
 notifications:
   slack:
