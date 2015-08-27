@@ -1,4 +1,4 @@
-![CI Status](https://travis-ci.org/sass-eyeglass/eyeglass.svg?branch=master)
+[![CI Status](https://travis-ci.org/sass-eyeglass/eyeglass.svg?branch=master)](https://travis-ci.org/sass-eyeglass/eyeglass)
 
 # eyeglass
 
@@ -66,7 +66,7 @@ var rootDir = __dirname;
 var assetsDir = path.join(rootDir, "assets");
 
 var options = { ... node-sass options ... };
- 
+
 
 // specifying root lets the script run from any directory instead of having to be in the same directory.
 options.root = rootDir;
@@ -77,16 +77,16 @@ options.buildDir = path.join(rootDir, "dist");
 
 // prefix to give assets for their output url.
 options.assetsHttpPrefix = "assets";
- 
+
 var eyeglass = new Eyeglass(options, sass);
- 
+
 // Add assets except for js and sass files
 // The url passed to asset-url should be
 // relative to the assets directory specified.
 eyeglass.assets.addSource(assetsDir, {
   globOpts: { ignore: ["**/*.js", "**/*.scss"] }
 });
- 
+
 // Standard node-sass rendering of a single file.
 sass.render(eyeglass.sassOptions(), function(err, result) {
   // handle results
@@ -108,7 +108,7 @@ assets Sass module.
 Then you can refer to that asset using the fully qualified source url of
 the asset. This url must include the module prefix when referencing the
 asset. For example `background: asset-url("images/foo.png")` would
-import a file `images/foo.png` that is relative to the `assetsDir`. 
+import a file `images/foo.png` that is relative to the `assetsDir`.
 
 To refer to an asset in your module, include the module name as a
 directory prefix when invoking `asset-url`. For example
@@ -178,7 +178,7 @@ a location relative to the build directory.
 
 In order to allow for asset pipeline integration (E.g. writing to a
 Vinyl file) and more complex application needs, it's possible to chain
-or override the default eyeglass asset installer. 
+or override the default eyeglass asset installer.
 
 ### Installer Example: Logging installed assets:
 
