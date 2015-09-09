@@ -4,6 +4,7 @@ var sass = require("node-sass");
 var Eyeglass = require("../lib").Eyeglass;
 var testutils = require("./testutils");
 var path = require("path");
+var assert = require("assert");
 
 describe("core api", function () {
 
@@ -200,6 +201,16 @@ describe("eyeglass importer", function () {
      path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
 
    testutils.assertCompilationError(options, expectedError, done);
+ });
+
+ it("has no circular references in eyeglass options", function(done) {
+   var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
+   var options = {root: rootDir};
+   var eyeglass = new Eyeglass(options);
+   var sassopts = eyeglass.sassOptions();
+   assert.equal(eyeglass, sassopts.eyeglass);
+   assert.equal(sassopts.eyeglass.options.eyeglass, undefined);
+   done();
  });
 
 });
