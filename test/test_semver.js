@@ -4,6 +4,7 @@ var assert = require("assert");
 var testutils = require("./testutils");
 
 var eyeglass = require("../lib").decorate;
+var eyeglassSemverChecker = require("../lib/semver_checker");
 
 describe("semver checking", function () {
   it("will not let a module through with an engine violation", function (done) {
@@ -21,6 +22,22 @@ describe("semver checking", function () {
       done();
     });
   });
+
+  it("gives a nice error when missing eyeglass version dep", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("old_engine"),
+      data: "#hello { greeting: hello(Chris); }"
+    };
+
+    testutils.assertStderr(function(check) {
+      eyeglass(options);
+      check("The following modules did not declare an eyeglass version:\n  module_a\n" +
+            "Please add the following to the module's package.json:\n" +
+            "  \"eyeglass\": { \"needs\": \"^" + eyeglassSemverChecker.eyeglassVersion + "\" }\n");
+      done();
+    });
+  });
+
 
   it("will throw if strictModuleVersions is set", function (done) {
     var options = {

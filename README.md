@@ -296,20 +296,41 @@ sass: {
 * etc.
 
 # Writing an eyeglass module with Custom Functions
-node-sass allows you to register custom functions for advanced functionality. Eyeglass allows any node modules that are tagged with `eyeglass-module` to be automatically loaded into eyeglass. To tag your module as an eyeglass module, add the `eyeglass-module` keyword to your `package.json`
+
+node-sass allows you to register custom functions for advanced
+functionality. Eyeglass allows any node modules that are tagged with
+`eyeglass-module` to be automatically loaded into eyeglass and makes
+your module [discoverable on
+NPM](http://npmjs.com/browse/keyword/eyeglass-module). To tag your module as an
+eyeglass module, add the `eyeglass-module` keyword to your
+`package.json`.
 
 ```js
 {
   ...
   "keywords": ["eyeglass-module", "sass", ...],
-  "main": "eyeglass-exports.js",
+  "eyeglass": {
+    "exports": "eyeglass-exports.js",
+    "needs": "^0.6.0"
+  },
   ...
 }
 ```
 
+In the `"eyeglass"` option block in your package.json, you will declare
+the eyeglass exports file and the semver dependency that your module has
+on eyeglass itself using the `"needs"` option. Failure to provide this
+option will give your users a warning since eyeglass has no way to check
+if your module is compatible with the currect eyeglass version.
+
+### Eyeglass Exports File
+
 Your requirable module exports an object that describes your module's
-structure and can expose javascript functions as sass functions. Below
-is an example eyeglass exports file:
+structure and can expose javascript functions as sass functions. It is
+convention to name this file `eyeglass-exports.js` but any file name is
+allowed.
+
+Below is an example eyeglass exports file:
 
 ```js
 "use strict";
@@ -328,26 +349,15 @@ module.exports = function(eyeglass, sass) {
 };
 ```
 
-If your package.json main file is already in use for something else, you
-can still export eyeglass functions by specifying `eyeglass: 'path/to/eyeglass-exports.js'`
-or by specifying an eyeglass object with an `exports` attribute:
-
-```js
-{
-  ...
-  "main": "lib/my-awesome-main-file.js",
-  "eyeglass": {
-    "exports": "lib/eyeglass-exports.js"
-  }
-  ...
-}
-```
+If the `eyeglass.exports` option is not found in `package.json` eyeglass
+will fall back to using the npm standard `main` file declared in your
+package.json.
 
 If you need the top level import to be named differently than the name
-of your npm module (this is not best practice) then you can specify a
-`name` attribute for the eyeglass object in your package.json. The
-following example would allow `@import "foo";` to import `index.scss`
-from your package's sass directory.
+of your npm module then you can specify a `name` attribute for the
+eyeglass object in your package.json. The following example would allow
+`@import "foo";` to import `index.scss` from your package's sass
+directory.
 
 ```js
 {
