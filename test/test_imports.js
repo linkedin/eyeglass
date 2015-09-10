@@ -16,6 +16,18 @@ describe("core api", function () {
    testutils.assertCompiles(options, expected, done);
  });
 
+ it("should compile a sass file if includePaths was not passed as an option & not needed", function(done) {
+   var expected = ".foo {\n" +
+                  "  color: red; }\n";
+   var rootDir = testutils.fixtureDirectory("app_assets");
+   var eg = new Eyeglass({
+     root: rootDir,
+     file: path.join(rootDir, "sass", "no_includePaths.scss")
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
  it("should compile a sass file honoring includePaths", function(done) {
    var expected = ".foo {\n" +
                   "  color: #112358; }\n";
@@ -32,7 +44,6 @@ describe("core api", function () {
 
    testutils.assertCompiles(eg, expected, done);
  });
-
 
   it("should be able to @import \"folder/file\" from a dir in includePaths", function(done) {
     var expected = ".bar {\n" +
