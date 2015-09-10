@@ -7,7 +7,6 @@ var path = require("path");
 var assert = require("assert");
 
 describe("core api", function () {
-
  it("should compile a sass file", function (done) {
    var options = {
      data: "div { $c: red; color: $c; }"
@@ -240,14 +239,43 @@ describe("eyeglass importer", function () {
    testutils.assertCompilationError(options, expectedError, done);
  });
 
- it("has no circular references in eyeglass options", function(done) {
-   var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
-   var options = {root: rootDir};
-   var eyeglass = new Eyeglass(options);
-   var sassopts = eyeglass.sassOptions();
-   assert.equal(eyeglass, sassopts.eyeglass);
-   assert.equal(sassopts.eyeglass.options.eyeglass, undefined);
-   done();
- });
+  describe("option defaults", function() {
+    beforeEach(function(done) {
+      process.env.SASS_PATH = "";
+      done();
+    });
 
+   it("has no circular references in eyeglass options", function(done) {
+     var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
+     var options = {root: rootDir};
+     var eyeglass = new Eyeglass(options);
+     var sassopts = eyeglass.sassOptions();
+     assert.equal(eyeglass, sassopts.eyeglass);
+     assert.equal(sassopts.eyeglass.options.eyeglass, undefined);
+     done();
+   });
+
+   it("uses the SASS_PATH environment variable as a default for includePaths", function(done) {
+     process.env.SASS_PATH = "foo:bar:baz";
+
+     var rootDir = testutils.fixtureDirectory("basic_modules");
+     var options = {root: rootDir};
+     var eyeglass = new Eyeglass(options);
+     var sassopts = eyeglass.sassOptions();
+     assert.equal(sassopts.includePaths[0], "foo");
+     assert.equal(sassopts.includePaths[1], "bar");
+     assert.equal(sassopts.includePaths[2], "baz");
+     done();
+   });
+
+   it("defaults includePaths to empty array", function(done) {
+     assert.equal(process.env.SASS_PATH, "");
+     var rootDir = testutils.fixtureDirectory("basic_modules");
+     var options = {root: rootDir};
+     var eyeglass = new Eyeglass(options);
+     var sassopts = eyeglass.sassOptions();
+     assert.equal(sassopts.includePaths.length, 0);
+     done();
+   });
+ });
 });

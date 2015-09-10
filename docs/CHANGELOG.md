@@ -1,5 +1,12 @@
 # CHANGELOG
 
+#### 0.6.2 (Sept 10, 2015)
+
+* Fix a bug when includePaths is an array.
+* If the SASS_PATH environment variable is set, default the
+  `includePaths` option to it.
+* Update all node module dependencies to the latest.
+
 #### 0.6.1 (Sept 09, 2015)
 
 * A runtime dependency was improperly declared in the package.json.
