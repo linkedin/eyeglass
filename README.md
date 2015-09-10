@@ -254,12 +254,12 @@ var eyeglass = new Eyeglass(sassOptions);
 // Expose images in the assets/images directory as /images on the
 // website by putting the images we reference with asset-url()
 // into the public/images directory.
-eyeglass.assets("assets/images", "images", "public/images");
+eyeglass.assets.addSource("assets", {pattern: "images/**/*"});
 
 // Expose fonts in the assets/fonts directory as /fonts on the
 // website by putting the fonts we reference with asset-url()
 // into the public/fonts directory.
-eyeglass.assets("assets/fonts", "fonts", "public/fonts");
+eyeglass.assets.addSource("assets", {pattern: "fonts/**/*"});
 
 // These options can be passed to any sass build tool that passes
 // options through to node-sass.
@@ -276,10 +276,10 @@ sass.render(eyeglass.sassOptions(), function(error, result) {
 
 ```js
 ...
-var eyeglassDecorator = require("eyeglass").decorate;
+var eyeglass = require("eyeglass");
 ...
 sass: {
-    options: eyeglassDecorator({
+    options: eyeglass.decorate({
         sourceMap: true
     }),
     dist: {
@@ -291,13 +291,7 @@ sass: {
 ...
 ```
 
-### TODO: Detailed build integration guide as details emerge.
-
-* Assets integration
-* Per-css callback for import-once support.
-* etc.
-
-# Writing an eyeglass module with Custom Functions
+# Writing an Eyeglass Module
 
 node-sass allows you to register custom functions for advanced
 functionality. Eyeglass allows any node modules that are tagged with
@@ -313,6 +307,7 @@ eyeglass module, add the `eyeglass-module` keyword to your
   "keywords": ["eyeglass-module", "sass", ...],
   "eyeglass": {
     "exports": "eyeglass-exports.js",
+    "name": "greetings",
     "needs": "^0.6.0"
   },
   ...
@@ -343,7 +338,7 @@ module.exports = function(eyeglass, sass) {
   return {
     sassDir: path.join(__dirname, "sass"),
     functions: {
-      "hello($name: 'World')": function(name, done) {
+      "greetings-hello($name: 'World')": function(name, done) {
         done(sass.types.String("Hello, " + name.getValue()));
       }
     }
@@ -354,6 +349,21 @@ module.exports = function(eyeglass, sass) {
 If the `eyeglass.exports` option is not found in `package.json` eyeglass
 will fall back to using the npm standard `main` file declared in your
 package.json.
+
+Since all functions declared from javascript are global, it is best
+practice to scope your function names to avoid naming conflicts. Then,
+to simplify the naming of your functions for the normal case, provide a
+sass file that when imported, unscopes the function names by wrapping
+them. 
+
+```scss
+// index.scss
+@function hello($args...) {
+  @return greetings-hello($args...);
+}
+```
+
+### Specifying a name for @import that is different from your npm package name
 
 If you need the top level import to be named differently than the name
 of your npm module then you can specify a `name` attribute for the
@@ -377,3 +387,13 @@ directory.
 Any sass files imported from your node modules will only ever be
 imported once per CSS output file. Note that Sass files imported
 from the Sass load path will have the standard Sass `@import` behavior.
+
+To disable the import-once behavior, you need to set `enableImportOnce`
+to false:
+
+```js
+var Eyeglass = require("eyeglass").Eyeglass;
+var sassOptions = {};
+var eyeglass = new Eyeglass(sassOptions);
+eyeglass.enableImportOnce = false;
+```
