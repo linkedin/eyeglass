@@ -44,7 +44,7 @@
     "broccoli"
   ],
   "dependencies": {
-    "broccoli-eyeglass": "^1.1.2",
+    "broccoli-eyeglass": "^1.2.1",
     "broccoli-stew": "^0.2.1"
   },
   "ember-addon": {
