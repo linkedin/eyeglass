@@ -277,5 +277,15 @@ describe("eyeglass importer", function () {
      assert.equal(sassopts.includePaths.length, 0);
      done();
    });
+
+   it("works with the indented syntax", function(done) {
+     var rootDir = testutils.fixtureDirectory("basic_modules");
+     var data = ".foo\n  bar: baz";
+     var options = {root: rootDir, indentedSyntax: true, data: data};
+     var eyeglass = new Eyeglass(options);
+     var expectedOutput = ".foo {\n  bar: baz; }\n";
+
+     testutils.assertCompiles(options, expectedOutput, done);
+   });
  });
 });
