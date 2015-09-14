@@ -50,7 +50,7 @@ describe("semver checking", function () {
       var ex;
       try {
         eyeglass(options);
-      } catch(e) {
+      } catch (e) {
         ex = e;
       }
       assert.ok(ex, "Exception thrown that stops eyeglass processing");
