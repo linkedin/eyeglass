@@ -32,7 +32,7 @@
     "fs-extra": "^0.23.1",
     "glob": "^5.0.14",
     "lodash": "^3.10.1",
-    "node-sass": "^3.2.0",
+    "node-sass": "^3.3.3",
     "node-sass-utils": "^1.1.2",
     "semver": "^4.2.0",
     "tmp": "0.0.27"
