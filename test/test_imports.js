@@ -245,7 +245,6 @@ describe("eyeglass importer", function () {
    };
 
    var importerHit = function(uri, prev, cb) {
-     console.log("hit");
      cb({contents: ".foo { color: red; }"});
    };
 
