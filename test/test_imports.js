@@ -175,15 +175,13 @@ describe("eyeglass importer", function () {
    testutils.assertStderr(function(checkStderr) {
      var options = {
        root: testutils.fixtureDirectory("basic_modules"),
+       file: "wubwubwub.scss",
        data: '@import "transitive_module";'
      };
      // TODO This should not be a successful compile (libsass issue?)
-     var expected = "";
-     testutils.assertCompiles(options, expected, function() {
-       // TODO: Why isn't there an error?
-       checkStderr("");
-       done();
-     });
+     var expectedError = "Could not import transitive_module from " +
+                         path.resolve("wubwubwub.scss");
+     testutils.assertCompilationError(options, expectedError, done);
    });
  });
 
@@ -237,6 +235,30 @@ describe("eyeglass importer", function () {
      path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
 
    testutils.assertCompilationError(options, expectedError, done);
+ });
+
+ it("handles an array of importers", function(done) {
+   var importerMissCalled = false;
+   var importerMiss = function(uri, prev, cb) {
+     importerMissCalled = true;
+     cb(sass.NULL);
+   };
+
+   var importerHit = function(uri, prev, cb) {
+     console.log("hit");
+     cb({contents: ".foo { color: red; }"});
+   };
+
+   var options = {
+     root: testutils.fixtureDirectory("basic_modules"),
+     data: '@import "OMG";',
+     importer: [importerMiss, importerHit]
+   };
+   var expected = ".foo {\n  color: red; }\n";
+   testutils.assertCompiles(options, expected, function() {
+     assert(importerMissCalled);
+     done();
+   });
  });
 
   describe("option defaults", function() {
