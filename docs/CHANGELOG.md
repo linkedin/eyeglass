@@ -1,5 +1,11 @@
 # CHANGELOG
 
+#### 0.6.3 (Oct 13, 2015)
+
+* Handle when the `importer` option to node-sass is an array of
+  importers.
+* Upgrade dependency on `deasync` to support recent changes in node 4.x.
+
 #### 0.6.2 (Sept 10, 2015)
 
 * Fix a bug when includePaths is an array.
