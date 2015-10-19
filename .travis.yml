@@ -1,15 +1,10 @@
 language: node_js
 node_js:
-- '0.12'
-- '4'
-#- iojs
-env:
-- COVERAGE=true
-- COVERAGE=false
-matrix:
-  exclude:
-    node_js: 'iojs'
-
+- 0.12
+- 4.0
+- 4.1
+- 4.2
+- node
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CC="gcc-4.7";
@@ -19,7 +14,6 @@ before_install:
     fi
   - gcc --version
   - g++ --version
-
 addons:
   apt:
     sources:

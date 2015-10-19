@@ -15,7 +15,8 @@ describe("core api", function () {
    testutils.assertCompiles(options, expected, done);
  });
 
- it("should compile a sass file if includePaths was not passed as an option & not needed", function(done) {
+ it("should compile a sass file if includePaths" +
+    " was not passed as an option & not needed", function(done) {
    var expected = ".foo {\n" +
                   "  color: red; }\n";
    var rootDir = testutils.fixtureDirectory("app_assets");
@@ -57,7 +58,8 @@ describe("core api", function () {
     testutils.assertCompiles(eg, expected, done);
   });
 
-  it("should be able to @import a sass file with a dots in its directory name and file name", function(done) {
+  it("should be able to @import a sass file with a dots in" +
+     " its directory name and file name", function(done) {
     var expected = ".bat-noise {\n" +
                    "  color: #eee; }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
@@ -214,7 +216,7 @@ describe("eyeglass importer", function () {
  });
 
  it("eyeglass exports can be specified through the " +
-    "eyeglass property of package.json.",
+    " eyeglass property of package.json.",
    function (done) {
      var options = {
        root: testutils.fixtureDirectory("has_a_main_already"),
@@ -233,6 +235,17 @@ describe("eyeglass importer", function () {
    };
    var expectedError = "sassDir is not specified in " +
      path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
+
+   testutils.assertCompilationError(options, expectedError, done);
+ });
+
+ it("errors on invalid module", function (done) {
+   var rootDir = testutils.fixtureDirectory("invalid_module_in_package");
+   var options = {
+     root: rootDir,
+     data: '@import "module_a";'
+   };
+   var expectedError = "Cannot find module 'module_a/package.json'";
 
    testutils.assertCompilationError(options, expectedError, done);
  });
@@ -306,7 +319,7 @@ describe("eyeglass importer", function () {
      var eyeglass = new Eyeglass(options);
      var expectedOutput = ".foo {\n  bar: baz; }\n";
 
-     testutils.assertCompiles(options, expectedOutput, done);
+     testutils.assertCompiles(eyeglass.sassOptions(), expectedOutput, done);
    });
  });
 });

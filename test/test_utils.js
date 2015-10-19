@@ -1,7 +1,6 @@
 "use strict";
 
 var assert = require("assert");
-var hash = require("../lib/util/hash");
 var unquote = require("../lib/util/unquote");
 var discover = require("../lib/util/discover");
 var sync = require("../lib/util/sync_fn");
@@ -9,23 +8,6 @@ var sass = require("node-sass");
 var testutils = require("./testutils");
 
 describe("utilities", function () {
-
- it("merge two 'hash' objects", function (done) {
-    var hash1 = {a: 1, c: 3};
-    var hash2 = {b: 2, c: 4};
-    var rv = hash.merge(hash1, hash2);
-    assert.equal(undefined, rv);
-    assert(hash1.hasOwnProperty("a"));
-    assert(hash1.hasOwnProperty("b"));
-    assert(hash1.hasOwnProperty("c"));
-    assert(!hash2.hasOwnProperty("a"));
-    assert(hash2.hasOwnProperty("b"));
-    assert(hash2.hasOwnProperty("c"));
-    assert.equal(1, hash1.a);
-    assert.equal(2, hash1.b);
-    assert.equal(4, hash1.c);
-    done();
- });
 
  it("unquote handles js strings", function(done) {
    assert.equal("asdf", unquote('"asdf"'));
@@ -46,7 +28,8 @@ describe("utilities", function () {
    done();
  });
 
- it("provides a collection of errors if it cannot find shared semantic versions in modules", function() {
+ it("provides a collection of errors if it cannot find" +
+    " shared semantic versions in modules", function() {
    var dir = testutils.fixtureDirectory("conflicting_modules");
    var result = discover.all(dir);
    assert(result.errors.length, "discovery found errors");
