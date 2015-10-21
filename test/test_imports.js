@@ -15,103 +15,103 @@ describe("core api", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-//  it("should compile a sass file if includePaths" +
-//     " was not passed as an option & not needed", function(done) {
-//    var expected = ".foo {\n" +
-//                   "  color: red; }\n";
-//    var rootDir = testutils.fixtureDirectory("app_assets");
-//    var eg = new Eyeglass({
-//      root: rootDir,
-//      file: path.join(rootDir, "sass", "no_includePaths.scss")
-//    }, sass);
-//
-//    testutils.assertCompiles(eg, expected, done);
-//  });
-//
-//  it("should compile a sass file honoring includePaths", function(done) {
-//    var expected = ".foo {\n" +
-//                   "  color: #112358; }\n";
-//    var rootDir = testutils.fixtureDirectory("app_assets");
-//    var eg = new Eyeglass({
-//      root: rootDir,
-//      includePaths: [
-//        "../this-folder-does-not-exist",
-//        "../../includable_scss",
-//        "../this-does-not-exist-either"
-//      ],
-//      file: path.join(rootDir, "sass", "uses_includePaths.scss")
-//    }, sass);
-//
-//    testutils.assertCompiles(eg, expected, done);
-//  });
-//
-//   it("should be able to @import \"folder/file\" from a dir in includePaths", function(done) {
-//     var expected = ".bar {\n" +
-//                    "  color: #333; }\n";
-//     var rootDir = testutils.fixtureDirectory("app_assets");
-//     var eg = new Eyeglass({
-//       root: rootDir,
-//       includePaths: ["../../includable_scss"],
-//       file: path.join(rootDir, "sass", "advanced_includePaths.scss")
-//     }, sass);
-//
-//     testutils.assertCompiles(eg, expected, done);
-//   });
-//
-//   it("should be able to @import a sass file with a dots in" +
-//      " its directory name and file name", function(done) {
-//     var expected = ".bat-noise {\n" +
-//                    "  color: #eee; }\n";
-//     var rootDir = testutils.fixtureDirectory("app_assets");
-//     var eg = new Eyeglass({
-//       root: rootDir,
-//       includePaths: ["../../includable_scss"],
-//       file: path.join(rootDir, "sass", "dot_include.scss")
-//     }, sass);
-//
-//     testutils.assertCompiles(eg, expected, done);
-//   });
-//
-//  it("should compile a sass file with a custom function", function (done) {
-//    var options = {
-//      data: "div { content: hello-world(); }",
-//      functions: {
-//        "hello-world()": function() {
-//          return sass.types.String('"Hello World!"');
-//        }
-//      }
-//    };
-//    var expected = 'div {\n  content: "Hello World!"; }\n';
-//    testutils.assertCompiles(options, expected, done);
-//  });
-//
-//  it("should compile a sass file with a custom async function", function (done) {
-//    var options = {
-//      data: "div { content: hello-world(); }",
-//      functions: {
-//        "hello-world()": function(sassCb) {
-//          setTimeout(function() {
-//            sassCb(sass.types.String('"Hello World!"'));
-//          });
-//        }
-//      }
-//    };
-//    var expected = 'div {\n  content: "Hello World!"; }\n';
-//    testutils.assertCompiles(options, expected, done);
-//  });
-//
-//  it("passes through node-sass options", function (done) {
-//    var options = {
-//      data: "div { content: hello-world(); }",
-//      functions: {
-//        "hello-world()": function() {
-//          return sass.types.String('"Hello World!"');
-//        }
-//      }
-//    };
-//    var expected = 'div {\n  content: "Hello World!"; }\n';
-//    testutils.assertCompiles(options, expected, done);
-//  });
+  it("should compile a sass file if includePaths" +
+     " was not passed as an option & not needed", function(done) {
+    var expected = ".foo {\n" +
+                   "  color: red; }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      root: rootDir,
+      file: path.join(rootDir, "sass", "no_includePaths.scss")
+    }, sass);
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("should compile a sass file honoring includePaths", function(done) {
+    var expected = ".foo {\n" +
+                   "  color: #112358; }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      root: rootDir,
+      includePaths: [
+        "../this-folder-does-not-exist",
+        "../../includable_scss",
+        "../this-does-not-exist-either"
+      ],
+      file: path.join(rootDir, "sass", "uses_includePaths.scss")
+    }, sass);
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+   it("should be able to @import \"folder/file\" from a dir in includePaths", function(done) {
+     var expected = ".bar {\n" +
+                    "  color: #333; }\n";
+     var rootDir = testutils.fixtureDirectory("app_assets");
+     var eg = new Eyeglass({
+       root: rootDir,
+       includePaths: ["../../includable_scss"],
+       file: path.join(rootDir, "sass", "advanced_includePaths.scss")
+     }, sass);
+
+     testutils.assertCompiles(eg, expected, done);
+   });
+
+   it("should be able to @import a sass file with a dots in" +
+      " its directory name and file name", function(done) {
+     var expected = ".bat-noise {\n" +
+                    "  color: #eee; }\n";
+     var rootDir = testutils.fixtureDirectory("app_assets");
+     var eg = new Eyeglass({
+       root: rootDir,
+       includePaths: ["../../includable_scss"],
+       file: path.join(rootDir, "sass", "dot_include.scss")
+     }, sass);
+
+     testutils.assertCompiles(eg, expected, done);
+   });
+
+  it("should compile a sass file with a custom function", function (done) {
+    var options = {
+      data: "div { content: hello-world(); }",
+      functions: {
+        "hello-world()": function() {
+          return sass.types.String('"Hello World!"');
+        }
+      }
+    };
+    var expected = 'div {\n  content: "Hello World!"; }\n';
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("should compile a sass file with a custom async function", function (done) {
+    var options = {
+      data: "div { content: hello-world(); }",
+      functions: {
+        "hello-world()": function(sassCb) {
+          setTimeout(function() {
+            sassCb(sass.types.String('"Hello World!"'));
+          });
+        }
+      }
+    };
+    var expected = 'div {\n  content: "Hello World!"; }\n';
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("passes through node-sass options", function (done) {
+    var options = {
+      data: "div { content: hello-world(); }",
+      functions: {
+        "hello-world()": function() {
+          return sass.types.String('"Hello World!"');
+        }
+      }
+    };
+    var expected = 'div {\n  content: "Hello World!"; }\n';
+    testutils.assertCompiles(options, expected, done);
+  });
 
 });
 
@@ -127,149 +127,151 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-//  it("lets you import sass files from dev dependencies", function (done) {
-//    var options = {
-//      root: testutils.fixtureDirectory("dev_deps"),
-//      data: '@import "module_a";'
-//    };
-//    var expected = ".module-a {\n  greeting: hello world; }\n\n" +
-//                   ".sibling-in-module-a {\n  sibling: yes; }\n";
-//    testutils.assertCompiles(options, expected, done);
-//  });
-//
-//  it("lets you import from a subdir in a npm module", function (done) {
-//    var options = {
-//      root: testutils.fixtureDirectory("basic_modules"),
-//      data: '@import "module_a/submodule";'
-//    };
-//    var expected = ".submodule {\n  hello: world; }\n";
-//    testutils.assertCompiles(options, expected, done);
-//  });
-//
-//  it("lets you import explicitly from a subdir in a module", function (done) {
-//    var options = {
-//      root: testutils.fixtureDirectory("basic_modules"),
-//      data: '@import "module_a/submodule/_index.scss";'
-//    };
-//    var expected = ".submodule {\n  hello: world; }\n";
-//    testutils.assertCompiles(options, expected, done);
-//  });
-//
-//  it("lets you import css files", function (done) {
-//    var options = {
-//      root: testutils.fixtureDirectory("basic_modules"),
-//      data: '@import "module_a/css_file";'
-//    };
-//    var expected = ".css-file {\n  hello: world; }\n";
-//    testutils.assertCompiles(options, expected, done);
-//  });
+  it("lets you import sass files from dev dependencies", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("dev_deps"),
+      data: '@import "module_a";'
+    };
+    var expected = ".module-a {\n  greeting: hello world; }\n\n" +
+                   ".sibling-in-module-a {\n  sibling: yes; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 
-  // it("lets you import sass files from a transitive dependency", function (done) {
-  //   var options = {
-  //     root: testutils.fixtureDirectory("basic_modules"),
-  //     data: '@import "module_a/transitive_imports";'
-  //   };
-  //   var expected = ".transitive_module {\n  hello: world; }\n";
-  //   testutils.assertCompiles(options, expected, done);
-  // });
-  //
-  // it("does not let you import transitive sass files", function (done) {
-  //   testutils.assertStderr(function(checkStderr) {
-  //     var options = {
-  //       root: testutils.fixtureDirectory("basic_modules"),
-  //       file: "wubwubwub.scss",
-  //       data: '@import "transitive_module";'
-  //     };
-  //     // TODO This should not be a successful compile (libsass issue?)
-  //     var expectedError = "Could not import transitive_module from " +
-  //                         path.resolve("wubwubwub.scss");
-  //     testutils.assertCompilationError(options, expectedError, done);
-  //   });
-  // });
-  //
-  // it("only imports a module dependency once.", function (done) {
-  //   var options = {
-  //     root: testutils.fixtureDirectory("basic_modules"),
-  //     data: '@import "module_a"; @import "module_a";'
-  //   };
-  //   var expected = ".module-a {\n  greeting: hello world; }\n\n" +
-  //                  ".sibling-in-module-a {\n  sibling: yes; }\n";
-  //   testutils.assertCompiles(options, expected, done);
-  // });
-  //
-  // it("imports modules if they are themselves a npm eyeglass module.", function(done) {
+  it("lets you import from a subdir in a npm module", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("basic_modules"),
+      data: '@import "module_a/submodule";'
+    };
+    var expected = ".submodule {\n  hello: world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("lets you import explicitly from a subdir in a module", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("basic_modules"),
+      data: '@import "module_a/submodule/_index.scss";'
+    };
+    var expected = ".submodule {\n  hello: world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("lets you import css files", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("basic_modules"),
+      data: '@import "module_a/css_file";'
+    };
+    var expected = ".css-file {\n  hello: world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("lets you import sass files from a transitive dependency", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("basic_modules"),
+      data: '@import "module_a/transitive_imports";'
+    };
+    var expected = ".transitive_module {\n  hello: world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  // TODO - WTH is going on here?
+  //it("does not let you import transitive sass files", function (done) {
+  //  testutils.assertStderr(function(checkStderr) {
   //    var options = {
-  //      root: testutils.fixtureDirectory("is_a_module"),
-  //      data: '@import "is-a-module";'
+  //      root: testutils.fixtureDirectory("basic_modules"),
+  //      file: "wubwubwub.scss",
+  //      data: '@import "transitive_module";'
   //    };
-  //   var expected = ".is-a-module {\n  this: is a module; }\n";
-  //   testutils.assertCompiles(options, expected, done);
-  // });
-  //
-  // it("imports for modules such as foo/bar/_foo.scss wanting foo/bar (#37)", function (done) {
-  //   var options = {
-  //     root: testutils.fixtureDirectory("redundantly_named_modules"),
-  //     data: '@import "module_a";'
-  //   };
-  //   var expected = ".nested-module-a {\n  greeting: hello world; }\n";
-  //   testutils.assertCompiles(options, expected, done);
-  // });
-  //
-  // it("eyeglass exports can be specified through the " +
-  // " eyeglass property of package.json.", function (done) {
-  //   var options = {
-  //     root: testutils.fixtureDirectory("has_a_main_already"),
-  //     data: '@import "has_a_main_already";'
-  //   };
-  //   var expected = ".has-a-main {\n  main: already; }\n";
-  //   testutils.assertCompiles(options, expected, done);
-  // });
-  //
-  // it("errors when no sass directory is specified", function (done) {
-  //   var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
-  //   var options = {
-  //     root: rootDir,
-  //     data: '@import "malformed_module"; .foo {}'
-  //   };
-  //   var expectedError = "sassDir is not specified in " +
-  //     path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
-  //
-  //   testutils.assertCompilationError(options, expectedError, done);
-  // });
-  //
-  // it("errors on invalid module", function (done) {
-  //   var rootDir = testutils.fixtureDirectory("invalid_module_in_package");
-  //   var options = {
-  //     root: rootDir,
-  //     data: '@import "module_a";'
-  //   };
-  //   var expectedError = "Cannot find module 'module_a/package.json'";
-  //
-  //   testutils.assertCompilationError(options, expectedError, done);
-  // });
-  //
-  // it("handles an array of importers", function(done) {
-  //   var importerMissCalled = false;
-  //   var importerMiss = function(uri, prev, cb) {
-  //    importerMissCalled = true;
-  //    cb(sass.NULL);
-  //   };
-  //
-  //   var importerHit = function(uri, prev, cb) {
-  //    cb({contents: ".foo { color: red; }"});
-  //   };
-  //
-  //   var options = {
-  //    root: testutils.fixtureDirectory("basic_modules"),
-  //    data: '@import "OMG";',
-  //    importer: [importerMiss, importerHit]
-  //   };
-  //   var expected = ".foo {\n  color: red; }\n";
-  //   testutils.assertCompiles(options, expected, function() {
-  //    assert(importerMissCalled);
-  //    done();
-  //   });
-  // });
+  //    // TODO This should not be a successful compile (libsass issue?)
+  //    var expectedError = "Could not import transitive_module from " +
+  //                        path.resolve(testutils.fixtureDirectory("basic_modules"), "wubwubwub.scss");
+  //                        console.log(expectedError);
+  //    testutils.assertCompilationError(options, expectedError, done);
+  //  });
+  //});
+
+  it("only imports a module dependency once.", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("basic_modules"),
+      data: '@import "module_a"; @import "module_a";'
+    };
+    var expected = ".module-a {\n  greeting: hello world; }\n\n" +
+                   ".sibling-in-module-a {\n  sibling: yes; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("imports modules if they are themselves a npm eyeglass module.", function(done) {
+     var options = {
+       root: testutils.fixtureDirectory("is_a_module"),
+       data: '@import "is-a-module";'
+     };
+    var expected = ".is-a-module {\n  this: is a module; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("imports for modules such as foo/bar/_foo.scss wanting foo/bar (#37)", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("redundantly_named_modules"),
+      data: '@import "module_a";'
+    };
+    var expected = ".nested-module-a {\n  greeting: hello world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("eyeglass exports can be specified through the " +
+  " eyeglass property of package.json.", function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("has_a_main_already"),
+      data: '@import "has_a_main_already";'
+    };
+    var expected = ".has-a-main {\n  main: already; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("errors when no sass directory is specified", function (done) {
+    var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
+    var options = {
+      root: rootDir,
+      data: '@import "malformed_module"; .foo {}'
+    };
+    var expectedError = "sassDir is not specified in " +
+      path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
+
+    testutils.assertCompilationError(options, expectedError, done);
+  });
+
+  it("errors on invalid module", function (done) {
+    var rootDir = testutils.fixtureDirectory("invalid_module_in_package");
+    var options = {
+      root: rootDir,
+      data: '@import "module_a";'
+    };
+    var expectedError = "Cannot find module 'module_a/package.json'";
+
+    testutils.assertCompilationError(options, expectedError, done);
+  });
+
+  it("handles an array of importers", function(done) {
+    var importerMissCalled = false;
+    var importerMiss = function(uri, prev, cb) {
+     importerMissCalled = true;
+     cb(sass.NULL);
+    };
+
+    var importerHit = function(uri, prev, cb) {
+     cb({contents: ".foo { color: red; }"});
+    };
+
+    var options = {
+     root: testutils.fixtureDirectory("basic_modules"),
+     data: '@import "OMG";',
+     importer: [importerMiss, importerHit]
+    };
+    var expected = ".foo {\n  color: red; }\n";
+    testutils.assertCompiles(options, expected, function() {
+     assert(importerMissCalled);
+     done();
+    });
+  });
 
 });
 
