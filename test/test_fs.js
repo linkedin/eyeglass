@@ -123,6 +123,30 @@ describe("fs", function () {
    testutils.assertCompiles(eg, expected, done);
  });
 
+ it("can check if a file exists in the sandbox", function (done) {
+   var rootDir = testutils.fixtureDirectory("app_assets");
+
+   var input = "@import 'fs(my-id)';" +
+               "fs {" +
+               "  absolute: fs-absolute-path(my-id, 'images/foo.png');" +
+               "  exists: fs-exists(fs-absolute-path(my-id, 'uses_mod_1.scss'));" +
+               "  missing: fs-exists(fs-absolute-path(my-id, 'images/foo.png'));" +
+               "}";
+   var expected = "fs {\n" +
+                  "  absolute: " + path.join(rootDir, "sass", "images", "foo.png") + ";\n" +
+                  "  exists: true;\n" +
+                  "  missing: false; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "sass", "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
  it("cannot access check existance of file outside the security sandbox", function(done) {
    var rootDir = testutils.fixtureDirectory("app_assets");
 
@@ -138,17 +162,108 @@ describe("fs", function () {
      fsSandbox: true
    }, sass);
 
-   // Ugh. I hate this, need to clean up error checking so it's not so fragile.
-   // Also, why is this error different?
-   var expectedError = [
-     "error in C function eyeglass-fs-exists: Security violation: Cannot access " +
-       path.resolve(rootDir, "..", ".."),
-     "",
-     "Backtrace:",
-     "\teyeglass/fs:23, in function `eyeglass-fs-exists`",
-     "\teyeglass/fs:23, in function `fs-exists`",
-     "\ttest/fixtures/app_assets/sass/uses_mod_1.scss:1",
-   ].join("\n");
+
+   var expectedError = {
+     message: "Security violation: Cannot access " + path.resolve(rootDir, "..", "..")
+   };
+   testutils.assertCompilationError(eg, expectedError, done);
+ });
+
+ it("can list files in a directory", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  files: inspect(fs-list-files(fs-absolute-path(root), '*'));" +
+               "}";
+   var expected = "fs {\n" +
+                  "  files: " + ["a.txt", "b.pdf"].join(", ") + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss")
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("can list files in a directory without providing a glob", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  files: inspect(fs-list-files(fs-absolute-path(root)));" +
+               "}";
+   var expected = "fs {\n" +
+                  "  files: " + ["a.txt", "b.pdf"].join(", ") + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss")
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("hidden files are not listed unless explicitly requested", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  files: fs-list-files(fs-absolute-path(root), '.*');" +
+               "}";
+   var expected = "fs {\n" +
+                  "  files: " + [".hidden.txt"].join(", ") + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss")
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("can list directories in a directory that's in the sandbox", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  dirs: inspect(fs-list-directories(fs-absolute-path(root), '**/*'));" +
+               "}";
+   var expected = "fs {\n" +
+                  "  dirs: " + ["subdir", "subdir/subsubdir"].join(", ") + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("cannot list directories in a directory that's outside the sandbox", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  dirs: inspect(fs-list-directories(fs-absolute-path(root), '../../f*'));" +
+               "}";
+
+   var expectedError = {
+     message: "Security violation: Cannot access ../../fixtures/"
+   };
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
 
    testutils.assertCompilationError(eg, expectedError, done);
  });

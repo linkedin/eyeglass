@@ -70,6 +70,49 @@ The returned path is not normalized and need not exist.
 Returns `true` if the absolute path provided exists. Returns `false`
 otherwise.
 
+This function will fail with an error if sandboxing is enabled (See
+below) and the path is outside the sandbox.
+
+
+#### `fs-list-files($directory, $glob: "*")`
+
+Returns a list of files in the directory specified. The file names
+returned are relative to the directory specified.
+
+Hidden files are not returned unless explicitly requested with a glob
+pattern similar to `.*`.
+
+Directories are not returned. Use `fs-list-directories()` instead.
+
+This function will fail with an error if sandboxing is enabled (See
+below) and the path is outside the sandbox.
+
+Symlinks are not resolved to their real file names as those might be
+outside the sandbox and would result in an error when sandboxing is
+enabled.
+
+See [node-glob](https://github.com/isaacs/node-glob) for documentation
+on what glob syntax is allowed.
+
+#### `fs-list-directories($directory, $glob: "*")`
+
+Returns a list of directories in the directory specified. The directory names
+returned are relative to the directory specified.
+
+Hidden directories are not returned unless explicitly requested with a glob
+pattern similar to `.*`.
+
+Files are not returned. Use `fs-list-files()` instead.
+
+This function will fail with an error if sandboxing is enabled (See
+below) and the path is outside the sandbox.
+
+Symlinks are not resolved to their real directory names as those might be
+outside the sandbox and would result in an error when sandboxing is
+enabled.
+
+See [node-glob](https://github.com/isaacs/node-glob) for documentation
+on what glob syntax is allowed.
 
 ### Security
 

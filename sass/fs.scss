@@ -22,3 +22,11 @@ $fs-path-separator: eyeglass-fs-path-separator();
 @function fs-exists($absolute-path) {
   @return eyeglass-fs-exists($absolute-path);
 }
+
+@function fs-list-files($directory, $glob: "*") {
+  @return eyeglass-fs-list-files($directory, $glob);
+}
+
+@function fs-list-directories($directory, $glob: "*") {
+  @return eyeglass-fs-list-directories($directory, $glob);
+}
