@@ -114,6 +114,38 @@ enabled.
 See [node-glob](https://github.com/isaacs/node-glob) for documentation
 on what glob syntax is allowed.
 
+#### `fs-parse-filename($filename)`
+
+This function parses a filename into its constitent parts that is
+convenient for manipulating the filename. It returns a map with the
+following keys:
+
+* `base` - This is the full filename without any directory prefix.
+* `dir` - The is the directory containing the base.
+* `name` - The name of the file without any extension or directory prefix.
+* `ext` - The extension of the file including the `.` extension separator.
+* `is-absolute` - a boolean indicating whether the filename is absolute.
+
+The file referenced by `$filename` does not need to exist. This function
+does not access the filesystem.
+
+#### `fs-info($filename)`
+
+This function returns information about the file as a map with the
+following keys:
+
+* `modification-time` - When the file was last modified. It is an
+  integer specifying the number of milliseconds since Jan 01, 1970 00:00 UTC.
+* `creation-time` - When the file was created. It is an
+  integer specifying the number of milliseconds since Jan 01, 1970 00:00 UTC.
+* `is-file` - A boolean that indicates whether this is a normal file.
+* `is-directory` - A boolean that indicates whether this is a directory.
+* `real-path` - The real path of the file after resolving all symbolic links.
+* `size` - The size of the file in bytes.
+
+This function will fail with an error if sandboxing is enabled (See
+below) and the path is outside the sandbox.
+
 ### Security
 
 By default, sass code is running locally on a dev machine running code

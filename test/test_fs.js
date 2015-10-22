@@ -7,6 +7,7 @@ var Eyeglass = require("../lib").Eyeglass;
 var testutils = require("./testutils");
 var assert = require("assert");
 var fse = require("fs-extra");
+var fs = require("fs");
 
 describe("fs", function () {
 
@@ -244,6 +245,92 @@ describe("fs", function () {
    }, sass);
 
    testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("can parse a filename", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'eyeglass/fs';" +
+               "$filename: fs-parse-filename('/foo/bar.baz');" +
+               "fs {\n" +
+               "  basename: map-get($filename, base);\n" +
+               "  dirname: map-get($filename, dir);\n" +
+               "  filename: map-get($filename, name);\n" +
+               "  extension: map-get($filename, ext);\n" +
+               "  is-absolute: map-get($filename, is-absolute);\n" +
+               "}";
+   var expected = "fs {\n" +
+                  "  basename: bar.baz;\n" +
+                  "  dirname: /foo;\n" +
+                  "  filename: bar;\n" +
+                  "  extension: .baz;\n" +
+                  "  is-absolute: true; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("can get info about a path", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "$info: fs-info(fs-absolute-path(root, 'a.txt'));" +
+               "fs {\n" +
+               "  modification-time: map-get($info, modification-time);\n" +
+               "  creation-time: map-get($info, creation-time);\n" +
+               "  is-file: map-get($info, is-file);\n" +
+               "  is-directory: map-get($info, is-directory);\n" +
+               "  real-path: map-get($info, real-path);\n" +
+               "  size: map-get($info, size);\n" +
+               "}";
+
+   var statFile = path.join(rootDir, "a.txt");
+   var stats = fs.statSync(statFile);
+
+   var expected = "fs {\n" +
+                  "  modification-time: " + stats.mtime.getTime() + ";\n" +
+                  "  creation-time: " + stats.birthtime.getTime() + ";\n" +
+                  "  is-file: " + stats.isFile() + ";\n" +
+                  "  is-directory: " + stats.isDirectory() + ";\n" +
+                  "  real-path: " + fs.realpathSync(statFile) + ";\n" +
+                  "  size: " + stats.size + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("cannot get info about a path that's outside the sandbox", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  error: fs-info(fs-absolute-path(root, '..'));" +
+               "}";
+
+   var expectedError = {
+     message: "Security violation: Cannot access " + path.resolve(rootDir, "..")
+   };
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "haserror.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompilationError(eg, expectedError, done);
  });
 
  it("cannot list directories in a directory that's outside the sandbox", function (done) {

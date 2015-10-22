@@ -30,3 +30,11 @@ $fs-path-separator: eyeglass-fs-path-separator();
 @function fs-list-directories($directory, $glob: "*") {
   @return eyeglass-fs-list-directories($directory, $glob);
 }
+
+@function fs-parse-filename($filename) {
+  @return eyeglass-fs-parse-filename($filename);
+}
+
+@function fs-info($filename) {
+  @return eyeglass-fs-info($filename);
+}
