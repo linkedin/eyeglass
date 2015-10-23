@@ -38,3 +38,7 @@ $fs-path-separator: eyeglass-fs-path-separator();
 @function fs-info($filename) {
   @return eyeglass-fs-info($filename);
 }
+
+@function fs-read-file($filename) {
+  @return eyeglass-fs-read-file($filename);
+}

@@ -146,6 +146,13 @@ following keys:
 This function will fail with an error if sandboxing is enabled (See
 below) and the path is outside the sandbox.
 
+#### `fs-read-file($filename)`
+
+Returns the contents of a file as a string.
+
+This function will fail with an error if sandboxing is enabled (See
+below) and the path is outside the sandbox.
+
 ### Security
 
 By default, sass code is running locally on a dev machine running code

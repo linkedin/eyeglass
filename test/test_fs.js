@@ -354,4 +354,51 @@ describe("fs", function () {
 
    testutils.assertCompilationError(eg, expectedError, done);
  });
+
+ it("can read a file", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "$contents: fs-read-file(fs-absolute-path(root, 'a.txt'));" +
+               "fs {\n" +
+               "  contents: $contents;\n" +
+               "}";
+
+   var file = path.join(rootDir, "a.txt");
+   var contents = fs.readFileSync(file);
+
+   var expected = "fs {\n" +
+                  "  contents: " + contents.toString() + "; }\n";
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "uses_mod_1.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompiles(eg, expected, done);
+ });
+
+ it("cannot get info about a path that's outside the sandbox", function (done) {
+   var rootDir = testutils.fixtureDirectory("filesystem");
+
+   var input = "@import 'fs(root)';" +
+               "fs {" +
+               "  error: fs-info(fs-absolute-path(root, '..', '..', 'foo.txt'));" +
+               "}";
+
+   var expectedError = {
+     message: "Security violation: Cannot access " + path.resolve(rootDir, "..", "..", "foo.txt")
+   };
+
+   var eg = new Eyeglass({
+     root: rootDir,
+     data: input,
+     file: path.join(rootDir, "haserror.scss"),
+     fsSandbox: true
+   }, sass);
+
+   testutils.assertCompilationError(eg, expectedError, done);
+ });
 });
