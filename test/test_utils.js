@@ -31,10 +31,11 @@ describe("utilities", function () {
  it("provides a collection of errors if it cannot find" +
     " shared semantic versions in modules", function() {
    var dir = testutils.fixtureDirectory("conflicting_modules");
-   var result = new EyeglassModules(dir);
-   assert(result.errors.length, "discovery found errors");
-   assert.equal(result.errors[0].name, "conflict_module");
-   assert.notEqual(result.errors[0].left.version, result.errors[0].right.version);
+   var versionIssues = new EyeglassModules(dir).issues.dependencies.versions;
+
+   assert(versionIssues.length, "discovery found errors");
+   assert.equal(versionIssues[0].name, "conflict_module");
+   assert.notEqual(versionIssues[0].left.version, versionIssues[0].right.version);
  });
 
  it("loads a package.json for an eyeglass module", function(done) {
