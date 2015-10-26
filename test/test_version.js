@@ -10,7 +10,7 @@ describe("sass version function", function () {
    var options = {
      data: "/* Eyeglass version is #{eyeglass-version()} */"
    };
-   var expectedOutput = "/* Eyeglass version is " + eyeglassVersion + " */\n";
+   var expectedOutput = "/* Eyeglass version is \"" + eyeglassVersion + "\" */\n";
    testutils.assertCompiles(options, expectedOutput, done);
  });
 

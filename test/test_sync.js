@@ -11,7 +11,7 @@ describe("synchronous rendering", function () {
      root: testutils.fixtureDirectory("function_modules"),
      data: "/* Eyeglass version is #{eyeglass-version()} */ .test { a: read('a'); }"
    };
-   var expectedOutput = "/* Eyeglass version is " + eyeglassVersion + " */\n" +
+   var expectedOutput = "/* Eyeglass version is \"" + eyeglassVersion + "\" */\n" +
                         ".test {\n  a: 1; }\n";
    testutils.assertCompilesSync(options, expectedOutput, done);
    done();

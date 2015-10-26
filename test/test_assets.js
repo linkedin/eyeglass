@@ -14,12 +14,7 @@ describe("assets", function () {
      var options = {
        data: "@import 'assets'; div { background-image: asset-url('fake.png'); }"
      };
-     var expectedError = "error in C function eyeglass-asset-uri: Asset not found: fake.png\n" +
-                         "\n" +
-                         "Backtrace:\n" +
-                         "	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
-                         "	eyeglass/assets:53, in function `asset-url`\n" +
-                         "	stdin:1";
+     var expectedError = {message: "Asset not found: fake.png"};
      testutils.assertCompilationError(options, expectedError, function() {
        checkStderr("");
        done();
@@ -369,12 +364,7 @@ describe("assets", function () {
    });
 
    testutils.assertStderr(function(checkStderr) {
-     var expectedError = "error in C function eyeglass-asset-uri: oops I did it again.\n" +
-                         "\n" +
-                         "Backtrace:\n" +
-                         "	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
-                         "	eyeglass/assets:53, in function `asset-url`\n" +
-                         "	stdin:1";
+     var expectedError = {message: "oops I did it again."};
      testutils.assertCompilationError(eg, expectedError, function() {
        checkStderr("");
        done();
@@ -396,12 +386,7 @@ describe("assets", function () {
    });
 
    testutils.assertStderr(function(checkStderr) {
-     var expectedError = "error in C function eyeglass-asset-uri: oops I did it again.\n" +
-                         "\n" +
-                         "Backtrace:\n" +
-                         "	eyeglass/assets:53, in function `eyeglass-asset-uri`\n" +
-                         "	eyeglass/assets:53, in function `asset-url`\n" +
-                         "	stdin:1";
+     var expectedError = {message: "oops I did it again."};
      testutils.assertCompilationError(eg, expectedError, function() {
        checkStderr("");
        done();
