@@ -249,7 +249,8 @@ describe("eyeglass importer", function () {
       };
       var expectedOutput = "/* test */\n";
       testutils.assertCompiles(options, expectedOutput, function() {
-        checkStderr("The following dependencies were not found:\n  module_a\nYou might need to `npm install` the above.\n");
+        checkStderr("The following dependencies were not found:" +
+          "\n  module_a\nYou might need to `npm install` the above.\n");
         done();
       });
     });
