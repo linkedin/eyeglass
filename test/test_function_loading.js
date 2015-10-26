@@ -98,15 +98,25 @@ describe("function loading", function () {
   });
 
   it("will always block and masquerade as an asynchronous function",
-    function(done) {
-      var input = "#hello { greeting: hello(); }\n";
-      var expected = "#hello {\n  greeting: Hello, Myself!; }\n";
-      var result = sass.renderSync(eyeglass({
-        root: testutils.fixtureDirectory("is_a_module"),
-        data: input
-      }));
-      assert.equal(expected, result.css);
-      done();
+  function(done) {
+    var input = "#hello { greeting: hello(); }\n";
+    var expected = "#hello {\n  greeting: Hello, Myself!; }\n";
+    var result = sass.renderSync(eyeglass({
+      root: testutils.fixtureDirectory("is_a_module"),
+      data: input
+    }));
+    assert.equal(expected, result.css);
+    done();
+  });
+
+  it("unversioned modules should return `unversioned` from `eyeglass-version()`",
+  function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("is_a_module"),
+      data: "/* #{eyeglass-version(is-a-module)} */\n"
+    };
+    var expectedOutput = "/* unversioned */\n";
+    testutils.assertCompiles(options, expectedOutput, done);
   });
 
 });
