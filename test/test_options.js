@@ -1,6 +1,5 @@
 "use strict";
 
-var sass = require("node-sass");
 var Eyeglass = require("../lib").Eyeglass;
 var assert = require("assert");
 var testutils = require("./testutils");
@@ -59,8 +58,8 @@ describe("options", function() {
     var eyeglass = new Eyeglass({
       includePaths: includePaths.join(":")
     });
-    var options = eyeglass.sassOptions();
-    assert(options);
-    assert.deepEqual(options.includePaths, includePaths);
+    var sassopts = eyeglass.sassOptions();
+    assert(sassopts);
+    assert.deepEqual(sassopts.includePaths, includePaths);
   });
 });
