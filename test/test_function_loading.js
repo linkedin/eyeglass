@@ -87,14 +87,14 @@ describe("function loading", function () {
     });
   });
 
- it("load functions from modules if they are themselves a npm eyeglass module.",
-    function (done) {
-      var options = {
-        root: testutils.fixtureDirectory("is_a_module"),
-        data: "#hello { greeting: hello(); }\n"
-      };
-      var expectedOutput = "#hello {\n  greeting: Hello, Myself!; }\n";
-      testutils.assertCompiles(options, expectedOutput, done);
+  it("load functions from modules if they are themselves a npm eyeglass module.",
+  function (done) {
+    var options = {
+      root: testutils.fixtureDirectory("is_a_module"),
+      data: "#hello { greeting: hello(); }\n"
+    };
+    var expectedOutput = "#hello {\n  greeting: Hello, Myself!; }\n";
+    testutils.assertCompiles(options, expectedOutput, done);
   });
 
   it("will always block and masquerade as an asynchronous function",
