@@ -13,7 +13,7 @@
   "main": "lib/index.js",
   "README": "README.md",
   "scripts": {
-    "test": "gulp test"
+    "test": "./test.sh"
   },
   "repository": {
     "type": "git",
