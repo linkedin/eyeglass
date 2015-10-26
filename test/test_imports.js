@@ -240,6 +240,21 @@ describe("eyeglass importer", function () {
     });
   });
 
+  it("errors when a dependency is missing", function (done) {
+    testutils.assertStderr(function(checkStderr) {
+      var rootDir = testutils.fixtureDirectory("missing_module");
+      var options = {
+        root: rootDir,
+        data: "/* test */"
+      };
+      var expectedOutput = "/* test */\n";
+      testutils.assertCompiles(options, expectedOutput, function() {
+        checkStderr("The following dependencies were not found:\n  module_a\nYou might need to `npm install` the above.\n");
+        done();
+      });
+    });
+  });
+
   it("handles an array of importers", function(done) {
     var importerMissCalled = false;
     var importerMiss = function(uri, prev, cb) {
