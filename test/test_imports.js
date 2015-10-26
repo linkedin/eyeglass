@@ -173,21 +173,20 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-  // TODO - WTH is going on here?
-  //it("does not let you import transitive sass files", function (done) {
-  //  testutils.assertStderr(function(checkStderr) {
-  //    var options = {
-  //      root: testutils.fixtureDirectory("basic_modules"),
-  //      file: "wubwubwub.scss",
-  //      data: '@import "transitive_module";'
-  //    };
-  //    // TODO This should not be a successful compile (libsass issue?)
-  //    var expectedError = "Could not import transitive_module from " +
-  //                        path.resolve(testutils.fixtureDirectory("basic_modules"), "wubwubwub.scss");
-  //                        console.log(expectedError);
-  //    testutils.assertCompilationError(options, expectedError, done);
-  //  });
-  //});
+  it("does not let you import transitive sass files", function (done) {
+    testutils.assertStderr(function(checkStderr) {
+      var options = {
+        root: testutils.fixtureDirectory("basic_modules"),
+        file: "wubwubwub.scss",
+        data: '@import "transitive_module";'
+      };
+      // TODO This should not be a successful compile (libsass issue?)
+      // TODO Shouldn't the file path be relative to `options.root`?
+      var expectedError = "Could not import transitive_module from " +
+                          path.resolve("wubwubwub.scss");
+      testutils.assertCompilationError(options, expectedError, done);
+    });
+  });
 
   it("only imports a module dependency once.", function (done) {
     var options = {
@@ -228,26 +227,17 @@ describe("eyeglass importer", function () {
   });
 
   it("errors when no sass directory is specified", function (done) {
-    var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
-    var options = {
-      root: rootDir,
-      data: '@import "malformed_module"; .foo {}'
-    };
-    var expectedError = "sassDir is not specified in " +
-      path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
+    testutils.assertStderr(function(checkStderr) {
+      var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
+      var options = {
+        root: rootDir,
+        data: '@import "malformed_module"; .foo {}'
+      };
+      var expectedError = "sassDir is not specified in " +
+        path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
 
-    testutils.assertCompilationError(options, expectedError, done);
-  });
-
-  it("errors on invalid module", function (done) {
-    var rootDir = testutils.fixtureDirectory("invalid_module_in_package");
-    var options = {
-      root: rootDir,
-      data: '@import "module_a";'
-    };
-    var expectedError = "Cannot find module 'module_a/package.json'";
-
-    testutils.assertCompilationError(options, expectedError, done);
+      testutils.assertCompilationError(options, expectedError, done);
+    });
   });
 
   it("handles an array of importers", function(done) {

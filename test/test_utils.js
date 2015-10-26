@@ -5,6 +5,7 @@ var unquote = require("../lib/util/unquote");
 var sync = require("../lib/util/sync_fn");
 var sass = require("node-sass");
 var testutils = require("./testutils");
+var EyeglassModules = require("../lib/util/eyeglass_modules");
 
 describe("utilities", function () {
 
@@ -27,33 +28,36 @@ describe("utilities", function () {
    done();
  });
 
-// it("provides a collection of errors if it cannot find" +
-//    " shared semantic versions in modules", function() {
-//   var dir = testutils.fixtureDirectory("conflicting_modules");
-//   var result = discover.all(dir);
-//   assert(result.errors.length, "discovery found errors");
-//   assert.equal(result.errors[0].name, "conflict_module");
-//   assert.notEqual(result.errors[0].left.version, result.errors[0].right.version);
-// });
+ it("provides a collection of errors if it cannot find" +
+    " shared semantic versions in modules", function() {
+   var dir = testutils.fixtureDirectory("conflicting_modules");
+   var result = new EyeglassModules(dir);
+   assert(result.errors.length, "discovery found errors");
+   assert.equal(result.errors[0].name, "conflict_module");
+   assert.notEqual(result.errors[0].left.version, result.errors[0].right.version);
+ });
 
-// it("loads a package.json for an eyeglass module", function(done) {
-//    var dir = testutils.fixtureDirectory("is_a_module");
-//    var eyeglass = {};
-//    var egModule = discover.getEyeglassModuleDef(dir);
-//    var egExports = require(egModule.main)(eyeglass, sass);
-//    assert(egExports);
-//    assert.equal(egExports.sassDir, dir);
-//    assert(egExports.functions);
-//    done();
-// });
+ it("loads a package.json for an eyeglass module", function(done) {
+    var dir = testutils.fixtureDirectory("is_a_module");
+    var eyeglass = {};
+    var modules = new EyeglassModules(dir);
+    var egModule = modules.find("is-a-module");
+    var egExports = require(egModule.main)(eyeglass, sass);
+    assert(egExports);
+    assert.equal(egExports.sassDir, dir);
+    assert(egExports.functions);
+    done();
+ });
 
-// it("populates the eyeglass name for a module into the module definition", function(done) {
-//    var dir = testutils.fixtureDirectory("is_a_module");
-//    var egModule = discover.getEyeglassModuleDef(dir);
-//    assert(egModule);
-//    assert.equal(egModule.eyeglassName, "is-a-module");
-//    done();
-// });
+ it("populates the eyeglass name for a module into the module definition", function(done) {
+    var dir = testutils.fixtureDirectory("is_a_module");
+    var modules = new EyeglassModules(dir);
+    var egModule = modules.find("is-a-module");
+    assert(egModule);
+    assert.equal(egModule.rawName, "is_a_module");
+    assert.equal(egModule.name, "is-a-module");
+    done();
+ });
 
  it("can convert an async function into a synchronous behavior", function() {
    var expected = "the-result";
