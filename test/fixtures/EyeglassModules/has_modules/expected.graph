@@ -1,0 +1,4 @@
+:root(has_modules)
+├── module_b
+├── module_d
+└── eyeglass

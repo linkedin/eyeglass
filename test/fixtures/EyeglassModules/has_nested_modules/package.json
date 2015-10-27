@@ -1,0 +1,12 @@
+{
+  "name": "has_nested_modules",
+  "private": true,
+  "dependencies": {
+    "module_a": "*",
+    "module_b": "*"
+  },
+  "devDependencies": {
+    "module_c": "*",
+    "module_d": "*"
+  }
+}
