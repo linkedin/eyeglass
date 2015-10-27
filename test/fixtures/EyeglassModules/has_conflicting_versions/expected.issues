@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "versions": [
+      {
+        "name": "module_b",
+        "left": {
+          "version": "1.0.0"
+        },
+        "right": {
+          "version": "2.0.0"
+        }
+      }
+    ]
+  }
+}

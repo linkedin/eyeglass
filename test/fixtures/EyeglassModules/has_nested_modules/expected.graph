@@ -1,0 +1,6 @@
+:root(has_nested_modules)
+├─┬ module_a
+│ └── module_b@1.0.0
+├── module_b@1.0.0
+├── module_d@1.0.0
+└── eyeglass
