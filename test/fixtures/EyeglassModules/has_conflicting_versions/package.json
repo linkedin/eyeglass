@@ -1,5 +1,5 @@
 {
-  "name": "has_nested_modules",
+  "name": "has_conflicting_versions",
   "private": true,
   "dependencies": {
     "module_a": "*",

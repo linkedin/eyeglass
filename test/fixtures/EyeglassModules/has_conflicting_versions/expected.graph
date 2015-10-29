@@ -1,4 +1,4 @@
-:root(has_nested_modules)
+:root(has_conflicting_versions)
 ├─┬ module_a
 │ └── module_b@2.0.0
 ├── module_b@2.0.0
