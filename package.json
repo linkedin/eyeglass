@@ -41,6 +41,7 @@
     "tmp": "0.0.28"
   },
   "devDependencies": {
+    "debug": "^2.2.0",
     "eslint": "^1.7.1",
     "eyeglass-dev-eslint": "^2.0.0",
     "grunt": "^0.4.5",
