@@ -13,8 +13,8 @@ If there is no sign of `gyp ERR` anywhere in your install log, then [file an iss
 
 If you're still running into issues, you can gain some insight by enabling some debug flags. To enable this logging, set an environment variable named `DEBUG` to one or more of the following:
 
-|----|----|
 | option | enables logging for...  |
+|----|----|
 | `eyeglass*` | all eyeglass logging |
 | `eyeglass:import` | import resolution |
 | `eyeglass:functions` | discovered custom functions |
