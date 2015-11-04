@@ -8,3 +8,14 @@ This happens during your `npm install` process, and in our case is almost certai
 If you've got a `gyp ERR`, take a look at the [open gyp issues for node-sass](https://github.com/sass/node-sass/search?o=desc&q=gyp&s=updated&state=open&type=Issues&utf8=✓). If you still don't see anything, please create a ticket and both use and the `node-sass` folks will figure out what's up.
 
 If there is no sign of `gyp ERR` anywhere in your install log, then [file an issue](https://github.com/sass-eyeglass/eyeglass/issues) and paste your `npm install` log. It's probably broken for a lot of people. =\
+
+# Logging debug messages
+
+If you're still running into issues, you can gain some insight by enabling some debug flags. To enable this logging, set an environment variable named `DEBUG` to one or more of the following:
+
+|----|----|
+| option | enables logging for...  |
+| `eyeglass*` | all eyeglass logging |
+| `eyeglass:import` | import resolution |
+| `eyeglass:functions` | discovered custom functions |
+| `eyeglass:modules` | discovered eyeglass modules |
