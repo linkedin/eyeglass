@@ -1,4 +1,6 @@
-# eyeglass Documentation
+---
+title: Eyeglass Documentation
+---
 
 **I want to use eyeglass in my `node-sass` project**
 * [Introduction: How eyeglass works](#introduction-how-eyeglass-works)

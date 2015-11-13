@@ -1,4 +1,6 @@
-# Getting Started
+---
+title: Getting Started
+---
 
 # Requirements
 To use eyeglass, you'll need at least the following items, which can be installed using the npm utility. Since these items are not used directly in production, you can place them in your dev dependencies.
