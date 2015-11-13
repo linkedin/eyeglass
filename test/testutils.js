@@ -31,7 +31,16 @@ module.exports = {
     this.compile(options, function(err, result) {
       assert(!result, result ? "Should not have compiled to: " + result.css : "");
       assert(err);
-      testutils.assertMultilineEqual(err.message, expectedError);
+      if (typeof expectedError == "object" && expectedError.message) {
+        var matchData = err.message.match(/error in C function ([^:]+): (.*)$/m);
+        if (matchData) {
+          assert.equal(expectedError.message, matchData[2]);
+        } else {
+          assert.equal(expectedError.message, err.message);
+        }
+      } else {
+        testutils.assertMultilineEqual(err.message, expectedError);
+      }
       done();
     });
   },
