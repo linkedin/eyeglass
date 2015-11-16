@@ -279,4 +279,21 @@ describe("eyeglass importer", function () {
     });
   });
 
+  it("should invoke importers with the correct context", function(done) {
+    var importerOptions;
+
+    var options = {
+      data: '@import "OMG";',
+      importer: function(uri, prev, cb) {
+        importerOptions = this.options;
+        cb({contents: ".foo { color: red; }"});
+      }
+    };
+    var expected = ".foo {\n  color: red; }\n";
+    testutils.assertCompiles(options, expected, function() {
+      assert(importerOptions);
+      done();
+    });
+  });
+
 });
