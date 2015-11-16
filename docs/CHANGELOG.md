@@ -1,5 +1,9 @@
 # CHANGELOG
 
+#### 0.7.1 (Nov 16, 2015)
+
+* Fix: Move the `debug` module to runtime dependencies in `package.json`.
+
 #### 0.7.0 (Nov 16, 2015)
 
 * Refactor module discovery to fix [issue #70](https://github.com/sass-eyeglass/eyeglass/issues/70).
