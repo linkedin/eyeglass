@@ -1,0 +1,9 @@
+{
+  "name": "my-package",
+  "version": "0.0.1",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "eyeglass-my-package": "*"
+  }
+}
