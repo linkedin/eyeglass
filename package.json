@@ -30,6 +30,7 @@
   "dependencies": {
     "archy": "^1.0.0",
     "deasync": "^0.1.3",
+    "debug": "^2.2.0",
     "fs-extra": "^0.24.0",
     "glob": "^5.0.15",
     "lodash.includes": "^3.1.3",
@@ -41,7 +42,6 @@
     "tmp": "0.0.28"
   },
   "devDependencies": {
-    "debug": "^2.2.0",
     "eslint": "^1.7.1",
     "eyeglass-dev-eslint": "^2.0.0",
     "grunt": "^0.4.5",
