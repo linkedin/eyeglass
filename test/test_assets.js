@@ -454,4 +454,20 @@ describe("assets", function () {
     });
     done();
   });
+
+  it("should allow uri fragments", function (done) {
+    var input = "@import 'assets'; div { background-image: asset-url('images/foo.png?q=true');" +
+                "background-image: asset-url('images/foo.png#foo'); }";
+    var expected = "div {\n  background-image: url(/images/foo.png?q=true);\n" +
+                   "  background-image: url(/images/foo.png#foo); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      root: rootDir,
+      data: input
+    }, sass);
+    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+    testutils.assertCompiles(eg, expected, done);
+  });
 });
