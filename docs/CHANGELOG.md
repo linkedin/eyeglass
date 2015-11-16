@@ -1,5 +1,20 @@
 # CHANGELOG
 
+#### 0.7.0 (Nov 16, 2015)
+
+* Refactor module discovery to fix [issue #70](https://github.com/sass-eyeglass/eyeglass/issues/70).
+* Added console debugging support to address [issue #66](https://github.com/sass-eyeglass/eyeglass/issues/66).
+  See [Troubleshooting](TROUBLESHOOTING.md) for details.
+
+#### 0.6.5 (Nov 13, 2015)
+
+* Pick up latest node-sass release that fixes known regressions.
+
+#### 0.6.4 (Oct 28, 2015)
+
+* Locked down the node-sass version due to regressions in node sass and
+  libsass releases.
+
 #### 0.6.3 (Oct 13, 2015)
 
 * Handle when the `importer` option to node-sass is an array of
