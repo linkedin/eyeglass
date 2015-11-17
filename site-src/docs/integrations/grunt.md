@@ -1,4 +1,7 @@
-# Working With Grunt
+---
+title: Working With Grunt
+---
+
 [Grunt](http://gruntjs.com) is a JavaScript task runner, frequently used for building your site's JavaScript, CSS, and more. Because there is a [grunt-sass](https://github.com/sindresorhus/grunt-sass) plugin that uses `node-sass`, we can integrate eyeglass by using its `require` to wrap the `node-sass` options.
 
 ```js

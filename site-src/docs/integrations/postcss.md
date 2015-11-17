@@ -1,4 +1,7 @@
-# Integrating eyeglass and PostCSS
+---
+title: Integrating eyeglass and PostCSS
+---
+
 [PostCSS](https://github.com/postcss/postcss) is a powerful tool that transforms CSS using JavaScript plugins. You can use PostCSS in your favorite build tools such as [grunt](https://github.com/nDmitry/grunt-postcss), [gulp](https://github.com/postcss/gulp-postcss), [webpack](https://github.com/postcss/postcss-loader), [broccoli](https://github.com/jeffjewiss/broccoli-postcss), and others. Combining PostCSS with eyeglass gives you the best of both worlds.
 
 Some examples of putting eyeglass and PostCSS together:

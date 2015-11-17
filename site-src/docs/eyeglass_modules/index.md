@@ -1,4 +1,6 @@
-# Writing an eyeglass Module
+---
+title: Writing an eyeglass Module
+---
 
 Writing an eyeglass module is a great way to both learn eyeglass and take common Sass code and make it reusable and managable from a dependency perspective. If you want to jump right in, we recommend referencing the [sample module](https://github.com/sass-eyeglass/eyeglass-sample) or using the [Yeoman generator](https://github.com/sass-eyeglass/generator-eyeglass).
 

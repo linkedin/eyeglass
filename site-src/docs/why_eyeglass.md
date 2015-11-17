@@ -1,4 +1,7 @@
-# Why eyeglass?
+---
+Title: Why eyeglass?
+---
+
 eyeglass fills a need for `node-sass` users: access to the rich Sass ecosystem using well-tested node.js development tools. The Sass community has numerous plugins, including [compass](http://compass-style.org), [Susy](http://susy.oddbird.net), [Bourbon](http://bourbon.io), and [many more](http://www.sache.in). By standardizing on eyeglass, we will bring many of these modules to `node-sass` users of the community and make them installable from a simple `npm install`.
 
 # Why Does eyeglass Wrap Options?

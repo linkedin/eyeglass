@@ -1,5 +1,6 @@
-# eyeglass Options API
-
+---
+title: eyeglass Options API
+---
 
 All node-sass options can be passed into eyeglass. Eyeglass-specfic options are:
 
