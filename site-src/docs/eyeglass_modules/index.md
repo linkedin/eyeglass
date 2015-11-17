@@ -11,7 +11,7 @@ An eyeglass module consists of (at a minimum) the following:
 ```
 /my-eyeglass-module <directory>
   /package.json
-  /eyeglass-exports.js
+  /eyeglass-exports.js <optional>
   /scss <directory>
 ```
 
@@ -29,7 +29,8 @@ The next step is to add the `eyeglass` section to package.json. This gives eyegl
 // ...
   "eyeglass": {
     "needs": "<eyeglass version>",
-    "exports": "<optional: alternate exports>"
+    "exports": "<optional: alternate exports>",
+    "sassDir": "<relative path to your sass files' directory>"
   }
 ```
 
@@ -55,7 +56,12 @@ module.exports = function(eyeglass, sass) {
 
 The goal of `eyeglass-exports.js` is to create a module that is a function. The function receives `eyeglass` (the environment), and `sass` (the Sass utilities). When the function is called, it should return an object literal. All items in the return object are optional: these are the eyeglass features your module provides.
 
-* **sassDir**: A directory string. This is the path to your `.sass` or `.scss` files. Many developers use the `path` module and `__dirname` in combination, setting `sassDir: require("path").resolve(__dirname, "scss")` and letting node do all the work.
+* **sassDir**: A directory string. This is the path to your `.sass` or
+   `.scss` files. Many developers use the `path` module and `__dirname`
+  in combination, setting `sassDir: require("path").resolve(__dirname, "scss")`
+  and letting node do all the work. Note that if you specify the `sassDir` in package.json that will take
+  precedence over what is returned from your eyeglass exports file.
+
 * **functions**: An object collection. Functions in eyeglass work the same as in `node-sass`. We'll cover Custom Functions in more detail below.
 
 # Custom Mixins
