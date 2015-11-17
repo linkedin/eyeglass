@@ -7,6 +7,8 @@
   like gulp which share options across compiles. Fixes #83, #65
 * Handle hash fragments in asset urls. Fixes #75.
 * Fixed an edge case when project name matches an eyeglass module name.
+* The `eyeglass-exports.js` file is now optional as long as the
+  `sassDir` of the project is specified in the `package.json` file.
 
 #### 0.7.1 (Nov 16, 2015)
 
