@@ -279,4 +279,13 @@ describe("eyeglass importer", function () {
     });
   });
 
+  it("handle project name that conflicts with eyeglass module name", function(done) {
+    var options = {
+     root: testutils.fixtureDirectory("project_name_is_dep_name"),
+     data: '@import "my-package";'
+    };
+    var expected = ".foo {\n  color: red; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
 });
