@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### 0.8.0 (unreleased)
+
+* Ensure custom importers are invoked with the correct context from
+  node-sass. Fixes import-once so that it works with several build tools
+  like gulp which share options across compiles. Fixes #83, #65
+* Handle hash fragments in asset urls. Fixes #75.
+* Fixed an edge case when project name matches an eyeglass module name.
+
 #### 0.7.1 (Nov 16, 2015)
 
 * Fix: Move the `debug` module to runtime dependencies in `package.json`.
