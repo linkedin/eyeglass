@@ -233,7 +233,7 @@ describe("eyeglass importer", function () {
         root: rootDir,
         data: '@import "malformed_module"; .foo {}'
       };
-      var expectedError = "sassDir is not specified in " +
+      var expectedError = "sassDir is not specified in malformed_module's package.json or " +
         path.join(rootDir, "node_modules", "malformed_module", "eyeglass-exports.js");
 
       testutils.assertCompilationError(options, expectedError, done);
@@ -305,4 +305,12 @@ describe("eyeglass importer", function () {
     });
   });
 
+  it("should allow sassDir to be specified in the package.json", function(done) {
+     var options = {
+       root: testutils.fixtureDirectory("simple_module"),
+       data: '@import "simple-module";'
+     };
+    var expected = ".simple-module {\n  this: is a simple module; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 });

@@ -1,0 +1,10 @@
+{
+  "name": "simple_module",
+  "keywords": ["eyeglass-module"],
+  "private": true,
+  "eyeglass": {
+    "name": "simple-module",
+    "needs": "*",
+    "sassDir": "sass"
+  }
+}
