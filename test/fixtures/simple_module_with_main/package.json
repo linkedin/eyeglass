@@ -1,0 +1,12 @@
+{
+  "main": "main.js",
+  "name": "simple_module_with_main",
+  "keywords": ["eyeglass-module"],
+  "private": true,
+  "eyeglass": {
+    "exports": false,
+    "name": "simple-module-with-main",
+    "needs": "*",
+    "sassDir": "sass"
+  }
+}

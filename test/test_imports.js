@@ -313,4 +313,13 @@ describe("eyeglass importer", function () {
     var expected = ".simple-module {\n  this: is a simple module; }\n";
     testutils.assertCompiles(options, expected, done);
   });
+
+  it("should allow sassDir to be specified in the package.json with main and no exports", function(done) {
+     var options = {
+       root: testutils.fixtureDirectory("simple_module_with_main"),
+       data: '@import "simple-module-with-main";'
+     };
+    var expected = ".simple-module {\n  this: is a simple module;\n  exports: nothing; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 });

@@ -29,15 +29,17 @@ The next step is to add the `eyeglass` section to package.json. This gives eyegl
 // ...
   "eyeglass": {
     "needs": "<eyeglass version>",
-    "exports": "<optional: alternate exports>",
-    "sassDir": "<relative path to your sass files' directory>"
+    "exports": "<exports file or false>",
+    "sassDir": "<directory>"
   }
 ```
 
-Currently, the `eyeglass` section contains two properties, `needs` and `exports`.
+Currently, the `eyeglass` section contains the following properties:
 
   * **needs**: A semantic version string. This defines the version of eyeglass you are compatible with. When developing, you can set the string to `"*"`, but before releasing the module to the public, you'll probably want to set it to a minimum compatible version. We usually recommend people take the Major + Minor approach, much like npm. This means if eyeglass is currently `1.0.6`, you can put a `^` in front and write your `needs` as `^1.0.6`. This means you'll work with eyeglass versions 1.0.6 and newer, but not versions so new that APIs you depend on are broken.
-  * **exports**: An optional string. When you already have a `main` property (common for existing npm projects) and you just want to add support for eyeglass, you can specify an alternate property here. Eyeglass will look for `eyeglass.exports` before checking `main`, so that we always include the right thing.
+  * **exports**: An optional string. When you already have a `main` property (common for existing npm projects) and you just want to add support for eyeglass, you can specify an alternate property here.  Eyeglass will look for `eyeglass.exports` before checking `main`, so that we always include the right thing. This property can be set to `false` which will cause the `main` of the project to be ignored -- in
+this case, the `sassDir` property must be set. 
+  * *sassDir*: Optional. A relative path to the directory containing your sass files. When omittied, this should be specified as part of eyeglass exports.
 
 # eyeglass-exports.js
 
@@ -48,7 +50,7 @@ The `eyeglass-exports.js` file is used at runtime to figure out information rega
 
 module.exports = function(eyeglass, sass) {
   return {
-    sassDir: "<DIRECTORY>",
+    sassDir: "<directory>",
     functions: {}
   };
 };
