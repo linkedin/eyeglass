@@ -470,4 +470,18 @@ describe("assets", function () {
 
     testutils.assertCompiles(eg, expected, done);
   });
+
+  it("asset-uri should return the uri only, not wrapped in url()", function (done) {
+    var input = "@import 'assets'; div { uri: asset-uri('images/foo.png'); }";
+    var expected = "div {\n  uri: /images/foo.png; }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      root: rootDir,
+      data: input
+    }, sass);
+    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+    testutils.assertCompiles(eg, expected, done);
+  });
 });
