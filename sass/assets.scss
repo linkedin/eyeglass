@@ -45,12 +45,12 @@ $eg-registered-assets: () !default;
 
 // Returns a URL to the asset wrapped.
 @function asset-uri($relative-path) {
-  @return url(eyeglass-asset-uri($eg-registered-assets, $relative-path));
+  @return eyeglass-asset-uri($eg-registered-assets, $relative-path);
 }
 
 // Returns a URL to the asset wrapped in the css url() function.
 @function asset-url($relative-path) {
-  @return url(eyeglass-asset-uri($eg-registered-assets, $relative-path));
+  @return url(asset-uri($relative-path));
 }
 
 // The full path to the file on disk specified by the relative path.
