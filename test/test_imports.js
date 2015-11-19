@@ -35,9 +35,9 @@ describe("core api", function () {
     var eg = new Eyeglass({
       root: rootDir,
       includePaths: [
-        "../this-folder-does-not-exist",
-        "../../includable_scss",
-        "../this-does-not-exist-either"
+        "this-folder-does-not-exist",
+        "../includable_scss",
+        "this-does-not-exist-either"
       ],
       file: path.join(rootDir, "sass", "uses_includePaths.scss")
     }, sass);
@@ -51,7 +51,7 @@ describe("core api", function () {
      var rootDir = testutils.fixtureDirectory("app_assets");
      var eg = new Eyeglass({
        root: rootDir,
-       includePaths: ["../../includable_scss"],
+       includePaths: ["../includable_scss"],
        file: path.join(rootDir, "sass", "advanced_includePaths.scss")
      }, sass);
 
@@ -65,7 +65,7 @@ describe("core api", function () {
      var rootDir = testutils.fixtureDirectory("app_assets");
      var eg = new Eyeglass({
        root: rootDir,
-       includePaths: ["../../includable_scss"],
+       includePaths: ["../includable_scss"],
        file: path.join(rootDir, "sass", "dot_include.scss")
      }, sass);
 
@@ -320,6 +320,17 @@ describe("eyeglass importer", function () {
        data: '@import "simple-module-with-main";'
      };
     var expected = ".simple-module {\n  this: is a simple module;\n  exports: nothing; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("should resolve includePaths against the root directory", function(done) {
+    var rootDir = testutils.fixtureDirectory("app_with_include_paths");
+    var options = {
+      root: rootDir,
+      file: path.join(rootDir, "scss", "main.scss"),
+      includePaths: ["more_scss"]
+    };
+    var expected = ".from {\n  include: path; }\n";
     testutils.assertCompiles(options, expected, done);
   });
 });

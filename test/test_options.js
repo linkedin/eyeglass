@@ -3,6 +3,7 @@
 var Eyeglass = require("../lib").Eyeglass;
 var assert = require("assert");
 var testutils = require("./testutils");
+var path = require("path");
 
 describe("options", function() {
   beforeEach(function(done) {
@@ -27,9 +28,9 @@ describe("options", function() {
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.sassOptions();
-    assert.equal(sassopts.includePaths[0], "foo");
-    assert.equal(sassopts.includePaths[1], "bar");
-    assert.equal(sassopts.includePaths[2], "baz");
+    assert.equal(sassopts.includePaths[0], path.resolve(process.cwd(), "foo"));
+    assert.equal(sassopts.includePaths[1], path.resolve(process.cwd(), "bar"));
+    assert.equal(sassopts.includePaths[2], path.resolve(process.cwd(), "baz"));
     done();
   });
 
@@ -55,11 +56,15 @@ describe("options", function() {
 
   it("should normalize includePaths", function () {
     var includePaths = ["path/one", "path/two", "path/three"];
+    var rootDir = testutils.fixtureDirectory("app_assets");
     var eyeglass = new Eyeglass({
+      root: rootDir,
       includePaths: includePaths.join(":")
     });
     var sassopts = eyeglass.sassOptions();
     assert(sassopts);
-    assert.deepEqual(sassopts.includePaths, includePaths);
+    assert.deepEqual(sassopts.includePaths, includePaths.map(function(p){
+      return path.resolve(rootDir, p);
+    }));
   });
 });

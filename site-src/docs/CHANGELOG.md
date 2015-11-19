@@ -11,6 +11,8 @@
   `sassDir` of the project is specified in the `package.json` file.
 * The function `asset-uri` no longer returns the asset's uri wrapped in
   the css `url()` function. Use `asset-url` instead.
+* When passing relative paths to node-sass `includePaths`, eyeglass will
+  now resolve them against the project's `root` directory.
 
 #### 0.7.1 (Nov 16, 2015)
 
