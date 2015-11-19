@@ -9,6 +9,8 @@
 * Fixed an edge case when project name matches an eyeglass module name.
 * The `eyeglass-exports.js` file is now optional as long as the
   `sassDir` of the project is specified in the `package.json` file.
+* The function `asset-uri` no longer returns the asset's uri wrapped in
+  the css `url()` function. Use `asset-url` instead.
 
 #### 0.7.1 (Nov 16, 2015)
 
