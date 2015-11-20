@@ -13,7 +13,8 @@
   "main": "lib/index.js",
   "README": "README.md",
   "scripts": {
-    "test": "./test.sh"
+    "test": "./test.sh",
+    "site": "./node_modules/.bin/metalsmith"
   },
   "repository": {
     "type": "git",
