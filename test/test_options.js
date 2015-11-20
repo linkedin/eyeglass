@@ -11,13 +11,12 @@ describe("options", function() {
     done();
   });
 
-  it("has no circular references in eyeglass options", function(done) {
+  it("should not contain a circular reference to itself", function(done) {
     var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.sassOptions();
-    assert.equal(eyeglass, sassopts.eyeglass);
-    assert.equal(sassopts.eyeglass.options.eyeglass, undefined);
+    assert.equal(undefined, sassopts.eyeglass);
     done();
   });
 

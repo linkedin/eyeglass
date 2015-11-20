@@ -1,6 +1,6 @@
 "use strict";
 
-var eyeglass = require("../lib").decorate;
+var eyeglass = require("../lib");
 var sass = require("node-sass");
 var path = require("path");
 var assert = require("assert");
