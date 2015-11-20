@@ -1,6 +1,8 @@
 "use strict";
 
-var eyeglass = require("../lib");
+// disable eyeglass deprecations until tests are rewritten without deprecated methods
+process.env.EYEGLASS_DEPRECATIONS = "false";
+var eyeglass = require("../lib").decorate;
 var sass = require("node-sass");
 var path = require("path");
 var assert = require("assert");
