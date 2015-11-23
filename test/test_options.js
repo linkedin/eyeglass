@@ -16,7 +16,8 @@ describe("options", function() {
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.sassOptions();
-    assert.equal(undefined, sassopts.eyeglass);
+    assert(sassopts.eyeglass);
+    assert.notEqual(eyeglass, sassopts.eyeglass);
     done();
   });
 
