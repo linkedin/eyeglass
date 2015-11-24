@@ -67,4 +67,50 @@ describe("options", function() {
       return path.resolve(rootDir, p);
     }));
   });
+
+  it("should disable deprecation warnings via an option", function(done) {
+    testutils.assertStderr(function(checkStderr) {
+      var rootDir = testutils.fixtureDirectory("basic_modules");
+      var options = {
+        root: rootDir,
+        eyeglass: {
+          ignoreDeprecations: true
+        }
+      };
+      var eyeglass = new Eyeglass(options);
+      var sassopts = eyeglass.sassOptions();
+      checkStderr("");
+      done();
+    });
+  });
+
+  it("should enable deprecation warnings via an option", function(done) {
+    testutils.assertStderr(function(checkStderr) {
+      var rootDir = testutils.fixtureDirectory("basic_modules");
+      var options = {
+        root: rootDir,
+        eyeglass: {
+          ignoreDeprecations: false
+        }
+      };
+      var eyeglass = new Eyeglass(options);
+      var sassopts = eyeglass.sassOptions();
+      checkStderr([
+        "[eyeglass:deprecation] `root` should be passed into the"+
+        " eyeglass options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      option: ...",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] `require('eyeglass').Eyeglass` is deprecated. " +
+        "Instead, use `require('eyeglass')`",
+        "[eyeglass:deprecation] #sassOptions() is deprecated. " +
+        "Instead, you should access the sass options on #options\n"
+      ].join("\n"));
+      done();
+    });
+  });
 });
