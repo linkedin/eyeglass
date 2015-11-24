@@ -484,4 +484,24 @@ describe("assets", function () {
 
     testutils.assertCompiles(eg, expected, done);
   });
+
+  it("support assets specified via options", function (done) {
+    var input = "@import 'assets'; div { background-image: asset-url('images/foo.png');" +
+                "font: asset-url('fonts/foo.woff'); }";
+    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
+                   "  font: url(/fonts/foo.woff); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        assets: [
+          [rootDir, {pattern: "images/**/*"}],
+          [rootDir, {pattern: "fonts/**/*"}]
+        ]
+      }
+    });
+
+    testutils.assertCompiles(eg, expected, done);
+  });
 });
