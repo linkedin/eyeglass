@@ -3,14 +3,16 @@
 var assert = require("assert");
 var testutils = require("./testutils");
 
-var eyeglass = require("../lib").decorate;
+var eyeglass = require("../lib");
 var eyeglassSemverChecker = require("../lib/semver_checker");
 
 describe("semver checking", function () {
   it("will not let a module through with an engine violation", function (done) {
     var options = {
-      root: testutils.fixtureDirectory("bad_engine"),
-      data: "#hello { greeting: hello(Chris); }"
+      data: "#hello { greeting: hello(Chris); }",
+      eyeglass: {
+        root: testutils.fixtureDirectory("bad_engine")
+      }
     };
 
     testutils.assertStderr(function(check) {
@@ -25,8 +27,10 @@ describe("semver checking", function () {
 
   it("gives a nice error when missing eyeglass version dep", function (done) {
     var options = {
-      root: testutils.fixtureDirectory("old_engine"),
-      data: "#hello { greeting: hello(Chris); }"
+      data: "#hello { greeting: hello(Chris); }",
+      eyeglass: {
+        root: testutils.fixtureDirectory("old_engine")
+      }
     };
 
     testutils.assertStderr(function(check) {
@@ -41,9 +45,11 @@ describe("semver checking", function () {
 
   it("will throw if strictModuleVersions is set", function (done) {
     var options = {
-      root: testutils.fixtureDirectory("bad_engine"),
       data: "#hello { greeting: hello(Chris); }",
-      strictModuleVersions: true
+      eyeglass: {
+        root: testutils.fixtureDirectory("bad_engine"),
+        strictModuleVersions: true
+      }
     };
 
     testutils.assertStderr(function(check) {
