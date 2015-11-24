@@ -1,7 +1,7 @@
 "use strict";
 
 var Eyeglass = require("../lib");
-var VERSION = require("../lib").VERSION;
+var VERSION = Eyeglass.VERSION;
 var assert = require("assert");
 var testutils = require("./testutils");
 var path = require("path");
@@ -79,7 +79,7 @@ describe("options", function() {
           ignoreDeprecations: semver.inc(VERSION, "minor")
         }
       };
-      var eyeglass = new Eyeglass(options);
+      var eyeglass = new Eyeglass.Eyeglass(options);
       /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr("");
