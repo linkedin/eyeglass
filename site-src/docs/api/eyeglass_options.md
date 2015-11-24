@@ -19,3 +19,12 @@ A cross-build cache directory for eyeglass modules to save files. For example, g
 ## assetsHttpPrefix
 
 A prefix to give assets for their output url.
+
+## `ignoreDeprecations`
+
+This option allows you to ignore deprecations. Set this to the version
+of eyeglass for which deprecation warnings should be ignored. Any
+deprecation warnings issues against that version or earlier will be
+silenced. Any deprecation warnings for future releases will still be
+output. Note: You can also set the environment variable
+`EYEGLASS_DEPRECATIONS` to an eyeglass version on the console.

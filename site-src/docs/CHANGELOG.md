@@ -2,6 +2,9 @@
 
 ### 0.8.0 (unreleased)
 
+* In preparation for our upcoming 1.0 release, we are polishing our
+  public API.  You will get deprecation warnings in this release which
+  will guide you through the update process.
 * Ensure custom importers are invoked with the correct context from
   node-sass. Fixes import-once so that it works with several build tools
   like gulp which share options across compiles. Fixes #83, #65

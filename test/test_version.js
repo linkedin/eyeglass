@@ -2,15 +2,14 @@
 
 var path = require("path");
 var testutils = require("./testutils");
+var Eyeglass = require("../lib/index");
 
 describe("sass version function", function () {
  it("should return the eyeglass version", function (done) {
-   var pkg = require(path.resolve(__dirname, "../package.json"));
-   var eyeglassVersion = pkg.version;
    var options = {
      data: "/* Eyeglass version is #{eyeglass-version()} */"
    };
-   var expectedOutput = "/* Eyeglass version is " + eyeglassVersion + " */\n";
+   var expectedOutput = "/* Eyeglass version is " + Eyeglass.VERSION + " */\n";
    testutils.assertCompiles(options, expectedOutput, done);
  });
 
