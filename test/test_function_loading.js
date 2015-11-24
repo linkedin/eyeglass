@@ -4,15 +4,17 @@ var assert = require("assert");
 var sass = require("node-sass");
 var testutils = require("./testutils");
 
-var eyeglass = require("../lib").decorate;
+var eyeglass = require("../lib");
 
 describe("function loading", function () {
 
   it("should discover sass functions", function (done) {
     var options = {
-      root: testutils.fixtureDirectory("function_modules"),
       data: "#hello { greeting: hello(Chris); }\n" +
-            "#transitive { is: transitive(); }\n"
+            "#transitive { is: transitive(); }\n",
+      eyeglass: {
+        root: testutils.fixtureDirectory("function_modules")
+      }
     };
     var expected = "#hello {\n  greeting: Hello, Chris!; }\n\n" +
                    "#transitive {\n  is: transitive; }\n";
@@ -21,8 +23,10 @@ describe("function loading", function () {
 
   it("should include devDependencies in its list", function (done) {
     var options = {
-      root: testutils.fixtureDirectory("function_modules"),
-      data: "#hello { greeting: hellob(Chris); }\n"
+      data: "#hello { greeting: hellob(Chris); }\n",
+      eyeglass: {
+        root: testutils.fixtureDirectory("function_modules")
+      }
     };
     var expected = "#hello {\n  greeting: Hello, Chris!; }\n";
     testutils.assertCompiles(options, expected, done);
@@ -32,12 +36,14 @@ describe("function loading", function () {
     var input = "#hello { greeting: hello(Chris); }\n" +
                 "#mine { something: add-one(3em); }\n";
     var options = {
-      root: testutils.fixtureDirectory("function_modules"),
       data: input,
       functions: {
         "add-one($number)": function(number) {
           return sass.types.Number(number.getValue() + 1, number.getUnit());
         }
+      },
+      eyeglass: {
+        root: testutils.fixtureDirectory("function_modules")
       }
     };
     var expected = "#hello {\n  greeting: Hello, Chris!; }\n\n" +
@@ -50,12 +56,14 @@ describe("function loading", function () {
       var input = "#hello { greeting: hello(Chris); }\n";
       var expectedOutput = "#hello {\n  greeting: Goodbye, Chris!; }\n";
       var options = {
-        root: testutils.fixtureDirectory("function_modules"),
         data: input,
         functions: {
           "hello($name: \"World\")": function(name) {
             return sass.types.String("Goodbye, " + name.getValue() + "!");
           }
+        },
+        eyeglass: {
+          root: testutils.fixtureDirectory("function_modules")
         }
       };
       testutils.assertCompiles(options, expectedOutput, function() {
@@ -69,12 +77,14 @@ describe("function loading", function () {
     testutils.assertStderr(function(checkStderr) {
       var input = "#hello { greeting: hello(Chris); }\n";
       var options = {
-        root: testutils.fixtureDirectory("function_modules"),
         data: input,
         functions: {
           "hello($name: 'Sucker')": function(name) {
             return sass.types.String("Goodbye, " + name.getValue() + "!");
           }
+        },
+        eyeglass: {
+          root: testutils.fixtureDirectory("function_modules")
         }
       };
       var expectedOutput = "#hello {\n  greeting: Goodbye, Chris!; }\n";
@@ -90,8 +100,10 @@ describe("function loading", function () {
   it("load functions from modules if they are themselves a npm eyeglass module.",
   function (done) {
     var options = {
-      root: testutils.fixtureDirectory("is_a_module"),
-      data: "#hello { greeting: hello(); }\n"
+      data: "#hello { greeting: hello(); }\n",
+      eyeglass: {
+        root: testutils.fixtureDirectory("is_a_module")
+      }
     };
     var expectedOutput = "#hello {\n  greeting: Hello, Myself!; }\n";
     testutils.assertCompiles(options, expectedOutput, done);
@@ -102,8 +114,10 @@ describe("function loading", function () {
     var input = "#hello { greeting: hello(); }\n";
     var expected = "#hello {\n  greeting: Hello, Myself!; }\n";
     var result = sass.renderSync(eyeglass({
-      root: testutils.fixtureDirectory("is_a_module"),
-      data: input
+      data: input,
+      eyeglass: {
+        root: testutils.fixtureDirectory("is_a_module")
+      }
     }));
     assert.equal(expected, result.css);
     done();
@@ -112,8 +126,10 @@ describe("function loading", function () {
   it("unversioned modules should return `unversioned` from `eyeglass-version()`",
   function (done) {
     var options = {
-      root: testutils.fixtureDirectory("is_a_module"),
-      data: "/* #{eyeglass-version(is-a-module)} */\n"
+      data: "/* #{eyeglass-version(is-a-module)} */\n",
+      eyeglass: {
+        root: testutils.fixtureDirectory("is_a_module")
+      }
     };
     var expectedOutput = "/* unversioned */\n";
     testutils.assertCompiles(options, expectedOutput, done);
