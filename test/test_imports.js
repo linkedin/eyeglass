@@ -366,7 +366,8 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-  it("should allow sassDir to be specified in the package.json with main and no exports", function(done) {
+  it("should allow sassDir to be specified in " +
+  "the package.json with main and no exports", function(done) {
     var options = {
       data: '@import "simple-module-with-main";',
       eyeglass: {

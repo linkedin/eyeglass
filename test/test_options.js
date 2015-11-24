@@ -1,6 +1,6 @@
 "use strict";
 
-var Eyeglass = require("../lib").Eyeglass;
+var Eyeglass = require("../lib");
 var VERSION = require("../lib").VERSION;
 var assert = require("assert");
 var testutils = require("./testutils");
@@ -17,7 +17,7 @@ describe("options", function() {
     var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
-    var sassopts = eyeglass.sassOptions();
+    var sassopts = eyeglass.options;
     assert(sassopts.eyeglass);
     assert.notEqual(eyeglass, sassopts.eyeglass);
     done();
@@ -29,7 +29,7 @@ describe("options", function() {
     var rootDir = testutils.fixtureDirectory("basic_modules");
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
-    var sassopts = eyeglass.sassOptions();
+    var sassopts = eyeglass.options;
     assert.equal(sassopts.includePaths[0], path.resolve(process.cwd(), "foo"));
     assert.equal(sassopts.includePaths[1], path.resolve(process.cwd(), "bar"));
     assert.equal(sassopts.includePaths[2], path.resolve(process.cwd(), "baz"));
@@ -41,7 +41,7 @@ describe("options", function() {
     var rootDir = testutils.fixtureDirectory("basic_modules");
     var options = {root: rootDir};
     var eyeglass = new Eyeglass(options);
-    var sassopts = eyeglass.sassOptions();
+    var sassopts = eyeglass.options;
     assert.equal(sassopts.includePaths.length, 0);
     done();
   });
@@ -53,7 +53,7 @@ describe("options", function() {
     var eyeglass = new Eyeglass(options);
     var expectedOutput = ".foo {\n  bar: baz; }\n";
 
-    testutils.assertCompiles(eyeglass.sassOptions(), expectedOutput, done);
+    testutils.assertCompiles(eyeglass.options, expectedOutput, done);
   });
 
   it("should normalize includePaths", function () {
@@ -63,7 +63,7 @@ describe("options", function() {
       root: rootDir,
       includePaths: includePaths.join(":")
     });
-    var sassopts = eyeglass.sassOptions();
+    var sassopts = eyeglass.options;
     assert(sassopts);
     assert.deepEqual(sassopts.includePaths, includePaths.map(function(p){
       return path.resolve(rootDir, p);
@@ -80,6 +80,7 @@ describe("options", function() {
         }
       };
       var eyeglass = new Eyeglass(options);
+      /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr("");
       done();
@@ -95,11 +96,12 @@ describe("options", function() {
           ignoreDeprecations: "0.7.1"
         }
       };
-      var eyeglass = new Eyeglass(options);
+      var eyeglass = new Eyeglass.Eyeglass(options);
+      /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr([
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `root` should be passed into the"+
-        " eyeglass options rather than the sass options:",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `root` " +
+        "should be passed into the eyeglass options rather than the sass options:",
         "  var options = eyeglass({",
         "    /* sassOptions */",
         "    ...",
@@ -107,10 +109,10 @@ describe("options", function() {
         "      option: ...",
         "    }",
         "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `require('eyeglass').Eyeglass` is deprecated. " +
-        "Instead, use `require('eyeglass')`",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) #sassOptions() is deprecated. " +
-        "Instead, you should access the sass options on #options\n"
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
       ].join("\n"));
       done();
     });
