@@ -106,7 +106,7 @@ describe("options", function() {
         "    /* sassOptions */",
         "    ...",
         "    eyeglass: {",
-        "      option: ...",
+        "      root: ...",
         "    }",
         "  });",
         "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
@@ -115,6 +115,115 @@ describe("options", function() {
         "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
       ].join("\n"));
       done();
+    });
+  });
+
+  describe("deprecated interface", function() {
+    it("should support `new Eyeglass.Eyeglass` with warning", function(done) {
+      testutils.assertStderr(function(checkStderr) {
+        var eyeglass = new Eyeglass.Eyeglass();
+        checkStderr(
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+          "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`\n"
+        );
+        done();
+      });
+    });
+
+    it("should support `Eyeglass.decorate` with warning", function(done) {
+      testutils.assertStderr(function(checkStderr) {
+        var eyeglass = Eyeglass.decorate();
+        checkStderr(
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+          "`require('eyeglass').decorate` is deprecated. Instead, use `require('eyeglass')`\n"
+        );
+        done();
+      });
+    });
+
+    it("should support `#sassOptions` method with warning", function(done) {
+      testutils.assertStderr(function(checkStderr) {
+        var eyeglass = new Eyeglass();
+        /* eslint no-unused-vars:0 */
+        var options = eyeglass.sassOptions();
+        checkStderr(
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+          "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
+        );
+        done();
+      });
+    });
+
+    it("should warn on eyeglass options not in namespace", function(done) {
+      function expectedOptionsWarning(option) {
+        return [
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `" +
+          option + "` should be passed into the eyeglass options rather than the sass options:",
+          "var options = eyeglass({",
+          "  /* sassOptions */",
+          "  ...",
+          "  eyeglass: {",
+          "    " + option + ": ...",
+          "  }",
+          "});"
+        ].join("\n  ");
+      }
+
+      testutils.assertStderr(function(checkStderr) {
+        var eyeglass = new Eyeglass({
+          root: __dirname,
+          cacheDir: ".cache",
+          buildDir: "dist",
+          httpRoot: "root",
+          assetsHttpPrefix: "prefix",
+          assetsRelativeTo: "relative",
+          strictModuleVersions: true
+        });
+        checkStderr([
+          expectedOptionsWarning("root"),
+          expectedOptionsWarning("cacheDir"),
+          expectedOptionsWarning("buildDir"),
+          expectedOptionsWarning("httpRoot"),
+          expectedOptionsWarning("assetsHttpPrefix"),
+          expectedOptionsWarning("assetsRelativeTo"),
+          expectedOptionsWarning("strictModuleVersions")
+        ].join("\n") + "\n");
+        done();
+      });
+    });
+
+    it("should warn when setting properties directly on eyeglass instance", function(done) {
+      function expectedOptionsWarning(option) {
+        return [
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `" +
+          option + "` should be passed into the eyeglass options rather than the sass options:",
+          "var options = eyeglass({",
+          "  /* sassOptions */",
+          "  ...",
+          "  eyeglass: {",
+          "    " + option + ": ...",
+          "  }",
+          "});"
+        ].join("\n  ");
+      }
+
+      testutils.assertStderr(function(checkStderr) {
+        var eyeglass = new Eyeglass();
+        eyeglass.enableImportOnce = false;
+        checkStderr([
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+          "The property `enableImportOnce` should no longer be set directly on eyeglass. " +
+          "Instead, you should pass this as an option to eyeglass:",
+          "  var options = eyeglass({",
+          "    /* sassOptions */",
+          "    ...",
+          "    eyeglass: {",
+          "      enableImportOnce: ...",
+          "    }",
+          "  });"
+        ].join("\n") + "\n");
+        done();
+      });
     });
   });
 });
