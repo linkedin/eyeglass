@@ -2,7 +2,7 @@
 
 // disable eyeglass deprecations until tests are rewritten without deprecated methods
 process.env.EYEGLASS_DEPRECATIONS = "0.8.0";
-var eyeglass = require("../lib").decorate;
+var eyeglass = require("../lib");
 var sass = require("node-sass");
 var path = require("path");
 var assert = require("assert");
@@ -59,7 +59,9 @@ module.exports = {
     return sass.renderSync(this.sassOptions(options));
   },
   sassOptions: function(options) {
-    if (typeof options.sassOptions === "function") {
+    if (typeof options.options === "object") {
+      return options.options;
+    } else if (typeof options.sassOptions === "function") {
       return options.sassOptions();
     } else {
       return eyeglass(options);

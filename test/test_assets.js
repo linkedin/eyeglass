@@ -2,7 +2,7 @@
 
 var sass = require("node-sass");
 var path = require("path");
-var Eyeglass = require("../lib").Eyeglass;
+var Eyeglass = require("../lib");
 var testutils = require("./testutils");
 var assert = require("assert");
 var fse = require("fs-extra");
@@ -29,9 +29,14 @@ describe("assets", function () {
                    "  font: url(/fonts/foo.woff); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-      root: rootDir,
-      data: input
-    }, sass);
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
     // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
@@ -46,7 +51,6 @@ describe("assets", function () {
                    "  importer: invoked; }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-      root: rootDir,
       data: input,
       importer: function(uri, prev, importerDone) {
         if (uri === "custom") {
@@ -55,8 +59,14 @@ describe("assets", function () {
             file: "custom"
           });
         }
+      },
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
       }
-    }, sass);
+    });
 
     testutils.assertCompiles(eg, expected, done);
   });
@@ -72,9 +82,14 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      file: path.join(rootDir, "sass", "uses_mod_1.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "uses_mod_1.scss"),
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
@@ -91,9 +106,14 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      file: path.join(rootDir, "sass", "app_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "app_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "assets"});
@@ -112,10 +132,15 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
@@ -134,11 +159,16 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      assetsHttpPrefix: "assets",
       file: path.join(rootDir, "sass", "both_assets.scss"),
-      assetsRelativeTo: "/assets/subdir"
-    }, sass);
+      eyeglass: {
+        root: rootDir,
+        assetsHttpPrefix: "assets",
+        assetsRelativeTo: "/assets/subdir",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
@@ -157,10 +187,15 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "whoa"});
@@ -179,9 +214,14 @@ describe("assets", function () {
                    'uri: "assets/foo/bar.png"))); }\n';
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-      root: rootDir,
-      data: input
-    }, sass);
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     testutils.assertCompiles(eg, expected, done);
   });
@@ -195,10 +235,15 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
@@ -226,10 +271,15 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
@@ -271,11 +321,16 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      buildDir: path.join(rootDir, "dist"),
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        buildDir: path.join(rootDir, "dist"),
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
@@ -314,12 +369,17 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      root: rootDir,
-      buildDir: path.join(rootDir, "dist"),
-      httpRoot: "/my-app",
-      assetsHttpPrefix: "assets",
-      file: path.join(rootDir, "sass", "both_assets.scss")
-    }, sass);
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        buildDir: path.join(rootDir, "dist"),
+        httpRoot: "/my-app",
+        assetsHttpPrefix: "assets",
+        engines: {
+          sass: sass
+        }
+      }
+    });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
@@ -352,8 +412,10 @@ describe("assets", function () {
   it("should handle an error in a resolver", function (done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-        root: rootDir,
-        data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }'
+      data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }',
+      eyeglass: {
+        root: rootDir
+      }
     });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
@@ -374,8 +436,10 @@ describe("assets", function () {
   it("should handle a sass error in a resolver", function (done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-        root: rootDir,
-        data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }'
+      data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }',
+      eyeglass: {
+        root: rootDir
+      }
     });
 
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
@@ -396,8 +460,10 @@ describe("assets", function () {
   it("should give an error when a module does not have assets", function (done) {
     testutils.assertStderr(function(checkStderr) {
       var options = {
-        root: testutils.fixtureDirectory("app_assets"),
-        data: '@import "non-asset-mod/assets";'
+        data: '@import "non-asset-mod/assets";',
+        eyeglass: {
+          root: testutils.fixtureDirectory("app_assets")
+        }
       };
       var expectedError = "No assets specified for eyeglass plugin non-asset-mod";
       testutils.assertCompilationError(options, expectedError, function() {
@@ -410,8 +476,10 @@ describe("assets", function () {
   it("should give an error when a module does not exist", function (done) {
     testutils.assertStderr(function(checkStderr) {
       var options = {
-        root: testutils.fixtureDirectory("app_assets"),
-        data: '@import "no-such-mod/assets";'
+        data: '@import "no-such-mod/assets";',
+        eyeglass: {
+          root: testutils.fixtureDirectory("app_assets")
+        }
       };
       var expectedError = "No eyeglass plugin named: no-such-mod";
       testutils.assertCompilationError(options, expectedError, function() {
@@ -423,7 +491,11 @@ describe("assets", function () {
 
   it("can pretty print an asset path entry", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({root: rootDir});
+    var eyeglass = new Eyeglass({
+      eyeglass: {
+        root: rootDir
+      }
+    });
     var AssetPathEntry = eyeglass.assets.AssetPathEntry;
     var entry = new AssetPathEntry(rootDir, {
       pattern: "images/**/*"
@@ -434,7 +506,11 @@ describe("assets", function () {
 
   it("can assign custom glob opts to an asset path entry", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({root: rootDir});
+    var eyeglass = new Eyeglass({
+      eyeglass: {
+        root: rootDir
+      }
+    });
     var AssetPathEntry = eyeglass.assets.AssetPathEntry;
     var entry = new AssetPathEntry(rootDir, {
       pattern: "images/**/*",
@@ -446,7 +522,11 @@ describe("assets", function () {
 
   it("asset path entries must be directories", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({root: rootDir});
+    var eyeglass = new Eyeglass({
+      eyeglass: {
+        root: rootDir
+      }
+    });
     var AssetPathEntry = eyeglass.assets.AssetPathEntry;
     assert.throws(function() {
       var ape = new AssetPathEntry(path.join(rootDir, "package.json"));
@@ -462,9 +542,14 @@ describe("assets", function () {
                    "  background-image: url(/images/foo.png#foo); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-      root: rootDir,
-      data: input
-    }, sass);
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
 
@@ -476,9 +561,14 @@ describe("assets", function () {
     var expected = "div {\n  uri: /images/foo.png; }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
-      root: rootDir,
-      data: input
-    }, sass);
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
 
