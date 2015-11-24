@@ -1,6 +1,5 @@
 "use strict";
 
-var path = require("path");
 var testutils = require("./testutils");
 var Eyeglass = require("../lib/index");
 
