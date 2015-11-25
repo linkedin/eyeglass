@@ -14,9 +14,8 @@ var sassOptions = {}; // put whatever eyeglass and node-sass options you need he
 
 var eyeglass = new Eyeglass(sassOptions);
 
-// Disable import once with gulp until we
-// figure out how to make them work together.
-eyeglass.options.enableImportOnce = false
+// import once can be disabled using the following line:
+// eyeglass.options.enableImportOnce = false
 
 gulp.task("sass", function () {
   gulp.src("./sass/**/*.scss")
