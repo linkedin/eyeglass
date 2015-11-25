@@ -28,7 +28,7 @@ gulp site:deploy
 
 ### Dry run
 
-To do a dry run before deploying to production, run `gulp site:deploy;dry`
+To do a dry run before deploying to production, run `gulp site:deploy:dry`
 
 ## `eyeglass-dev-site-builder`
 
