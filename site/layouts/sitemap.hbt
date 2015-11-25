@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {{#each pages as |page|}}
+    <url>
+      <loc>{{link (or page.path page.shortpath) protocol='http'}}</loc>
+      {{#if (or page.lastmod (or page.date ../today))}}
+        <lastmod>{{sitemapdate (or page.lastmod (or page.date ../today))}}</lastmod>
+      {{/if}}
+      {{#if (or page.changefreq collection.changefreq)}}
+        <changefreq>{{or page.changefreq collection.changefreq}}</changefreq>
+      {{/if}}
+      <priority>{{or page.priority (or collection.priority '0.7')}}</priority>
+    </url>
+  {{/each}}
+</urlset>

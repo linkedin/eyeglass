@@ -1,0 +1,41 @@
+{
+  "http://sass-lang.com/": {
+    "status": 200
+  },
+  "https://travis-ci.org/sass-eyeglass/eyeglass": {
+    "status": 200
+  },
+  "https://github.com/sass-eyeglass/eyeglass/blob/master/LICENSE": {
+    "status": 200
+  },
+  "https://github.com/sass-eyeglass/eyeglass/issues": {
+    "status": 200
+  },
+  "https://www.npmjs.com/package/eyeglass": {
+    "status": 200
+  },
+  "https://github.com/sass-eyeglass/eyeglass/": {
+    "status": 200
+  },
+  "http://img.shields.io/npm/l/eyeglass.svg?style=flat-square": {
+    "status": 200
+  },
+  "http://img.shields.io/travis/sass-eyeglass/eyeglass.svg?style=flat-square": {
+    "status": 200
+  },
+  "http://img.shields.io/npm/v/eyeglass.svg?style=flat-square": {
+    "status": 200
+  },
+  "https://github.com/sass-eyeglass/eyeglass": {
+    "status": 200
+  },
+  "http://img.shields.io/github/issues-raw/sass-eyeglass/eyeglass.svg?style=flat-square": {
+    "status": 200
+  },
+  "http://img.shields.io/github/stars/sass-eyeglass/eyeglass.svg?style=flat-square": {
+    "status": 200
+  },
+  "http://img.shields.io/github/forks/sass-eyeglass/eyeglass.svg?style=flat-square": {
+    "status": 200
+  }
+}

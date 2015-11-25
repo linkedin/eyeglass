@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+  {{> head }}
+</head>
+
+<body class="{{ page.class }}{{inline-if page.aside '' ' full-width'}}" id="pageid_{{ page.id }}">
+  {{> header title=page.tag nav=site.nav}}
+
+  <div id="global-container">
+    {{>sidebar collections=page.aside}}
+
+    <main id="global-main">
+      <div id="global-content">
+        <h2>&ldquo;{{page.tag}}&rdquo; topics</h2>
+        {{#with (lookup this.alltags page.tag)}}
+
+          {{#each this as |tagged|}}
+            <article class="topic">
+              <h3><a href="{{link tagged.shortpath}}">{{tagged.title}}</a></h3>
+              {{#if tagged.excerpt}}
+                <section class="description">
+                  {{tagged.excerpt}}
+                </section>
+              {{/if}}
+            </article>
+          {{/each}}
+
+        {{/with}}
+
+        <div class="more-topics">
+          <a href="{{link 'topics'}}">more topics &#9656;</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  {{> footer }}
+</body>
+</html>

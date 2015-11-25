@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+  {{> head }}
+</head>
+
+<body class="{{ page.class }}{{inline-if page.aside '' ' full-width'}}" id="pageid_{{ page.id }}">
+  {{> header title=page.title nav=site.nav}}
+
+  <div id="global-container">
+    {{>sidebar collections=page.aside}}
+
+    <main id="global-main">
+      <div id="global-content">
+        {{{ contents }}}
+
+        {{>tags tags=page.tags tagpages=this.tagpages}}
+      </div>
+    </main>
+  </div>
+
+  {{> footer }}
+</body>
+</html>
