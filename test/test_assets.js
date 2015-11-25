@@ -495,10 +495,12 @@ describe("assets", function () {
       data: input,
       eyeglass: {
         root: rootDir,
-        assets: [
-          [rootDir, {pattern: "images/**/*"}],
-          [rootDir, {pattern: "fonts/**/*"}]
-        ]
+        assets: {
+          sources: [
+            {directory: rootDir, pattern: "images/**/*"},
+            {directory: rootDir, pattern: "fonts/**/*"}
+          ]
+        }
       }
     });
 
