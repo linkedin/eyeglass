@@ -135,7 +135,9 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -162,8 +164,10 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
-        assetsHttpPrefix: "assets",
-        assetsRelativeTo: "/assets/subdir",
+        assets: {
+          httpPrefix: "assets",
+          relativeTo: "/assets/subdir",
+        },
         engines: {
           sass: sass
         }
@@ -190,7 +194,9 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -238,7 +244,9 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -274,7 +282,9 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -325,7 +335,9 @@ describe("assets", function () {
       eyeglass: {
         root: rootDir,
         buildDir: path.join(rootDir, "dist"),
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -374,7 +386,9 @@ describe("assets", function () {
         root: rootDir,
         buildDir: path.join(rootDir, "dist"),
         httpRoot: "/my-app",
-        assetsHttpPrefix: "assets",
+        assets: {
+          httpPrefix: "assets"
+        },
         engines: {
           sass: sass
         }
@@ -571,6 +585,28 @@ describe("assets", function () {
     });
     // asset-url("images/foo.png") => url(public/assets/images/foo.png);
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("support assets specified via options", function (done) {
+    var input = "@import 'assets'; div { background-image: asset-url('images/foo.png');" +
+                "font: asset-url('fonts/foo.woff'); }";
+    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
+                   "  font: url(/fonts/foo.woff); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        assets: {
+          sources: [
+            {directory: rootDir, pattern: "images/**/*"},
+            {directory: rootDir, pattern: "fonts/**/*"}
+          ]
+        }
+      }
+    });
 
     testutils.assertCompiles(eg, expected, done);
   });

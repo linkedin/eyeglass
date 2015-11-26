@@ -38,8 +38,8 @@ If there isn't a plugin listed above, you can still use eyeglass! It just takes 
 # Using eyeglass directly with node-sass
 If you are using a build system such as grunt or gulp, you can use the `node-sass` plugin as-is: [grunt-sass](https://github.com/sindresorhus/grunt-sass) and [gulp-sass](https://www.npmjs.com/package/gulp-sass) respectively. In all systems where you can use a `node-sass` build plugin, the recipe is the same:
 
-1. `var Eyeglass = require("eyeglass").Eyeglass;`
-2. `var eyeglass = new Eyeglass({ /* sass options */ });`
-3. Pass in `eyeglass.sassOptions()` wherever the plugin asked for the original sassOptions
+1. `var eyeglass = require("eyeglass");`
+2. Add eyeglass specific options to your node-sass options' `eyeglass` key.
+3. Pass in `eyeglass(sassOptions)` wherever the plugin asked for the original `sassOptions`.
 
 This works because eyeglass is a tool designed to wrap around the `node-sass` options and add a layer of customization based on npm. You can read about the design decisions in [Why eyeglass](../why_eyeglass.md).

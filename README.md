@@ -61,34 +61,36 @@ compile a Sass file.
 #!/usr/bin/env node
 var path = require("path");
 var sass = require("node-sass");
-var Eyeglass = require("eyeglass").Eyeglass;
+var eyeglass = require("eyeglass");
 var rootDir = __dirname;
 var assetsDir = path.join(rootDir, "assets");
 
 var options = { ... node-sass options ... };
 
 
-// specifying root lets the script run from any directory instead of having to be in the same directory.
-options.root = rootDir;
+options.eyeglass = {
+  // specifying root lets the script run from any directory instead of having to be in the same directory.
+  root: rootDir,
 
-// where assets are installed by eyeglass to expose them according to their output url.
-// If not provided, assets are not installed unless you provide a custom installer.
-options.buildDir = path.join(rootDir, "dist");
+  // where assets are installed by eyeglass to expose them according to their output url.
+  // If not provided, assets are not installed unless you provide a custom installer.
+  buildDir: path.join(rootDir, "dist"),
 
-// prefix to give assets for their output url.
-options.assetsHttpPrefix = "assets";
+  assets: {
+    // prefix to give assets for their output url.
+    httpPrefix: "assets",
 
-var eyeglass = new Eyeglass(options, sass);
-
-// Add assets except for js and sass files
-// The url passed to asset-url should be
-// relative to the assets directory specified.
-eyeglass.assets.addSource(assetsDir, {
-  globOpts: { ignore: ["**/*.js", "**/*.scss"] }
-});
+    // Add assets except for js and sass files
+    // The url passed to asset-url should be
+    // relative to the assets directory specified.
+    sources: [
+      {directory: assetsDir, globOpts: { ignore: ["**/*.js", "**/*.scss"] }}
+    ]
+  }
+}
 
 // Standard node-sass rendering of a single file.
-sass.render(eyeglass.sassOptions(), function(err, result) {
+sass.render(eyeglass(options, sass), function(err, result) {
   // handle results
 });
 ```
@@ -244,26 +246,30 @@ Eyeglass is designed to be easy to use with any node-sass based
 compilation system.
 
 ```js
-var Eyeglass = require("eyeglass").Eyeglass;
+var eyeglass = require("eyeglass");
 var sass = require("node-sass")
 var sassOptions = { ... } ; // options for node-sass
-var eyeglass = new Eyeglass(sassOptions);
 
-// futher configuration of the eyeglass instance can happen here.
+// eyeglass specific options are passed via the `eyeglass` key in the sass options.
+sassOptions.eyeglass {
+  assets: {
+    sources: [
+      // Expose images in the assets/images directory as /images on the
+      // website by putting the images we reference with asset-url()
+      // into the public/images directory.
+      {directory: "assets", {pattern: "images/**/*"}},
 
-// Expose images in the assets/images directory as /images on the
-// website by putting the images we reference with asset-url()
-// into the public/images directory.
-eyeglass.assets.addSource("assets", {pattern: "images/**/*"});
+      // Expose fonts in the assets/fonts directory as /fonts on the
+      // website by putting the fonts we reference with asset-url()
+      // into the public/fonts directory.
+      {directory: "assets", {pattern: "fonts/**/*"}}
+    ]
+  }
+}
 
-// Expose fonts in the assets/fonts directory as /fonts on the
-// website by putting the fonts we reference with asset-url()
-// into the public/fonts directory.
-eyeglass.assets.addSource("assets", {pattern: "fonts/**/*"});
-
-// These options can be passed to any sass build tool that passes
-// options through to node-sass.
-sass.render(eyeglass.sassOptions(), function(error, result) {
+// These options are processed and returned as options that can be passed to any build tool
+// that passes options through to node-sass.
+sass.render(eyeglass(sassOptions), function(error, result) {
   if (error) {
     //handle the compilation error
   } else {
@@ -279,9 +285,7 @@ sass.render(eyeglass.sassOptions(), function(error, result) {
 var eyeglass = require("eyeglass");
 ...
 sass: {
-    options: eyeglass.decorate({
-        sourceMap: true
-    }),
+    options: eyeglass({sourceMap: true}),
     dist: {
         files: {
             'public/css/main.css': 'sass/main.scss'
@@ -306,6 +310,7 @@ eyeglass module, add the `eyeglass-module` keyword to your
   ...
   "keywords": ["eyeglass-module", "sass", ...],
   "eyeglass": {
+    "sassDir": "sass",
     "exports": "eyeglass-exports.js",
     "name": "greetings",
     "needs": "^0.6.0"
@@ -322,10 +327,9 @@ if your module is compatible with the currect eyeglass version.
 
 ### Eyeglass Exports File
 
-Your requirable module exports an object that describes your module's
-structure and can expose javascript functions as sass functions. It is
-convention to name this file `eyeglass-exports.js` but any file name is
-allowed.
+If your eyeglass module needs to define Sass functions in javascript,
+you will need to make an eyeglass exports file. It is convention to name
+this file `eyeglass-exports.js` but any file name is allowed.
 
 Below is an example eyeglass exports file:
 
@@ -336,7 +340,6 @@ var path = require("path");
 
 module.exports = function(eyeglass, sass) {
   return {
-    sassDir: path.join(__dirname, "sass"),
     functions: {
       "greetings-hello($name: 'World')": function(name, done) {
         done(sass.types.String("Hello, " + name.getValue()));
@@ -348,7 +351,10 @@ module.exports = function(eyeglass, sass) {
 
 If the `eyeglass.exports` option is not found in `package.json` eyeglass
 will fall back to using the npm standard `main` file declared in your
-package.json.
+package.json.  If your npm module has a main file meant to be used generally by
+javascript, but no eyeglass exports file, then you can simply set
+`eyeglass.exports` option to `false` in your `package.json`.
+
 
 Since all functions declared from javascript are global, it is best
 practice to scope your function names to avoid naming conflicts. Then,
@@ -388,12 +394,17 @@ Any sass files imported from your node modules will only ever be
 imported once per CSS output file. Note that Sass files imported
 from the Sass load path will have the standard Sass `@import` behavior.
 
-To disable the import-once behavior, you need to set `enableImportOnce`
-to false:
+To disable the import-once behavior, you need to set the `enableImportOnce`
+option to false:
 
 ```js
-var Eyeglass = require("eyeglass").Eyeglass;
-var sassOptions = {};
-var eyeglass = new Eyeglass(sassOptions);
-eyeglass.enableImportOnce = false;
+var sass = require("node-sass");
+var eyeglass = require("eyeglass");
+var sassOptions = {
+  eyeglass: {
+    enableImportOnce: false
+  }
+};
+
+sass.render(eyeglass(sassOptions, sass));
 ```

@@ -92,6 +92,8 @@ describe("options", function() {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         root: rootDir,
+        assetsHttpPrefix: "foo",
+        assetsRelativeTo: "/styles/main.css",
         eyeglass: {
           ignoreDeprecations: "0.7.1"
         }
@@ -107,6 +109,26 @@ describe("options", function() {
         "    ...",
         "    eyeglass: {",
         "      root: ...",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `assetsHttpPrefix` has been renamed to `httpPrefix` and should be passed into the eyeglass asset options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      assets: {",
+        "        httpPrefix: ...",
+        "      }",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `assetsRelativeTo` has been renamed to `relativeTo` and should be passed into the eyeglass asset options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      assets: {",
+        "        relativeTo: ...",
+        "      }",
         "    }",
         "  });",
         "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
@@ -168,6 +190,21 @@ describe("options", function() {
           "});"
         ].join("\n  ");
       }
+      function expectedAssetOptionsWarning(originalName, newName) {
+        return [
+          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `" +
+          originalName + "` has been renamed to `" + newName + "` and should be passed into the eyeglass asset options rather than the sass options:",
+          "var options = eyeglass({",
+          "  /* sassOptions */",
+          "  ...",
+          "  eyeglass: {",
+          "    assets: {",
+          "      " + newName + ": ...",
+          "    }",
+          "  }",
+          "});"
+        ].join("\n  ");
+      }
 
       testutils.assertStderr(function(checkStderr) {
         var eyeglass = new Eyeglass({
@@ -184,9 +221,9 @@ describe("options", function() {
           expectedOptionsWarning("cacheDir"),
           expectedOptionsWarning("buildDir"),
           expectedOptionsWarning("httpRoot"),
-          expectedOptionsWarning("assetsHttpPrefix"),
-          expectedOptionsWarning("assetsRelativeTo"),
-          expectedOptionsWarning("strictModuleVersions")
+          expectedOptionsWarning("strictModuleVersions"),
+          expectedAssetOptionsWarning("assetsHttpPrefix", "httpPrefix"),
+          expectedAssetOptionsWarning("assetsRelativeTo", "relativeTo")
         ].join("\n") + "\n");
         done();
       });
