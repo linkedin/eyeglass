@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+  {{> head }}
+</head>
+
+<body class="{{ page.class }}{{inline-if page.aside '' ' full-width'}}" id="pageid_{{ page.id }}">
+  {{> header title=page.tag nav=site.nav}}
+
+  <div id="global-container">
+    {{>sidebar collections=page.aside}}
+
+    <main id="global-main">
+      <div id="global-content">
+
+        <h2>Topics</h2>
+        <ul class="page-tags">
+          {{#each this.tagpages as |page|}}
+            <li class="tag"><a href="{{link page.path}}">{{@key}}</a></li>
+          {{/each}}
+        </ul>
+      </div>
+    </main>
+  </div>
+
+  {{> footer }}
+</body>
+</html>

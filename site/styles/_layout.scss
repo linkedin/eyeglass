@@ -1,0 +1,23 @@
+#global-container {
+  display: flex;
+}
+
+#global-sidebar,
+#global-main {
+  box-sizing: border-box;
+}
+
+#global-main {
+  padding: 80px 20px;
+  flex: 0 0 100%;
+}
+
+#global-sidebar {
+  font-size: 16px;
+  background-color: pink;
+  flex: 0 0 240px;
+  padding: 40px 20px;
+  & + #global-main {
+    flex: 0 0 calc(100% - 240px);
+  }
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.title }}</title>
+    {{#if site.description}}<description>{{ site.description }}</description>{{/if}}
+    <link>{{ site.url }}</link>
+
+    <atom:link href="{{link 'feed.xml' protocol='http'}}" rel="self" type="application/rss+xml" />
+
+    {{#each site.feed as |feed|}}
+      {{#each (lookup ../collections feed) as |page|}}
+        <item>
+          <title>{{ page.title }}</title>
+          {{#if page.excerpt}}<description>{{ page.excerpt }}</description>{{/if}}
+          <pubDate>{{xmldate page.date }}</pubDate>
+          <link>{{link page.path protocol='http'}}</link>
+          <guid isPermaLink="true">{{link page.path protocol='http'}}</guid>
+        </item>
+      {{/each}}
+    {{/each}}
+
+  </channel>
+</rss>
