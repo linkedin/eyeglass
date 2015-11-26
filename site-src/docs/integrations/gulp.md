@@ -9,18 +9,17 @@ Additionally, to avoid any problems with `node-sass`, you should provide a defau
 ```js
 var gulp = require("gulp");
 var sass = require("gulp-sass");
-var Eyeglass = require("eyeglass").Eyeglass;
-var sassOptions = {}; // put whatever eyeglass and node-sass options you need here.
-
-var eyeglass = new Eyeglass(sassOptions);
-
-// Disable import once with gulp until we
-// figure out how to make them work together.
-eyeglass.enableImportOnce = false
+var eyeglass = require("eyeglass");
+var sassOptions = {
+  // put node-sass options you need here.
+  eyeglass: {
+    // put eyeglass options you need here.
+  }
+}; 
 
 gulp.task("sass", function () {
   gulp.src("./sass/**/*.scss")
-    .pipe(sass(eyeglass.sassOptions()).on("error", sass.logError))
+    .pipe(sass(eyeglass(sassOptions)).on("error", sass.logError))
     .pipe(gulp.dest("./css"));
 });
 ```
