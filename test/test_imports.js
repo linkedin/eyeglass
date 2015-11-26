@@ -390,4 +390,18 @@ describe("eyeglass importer", function () {
     var expected = ".from {\n  include: path; }\n";
     testutils.assertCompiles(options, expected, done);
   });
+
+  it("should support manually added modules", function(done) {
+    var manualModule = require(testutils.fixtureDirectory("manual_module"));
+    var rootDir = testutils.fixtureDirectory("simple_module");
+    var options = {
+      data: '@import "my-manual-module"; .test { hello: manual-hello(); }',
+      eyeglass: {
+        root: rootDir,
+        modules: [manualModule]
+      }
+    };
+    var expected = ".manual-module {\n  works: true; }\n\n.test {\n  hello: \"Hello World!\"; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 });
