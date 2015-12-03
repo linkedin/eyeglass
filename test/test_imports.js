@@ -391,7 +391,7 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-  it("should support manually added modules", function(done) {
+  it("should support manually added module", function(done) {
     var manualModule = require(testutils.fixtureDirectory("manual_module"));
     var rootDir = testutils.fixtureDirectory("simple_module");
     var options = {
@@ -402,6 +402,26 @@ describe("eyeglass importer", function () {
       }
     };
     var expected = ".manual-module {\n  works: true; }\n\n.test {\n  hello: \"Hello World!\"; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
+  it("should support manually added module via path", function(done) {
+    var manualModulePath = testutils.fixtureDirectory("manual_module");
+    var manualModule = require(manualModulePath);
+    // add a bower module with a given path
+    var bowerModule = {
+      path: path.join(manualModulePath, "bower_components/bower-module")
+    };
+    var rootDir = testutils.fixtureDirectory("simple_module");
+    var options = {
+      data: '@import "bower-module"; @import "my-manual-module"; .test { hello: manual-hello(); }',
+      eyeglass: {
+        root: rootDir,
+        modules: [manualModule, bowerModule]
+      }
+    };
+    var expected = "/* bower-module */\n.manual-module {\n  works: true; }" +
+      "\n\n.test {\n  hello: \"Hello World!\"; }\n";
     testutils.assertCompiles(options, expected, done);
   });
 });

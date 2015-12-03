@@ -31,9 +31,11 @@ output. Note: You can also set the environment variable
 
 ## `modules`
 
-Eyeglass will traverse your dependency tree (`package.json`) to auto-load modules for you. If you have any modules that are not in your dependency tree, you can manually add them via the `modules` option.
+Eyeglass will traverse your dependency tree (`package.json`) to auto-load modules for you. If you have any modules that are not in your dependency tree, you can programmatically add them via the `modules` option.
 
-This takes an array of modules to register. Each module is an Object with the following structure:
+This takes an array of `EyeglassModule`s to register. Each item should be one of the following signatures. Note that modules added programmatically cannot have dependencies.
+
+### A manual module
 
 ```js
 {
@@ -46,5 +48,15 @@ This takes an array of modules to register. Each module is an Object with the fo
       assets: ... // optional
     }
   }
+}
+```
+
+### A module path
+
+This should point to the path where a `package.json` for the module can be found.
+
+```js
+{
+  path: path.join(__dirname, "bower_components/my-bower-module")
 }
 ```
