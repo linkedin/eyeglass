@@ -20,10 +20,10 @@
     "broccoli-caching-writer": "^1.1.0",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
-    "eyeglass": "^0.6.0",
+    "eyeglass": "^0.8.0",
     "glob": "^5.0.3",
     "mkdirp": "^0.5.1",
-    "node-sass": "3.3.3",
+    "node-sass": "^3.4.2",
     "rsvp": "^3.0.21"
   },
   "devDependencies": {
