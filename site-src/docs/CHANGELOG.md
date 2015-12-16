@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### 0.8.0 (unreleased)
+### 0.8.0 (Dec 15, 2015)
 
 * In preparation for our upcoming 1.0 release, we are polishing our
   public API.  You will get deprecation warnings in this release which
