@@ -28,3 +28,35 @@ deprecation warnings issues against that version or earlier will be
 silenced. Any deprecation warnings for future releases will still be
 output. Note: You can also set the environment variable
 `EYEGLASS_DEPRECATIONS` to an eyeglass version on the console.
+
+## `modules`
+
+Eyeglass will traverse your dependency tree (`package.json`) to auto-load modules for you. If you have any modules that are not in your dependency tree, you can programmatically add them via the `modules` option.
+
+This takes an array of `EyeglassModule`s to register. Each item should be one of the following signatures. Note that modules added programmatically cannot have dependencies.
+
+### A manual module
+
+```js
+{
+  name: "your-module-name",
+  version: "0.0.1", // optional
+  main: function(eyeglass, sass) {
+    return {
+      sassDir: path.join(__dirname, "sass"),
+      functions: ..., // optional
+      assets: ... // optional
+    }
+  }
+}
+```
+
+### A module path
+
+This should point to the path where a `package.json` for the module can be found.
+
+```js
+{
+  path: path.join(__dirname, "bower_components/my-bower-module")
+}
+```
