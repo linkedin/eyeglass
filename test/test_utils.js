@@ -43,7 +43,7 @@ describe("utilities", function () {
     var eyeglass = {};
     var modules = new EyeglassModules(dir);
     var egModule = modules.find("is-a-module");
-    var egExports = require(egModule.main)(eyeglass, sass);
+    var egExports = egModule.main(eyeglass, sass);
     assert(egExports);
     assert.equal(egExports.sassDir, dir);
     assert(egExports.functions);
