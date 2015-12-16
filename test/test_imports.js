@@ -234,6 +234,18 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+  it("imports modules that use the module name instead index.", function(done) {
+    var options = {
+      data: '@import "compatible-module";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("compatible_module")
+      }
+    };
+    var expected = ".is-a-compatible-submodule {\n  this: is a compatible submodule; }\n\n" +
+                   ".is-a-compatible-module {\n  this: is a compatible module; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   it("imports modules if they are themselves a npm eyeglass module.", function(done) {
     var options = {
       data: '@import "is-a-module";',

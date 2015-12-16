@@ -1,0 +1,11 @@
+{
+  "name": "compatible_module",
+  "keywords": ["eyeglass-module"],
+  "private": true,
+  "eyeglass": {
+    "exports": false,
+    "sassDir": "sass",
+    "name": "compatible-module",
+    "needs": "*"
+  }
+}
