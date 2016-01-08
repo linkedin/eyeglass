@@ -1,0 +1,7 @@
+{
+  "name": "module-imports-eyeglass",
+  "private": true,
+  "dependencies": {
+    "module_a": "*"
+  }
+}

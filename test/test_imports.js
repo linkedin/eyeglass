@@ -431,4 +431,15 @@ describe("eyeglass importer", function () {
       done();
     }, done);
   });
+
+  it("should be allowed to import from eyeglass without a declared depenedency", function(done) {
+    var options = {
+      data: '@import "module_a";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("module_imports_eyeglass")
+      }
+    };
+    var expected = "/* function-exists(asset-url): true */\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 });
