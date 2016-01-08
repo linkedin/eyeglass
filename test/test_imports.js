@@ -402,4 +402,33 @@ describe("eyeglass importer", function () {
     var expected = ".from {\n  include: path; }\n";
     testutils.assertCompiles(options, expected, done);
   });
+
+  it("should compile multiple files with imports (#114)", function(done) {
+    var rootDir = testutils.fixtureDirectory("issue-114");
+    var files = ["main1.scss", "main2.scss", "main3.scss", "main4.scss"];
+
+    var promises = files.map(function(file) {
+      return new Promise(function(fulfill, reject) {
+        var options = {
+          file: path.join(rootDir, "sass", file),
+          eyeglass: {
+            root: rootDir
+          }
+        };
+        var expected = "/* partial */\n";
+        testutils.assertCompiles(options, expected, function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill();
+          }
+        });
+      });
+    });
+
+    // when all the promises finish
+    Promise.all(promises).then(function() {
+      done();
+    }, done);
+  });
 });
