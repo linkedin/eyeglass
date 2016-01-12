@@ -442,4 +442,16 @@ describe("eyeglass importer", function () {
     var expected = "/* function-exists(asset-url): true */\n";
     testutils.assertCompiles(options, expected, done);
   });
+
+  it("should not require(main) if not an eyeglass module", function(done) {
+    var root = testutils.fixtureDirectory("no_main_if_not_module");
+    var options = {
+      file: path.join(root, "test.scss"),
+      eyeglass: {
+        root: root
+      }
+    };
+    var expected = "/* testing */\n";
+    testutils.assertCompiles(options, expected, done);
+  });
 });
