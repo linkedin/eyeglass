@@ -484,4 +484,17 @@ describe("eyeglass importer", function () {
 
     testutils.assertCompilationError(options, expectedError, done);
   });
+
+  it("should import files with extensions", function(done) {
+    var options = {
+      data: '@import "simple-module/bar";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("simple_module")
+      }
+    };
+
+    var expected = "/* baz.css */\n/* _qux */\n";
+
+    testutils.assertCompiles(options, expected, done);
+  });
 });
