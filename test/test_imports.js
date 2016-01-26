@@ -458,7 +458,7 @@ describe("eyeglass importer", function () {
   it("should not import `index` for non-existent files", function(done) {
     var rootDir = testutils.fixtureDirectory("simple_module");
     var options = {
-      data: '@import "simple-module/foo";',
+      data: '@import "simple-module/invalid";',
       eyeglass: {
         root: rootDir
       }
@@ -493,7 +493,7 @@ describe("eyeglass importer", function () {
       }
     };
 
-    var expected = "/* baz.css */\n/* _qux */\n";
+    var expected = "/* baz.css */\n/* _qux.scss */\n/* quux.css.scss */\n";
 
     testutils.assertCompiles(options, expected, done);
   });

@@ -1,2 +1,3 @@
-@import "baz.css";
-@import "_qux";
+@import "baz.css";  // should import `./baz.css`
+@import "_qux";     // should import `./_qux.scss`
+@import "quux.css"; // should import `./quux.css.scss`
