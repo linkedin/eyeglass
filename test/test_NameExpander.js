@@ -28,12 +28,26 @@ describe("NameExpander", function () {
   });
 
 
-  it("should expand to the correct file names with extension", function() {
+  it("should expand to the correct file names with .css extension", function() {
     var nameExpander = new NameExpander("test-uri.css");
     nameExpander.addLocation(__dirname);
 
     var expectedFiles = adjustPaths([
-      "test-uri.css"
+      "test-uri.css",
+      "_test-uri.css"
+    ]);
+
+    assert.deepEqual(setToArray(nameExpander.files), expectedFiles);
+  });
+
+
+  it("should expand to the correct file names with .scss extension", function() {
+    var nameExpander = new NameExpander("test-uri.scss");
+    nameExpander.addLocation(__dirname);
+
+    var expectedFiles = adjustPaths([
+      "test-uri.scss",
+      "_test-uri.scss"
     ]);
 
     assert.deepEqual(setToArray(nameExpander.files), expectedFiles);
