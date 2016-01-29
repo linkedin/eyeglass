@@ -465,7 +465,6 @@ describe("eyeglass importer", function () {
     };
 
     var expectedError = [
-      "sass/this-does-not-exist",
       "sass/this-does-not-exist.scss",
       "sass/this-does-not-exist.sass",
       "sass/this-does-not-exist.css",
@@ -493,7 +492,7 @@ describe("eyeglass importer", function () {
       }
     };
 
-    var expected = "/* baz.css */\n/* _qux.scss */\n/* quux.css.scss */\n";
+    var expected = "/* baz.css */\n/* _qux.scss */\n";
 
     testutils.assertCompiles(options, expected, done);
   });
