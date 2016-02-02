@@ -1,9 +1,12 @@
 {
-  "name": "basic_modules",
+  "name": "dev_peer_deps",
   "version": "0.0.1",
   "main": "package.json",
   "private": true,
   "devDependencies": {
     "module_a": "*"
+  },
+  "peerDependencies": {
+    "module_peer": "*"
   }
 }
