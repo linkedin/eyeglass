@@ -4,9 +4,8 @@
   "main": "package.json",
   "private": true,
   "devDependencies": {
-    "module_a": "*"
-  },
-  "peerDependencies": {
+    "module_a": "*",
+    "module_b": "*",
     "module_peer": "*"
   }
 }

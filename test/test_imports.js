@@ -149,15 +149,16 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
-  it("lets you import sass files from dev dependencies", function (done) {
+  it("lets you import sass files from dev and peer dependencies", function (done) {
     var options = {
-      data: '@import "module_a"; @import "module_peer";',
+      data: '@import "module_a"; @import "module_peer"; @import "module_b";',
       eyeglass: {
         root: testutils.fixtureDirectory("dev_peer_deps")
       }
     };
     var expected = ".module-a {\n  greeting: hello world; }\n\n" +
-                   ".sibling-in-module-a {\n  sibling: yes; }\n\n/* peer dependency */\n";
+                   ".sibling-in-module-a {\n  sibling: yes; }\n\n" +
+                   "/* module_peer */\n/* module_b */\n/* module_peer/foo */\n";
     testutils.assertCompiles(options, expected, done);
   });
 
