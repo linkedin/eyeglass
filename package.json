@@ -9,6 +9,9 @@
     "type": "git",
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
+  "scripts": {
+    "test": "gulp test"
+  },
   "keywords": [
     "broccoli-plugin",
     "sass",
@@ -29,7 +32,14 @@
   "devDependencies": {
     "broccoli": "^0.16.5",
     "broccoli-cli": "^1.0.0",
+    "eslint": "^0.22.0",
+    "eyeglass-dev-eslint": "*",
     "grunt": "^0.4.5",
-    "grunt-release": "^0.12.0"
+    "grunt-release": "^0.12.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "1.1.1",
+    "gulp-jshint": "^2.0.0",
+    "gulp-mocha": "^2.2.0",
+    "jshint": "^2.8.0"
   }
 }
