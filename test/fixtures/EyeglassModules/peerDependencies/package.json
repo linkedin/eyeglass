@@ -1,0 +1,8 @@
+{
+  "name": "test-peer-deps",
+  "private": true,
+  "dependencies": {
+    "foo": "*",
+    "bar": "*"
+  }
+}

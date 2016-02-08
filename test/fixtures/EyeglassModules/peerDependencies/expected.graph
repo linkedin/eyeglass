@@ -1,0 +1,5 @@
+:root(test-peer-deps)
+├─┬ foo@0.0.1
+│ └── bar@0.0.1
+├── bar@0.0.1
+└── eyeglass
