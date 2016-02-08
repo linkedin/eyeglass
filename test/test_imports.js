@@ -454,4 +454,46 @@ describe("eyeglass importer", function () {
     var expected = "/* testing */\n";
     testutils.assertCompiles(options, expected, done);
   });
+
+  it("should not import `index` for non-existent files", function(done) {
+    var rootDir = testutils.fixtureDirectory("simple_module");
+    var options = {
+      data: '@import "simple-module/invalid";',
+      eyeglass: {
+        root: rootDir
+      }
+    };
+
+    var expectedError = [
+      "sass/this-does-not-exist.scss",
+      "sass/this-does-not-exist.sass",
+      "sass/this-does-not-exist.css",
+      "sass/_this-does-not-exist.scss",
+      "sass/_this-does-not-exist.sass",
+      "sass/_this-does-not-exist.css",
+      "sass/this-does-not-exist/index.scss",
+      "sass/this-does-not-exist/index.sass",
+      "sass/this-does-not-exist/index.css",
+      "sass/this-does-not-exist/_index.scss",
+      "sass/this-does-not-exist/_index.sass",
+      "sass/this-does-not-exist/_index.css"
+    ].reduce(function(msg, location) {
+      return msg + "\n  " + path.resolve(rootDir, location);
+    }, "Error: Could not import this-does-not-exist from any of the following locations:");
+
+    testutils.assertCompilationError(options, expectedError, done);
+  });
+
+  it("should import files with extensions", function(done) {
+    var options = {
+      data: '@import "simple-module/bar";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("simple_module")
+      }
+    };
+
+    var expected = "/* baz.css */\n/* _qux.scss */\n";
+
+    testutils.assertCompiles(options, expected, done);
+  });
 });

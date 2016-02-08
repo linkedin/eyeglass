@@ -11,13 +11,22 @@ var fixtures = glob.sync(path.join(fixtureDir, "*"));
 
 var TESTS = {
   // tests that the graph is accurate
-  graph: function(modules, expected) {
+  graph: function(modules, err, expected) {
+    assert.ok(!err);
+    assert.ok(modules);
     // get the module graph, stripping off the local eyeglass version
     var graph = modules.getGraph().replace(/(\seyeglass)(?:@\S+)?/g, "$1");
     assert.equal(graph, expected);
   },
-  issues: function(modules, expected) {
+  issues: function(modules, err, expected) {
+    assert.ok(!err);
+    assert.ok(modules);
     assertSubset(JSON.parse(expected), modules.issues);
+  },
+  error: function(modules, err, expected) {
+    assert.ok(err);
+    assert.ok(!modules);
+    assert.equal(JSON.parse(expected).error, err.toString());
   }
 };
 
@@ -36,15 +45,21 @@ describe("EyeglassModules", function () {
   fixtures.forEach(function(testDir) {
     var testName = path.basename(testDir);
     it(testName, function() {
-      var modules = new EyeglassModules(testDir);
-      assert(modules);
+      var modules;
+      var err;
+
+      try {
+        modules = new EyeglassModules(testDir);
+      } catch (e) {
+        err = e;
+      }
 
       var expectations = glob.sync(path.join(testDir, "expected.*"));
       expectations.forEach(function(expectationFile) {
         var testType = path.extname(expectationFile).replace(/^\./, "");
         var expectationFn = TESTS[testType];
         var expectationContents = fs.readFileSync(expectationFile).toString();
-        expectationFn(modules, expectationContents);
+        expectationFn(modules, err, expectationContents);
       });
     });
   });

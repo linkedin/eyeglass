@@ -1,0 +1,10 @@
+{
+  "name": "invalid.css",
+  "keywords": ["eyeglass-module"],
+  "private": true,
+  "eyeglass": {
+    "name": "invalid.css",
+    "needs": "*",
+    "sassDir": "./"
+  }
+}
