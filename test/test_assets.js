@@ -2,10 +2,12 @@
 
 var sass = require("node-sass");
 var path = require("path");
-var Eyeglass = require("../lib");
 var testutils = require("./testutils");
 var assert = require("assert");
 var fse = require("fs-extra");
+
+var Eyeglass = require("../lib");
+var AssetsSource = require("../lib/assets/AssetsSource");
 
 describe("assets", function () {
 
@@ -99,6 +101,34 @@ describe("assets", function () {
     testutils.assertCompiles(eg, expected, done);
   });
 
+  it("should import own assets from within a module", function (done) {
+    var expected = [
+      "/* index */",
+      ".test {",
+      "  background: url(/mod-one/mod-one.jpg);",
+      "  background: url(/mod-one/subdir/sub.png); }\n",
+      ".all-assets {",
+      "  mod-assets: \"mod-one/mod-one.jpg\", \"mod-one/subdir/sub.png\"; }\n"
+    ].join("\n");
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      data: "@import 'mod-one';",
+      eyeglass: {
+        root: rootDir,
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
   it("should allow httpPrefix for app assets", function (done) {
     var expected = ".test {\n" +
                    "  background: url(/assets/images/foo.png);\n" +
@@ -164,6 +194,37 @@ describe("assets", function () {
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
         root: rootDir,
+        assets: {
+          httpPrefix: "assets",
+          relativeTo: "/assets/subdir",
+        },
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("should allow a relative URLs when httpRoot is set", function (done) {
+    var expected = ".test {\n" +
+                   "  background: url(../images/foo.png);\n" +
+                   "  background: url(../fonts/foo.woff);\n" +
+                   "  background: url(../mod-one/mod-one.jpg);\n" +
+                   "  background: url(../mod-one/subdir/sub.png); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    //var distDir = tmp.dirSync();
+    var eg = new Eyeglass({
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        httpRoot: "/foo/",
         assets: {
           httpPrefix: "assets",
           relativeTo: "/assets/subdir",
@@ -505,13 +566,8 @@ describe("assets", function () {
 
   it("can pretty print an asset path entry", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({
-      eyeglass: {
-        root: rootDir
-      }
-    });
-    var AssetPathEntry = eyeglass.assets.AssetPathEntry;
-    var entry = new AssetPathEntry(rootDir, {
+
+    var entry = new AssetsSource(rootDir, {
       pattern: "images/**/*"
     });
     assert.equal(entry.toString(), rootDir + "/images/**/*");
@@ -520,13 +576,8 @@ describe("assets", function () {
 
   it("can assign custom glob opts to an asset path entry", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({
-      eyeglass: {
-        root: rootDir
-      }
-    });
-    var AssetPathEntry = eyeglass.assets.AssetPathEntry;
-    var entry = new AssetPathEntry(rootDir, {
+
+    var entry = new AssetsSource(rootDir, {
       pattern: "images/**/*",
       globOpts: {dot: true}
     });
@@ -536,14 +587,9 @@ describe("assets", function () {
 
   it("asset path entries must be directories", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
-    var eyeglass = new Eyeglass({
-      eyeglass: {
-        root: rootDir
-      }
-    });
-    var AssetPathEntry = eyeglass.assets.AssetPathEntry;
+
     assert.throws(function() {
-      var ape = new AssetPathEntry(path.join(rootDir, "package.json"));
+      var ape = new AssetsSource(path.join(rootDir, "package.json"));
       ape = ape; // TODO: Why is this not returned or used?
     });
     done();
@@ -604,6 +650,31 @@ describe("assets", function () {
             {directory: rootDir, pattern: "images/**/*"},
             {directory: rootDir, pattern: "fonts/**/*"}
           ]
+        }
+      }
+    });
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("should normalize platform separators as well as directory traversal", function (done) {
+    var input = "@import 'assets'; div { background-image: asset-url('images\\\\foo.png');" +
+                "background-image: asset-url('images/bar/../foo.png'); }";
+    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
+                   "  background-image: url(/images/foo.png); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eg = new Eyeglass({
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        assets: {
+          sources: [{
+            directory: rootDir,
+            pattern: "images/**/*"
+          }]
+        },
+        engines: {
+          sass: sass
         }
       }
     });
