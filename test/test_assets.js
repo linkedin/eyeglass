@@ -277,7 +277,7 @@ describe("assets", function () {
                "@include asset-register(module-a, 'foo/bar.png', 'images/foo/bar.png', " +
                "$uri: 'assets/foo/bar.png');" +
                ".test { foo: inspect($eg-registered-assets); }";
-    var filepath = path.join("images", "foo", "bar.png").replace(/\\/, "\\\\");
+    var filepath = path.join("images", "foo", "bar.png").replace(/\\/g, "\\\\");
     var expected = '.test {\n  foo: (module-a: ("foo/bar.png": (' +
                    'filepath: "' + filepath + '", ' +
                    'uri: "assets/foo/bar.png"))); }\n';
