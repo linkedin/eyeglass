@@ -28,7 +28,7 @@ describe("sass indented syntax", function (done) {
   });
 
 
-  it("shouldn’t interfere with .sass syntax partial", function (done) {
+  xit("shouldn’t interfere with .sass syntax partial", function (done) {
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "main.sass"),
       eyeglass: options
