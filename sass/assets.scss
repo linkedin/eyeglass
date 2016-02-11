@@ -60,7 +60,7 @@ $eg-registered-assets: () !default;
 
 // Returns a URL to the asset wrapped.
 @function asset-uri($relative-path) {
-  @return eyeglass-asset-uri($eg-registered-assets, $relative-path);
+  @return quote(eyeglass-asset-uri($eg-registered-assets, unquote($relative-path)));
 }
 
 // Returns a URL to the asset wrapped in the css url() function.

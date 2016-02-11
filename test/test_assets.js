@@ -27,8 +27,8 @@ describe("assets", function () {
   it("should let an app refer to it's own assets", function (done) {
     var input = "@import 'assets'; div { background-image: asset-url('images/foo.png');" +
                 "font: asset-url('fonts/foo.woff'); }";
-    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
-                   "  font: url(/fonts/foo.woff); }\n";
+    var expected = "div {\n  background-image: url(\"/images/foo.png\");\n" +
+                   "  font: url(\"/fonts/foo.woff\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
@@ -39,9 +39,9 @@ describe("assets", function () {
         }
       }
     });
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -75,8 +75,8 @@ describe("assets", function () {
 
   it("should import a module's assets", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/mod-one/mod-one.jpg);\n" +
-                   "  background: url(/mod-one/subdir/sub.png); }\n" +
+                   "  background: url(\"/mod-one/mod-one.jpg\");\n" +
+                   "  background: url(\"/mod-one/subdir/sub.png\"); }\n" +
                    "\n" +
                    ".all-assets {\n" +
                    "  app-assets: \"images/foo.png\", \"fonts/foo.woff\";\n" +
@@ -93,9 +93,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -105,8 +105,8 @@ describe("assets", function () {
     var expected = [
       "/* index */",
       ".test {",
-      "  background: url(/mod-one/mod-one.jpg);",
-      "  background: url(/mod-one/subdir/sub.png); }\n",
+      "  background: url(\"/mod-one/mod-one.jpg\");",
+      "  background: url(\"/mod-one/subdir/sub.png\"); }\n",
       ".all-assets {",
       "  mod-assets: \"mod-one/mod-one.jpg\", \"mod-one/subdir/sub.png\"; }\n"
     ].join("\n");
@@ -121,9 +121,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -131,8 +131,8 @@ describe("assets", function () {
 
   it("should allow httpPrefix for app assets", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff); }\n";
+                   "  background: url(\"/assets/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -145,9 +145,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "assets"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*", httpPrefix: "assets"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -155,10 +155,10 @@ describe("assets", function () {
 
   it("should allow a global httpPrefix for all assets", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff);\n" +
-                   "  background: url(/assets/mod-one/mod-one.jpg);\n" +
-                   "  background: url(/assets/mod-one/subdir/sub.png); }\n";
+                   "  background: url(\"/assets/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/assets/mod-one/mod-one.jpg\");\n" +
+                   "  background: url(\"/assets/mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -174,9 +174,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -184,10 +184,10 @@ describe("assets", function () {
 
   it("should allow a relative URLs", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(../images/foo.png);\n" +
-                   "  background: url(../fonts/foo.woff);\n" +
-                   "  background: url(../mod-one/mod-one.jpg);\n" +
-                   "  background: url(../mod-one/subdir/sub.png); }\n";
+                   "  background: url(\"../images/foo.png\");\n" +
+                   "  background: url(\"../fonts/foo.woff\");\n" +
+                   "  background: url(\"../mod-one/mod-one.jpg\");\n" +
+                   "  background: url(\"../mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -204,9 +204,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -214,10 +214,10 @@ describe("assets", function () {
 
   it("should allow a relative URLs when httpRoot is set", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(../images/foo.png);\n" +
-                   "  background: url(../fonts/foo.woff);\n" +
-                   "  background: url(../mod-one/mod-one.jpg);\n" +
-                   "  background: url(../mod-one/subdir/sub.png); }\n";
+                   "  background: url(\"../images/foo.png\");\n" +
+                   "  background: url(\"../fonts/foo.woff\");\n" +
+                   "  background: url(\"../mod-one/mod-one.jpg\");\n" +
+                   "  background: url(\"../mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -235,9 +235,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -245,10 +245,10 @@ describe("assets", function () {
 
   it("should nest a asset path entry http prefix inside the global httpPrefix", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/whoa/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff);\n" +
-                   "  background: url(/assets/mod-one/mod-one.jpg);\n" +
-                   "  background: url(/assets/mod-one/subdir/sub.png); }\n";
+                   "  background: url(\"/assets/whoa/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/assets/mod-one/mod-one.jpg\");\n" +
+                   "  background: url(\"/assets/mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -264,9 +264,9 @@ describe("assets", function () {
       }
     });
 
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*", httpPrefix: "whoa"});
-    // asset-url("fonts/foo.ttf") => url(public/assets/fonts/foo.ttf);
+    // asset-url("fonts/foo.ttf") => url("public/assets/fonts/foo.ttf");
     eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -297,10 +297,10 @@ describe("assets", function () {
 
   it("allows url mangling", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff);\n" +
-                   "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
-                   "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+                   "  background: url(\"/assets/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
+                   "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -335,10 +335,10 @@ describe("assets", function () {
 
   it("allows installing assets", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff);\n" +
-                   "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
-                   "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+                   "  background: url(\"/assets/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
+                   "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -387,10 +387,10 @@ describe("assets", function () {
 
   it("allows installing assets", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/assets/images/foo.png);\n" +
-                   "  background: url(/assets/fonts/foo.woff);\n" +
-                   "  background: url(/assets/mod-one/mod-one.jpg?12345678);\n" +
-                   "  background: url(/assets/mod-one/subdir/sub.png?12345678); }\n";
+                   "  background: url(\"/assets/images/foo.png\");\n" +
+                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
+                   "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -437,10 +437,10 @@ describe("assets", function () {
 
   it("Doesn't install into the httpRoot", function (done) {
     var expected = ".test {\n" +
-                   "  background: url(/my-app/assets/images/foo.png);\n" +
-                   "  background: url(/my-app/assets/fonts/foo.woff);\n" +
-                   "  background: url(/my-app/assets/mod-one/mod-one.jpg?12345678);\n" +
-                   "  background: url(/my-app/assets/mod-one/subdir/sub.png?12345678); }\n";
+                   "  background: url(\"/my-app/assets/images/foo.png\");\n" +
+                   "  background: url(\"/my-app/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/my-app/assets/mod-one/mod-one.jpg?12345678\");\n" +
+                   "  background: url(\"/my-app/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
@@ -600,8 +600,8 @@ describe("assets", function () {
   it("should allow uri fragments", function (done) {
     var input = "@import 'assets'; div { background-image: asset-url('images/foo.png?q=true');" +
                 "background-image: asset-url('images/foo.png#foo'); }";
-    var expected = "div {\n  background-image: url(/images/foo.png?q=true);\n" +
-                   "  background-image: url(/images/foo.png#foo); }\n";
+    var expected = "div {\n  background-image: url(\"/images/foo.png?q=true\");\n" +
+                   "  background-image: url(\"/images/foo.png#foo\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
@@ -612,7 +612,7 @@ describe("assets", function () {
         }
       }
     });
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -620,7 +620,7 @@ describe("assets", function () {
 
   it("asset-uri should return the uri only, not wrapped in url()", function (done) {
     var input = "@import 'assets'; div { uri: asset-uri('images/foo.png'); }";
-    var expected = "div {\n  uri: /images/foo.png; }\n";
+    var expected = "div {\n  uri: \"/images/foo.png\"; }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
@@ -631,7 +631,7 @@ describe("assets", function () {
         }
       }
     });
-    // asset-url("images/foo.png") => url(public/assets/images/foo.png);
+    // asset-url("images/foo.png") => url("public/assets/images/foo.png");
     eg.assets.addSource(rootDir, {pattern: "images/**/*"});
 
     testutils.assertCompiles(eg, expected, done);
@@ -640,8 +640,8 @@ describe("assets", function () {
   it("support assets specified via options", function (done) {
     var input = "@import 'assets'; div { background-image: asset-url('images/foo.png');" +
                 "font: asset-url('fonts/foo.woff'); }";
-    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
-                   "  font: url(/fonts/foo.woff); }\n";
+    var expected = "div {\n  background-image: url(\"/images/foo.png\");\n" +
+                   "  font: url(\"/fonts/foo.woff\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
@@ -662,8 +662,8 @@ describe("assets", function () {
   it("should normalize platform separators as well as directory traversal", function (done) {
     var input = "@import 'assets'; div { background-image: asset-url('images\\\\foo.png');" +
                 "background-image: asset-url('images/bar/../foo.png'); }";
-    var expected = "div {\n  background-image: url(/images/foo.png);\n" +
-                   "  background-image: url(/images/foo.png); }\n";
+    var expected = "div {\n  background-image: url(\"/images/foo.png\");\n" +
+                   "  background-image: url(\"/images/foo.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
