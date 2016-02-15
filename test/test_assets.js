@@ -296,15 +296,20 @@ describe("assets", function () {
   });
 
   it("allows url mangling", function (done) {
-    var expected = ".test {\n" +
-                   "  background: url(\"/assets/images/foo.png\");\n" +
-                   "  background: url(\"/assets/fonts/foo.woff\");\n" +
-                   "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
-                   "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
+    var expected = [
+      "/assets/images/foo.png",
+      "/assets/fonts/foo.woff",
+      "/assets/mod-one/mod-one.jpg?12345678",
+      "/assets/mod-one/subdir/sub.png?12345678",
+      "/assets/mod-one/subdir/sub.png?q=true&12345678#hash"
+    ].map(function(uri) {
+      return "  background: url(\"" + uri + "\");";
+    });
+    expected = ".test {\n" + expected.join("\n") + " }\n";
+
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
     var eg = new Eyeglass({
-      file: path.join(rootDir, "sass", "both_assets.scss"),
+      file: path.join(rootDir, "sass", "both_assets_with_url_fragments.scss"),
       eyeglass: {
         root: rootDir,
         assets: {
@@ -674,6 +679,41 @@ describe("assets", function () {
             directory: rootDir,
             pattern: "images/**/*"
           }]
+        },
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("should support odd character in file names", function (done) {
+    var tests = [
+      {input: "images/foo bar.png", expected: "/images/foo bar.png"},
+      {input: "images/foo%2Fbar.png", expected: "/images/foo%2Fbar.png"},
+      {input: "images/foo%5Cbar.png", expected: "/images/foo%5Cbar.png"},
+      // backslash gets converted to forward slash
+      {input: "images/foo\\\\bar.png", expected: "/images/foo/bar.png"},
+      // should allow unicode characters
+      {input: "images/foo☃bar.png", expected: "/images/foo☃bar.png"}
+    ];
+    var input = "@import 'assets';";
+    var expected = "@charset \"UTF-8\";\n";
+    tests.forEach(function(test) {
+      input += "/* #{asset-url('" + test.input + "')} */\n";
+      expected += "/* url(\"" + test.expected + "\") */\n";
+    });
+    var rootDir = testutils.fixtureDirectory("app_assets_odd_names");
+    var eg = new Eyeglass({
+      data: input,
+      eyeglass: {
+        root: rootDir,
+        assets: {
+          sources: [
+            {directory: rootDir, pattern: "images/**/*"},
+          ]
         },
         engines: {
           sass: sass
