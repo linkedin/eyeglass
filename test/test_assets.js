@@ -440,6 +440,41 @@ describe("assets", function () {
     });
   });
 
+  it("handles asset installer errors", function (done) {
+    var errorMessage = "throws installer error";
+    var expectedError = {
+      message: errorMessage
+    };
+
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eyeglass = new Eyeglass({
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        assets: {
+          sources: [
+            {directory: rootDir, pattern: "images/**/*"},
+            {directory: rootDir, pattern: "fonts/**/*"}
+          ]
+        },
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    testutils.assertStderr(function(checkStderr) {
+      // simulate an installer error
+      eyeglass.assets.installer(function(assetFile, assetUri, oldInstaller, finished) {
+        finished(new Error(errorMessage));
+      });
+      checkStderr("");
+      testutils.assertCompilationError(eyeglass, expectedError, function() {
+        done();
+      });
+    });
+  });
+
   it("Doesn't install into the httpRoot", function (done) {
     var expected = ".test {\n" +
                    "  background: url(\"/my-app/assets/images/foo.png\");\n" +
