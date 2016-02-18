@@ -729,8 +729,6 @@ describe("assets", function () {
       {input: "images/foo bar.png", expected: "/images/foo bar.png"},
       {input: "images/foo%2Fbar.png", expected: "/images/foo%2Fbar.png"},
       {input: "images/foo%5Cbar.png", expected: "/images/foo%5Cbar.png"},
-      // backslash gets converted to forward slash
-      {input: "images/foo\\\\bar.png", expected: "/images/foo/bar.png"},
       // should allow unicode characters
       {input: "images/foo☃bar.png", expected: "/images/foo☃bar.png"}
     ];
