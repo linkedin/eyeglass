@@ -474,7 +474,7 @@ describe("assets", function () {
     });
   });
 
-  it("Doesn't install into the httpRoot", function (done) {
+  it("should not install into the httpRoot", function (done) {
     var expected = ".test {\n" +
                    "  background: url(\"/my-app/assets/images/foo.png\");\n" +
                    "  background: url(\"/my-app/assets/fonts/foo.woff\");\n" +
@@ -526,11 +526,6 @@ describe("assets", function () {
   });
 
   it("should manually install assets", function (done) {
-    var expected = ".test {\n" +
-                   "  background: url(\"/my-app/assets/images/foo.png\");\n" +
-                   "  background: url(\"/my-app/assets/fonts/foo.woff\");\n" +
-                   "  background: url(\"/my-app/assets/mod-one/mod-one.jpg?12345678\");\n" +
-                   "  background: url(\"/my-app/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eyeglass = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
