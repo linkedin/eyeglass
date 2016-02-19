@@ -756,13 +756,21 @@ describe("assets", function () {
 
   describe("path separator normalization", function() {
     var merge = require("lodash.merge");
-    var input = "@import 'assets'; /* #{asset-url('images\\\\foo.png')} */";
+    var uriFragments = ["images", "bar", "foo.png"];
+    var stdSep = "/";
+    var otherSep = path.sep === stdSep ? "\\" : stdSep;
+    var otherUri = uriFragments.join(otherSep);
+    var otherUriEscaped = otherUri.replace(/\\/g, "\\\\");
+    var normalizedUri = uriFragments.join(stdSep);
+    var input = "@import 'assets'; /* #{eyeglass-normalize-uri('" + otherUriEscaped + "')} */";
     var rootDir = testutils.fixtureDirectory("app_assets");
 
-    function test(options, shouldPass, done) {
-      var expected = shouldPass ?
-        "/* url(\"/images/foo.png\") */\n" :
-        "Asset not found: images\\foo.png";
+    function resetEnv() {
+      process.env.EYEGLASS_NORMALIZE_PATHS = "";
+    }
+
+    function test(options, shouldNormalize, done) {
+      var expected = "/* " + (shouldNormalize ? normalizedUri : otherUri) + " */\n";
 
       options = merge({
         data: input,
@@ -780,22 +788,11 @@ describe("assets", function () {
         }
       }, options);
 
-      if (shouldPass) {
-        testutils.assertCompiles(options, expected, done);
-      } else {
-        testutils.assertStderr(function(checkStderr) {
-          testutils.assertCompilationError(options, {message: expected}, function() {
-            checkStderr("");
-            done();
-          });
-        });
-      }
+      testutils.assertCompiles(options, expected, done);
     }
 
-    beforeEach(function() {
-      // reset the env var with each run
-      process.env.EYEGLASS_NORMALIZE_PATHS = "";
-    });
+    beforeEach(resetEnv);
+    afterEach(resetEnv);
 
     // TODO - collapse the following next 2 tests when default is changed
     it("should normalize platform separators (via env)", function (done) {
