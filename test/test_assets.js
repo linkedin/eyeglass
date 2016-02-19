@@ -525,6 +525,65 @@ describe("assets", function () {
     });
   });
 
+  it("should manually install assets", function (done) {
+    var expected = ".test {\n" +
+                   "  background: url(\"/my-app/assets/images/foo.png\");\n" +
+                   "  background: url(\"/my-app/assets/fonts/foo.woff\");\n" +
+                   "  background: url(\"/my-app/assets/mod-one/mod-one.jpg?12345678\");\n" +
+                   "  background: url(\"/my-app/assets/mod-one/subdir/sub.png?12345678\"); }\n";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eyeglass = new Eyeglass({
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        buildDir: path.join(rootDir, "dist"),
+        httpRoot: "/my-app",
+        assets: {
+          httpPrefix: "assets"
+        },
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    eyeglass.assets.addSource(rootDir, {pattern: "images/**/*"});
+
+    var assetPath = "images/foo.png";
+    var filePath = path.join(rootDir, assetPath);
+    eyeglass.assets.install(filePath, assetPath, function(error, file) {
+      try {
+        testutils.assertFileExists(path.join(rootDir, "dist", assetPath));
+      } finally {
+        fse.remove(path.join(rootDir, "dist"), function() {
+          done();
+        });
+      }
+    });
+  });
+
+  it("should handle an installer error", function (done) {
+    var rootDir = testutils.fixtureDirectory("app_assets");
+    var eyeglass = new Eyeglass({
+      file: path.join(rootDir, "sass", "both_assets.scss"),
+      eyeglass: {
+        root: rootDir,
+        buildDir: path.join(rootDir, "dist"),
+        engines: {
+          sass: sass
+        }
+      }
+    });
+
+    var assetUri = path.join("file", "does", "not", "exist.png");
+    eyeglass.assets.install(assetUri, assetUri, function(error, file) {
+      assert(error, "no such file or directory, lstat '" + assetUri + "'");
+      fse.remove(path.join(rootDir, "dist"), function(error) {
+        done();
+      });
+    });
+  });
+
   it("should handle an error in a resolver", function (done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
