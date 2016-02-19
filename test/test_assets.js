@@ -10,7 +10,6 @@ var Eyeglass = require("../lib");
 var AssetsSource = require("../lib/assets/AssetsSource");
 
 describe("assets", function () {
-
   it("should give an error when an asset is not found", function (done) {
     testutils.assertStderr(function(checkStderr) {
       var options = {
@@ -699,11 +698,9 @@ describe("assets", function () {
     testutils.assertCompiles(eg, expected, done);
   });
 
-  it("should normalize platform separators as well as directory traversal", function (done) {
-    var input = "@import 'assets'; div { background-image: asset-url('images\\\\foo.png');" +
-                "background-image: asset-url('images/bar/../foo.png'); }";
-    var expected = "div {\n  background-image: url(\"/images/foo.png\");\n" +
-                   "  background-image: url(\"/images/foo.png\"); }\n";
+  it("should normalize URI directory traversal", function (done) {
+    var input = "@import 'assets'; /* #{asset-url('images/bar/../foo.png')} */";
+    var expected = "/* url(\"/images/foo.png\") */\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eg = new Eyeglass({
       data: input,
@@ -755,5 +752,85 @@ describe("assets", function () {
     });
 
     testutils.assertCompiles(eg, expected, done);
+  });
+
+  describe("path separator normalization", function() {
+    var merge = require("lodash.merge");
+    var input = "@import 'assets'; /* #{asset-url('images\\\\foo.png')} */";
+    var rootDir = testutils.fixtureDirectory("app_assets");
+
+    function test(options, shouldPass, done) {
+      var expected = shouldPass ?
+        "/* url(\"/images/foo.png\") */\n" :
+        "Asset not found: images\\foo.png";
+
+      options = merge({
+        data: input,
+        eyeglass: {
+          root: rootDir,
+          assets: {
+            sources: [{
+              directory: rootDir,
+              pattern: "images/**/*"
+            }]
+          },
+          engines: {
+            sass: sass
+          }
+        }
+      }, options);
+
+      if (shouldPass) {
+        testutils.assertCompiles(options, expected, done);
+      } else {
+        testutils.assertStderr(function(checkStderr) {
+          testutils.assertCompilationError(options, {message: expected}, function() {
+            checkStderr("");
+            done();
+          });
+        });
+      }
+    }
+
+    beforeEach(function() {
+      // reset the env var with each run
+      process.env.EYEGLASS_NORMALIZE_PATHS = "";
+    });
+
+    // TODO - collapse the following next 2 tests when default is changed
+    it("should normalize platform separators (via env)", function (done) {
+      // currently defaults to disabled, so we explicitly enable via env var
+      // TODO - when default is enabled, remove this
+      process.env.EYEGLASS_NORMALIZE_PATHS = "true";
+
+      // no options, should pass
+      test(null, true, done);
+    });
+
+    it("should normalize platform separators (via option)", function (done) {
+      // enabled via options, should pass
+      test({
+        eyeglass: {
+          normalizePaths: true
+        }
+      }, true, done);
+    });
+
+    it("should not normalize platform separators when disabled (via env)", function (done) {
+      // explicitly disable
+      process.env.EYEGLASS_NORMALIZE_PATHS = "false";
+      // should not pass
+      test(null, false, done);
+    });
+
+    it("should not normalize platform separators when disabled (via option)", function (done) {
+      // enabled via options, should not pass
+      test({
+        eyeglass: {
+          // explicitly disable path normalization via option
+          normalizePaths: false
+        }
+      }, false, done);
+    });
   });
 });
