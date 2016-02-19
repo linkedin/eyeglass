@@ -755,6 +755,7 @@ describe("assets", function () {
   });
 
   describe("path separator normalization", function() {
+    var originalEnv = process.env.EYEGLASS_NORMALIZE_PATHS;
     var merge = require("lodash.merge");
     var uriFragments = ["images", "bar", "foo.png"];
     var stdSep = "/";
@@ -766,7 +767,7 @@ describe("assets", function () {
     var rootDir = testutils.fixtureDirectory("app_assets");
 
     function resetEnv() {
-      process.env.EYEGLASS_NORMALIZE_PATHS = "";
+      process.env.EYEGLASS_NORMALIZE_PATHS = originalEnv;
     }
 
     function test(options, shouldNormalize, done) {
