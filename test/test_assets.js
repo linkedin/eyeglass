@@ -801,12 +801,12 @@ describe("assets", function () {
       // TODO - when default is enabled, remove this
       process.env.EYEGLASS_NORMALIZE_PATHS = "true";
 
-      // no options, should pass
+      // no options, should normalize
       test(null, true, done);
     });
 
     it("should normalize platform separators (via option)", function (done) {
-      // enabled via options, should pass
+      // enabled via options, should normalize
       test({
         eyeglass: {
           normalizePaths: true
@@ -817,12 +817,12 @@ describe("assets", function () {
     it("should not normalize platform separators when disabled (via env)", function (done) {
       // explicitly disable
       process.env.EYEGLASS_NORMALIZE_PATHS = "false";
-      // should not pass
+      // should not normalize
       test(null, false, done);
     });
 
     it("should not normalize platform separators when disabled (via option)", function (done) {
-      // enabled via options, should not pass
+      // enabled via options, should not normalize
       test({
         eyeglass: {
           // explicitly disable path normalization via option
