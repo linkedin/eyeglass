@@ -572,7 +572,7 @@ describe("assets", function () {
 
     var assetUri = path.join("file", "does", "not", "exist.png");
     eyeglass.assets.install(assetUri, assetUri, function(error, file) {
-      assert(error, "no such file or directory, lstat '" + assetUri + "'");
+      assert(error, "Failed to install asset " + assetUri + "'");
       fse.remove(path.join(rootDir, "dist"), function(error) {
         done();
       });
