@@ -44,7 +44,6 @@
     "eslint": "^1.7.1",
     "eyeglass-dev-eslint": "^2.0.0",
     "eyeglass-dev-site-builder": "0.0.5",
-    "fs-extra": "^0.24.0",
     "grunt": "^0.4.5",
     "grunt-release": "^0.13.0",
     "gulp": "^3.9.0",

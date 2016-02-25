@@ -19,8 +19,22 @@ $eg-registered-assets: () !default;
 //   if not provided.
 @function asset-register($module, $url, $path, $uri: null) {
   $mod-assets: map-get($eg-registered-assets, $module) or ();
-  $mod-assets: map-merge($mod-assets, ($url: (filepath: $path, uri: $uri or $url)));
-  $eg-registered-assets: map-merge($eg-registered-assets, ($module: $mod-assets)) !global;
+  // normalize the various paths
+  // ensure that the URI and URL are both web paths
+  $url: eyeglass-normalize-uri($url, web);
+  $uri: eyeglass-normalize-uri($uri or $url, web);
+  // while the file path is a system path
+  $path: eyeglass-normalize-uri($path, system);
+
+  // then merge these back into the global registry
+  $eg-registered-assets: map-merge($eg-registered-assets, (
+    $module: map-merge($mod-assets, (
+      $url: (
+        filepath: $path,
+        uri: $uri
+      )
+    ))
+  )) !global;
   @return null;
 }
 
@@ -33,9 +47,10 @@ $eg-registered-assets: () !default;
 // @param $assets map<string => map> maps source urls to the asset information
 //   as described in the docs for `$eg-registered-assets` above.
 @function asset-register-all($module, $assets) {
-  $mod-assets: map-get($eg-registered-assets, $module) or ();
-  $mod-assets: map-merge($mod-assets, $assets);
-  $eg-registered-assets: map-merge($eg-registered-assets, ($module: $mod-assets)) !global;
+  // iterate through the given assets and register
+  @each $key, $asset in $assets {
+    $trash: asset-register($module, $key, map-get($asset, filepath), map-get($asset, uri));
+  }
   @return null;
 }
 
@@ -45,7 +60,7 @@ $eg-registered-assets: () !default;
 
 // Returns a URL to the asset wrapped.
 @function asset-uri($relative-path) {
-  @return eyeglass-asset-uri($eg-registered-assets, $relative-path);
+  @return quote(eyeglass-asset-uri($eg-registered-assets, unquote($relative-path)));
 }
 
 // Returns a URL to the asset wrapped in the css url() function.
@@ -54,9 +69,10 @@ $eg-registered-assets: () !default;
 }
 
 // The full path to the file on disk specified by the relative path.
-@function asset-file($relative-path) {
-  @return eyeglass-asset-file($eg-registered-assets, $relative-path);
-}
+//@function asset-file($relative-path) {
+//  // TODO - this isn't defined anywhere!!!
+//  @return eyeglass-asset-file($eg-registered-assets, $relative-path);
+//}
 
 // Lists all the modules which have registered assets.
 @function asset-modules() {

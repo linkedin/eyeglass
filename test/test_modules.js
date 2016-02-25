@@ -1,6 +1,6 @@
 "use strict";
 
-var EyeglassModules = require("../lib/util/eyeglass_modules");
+var EyeglassModules = require("../lib/modules/EyeglassModules");
 var fs = require("fs");
 var path = require("path");
 var glob = require("glob");
@@ -62,12 +62,5 @@ describe("EyeglassModules", function () {
         expectationFn(modules, err, expectationContents);
       });
     });
-  });
-
-  it("should find a module given a path", function() {
-    var modules = new EyeglassModules(path.join(fixtureDir, "has_modules"));
-    var moduleB = modules.find("module_b");
-    var moduleBPrime = modules.findByPath(moduleB.path);
-    assert.deepEqual(moduleB, moduleBPrime);
   });
 });
