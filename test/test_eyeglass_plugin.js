@@ -37,6 +37,7 @@ function fixtureOutputDir(name) {
 function build(builder) {
   return RSVP.Promise.resolve()
   .then(function() {
+    debugger;
     return builder.build();
   })
   .then(function(hash) {
@@ -83,4 +84,74 @@ describe("EyeglassCompiler", function () {
         });
       });
   });
+
+  it("passes unknown options to eyeglass", function() {
+    var optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+      cssDir: ".",
+      foo: true
+    });
+    assert.equal(undefined, optimizer.options.cssDir);
+    assert.equal(".", optimizer.cssDir);
+    assert.equal(optimizer.options.foo, true);
+  });
+
+  it("forbids the file option", function() {
+    assert.throws(
+      function() {
+        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+          cssDir: ".",
+          file: "asdf"
+        });
+      },
+      /The node-sass option 'file' cannot be set explicitly\./
+    );
+  });
+
+  it("forbids the data option", function() {
+    assert.throws(
+      function() {
+        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+          cssDir: ".",
+          data: "asdf"
+        });
+      },
+      /The node-sass option 'data' cannot be set explicitly\./
+    );
+  });
+
+  it("forbids the outFile option", function() {
+    assert.throws(
+      function() {
+        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+          cssDir: ".",
+          outFile: "asdf"
+        });
+      },
+      /The node-sass option 'outFile' cannot be set explicitly\./
+    );
+  });
+
+  it("outputs exceptions when the fullException option is set", function(done) {
+    var optimizer = new EyeglassCompiler(fixtureSourceDir("errorProject"), {
+      cssDir: ".",
+      fullException: true
+    });
+
+    var builder = new broccoli.Builder(optimizer);
+
+    return build(builder)
+      .then(function(outputDir) {
+        diffDirs(outputDir, fixtureOutputDir("basicProject"), done);
+      }, function(error) {
+        assert.equal("property \"asdf\" must be followed by a ':'", error.message.split("\n")[0]);
+        done();
+      });
+  });
+
+  /*
+    moveOption(this.options, this, "cssDir", "sassDir",
+                                   "optionsGenerator", "fullException",
+                                   "verbose", "renderSync",
+                                   "discover", "sourceFiles");
+   */
 });
