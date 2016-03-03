@@ -23,7 +23,7 @@
     "broccoli-caching-writer": "^1.1.0",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
-    "eyeglass": "^0.8.0",
+    "eyeglass": "^0.8.3",
     "glob": "^5.0.3",
     "mkdirp": "^0.5.1",
     "node-sass": "^3.4.2",
