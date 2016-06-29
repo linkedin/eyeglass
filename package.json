@@ -20,7 +20,7 @@
     "eyeglass"
   ],
   "dependencies": {
-    "broccoli-caching-writer": "^1.1.0",
+    "broccoli-caching-writer": "^2.2.1",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "eyeglass": "^0.8.3",
@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "broccoli": "^0.16.5",
-    "broccoli-cli": "^1.0.0",
     "eslint": "^0.22.0",
     "eyeglass-dev-eslint": "*",
     "grunt": "^0.4.5",

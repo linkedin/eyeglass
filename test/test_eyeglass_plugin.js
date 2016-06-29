@@ -17,14 +17,6 @@ var RSVP = require("rsvp");
 var glob = require("glob");
 var EyeglassCompiler = require("../lib/index");
 
-RSVP.on("error", function(reason, label) {
-  if (label) {
-    console.error(label);
-  }
-
-  console.assert(false, reason.message);
-});
-
 function fixtureSourceDir(name) {
   return path.resolve(__dirname, "fixtures", name, "input");
 }
@@ -36,52 +28,49 @@ function fixtureOutputDir(name) {
 
 function build(builder) {
   return RSVP.Promise.resolve()
-  .then(function() {
-    debugger;
-    return builder.build();
-  })
-  .then(function(hash) {
-    return builder.tree.outputPath;
-  });
+    .then(function() {
+      return builder.build();
+    })
+    .then(function(hash) {
+      return builder.tree.outputPath;
+    });
 }
 
-function diffDirs(actualDir, expectedDir, callback) {
+function assertEqualDirs(actualDir, expectedDir) {
   var actualFiles = glob.sync("**/*", {cwd: actualDir}).sort();
   var expectedFiles = glob.sync("**/*", {cwd: expectedDir}).sort();
+
   assert.deepEqual(actualFiles, expectedFiles);
+
   actualFiles.forEach(function(file) {
     var actualPath = path.join(actualDir, file);
     var expectedPath = path.join(expectedDir, file);
     var stats = fs.statSync(actualPath);
     if (stats.isFile()) {
       assert.equal(fs.readFileSync(actualPath).toString(),
-                   fs.readFileSync(expectedPath).toString());
+        fs.readFileSync(expectedPath).toString());
     }
   });
-  callback();
 }
 
 describe("EyeglassCompiler", function () {
-  it("can be instantiated", function (done) {
+  it("can be instantiated", function () {
     var optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: "."
     });
     assert(optimizer instanceof EyeglassCompiler);
-    done();
   });
 
-  it("compiles sass files", function (done) {
+  it("compiles sass files", function () {
     var optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: "."
     });
 
     var builder = new broccoli.Builder(optimizer);
 
-    build(builder)
+    return build(builder)
       .then(function(outputDir) {
-        diffDirs(outputDir, fixtureOutputDir("basicProject"), function() {
-          done();
-        });
+        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
       });
   });
 
@@ -131,7 +120,7 @@ describe("EyeglassCompiler", function () {
     );
   });
 
-  it("outputs exceptions when the fullException option is set", function(done) {
+  it("outputs exceptions when the fullException option is set", function() {
     var optimizer = new EyeglassCompiler(fixtureSourceDir("errorProject"), {
       cssDir: ".",
       fullException: true
@@ -141,10 +130,9 @@ describe("EyeglassCompiler", function () {
 
     return build(builder)
       .then(function(outputDir) {
-        diffDirs(outputDir, fixtureOutputDir("basicProject"), done);
+        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
       }, function(error) {
         assert.equal("property \"asdf\" must be followed by a ':'", error.message.split("\n")[0]);
-        done();
       });
   });
 
