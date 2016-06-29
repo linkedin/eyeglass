@@ -158,6 +158,7 @@ module.exports = outputTree;
 ```
 
 You can build the project with the command
+
 ```sh
 broccoli build dist
 ```
