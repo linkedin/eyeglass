@@ -1,4 +1,4 @@
-# broccoli-eyeglass
+# broccoli-eyeglass [![Build Status](https://travis-ci.org/sass-eyeglass/broccoli-eyeglass.svg?branch=master)](https://travis-ci.org/sass-eyeglass/broccoli-eyeglass)
 
 `broccoli-eyeglass` is a [broccoli](https://github.com/broccolijs/broccoli) plugin that compiles
 `.scss` and `.sass` files with [libsass](https://github.com/sass/libsass)
