@@ -1,4 +1,4 @@
-# `ember-cli-eyeglass`
+# `ember-cli-eyeglass` [![Build Status](https://travis-ci.org/sass-eyeglass/ember-cli-eyeglass.svg?branch=master)](https://travis-ci.org/sass-eyeglass/ember-cli-eyeglass)<Paste>
 
 This Ember CLI Addon makes it trivial to compile your sass files with
 eyeglass support via node-sass.
