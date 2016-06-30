@@ -37,7 +37,8 @@ module.exports = {
         config.cssDir = cssDir;
         config.sassDir = sassDir;
         config.assets = ["public", "app"].concat(config.assets || []);
-        config.httpRoot = projectConfig.baseURL;
+        config.eyeglass = config.eyeglass || {}
+        config.eyeglass.httpRoot = projectConfig.baseURL;
         config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
 
         // rename app.css to <project>.css per ember conventions.
