@@ -20,7 +20,7 @@
     "eyeglass"
   ],
   "dependencies": {
-    "broccoli-caching-writer": "^2.2.1",
+    "broccoli-caching-writer": "^3.0.3",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "eyeglass": "^0.8.3",
