@@ -1,11 +1,11 @@
 "use strict";
 
 var assert = require("assert");
-var unquote = require("../lib/util/unquote");
-var sync = require("../lib/util/sync_fn");
+var unquote = require("../lib/util/strings").unquote;
+var sync = require("../lib/util/sync");
 var sass = require("node-sass");
 var testutils = require("./testutils");
-var EyeglassModules = require("../lib/util/eyeglass_modules");
+var EyeglassModules = require("../lib/modules/EyeglassModules");
 
 describe("utilities", function () {
 

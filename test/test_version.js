@@ -17,7 +17,7 @@ describe("sass version function", function () {
      root: testutils.fixtureDirectory("basic_modules"),
      data: ".version {\nmodule-a: eyeglass-version('module_a')}"
    };
-   var expectedOutput = '.version {\n  module-a: "1.0.1"; }\n';
+   var expectedOutput = ".version {\n  module-a: 1.0.1; }\n";
    testutils.assertCompiles(options, expectedOutput, done);
  });
 

@@ -31,3 +31,6 @@ build/Release
 /coverage
 
 /tmp
+
+# test file to gitignore
+*.gitignore.png

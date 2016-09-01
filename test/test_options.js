@@ -37,7 +37,7 @@ describe("options", function() {
   });
 
   it("uses the SASS_PATH environment variable as a default for includePaths", function(done) {
-    process.env.SASS_PATH = "foo:bar:baz";
+    process.env.SASS_PATH = ["foo", "bar", "baz"].join(path.delimiter);
 
     var rootDir = testutils.fixtureDirectory("basic_modules");
     var options = {root: rootDir};
@@ -74,7 +74,7 @@ describe("options", function() {
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eyeglass = new Eyeglass({
       root: rootDir,
-      includePaths: includePaths.join(":")
+      includePaths: includePaths.join(path.delimiter)
     });
     var sassopts = eyeglass.options;
     assert(sassopts);
