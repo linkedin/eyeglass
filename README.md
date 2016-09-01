@@ -360,7 +360,7 @@ Since all functions declared from javascript are global, it is best
 practice to scope your function names to avoid naming conflicts. Then,
 to simplify the naming of your functions for the normal case, provide a
 sass file that when imported, unscopes the function names by wrapping
-them. 
+them.
 
 ```scss
 // index.scss
@@ -408,3 +408,37 @@ var sassOptions = {
 
 sass.render(eyeglass(sassOptions, sass));
 ```
+
+# URI path normalization
+
+By default, eyeglass will normalize path separators for interoperability between different platforms (Windows,
+Unix, etc). While we don't anticipate any issues with this feature, you can opt-out of this feature if you do
+encounter issues. Please do report any such issues so we may investigate. If you disable this feature,
+eyeglass will not work on Windows platforms.
+
+## Opt-Out via Environment Variable
+
+Setting an environment variable `EYEGLASS_NORMALIZE_PATHS=false`
+
+## Opt-Out via Config Option
+
+Explicitly via eyeglass options:
+```js
+var sass = require("node-sass");
+var eyeglass = require("eyeglass");
+var options = {
+  eyeglass: {
+    normalizePaths: false
+  }
+};
+sass.render(eyeglass(options), sass));
+```
+
+## `asset-uri`/`asset-url` string literals are not normalized
+
+When using the `asset-uri` and `asset-url`, the URI string passed are not normalized. This is to
+ensure that the URI always uses valid web path separators (`/`) rather than file system path separators.
+That is `asset-uri('path/to/file.png)` will resolve the correct file asset on any platform, but
+`asset-url('foo\\bar.png')` will expect to find a file with a literal `\` in it's name
+(`foo\\bar.png`), not a file located at `foo/bar.png`. We encourage you _not_ to use backslashes in
+your file names, as this means your code cannot easily be ported to Windows platforms.
