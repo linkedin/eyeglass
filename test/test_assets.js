@@ -810,6 +810,7 @@ describe("assets", function () {
   it("should support odd character in file names", function (done) {
     process.env.EYEGLASS_NORMALIZE_PATHS = "true";
     var rootDir = testutils.fixtureDirectory("app_assets_odd_names");
+    var rootDirNormalized = rootDir.replace(/\\/g, "/");
     var images = glob.sync(path.join(rootDir, "images/**/*"));
 
     // if the file system path is not a backslash...
@@ -823,7 +824,7 @@ describe("assets", function () {
     var input = "@import 'assets';";
     var expected = "@charset \"UTF-8\";\n";
     images.forEach(function(image) {
-      var imagePath = escapeBackslash(image.replace(rootDir, "").replace(/^\//, ""));
+      var imagePath = escapeBackslash(image.replace(rootDirNormalized, "").replace(/^\//, ""));
       input += "/* #{asset-url('" + imagePath + "')} */\n";
       expected += "/* url(\"/" + imagePath + "\") */\n";
     });
