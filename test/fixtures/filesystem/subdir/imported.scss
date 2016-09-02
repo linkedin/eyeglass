@@ -1,0 +1,6 @@
+@import "fs(subdir)";
+
+.imported {
+  should-be-true: map-get(fs-info(fs-absolute-path(subdir, 'subsubdir', "deep.txt")), is-file);
+  should-be-false: fs-exists(fs-absolute-path(subdir, 'subsubdir', "nope.txt"));
+}

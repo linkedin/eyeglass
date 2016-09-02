@@ -489,4 +489,26 @@ describe("fs", function () {
 
     testutils.assertCompilationError(eg, expectedError, done);
   });
+
+  it("works within files that were imported", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+
+    var input = "@import 'subdir/imported';";
+
+    var expected = ".imported {\n  should-be-true: true;\n  should-be-false: false; }\n";
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: true,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "uses_import_with_fs.scss")
+    });
+
+    testutils.assertCompiles(eg, expected, done);
+  });
 });
