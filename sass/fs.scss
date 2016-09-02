@@ -1,0 +1,44 @@
+$fs-registered-pathnames: () !default;
+$fs-path-separator: eyeglass-fs-path-separator();
+
+@mixin fs-register-path($path-id, $absolute-path) {
+  $existing-path: map-get($fs-registered-pathnames, $path-id);
+  @if $existing-path and $existing-path != $absolute-path {
+    @error "Path " + $path-id + " already set to " + $existing-path + ". " +
+           "Cannot set to " + $absolute-path + ".";
+  }
+  $fs-registered-pathnames:
+    map-merge($fs-registered-pathnames, ($path-id: $absolute-path)) !global;
+}
+
+@function fs-absolute-path($segments...) {
+  @return eyeglass-fs-absolute-path($fs-registered-pathnames, $segments...);
+}
+
+@function fs-join($segments...) {
+  @return eyeglass-fs-join($segments...);
+}
+
+@function fs-exists($absolute-path) {
+  @return eyeglass-fs-exists($absolute-path);
+}
+
+@function fs-list-files($directory, $glob: "*") {
+  @return eyeglass-fs-list-files($directory, $glob);
+}
+
+@function fs-list-directories($directory, $glob: "*") {
+  @return eyeglass-fs-list-directories($directory, $glob);
+}
+
+@function fs-parse-filename($filename) {
+  @return eyeglass-fs-parse-filename($filename);
+}
+
+@function fs-info($filename) {
+  @return eyeglass-fs-info($filename);
+}
+
+@function fs-read-file($filename) {
+  @return eyeglass-fs-read-file($filename);
+}
