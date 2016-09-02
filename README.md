@@ -34,6 +34,8 @@ that you actually use end up in your built application.
 
 ## Exposing assets
 
+### In your application
+
 The `addSource` method on `eyeglass.assets` is how you add assets to
 your application. The path passed to `asset-url()` is going to be
 relative to the directory that you pass to addSource.
@@ -94,6 +96,96 @@ sass.render(eyeglass(options, sass), function(err, result) {
   // handle results
 });
 ```
+
+### In the module
+
+In function that you export from your `eyeglass-exports.js`, you have the
+`eyeglass` as the first parameter. It has `assets` property, and it has the
+method `export` that accepts the same arguments as `addSource` and returns a
+new instance of assets list with the given path already included in the list
+with provided options.
+
+To expose it, you need to set it as `assets` property on the object you return
+from exported function:
+
+```js
+module.exports = function(eyeglass, sass) {
+  return {
+    assets: eyeglass.assets.export('some/path/here'),
+  };
+};
+```
+
+See the `Examples` section below for more details.
+
+#### Examples
+
+Let's say your module has structure like this:
+
+```
+mymodule/
+└── assets/
+    ├── images/
+    │   ├── foo/
+    │   │   └── image1.png
+    │   └── unused.gif
+    ├── fonts/
+    │   └── coolfont.ttf
+    └── scss/
+        └── app.scss
+```
+
+If you don't require per-path options or fine-grained control of what can be
+imported from SASS, you can use just one path:
+
+```js
+var path = require('path');
+
+var assets_path = path.join(__dirname, 'assets');
+
+module.exports = function(eyeglass, sass) {
+  return {
+    sassDir: path.join(assets_path, 'scss'),
+    assets: eyeglass.assets.export(assets_path, {
+      globOpts: {
+        ignore: [ '**/*.scss', '**/*.js' ]
+      }
+    });
+  }
+};
+```
+
+But if you want more fine-grained control, you can save the result of
+`assets.export()` to the variable and call `addSource` on it any amount of
+times:
+
+```js
+var path = require('path');
+
+var assets_path = path.join(__dirname, 'assets');
+var images_path = path.join(assets_path, 'images');
+var fonts_path = path.join(assets_path, 'fonts');
+
+var images_options = { ... images-related options ... };
+var fonts_options = { ... fonts-related options ... };
+
+module.exports = function(eyeglass, sass) {
+  // Create new list of assets with at least one path
+  var module_assets = eyeglass.assets.export(images_path, images_options);
+
+  // You can add more paths like this
+  module_assets.addSource(fonts_path, fonts_options);
+
+  return {
+    sassDir: path.join(assets_path, 'stylesheets'),
+    assets: module_assets
+  }
+};
+```
+
+Note that in this case, given the name of the module is `mymodule`,
+the `coolfont.ttf` and `foo/image1.png` will be avilable
+as `mymodule/coolfont.ttf` and `mymodule/foot/image1.png` accordingly.
 
 ## Referencing Assets
 
