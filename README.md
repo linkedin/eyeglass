@@ -24,6 +24,41 @@ Once installed via npm, an eyeglass module can:
 
 If your build-tool is [eyeglass-aware](#building-sass-files-with-eyeglass-support), you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
+## Manually adding modules
+
+Eyeglass will auto-discover npm installed modules. To add modules that are not part of the npm ecosystem, you can manually add modules via the eyeglass options:
+
+```js
+var sass = require("node-sass");
+var eyeglass = require("eyeglass");
+var options = {
+  eyeglass: {
+    modules: [
+      // add module by path (must have a valid package.json)
+      {
+        path: "/path/to/your/module"
+      },
+      // add module by Object
+      {
+        name: "my-module-name",
+        main: function(eyeglass, sass) {
+          return {
+            sassDir: ...,
+            functions: ...,
+            ...
+          }
+        },
+        eyeglass: {
+          needs: "...",
+          ...
+        }
+      }
+    ]
+  }
+};
+sass.render(eyeglass(options), sass));
+```
+
 # Working with assets
 
 It's quite common to need to refer to assets from within your
