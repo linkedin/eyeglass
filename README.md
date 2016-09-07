@@ -59,6 +59,19 @@ var options = {
 sass.render(eyeglass(options), sass));
 ```
 
+When adding a module by object, the object has the same format as the
+object in an eyeglass module's package.json that would normally be
+assigned to top-level `eyeglass` property. However, it supports one
+additional property: `main`. The `main` object is a function as would be
+returned by requiring the eyeglass `exports` file.  In this way, it is
+possible to expose any arbitrary Sass project as an eyeglass module
+without that module being required to "become an eyeglass" module. This
+also enables the use of bower packages with Eyeglass.
+
+Manually added eyeglass modules will only be able to be imported by the
+main application's sass files. Dependencies between such manual modules
+are not currently supported.
+
 # Working with assets
 
 It's quite common to need to refer to assets from within your
