@@ -1,0 +1,9 @@
+{
+  "name": "bower-module",
+  "private": true,
+  "version": "2.0.0",
+  "eyeglass": {
+    "sassDir": "./",
+    "needs": "*"
+  }
+}

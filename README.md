@@ -24,6 +24,54 @@ Once installed via npm, an eyeglass module can:
 
 If your build-tool is [eyeglass-aware](#building-sass-files-with-eyeglass-support), you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
+## Manually adding modules
+
+Eyeglass will auto-discover npm installed modules. To add modules that are not part of the npm ecosystem, you can manually add modules via the eyeglass options:
+
+```js
+var sass = require("node-sass");
+var eyeglass = require("eyeglass");
+var options = {
+  eyeglass: {
+    modules: [
+      // add module by path (must have a valid package.json)
+      {
+        path: "/path/to/your/module"
+      },
+      // add module by Object
+      {
+        name: "my-module-name",
+        main: function(eyeglass, sass) {
+          return {
+            sassDir: ...,
+            functions: ...,
+            ...
+          }
+        },
+        eyeglass: {
+          needs: "...",
+          ...
+        }
+      }
+    ]
+  }
+};
+sass.render(eyeglass(options), sass));
+```
+
+When adding a module by object, the object has the same format as the
+object in an eyeglass module's package.json that would normally be
+assigned to top-level `eyeglass` property. However, it supports one
+additional property: `main`. The `main` object is a function as would be
+returned by requiring the eyeglass `exports` file.  In this way, it is
+possible to expose any arbitrary Sass project as an eyeglass module
+without that module being required to "become an eyeglass" module. This
+also enables the use of bower packages with Eyeglass.
+
+Manually added eyeglass modules will only be able to be imported by the
+main application's sass files. Dependencies between such manual modules
+are not currently supported.
+
 # Working with assets
 
 It's quite common to need to refer to assets from within your
