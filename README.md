@@ -26,7 +26,15 @@ If your build-tool is [eyeglass-aware](#building-sass-files-with-eyeglass-suppor
 
 ## Manually adding modules
 
-Eyeglass will auto-discover npm installed modules. To add modules that are not part of the npm ecosystem, you can manually add modules via the eyeglass options:
+Eyeglass will transitively auto-discover npm installed modules that are listed in
+your `package.json` files. Just using `npm link` is not enough to use
+modules on your local filesystem. If that isn't sufficient, you can use
+the `eyeglass.modules` config option to specify a path to your npm
+module or to even declare an eyeglass module for a project that doesn't
+declare itself to be one.
+
+To add modules that are not part of the npm ecosystem, you can manually
+add modules via the eyeglass options:
 
 ```js
 var sass = require("node-sass");
