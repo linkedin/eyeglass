@@ -17,6 +17,10 @@ var RSVP = require("rsvp");
 var glob = require("glob");
 var EyeglassCompiler = require("../lib/index");
 
+function fixtureDir(name) {
+  return path.resolve(__dirname, "fixtures", name);
+}
+
 function fixtureSourceDir(name) {
   return path.resolve(__dirname, "fixtures", name, "input");
 }
@@ -133,6 +137,25 @@ describe("EyeglassCompiler", function () {
         assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
       }, function(error) {
         assert.equal("property \"asdf\" must be followed by a ':'", error.message.split("\n")[0]);
+      });
+  });
+
+  it("supports manual modules", function() {
+    var optimizer = new EyeglassCompiler(fixtureSourceDir("usesManualModule"), {
+      cssDir: ".",
+      fullException: true,
+      eyeglass: {
+        modules: [
+          {path: fixtureDir("manualModule")}
+        ]
+      }
+    });
+
+    var builder = new broccoli.Builder(optimizer);
+
+    return build(builder)
+      .then(function(outputDir) {
+        assertEqualDirs(outputDir, fixtureOutputDir("usesManualModule"));
       });
   });
 

@@ -1,0 +1,5 @@
+@import "manual";
+
+.test {
+  @include manual("foo");
+}
