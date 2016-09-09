@@ -5,6 +5,43 @@ var EyeglassCompiler = require("broccoli-eyeglass");
 var path = require("path");
 var stew = require("broccoli-stew");
 
+/* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
+ * ember addon dependencies.  However there's no path information in the addon object,
+ * but each addon object has some disconnected metadata in addon.addonPackages
+ * with the path info. Unfortunately there's no shared information that would
+ * allow us to connect which addon packages are actually which addon objects.
+ * It would be great if ember-cli didn't throw that information on the ground
+ * while building these objects. It would also be marvelous if we knew which
+ * addons came from a local addon declaration and which ones came from node
+ * modules.
+ **/
+function localEyeglassAddons(addon) {
+  var paths = [];
+  if (typeof(addon.addons) !== "object" ||
+      typeof(addon.addonPackages) !== "object") {
+    return paths;
+  }
+
+  var packages = Object.keys(addon.addonPackages);
+
+  for (var i = 0; i < packages.length; i++) {
+    var p = addon.addonPackages[packages[i]];
+    // Note: this will end up creating manual addons for things in node modules
+    // that are actually auto discovered, these manual modules will get deduped
+    // out.  but we need to add all of them because the some eyeglass modules
+    // for addons & engines won't get autodiscovered otherwise unless the
+    // addons/engines are themselves eyeglass modules (which we don't want to require).
+    if (p.pkg.keywords.some(function(kw) {return kw == "eyeglass-module";})) {
+      paths.push({path: p.path})
+    }
+  }
+  // TODO: if there's a cycle in the addon graph don't recurse.
+  for (var i = 0; i < addon.addons.length; i++) {
+    paths = paths.concat(localEyeglassAddons(addon.addons[i]));
+  }
+  return paths;
+}
+
 module.exports = {
   name: 'ember-cli-eyeglass',
 
@@ -50,6 +87,12 @@ module.exports = {
                                    config.httpRoot ||
                                    projectConfig.baseURL;
         config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
+
+        if (config.eyeglass.modules) {
+          config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
+        } else {
+          config.eyeglass.modules = localEyeglassAddons(addon.parent);
+        }
 
         // If building an app, rename app.css to <project>.css per Ember conventions.
         // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
