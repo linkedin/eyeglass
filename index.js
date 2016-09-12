@@ -60,7 +60,8 @@ module.exports = {
       name: 'eyeglass',
       ext: 'scss',
       toTree: function(tree, inputPath, outputPath, options) {
-        var isApp = (addon._findHost() === addon.app);
+        var host = addon._findHost();
+        var isApp = (host === addon.app);
         // These start with a slash and that messes things up.
         var cssDir = outputPath.slice(1);
         var sassDir = inputPath.slice(1);
@@ -73,7 +74,10 @@ module.exports = {
         // limit to only files in the sass directory.
         tree = stew.find(tree, {include: [path.join(sassDir, "/**/*")]});
 
-        var projectConfig = addon.app ? addon.project.config(addon.app.env) : {};
+        var projectConfig = addon.project.config(host.env);
+        if (addon.parent && addon.parent.engineConfig) {
+          projectConfig = addon.parent.engineConfig(host.env, projectConfig);
+        }
         // setup eyeglass for this project's configuration
         var config = projectConfig.eyeglass || {};
         if (!config.sourceFiles && !config.discover) {
