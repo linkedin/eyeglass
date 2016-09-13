@@ -24,10 +24,12 @@
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "eyeglass": "^1.0.0",
+    "fs-tree-diff": "^0.5.2",
     "glob": "^5.0.3",
     "mkdirp": "^0.5.1",
     "node-sass": "^3.9.3",
-    "rsvp": "^3.0.21"
+    "rsvp": "^3.0.21",
+    "walk-sync": "^0.3.1"
   },
   "devDependencies": {
     "broccoli": "^0.16.5",
@@ -39,6 +41,7 @@
     "gulp-eslint": "1.1.1",
     "gulp-jshint": "^2.0.0",
     "gulp-mocha": "^2.2.0",
-    "jshint": "^2.8.0"
+    "jshint": "^2.8.0",
+    "mocha": "^3.0.2"
   }
 }

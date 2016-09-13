@@ -159,10 +159,80 @@ describe("EyeglassCompiler", function () {
       });
   });
 
-  /*
-    moveOption(this.options, this, "cssDir", "sassDir",
-                                   "optionsGenerator", "fullException",
-                                   "verbose", "renderSync",
-                                   "discover", "sourceFiles");
-   */
+  describe("caching", function() {
+    it("caches when an unrelated file changes", function() {
+      var sourceDir = fixtureSourceDir("basicProject");
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(sourceDir, {
+        cssDir: ".",
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+          var mtime = fs.statSync(path.join(outputDir, "styles", "foo.css")).mtime;
+          assert.equal(1, compiledFiles.length);
+
+          var unusedSourceFile = path.join(sourceDir, "styles", "_unused.scss");
+          fs.writeFileSync(unusedSourceFile, "// changed but still not used.");
+          return build(builder).then(function(outputDir2) {
+            assert.equal(outputDir, outputDir2);
+            assert.equal(1, compiledFiles.length);
+            var mtime2 = fs.statSync(path.join(outputDir2, "styles", "foo.css")).mtime;
+            assert.deepEqual(mtime, mtime2);
+          });
+        });
+    });
+
+    it("doesn't cache when there's a change", function() {
+      var sourceDir = fixtureSourceDir("basicProject");
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(sourceDir, {
+        cssDir: ".",
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+          var mtime = fs.statSync(path.join(outputDir, "styles", "foo.css")).mtime;
+          assert.equal(1, compiledFiles.length);
+
+          var sourceFile = path.join(sourceDir, "styles", "foo.scss");
+          var originalSource = fs.readFileSync(sourceFile);
+          var newSource = "@import \"used\";\n" +
+                          "$color: blue;\n" +
+                          ".foo {\n" +
+                          "  color: $color;\n" +
+                          "}\n";
+
+          var newExpectedOutput = ".foo {\n" +
+                                  "  color: blue; }\n";
+
+          fs.writeFileSync(sourceFile, newSource);
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              var outputFile = path.join(outputDir2, "styles", "foo.css");
+              var mtime2 = fs.statSync(outputFile).mtime;
+              assert.equal(newExpectedOutput, fs.readFileSync(outputFile));
+              assert.equal(2, compiledFiles.length);
+            })
+            .finally(function() {
+              fs.writeFileSync(sourceFile, originalSource);
+            });
+        });
+    });
+  });
 });
