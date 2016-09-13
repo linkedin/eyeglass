@@ -176,7 +176,6 @@ describe("EyeglassCompiler", function () {
       return build(builder)
         .then(function(outputDir) {
           assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-          var mtime = fs.statSync(path.join(outputDir, "styles", "foo.css")).mtime;
           assert.equal(1, compiledFiles.length);
 
           var unusedSourceFile = path.join(sourceDir, "styles", "_unused.scss");
@@ -184,8 +183,6 @@ describe("EyeglassCompiler", function () {
           return build(builder).then(function(outputDir2) {
             assert.equal(outputDir, outputDir2);
             assert.equal(1, compiledFiles.length);
-            var mtime2 = fs.statSync(path.join(outputDir2, "styles", "foo.css")).mtime;
-            assert.deepEqual(mtime, mtime2);
           });
         });
     });
@@ -206,7 +203,6 @@ describe("EyeglassCompiler", function () {
       return build(builder)
         .then(function(outputDir) {
           assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-          var mtime = fs.statSync(path.join(outputDir, "styles", "foo.css")).mtime;
           assert.equal(1, compiledFiles.length);
 
           var sourceFile = path.join(sourceDir, "styles", "foo.scss");
@@ -225,7 +221,6 @@ describe("EyeglassCompiler", function () {
             .then(function(outputDir2) {
               assert.equal(outputDir, outputDir2);
               var outputFile = path.join(outputDir2, "styles", "foo.css");
-              var mtime2 = fs.statSync(outputFile).mtime;
               assert.equal(newExpectedOutput, fs.readFileSync(outputFile));
               assert.equal(2, compiledFiles.length);
             })
