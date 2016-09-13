@@ -37,8 +37,7 @@
     "lodash.merge": "^3.3.2",
     "node-sass": "^3.8.0",
     "node-sass-utils": "^1.1.2",
-    "semver": "^5.0.3",
-    "tmp": "0.0.28"
+    "semver": "^5.0.3"
   },
   "devDependencies": {
     "eslint": "^1.7.1",

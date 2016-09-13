@@ -86,7 +86,7 @@ describe("assets", function () {
                    "  app-assets: \"images/foo.png\", \"fonts/foo.woff\";\n" +
                    "  mod-assets: \"mod-one/mod-one.jpg\", \"mod-one/subdir/sub.png\"; }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "uses_mod_1.scss"),
       eyeglass: {
@@ -138,7 +138,7 @@ describe("assets", function () {
                    "  background: url(\"/assets/images/foo.png\");\n" +
                    "  background: url(\"/assets/fonts/foo.woff\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "app_assets.scss"),
       eyeglass: {
@@ -164,7 +164,7 @@ describe("assets", function () {
                    "  background: url(\"/assets/mod-one/mod-one.jpg\");\n" +
                    "  background: url(\"/assets/mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -193,7 +193,7 @@ describe("assets", function () {
                    "  background: url(\"../mod-one/mod-one.jpg\");\n" +
                    "  background: url(\"../mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -223,7 +223,7 @@ describe("assets", function () {
                    "  background: url(\"../mod-one/mod-one.jpg\");\n" +
                    "  background: url(\"../mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -254,7 +254,7 @@ describe("assets", function () {
                    "  background: url(\"/assets/mod-one/mod-one.jpg\");\n" +
                    "  background: url(\"/assets/mod-one/subdir/sub.png\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -349,7 +349,7 @@ describe("assets", function () {
                    "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
                    "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -401,7 +401,7 @@ describe("assets", function () {
                    "  background: url(\"/assets/mod-one/mod-one.jpg?12345678\");\n" +
                    "  background: url(\"/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {
@@ -486,7 +486,7 @@ describe("assets", function () {
                    "  background: url(\"/my-app/assets/mod-one/mod-one.jpg?12345678\");\n" +
                    "  background: url(\"/my-app/assets/mod-one/subdir/sub.png?12345678\"); }\n";
     var rootDir = testutils.fixtureDirectory("app_assets");
-    //var distDir = tmp.dirSync();
+
     var eg = new Eyeglass({
       file: path.join(rootDir, "sass", "both_assets.scss"),
       eyeglass: {

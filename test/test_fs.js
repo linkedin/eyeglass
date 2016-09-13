@@ -2,11 +2,9 @@
 
 var sass = require("node-sass");
 var path = require("path");
-var tmp = require("tmp");
 var Eyeglass = require("../lib");
 var testutils = require("./testutils");
 var assert = require("assert");
-var fse = require("fs-extra");
 var fs = require("fs");
 
 describe("fs", function () {
