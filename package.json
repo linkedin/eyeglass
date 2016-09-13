@@ -21,6 +21,7 @@
   ],
   "dependencies": {
     "broccoli-caching-writer": "^3.0.3",
+    "broccoli-merge-trees": "^1.1.4",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "eyeglass": "^1.0.0",
