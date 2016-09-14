@@ -12,6 +12,8 @@
 var assert = require("assert");
 var path = require("path");
 var fs = require("fs");
+var rimraf = require("rimraf");
+var fixturify = require("fixturify");
 var broccoli = require("broccoli");
 var RSVP = require("rsvp");
 var glob = require("glob");
@@ -22,11 +24,18 @@ function fixtureDir(name) {
 }
 
 function fixtureSourceDir(name) {
-  return path.resolve(__dirname, "fixtures", name, "input");
+  return path.resolve(fixtureDir(name), "input");
 }
 
 function fixtureOutputDir(name) {
-  return path.resolve(__dirname, "fixtures", name, "output");
+  return path.resolve(fixtureDir(name), "output");
+}
+
+function makeFixtures(name, files) {
+  var dirname = fixtureDir(name);
+  fs.mkdirSync(dirname);
+  fixturify.writeSync(dirname, files);
+  return dirname;
 }
 
 
@@ -160,6 +169,13 @@ describe("EyeglassCompiler", function () {
   });
 
   describe("caching", function() {
+    afterEach(function() {
+      var tmpDirs = glob.sync(path.join(path.resolve(__dirname, "fixtures"),"**", "*.tmp"));
+      tmpDirs.forEach(function(tmpDir) {
+        rimraf.sync(tmpDir);
+      });
+    });
+
     it("caches when an unrelated file changes", function() {
       var sourceDir = fixtureSourceDir("basicProject");
       var compiledFiles = [];
@@ -229,5 +245,58 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
+
+    it("busts cache when file reached via includePaths changes", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "external";'
+      });
+      var includeDir = makeFixtures("includeDir.tmp", {
+        "external.scss": ".external { float: left; }"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".external {\n  float: left; }\n"
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        includePaths: [includeDir],
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(includeDir, {
+            "external.scss": ".external { float: right; }"
+          });
+
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css": ".external {\n  float: right; }\n"
+          });
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
+    it("busts cache when file mode changes");
+    it("busts cache when an eyeglass module is upgraded");
+    it("busts cache when an eyeglass asset changes");
+    it("busts cache when options used for compilation are different");
+    it("busts cache when a file higher in the load path order is added");
+    it("removes a css file when the corresponding sass file is removed");
+    it("preserves cache across builder instances?");
   });
 });
