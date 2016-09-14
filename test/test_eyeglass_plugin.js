@@ -332,7 +332,70 @@ describe("EyeglassCompiler", function () {
         });
     });
 
-    it("busts cache when an eyeglass module is upgraded");
+    it("busts cache when an eyeglass module is upgraded", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "eyeglass-module";'
+      });
+      var eyeglassModDir = makeFixtures("eyeglassmod.tmp", {
+        "package.json": "{\n" +
+                        '  "name": "is_a_module",\n' +
+                        '  "keywords": ["eyeglass-module"],\n' +
+                        '  "private": true,\n' +
+                        '  "eyeglass": {\n' +
+                        '    "exports": false,\n' +
+                        '    "name": "eyeglass-module",\n' +
+                        '    "sassDir": "sass",\n' +
+                        '    "needs": "*"\n' +
+                        "  }\n" +
+                        "}",
+        "sass": {
+          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        }
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".eyeglass-mod {\n  content: eyeglass; }\n"
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        },
+        eyeglass: {
+          modules: [
+            {path: eyeglassModDir}
+          ]
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(eyeglassModDir, {
+            "sass": {
+              "index.scss": ".eyeglass-mod { content: eyeglass-changed }"
+            }
+          });
+
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css": ".eyeglass-mod {\n  content: eyeglass-changed; }\n"
+          });
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
     it("busts cache when an eyeglass asset changes");
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
