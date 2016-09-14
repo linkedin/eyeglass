@@ -1,0 +1,11 @@
+{
+  "name": "module_b",
+  "private": true,
+  "eyeglass": {
+    "needs": "*",
+    "sassDir": "./"
+  },
+  "dependencies": {
+    "module_c": "*"
+  }
+}

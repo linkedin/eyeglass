@@ -1,0 +1,6 @@
+/* module_b */
+// should be able to import `module_a` (declared as a manual dependency)
+@import "module_a";
+
+// should be able to import `module_c` (declared as a dependency via package.json#dependencies)
+@import "module_c";

@@ -433,7 +433,7 @@ describe("eyeglass importer", function () {
     }, done);
   });
 
-  it("should be allowed to import from eyeglass without a declared depenedency", function(done) {
+  it("should be allowed to import from eyeglass without a declared dependency", function(done) {
     var options = {
       data: '@import "module_a";',
       eyeglass: {
@@ -532,6 +532,40 @@ describe("eyeglass importer", function () {
       };
       var expected = "/* bower-module */\n.manual-module {\n  works: true; }" +
         "\n\n.test {\n  hello: \"Hello World!\"; }\n";
+      testutils.assertCompiles(options, expected, done);
+    });
+
+    it("TODO - something something dependencies", function(done) {
+      var manualModulePath = testutils.fixtureDirectory("manual_module");
+      var rootDir = testutils.fixtureDirectory("simple_module");
+      var options = {
+        data: "@import \"module_b\";",
+        eyeglass: {
+          root: rootDir,
+          modules: [
+            // my-manual-module
+            require(manualModulePath),
+
+            // module_a
+            {
+              path: path.join(manualModulePath, "module_a"),
+              dependencies: {
+                "my-manual-module": "*"
+              }
+            },
+
+            // module_b
+            {
+              path: path.join(manualModulePath, "module_b"),
+              dependencies: {
+                "module_a": "*"
+              }
+            }
+          ]
+        }
+      };
+      var expected = "/* module_b */\n/* module_a */\n"
+                   + ".manual-module {\n  works: true; }\n\n/* module_c */\n";
       testutils.assertCompiles(options, expected, done);
     });
   });
