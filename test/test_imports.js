@@ -535,7 +535,7 @@ describe("eyeglass importer", function () {
       testutils.assertCompiles(options, expected, done);
     });
 
-    it("TODO - something something dependencies", function(done) {
+    it("should allow manually declared dependencies", function(done) {
       var manualModulePath = testutils.fixtureDirectory("manual_module");
       var rootDir = testutils.fixtureDirectory("simple_module");
       var options = {
