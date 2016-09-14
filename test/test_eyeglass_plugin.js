@@ -291,7 +291,47 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
-    it("busts cache when file mode changes");
+
+    it("busts cache when file mode changes", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "external";'
+      });
+      var includeDir = makeFixtures("includeDir.tmp", {
+        "external.scss": ".external { float: left; }"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".external {\n  float: left; }\n"
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        includePaths: [includeDir],
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fs.chmodSync(path.join(includeDir, "external.scss"), parseInt("755", 8));
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
+
     it("busts cache when an eyeglass module is upgraded");
     it("busts cache when an eyeglass asset changes");
     it("busts cache when options used for compilation are different");
