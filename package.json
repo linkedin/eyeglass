@@ -24,7 +24,7 @@
     "broccoli-plugin": "^1.2.2",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
-    "eyeglass": "^1.0.0",
+    "eyeglass": "^1.1.0",
     "fs-tree-diff": "^0.5.2",
     "glob": "^5.0.3",
     "mkdirp": "^0.5.1",
