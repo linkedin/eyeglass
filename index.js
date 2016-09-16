@@ -2,6 +2,7 @@
 'use strict';
 
 var EyeglassCompiler = require("broccoli-eyeglass");
+var findHost = require("./lib/findHost");
 var path = require("path");
 var stew = require("broccoli-stew");
 
@@ -60,7 +61,7 @@ module.exports = {
       name: 'eyeglass',
       ext: 'scss',
       toTree: function(tree, inputPath, outputPath, options) {
-        var host = addon._findHost();
+        var host = findHost(addon);
         var isApp = (host === addon.app);
         // These start with a slash and that messes things up.
         var cssDir = outputPath.slice(1);
