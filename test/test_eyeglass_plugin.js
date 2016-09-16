@@ -66,6 +66,22 @@ function assertEqualDirs(actualDir, expectedDir) {
   });
 }
 
+function svg(contents) {
+  return '<svg xmlns="http://www.w3.org/2000/svg"\n' +
+         '     xmlns:xlink="http://www.w3.org/1999/xlink">\n' +
+         contents +
+         "</svg>\n";
+}
+
+var rectangleSVG = svg(
+  '  <rect x="10" y="10" height="100" width="100"\n' +
+  '        style="stroke:#ff0000; fill: #0000ff"/>\n'
+);
+
+var circleSVG = svg(
+  '<circle cx="40" cy="40" r="24" style="stroke:#006600; fill:#00cc00"/>'
+);
+
 describe("EyeglassCompiler", function () {
   it("can be instantiated", function () {
     var optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
@@ -168,16 +184,19 @@ describe("EyeglassCompiler", function () {
       });
   });
 
-  describe("caching", function() {
-    afterEach(function() {
-      var tmpDirs = glob.sync(path.join(path.resolve(__dirname, "fixtures"),"**", "*.tmp"));
-      tmpDirs.forEach(function(tmpDir) {
-        rimraf.sync(tmpDir);
-      });
+  function cleanupTempDirs() {
+    var tmpDirs = glob.sync(path.join(path.resolve(__dirname, "fixtures"),"**", "*.tmp"));
+    tmpDirs.forEach(function(tmpDir) {
+      rimraf.sync(tmpDir);
     });
+  }
+
+  describe("caching", function() {
+    afterEach(cleanupTempDirs);
 
     it("caches when an unrelated file changes", function() {
       var sourceDir = fixtureSourceDir("basicProject");
+      var unusedSourceFile = path.join(sourceDir, "styles", "_unused.scss");
       var compiledFiles = [];
       var compiler = new EyeglassCompiler(sourceDir, {
         cssDir: ".",
@@ -187,6 +206,8 @@ describe("EyeglassCompiler", function () {
         }
       });
 
+      fs.writeFileSync(unusedSourceFile, "// this isn't used.");
+
       var builder = new broccoli.Builder(compiler);
 
       return build(builder)
@@ -194,7 +215,6 @@ describe("EyeglassCompiler", function () {
           assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
           assert.equal(1, compiledFiles.length);
 
-          var unusedSourceFile = path.join(sourceDir, "styles", "_unused.scss");
           fs.writeFileSync(unusedSourceFile, "// changed but still not used.");
           return build(builder).then(function(outputDir2) {
             assert.equal(outputDir, outputDir2);
@@ -396,7 +416,90 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
-    it("busts cache when an eyeglass asset changes");
+    it("busts cache when an eyeglass asset changes", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss":
+          '@import "eyeglass-module/assets";\n' +
+          '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n'
+      });
+      var eyeglassModDir = makeFixtures("eyeglassmod2.tmp", {
+        "package.json": "{\n" +
+                        '  "name": "is_a_module",\n' +
+                        '  "keywords": ["eyeglass-module"],\n' +
+                        '  "main": "eyeglass-exports.js",\n' +
+                        '  "private": true,\n' +
+                        '  "eyeglass": {\n' +
+                        '    "name": "eyeglass-module",\n' +
+                        '    "needs": "*"\n' +
+                        "  }\n" +
+                        "}",
+        "eyeglass-exports.js":
+          'var path = require("path");\n' +
+          "module.exports = function(eyeglass, sass) {\n" +
+          "  return {\n" +
+          "    sassDir: __dirname, // directory where the sass files are.\n" +
+          '    assets: eyeglass.assets.export(path.join(__dirname, "images"))\n' +
+          "  };\n" +
+          "};",
+        "sass": {
+          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        },
+        "images": {
+          "shape.svg": rectangleSVG
+        }
+      });
+
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "eyeglass-module": {
+          "shape.svg": rectangleSVG
+        },
+        "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n'
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        },
+        eyeglass: {
+          modules: [
+            {path: eyeglassModDir}
+          ]
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(eyeglassModDir, {
+            "images": {
+              "shape.svg": circleSVG
+            }
+          });
+
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css":
+              '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n',
+            "eyeglass-module": {
+              "shape.svg": circleSVG
+            }
+          });
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
     it("removes a css file when the corresponding sass file is removed");
