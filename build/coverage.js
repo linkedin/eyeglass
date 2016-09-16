@@ -3,8 +3,8 @@
 var istanbul = require("gulp-istanbul");
 var mocha = require("gulp-mocha");
 
-module.exports = function(gulp, depends) {
-  gulp.task("coverage", depends, function (cb) {
+module.exports = function(gulp, depends, name) {
+  gulp.task(name || "coverage", depends, function (cb) {
     gulp.src(["lib/**/*.js"])
     .pipe(istanbul()) // Covering files
     .pipe(istanbul.hookRequire()) // Force `require` to return covered files
@@ -15,18 +15,17 @@ module.exports = function(gulp, depends) {
       .pipe(istanbul.enforceThresholds({
         thresholds: {
           global: {
-            statements: 97.92,
-            branches: 93.81,
-            functions: 98.73,
-            lines: 97.92
+            statements: 98.79,
+            branches: 96.99,
+            functions: 100,
+            lines: 98.79
           }
-        }})) // Enforce a coverage of at least 90%
+        }
+      }))
       .on("end", cb)
       .on("error", function(e) {
-        console.error(e.toString());
-        /*eslint-disable */
+        console.log(e.toString());
         process.exit(1);
-        /*eslint-enable */
       });
     });
   });

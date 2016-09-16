@@ -157,6 +157,63 @@ describe("options", function() {
     });
   });
 
+  it("should use default verion of `0.0.0` if `ignoreDeprecations: false`", function(done) {
+    testutils.assertStderr(function(checkStderr) {
+      var rootDir = testutils.fixtureDirectory("basic_modules");
+      var options = {
+        root: rootDir,
+        assetsHttpPrefix: "foo",
+        assetsRelativeTo: "/styles/main.css",
+        eyeglass: {
+          ignoreDeprecations: false
+        }
+      };
+      var eyeglass = new Eyeglass.Eyeglass(options);
+      /* eslint no-unused-vars:0 */
+      var sassopts = eyeglass.sassOptions();
+      checkStderr([
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `root` " +
+        "should be passed into the eyeglass options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      root: ...",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "`assetsHttpPrefix` has been renamed to `httpPrefix` and should be passed into " +
+        "the eyeglass asset options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      assets: {",
+        "        httpPrefix: ...",
+        "      }",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "`assetsRelativeTo` has been renamed to `relativeTo` and should be passed into " +
+        "the eyeglass asset options rather than the sass options:",
+        "  var options = eyeglass({",
+        "    /* sassOptions */",
+        "    ...",
+        "    eyeglass: {",
+        "      assets: {",
+        "        relativeTo: ...",
+        "      }",
+        "    }",
+        "  });",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
+        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
+        "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
+      ].join("\n"));
+      done();
+    });
+  });
+
   describe("deprecated interface", function() {
     it("should support `new Eyeglass.Eyeglass` with warning", function(done) {
       testutils.assertStderr(function(checkStderr) {

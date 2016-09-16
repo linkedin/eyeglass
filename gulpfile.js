@@ -9,3 +9,5 @@ require("./build/coverage")(gulp);
 require("./build/site")(gulp, null, __dirname);
 
 gulp.task("default", ["test"]);
+
+require("./build/coverage")(gulp, ["lint"], "test:all");

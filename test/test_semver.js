@@ -65,4 +65,16 @@ describe("semver checking", function () {
       done();
     });
   });
+
+  it("should be silent if strictModuleVersions is disabled (false)", function (done) {
+    var options = {
+      data: "#hello { greeting: hello(Chris); }",
+      eyeglass: {
+        root: testutils.fixtureDirectory("bad_engine"),
+        strictModuleVersions: false
+      }
+    };
+
+    testutils.assertCompiles(options, "#hello {\n  greeting: hello(Chris); }\n", done);
+  });
 });
