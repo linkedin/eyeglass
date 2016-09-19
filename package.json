@@ -53,5 +53,9 @@
     "handlebars": "^4.0.5",
     "mocha": "^2.3.3",
     "should": "^7.1.0"
-  }
+  },
+  "files": [
+    "lib",
+    "sass"
+  ]
 }
