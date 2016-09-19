@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-eyeglass",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Use eyeglass and node-sass to compile Sass files.",
   "directories": {
     "doc": "doc",
