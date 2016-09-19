@@ -15,10 +15,10 @@ module.exports = function(gulp, depends, name) {
       .pipe(istanbul.enforceThresholds({
         thresholds: {
           global: {
-            statements: 98.79,
-            branches: 96.99,
+            statements: 99.8,
+            branches: 99.25,
             functions: 100,
-            lines: 98.79
+            lines: 99.8
           }
         }
       }))
