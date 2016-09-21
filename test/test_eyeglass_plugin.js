@@ -505,5 +505,6 @@ describe("EyeglassCompiler", function () {
     it("busts cache when a file higher in the load path order is added");
     it("removes a css file when the corresponding sass file is removed");
     it("preserves cache across builder instances?");
+    it("tracks dependencies on the 3rd build correctly");
   });
 });
