@@ -500,6 +500,7 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
+    it("handles files reached via ../ outside the load path");
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
     it("removes a css file when the corresponding sass file is removed");
