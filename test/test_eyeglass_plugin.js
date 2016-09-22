@@ -556,7 +556,54 @@ describe("EyeglassCompiler", function () {
         });
     });
 
-    it("handles files reached via ../ outside the load path");
+    it.only("busts cache when file reached via ../ outside the load path changes", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "external";'
+      });
+      var includeDir = makeFixtures("includeDir.tmp", {
+        "external.scss": '@import "../relativeIncludeDir.tmp/relative";'
+      });
+      var relativeIncludeDir = makeFixtures("relativeIncludeDir.tmp", {
+        "relative.scss": ".external { float: left; }"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".external {\n  float: left; }\n"
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        includePaths: [includeDir],
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(relativeIncludeDir, {
+            "relative.scss": ".external { float: right; }"
+          });
+
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css": ".external {\n  float: right; }\n"
+          });
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
     it("removes a css file when the corresponding sass file is removed");
