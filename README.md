@@ -117,6 +117,17 @@ intelligent decisions about how to handle it.
 * `fullCssFilename`: The absolute path of the CSS file. (note: the file is not there yet, obviously)
 * `options`: The sassOptions as returned by the options generator (if provided).
 
+## Debugging
+
+Set the an environment variable `DEBUG="broccoli-eyeglass"` to get lots of
+debugging output that can help diagnose build issues -- especially
+issues with build caching and cache invalidation.
+
+Eyeglass-specific debugging can by enabled by setting `DEBUG="eyeglass:*"`
+
+For more details, see the documentation on [debug](https://github.com/visionmedia/debug).
+
+
 ## Examples
 
 Do you like examples? You’re in luck!
