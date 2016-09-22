@@ -266,6 +266,60 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("caches on the 3rd build", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "external";',
+        "_unrelated.scss": "/* This is unrelated to anything. */"
+      });
+      var includeDir = makeFixtures("includeDir.tmp", {
+        "external.scss": ".external { float: left; }"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".external {\n  float: left; }\n"
+      });
+
+      var compiledFiles = [];
+      var compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        includePaths: [includeDir],
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          compiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      });
+
+      var builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(projectDir, {
+            "_unrelated.scss": "/* This is very unrelated to anything. */"
+          });
+
+          return build(builder)
+            .then(function(outputDir2) {
+              assert.equal(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 0);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+              compiledFiles = [];
+              fixturify.writeSync(projectDir, {
+                "_unrelated.scss": "/* This is quite unrelated to anything. */"
+              });
+
+              return build(builder)
+                .then(function(outputDir2) {
+                  assert.equal(outputDir, outputDir2);
+                  assert.equal(compiledFiles.length, 0);
+                  assertEqualDirs(outputDir2, expectedOutputDir);
+                });
+            });
+        });
+    });
+
     it("busts cache when file reached via includePaths changes", function() {
       var projectDir = makeFixtures("projectDir.tmp", {
         "project.scss": '@import "external";'
@@ -416,6 +470,7 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
+
     it("busts cache when an eyeglass asset changes", function() {
       var projectDir = makeFixtures("projectDir.tmp", {
         "project.scss":
@@ -500,6 +555,7 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
+
     it("handles files reached via ../ outside the load path");
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
