@@ -3,6 +3,7 @@
 
 var EyeglassCompiler = require("broccoli-eyeglass");
 var findHost = require("./lib/findHost");
+var merge = require("broccoli-merge-trees");
 var path = require("path");
 var stew = require("broccoli-stew");
 
@@ -114,8 +115,31 @@ module.exports = {
             compilationCallback(cssFile, sassOptions);
           }
         };
-        return new EyeglassCompiler(tree, config);
+
+        tree = new EyeglassCompiler(tree, config);
+
+        // Ember CLI will ignore any non-CSS files returned in the tree for an
+        // addon. So that non-CSS assets aren't lost, we'll store them in a
+        // separate tree for now and return them in a later hook.
+        if (!isApp) {
+          addon.addonAssetsTree = stew.find(tree, '**/*.!(css)');
+        }
+
+        return tree;
       }
     });
+  },
+
+  treeForPublic: function(tree) {
+    tree = this._super.treeForPublic(tree);
+
+    // If we're processing an addon and stored some assets for it, add them
+    // to the addon's public tree so they'll be available in the app's build
+    if (this.addonAssetsTree) {
+      tree = tree ? merge([tree, this.addonAssetsTree]) : this.addonAssetsTree;
+      this.addonAssetsTree = null;
+    }
+
+    return tree;
   }
 };
