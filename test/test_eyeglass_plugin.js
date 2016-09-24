@@ -18,6 +18,7 @@ var broccoli = require("broccoli");
 var RSVP = require("rsvp");
 var glob = require("glob");
 var EyeglassCompiler = require("../lib/index");
+var AsyncDiskCache = require("async-disk-cache");
 
 function fixtureDir(name) {
   return path.resolve(__dirname, "fixtures", name);
@@ -728,12 +729,63 @@ describe("EyeglassCompiler", function () {
             });
         });
     });
+
+    it("doesn't remove an asset unless no files are using it anymore");
   });
 
 
   describe("warm caching", function() {
+    afterEach(function() {
+      var cache = new AsyncDiskCache("broccoli-eyeglass");
+      return cache.clear();
+    });
+
+    function warmBuilders(dir, options, compilationListener) {
+      var compiler1 = new EyeglassCompiler(dir, options);
+      compiler1.events.on("compiled", compilationListener);
+      var compiler2 = new EyeglassCompiler(dir, options);
+      compiler2.events.on("compiled", compilationListener);
+
+      var builder1 = new broccoli.Builder(compiler1);
+      builder1.compiler = compiler1;
+      var builder2 = new broccoli.Builder(compiler2);
+      builder2.compiler = compiler2;
+      return [builder1, builder2];
+    }
+
     afterEach(cleanupTempDirs);
-    it("preserves cache across builder instances?");
+
+    it("preserves cache across builder instances", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "related";',
+        "_related.scss": "/* This is related to something. */"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": "/* This is related to something. */\n"
+      });
+
+      var compiledFiles = [];
+      var builders = warmBuilders(projectDir, {
+        cssDir: ".",
+        persistentCache: true
+      }, function(details) {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+      return build(builders[0])
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          return build(builders[1])
+            .then(function(outputDir2) {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 0);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
   });
