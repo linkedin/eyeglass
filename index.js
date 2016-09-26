@@ -3,9 +3,9 @@
 
 var EyeglassCompiler = require("broccoli-eyeglass");
 var findHost = require("./lib/findHost");
+var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
-var stew = require("broccoli-stew");
 
 /* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
  * ember addon dependencies.  However there's no path information in the addon object,
@@ -74,7 +74,7 @@ module.exports = {
         sassDir = sassDir || './';
 
         // limit to only files in the sass directory.
-        tree = stew.find(tree, {include: [path.join(sassDir, "/**/*")]});
+        tree = funnel(tree, {include: [path.join(sassDir, "/**/*")]});
 
         var projectConfig = addon.project.config(host.env);
         if (addon.parent && addon.parent.engineConfig) {
@@ -122,7 +122,7 @@ module.exports = {
         // addon. So that non-CSS assets aren't lost, we'll store them in a
         // separate tree for now and return them in a later hook.
         if (!isApp) {
-          addon.addonAssetsTree = stew.find(tree, '**/*.!(css)');
+          addon.addonAssetsTree = funnel(tree, {include: ['**/*.!(css)']});
         }
 
         return tree;
