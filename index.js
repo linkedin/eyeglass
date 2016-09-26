@@ -3,8 +3,9 @@
 
 var EyeglassCompiler = require("broccoli-eyeglass");
 var findHost = require("./lib/findHost");
+var funnel = require("broccoli-funnel");
+var merge = require("broccoli-merge-trees");
 var path = require("path");
-var stew = require("broccoli-stew");
 
 /* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
  * ember addon dependencies.  However there's no path information in the addon object,
@@ -73,7 +74,7 @@ module.exports = {
         sassDir = sassDir || './';
 
         // limit to only files in the sass directory.
-        tree = stew.find(tree, {include: [path.join(sassDir, "/**/*")]});
+        tree = funnel(tree, {include: [path.join(sassDir, "/**/*")]});
 
         var projectConfig = addon.project.config(host.env);
         if (addon.parent && addon.parent.engineConfig) {
@@ -114,8 +115,31 @@ module.exports = {
             compilationCallback(cssFile, sassOptions);
           }
         };
-        return new EyeglassCompiler(tree, config);
+
+        tree = new EyeglassCompiler(tree, config);
+
+        // Ember CLI will ignore any non-CSS files returned in the tree for an
+        // addon. So that non-CSS assets aren't lost, we'll store them in a
+        // separate tree for now and return them in a later hook.
+        if (!isApp) {
+          addon.addonAssetsTree = funnel(tree, {include: ['**/*.!(css)']});
+        }
+
+        return tree;
       }
     });
+  },
+
+  treeForPublic: function(tree) {
+    tree = this._super.treeForPublic(tree);
+
+    // If we're processing an addon and stored some assets for it, add them
+    // to the addon's public tree so they'll be available in the app's build
+    if (this.addonAssetsTree) {
+      tree = tree ? merge([tree, this.addonAssetsTree]) : this.addonAssetsTree;
+      this.addonAssetsTree = null;
+    }
+
+    return tree;
   }
 };
