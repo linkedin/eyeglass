@@ -177,7 +177,36 @@ describe("fs", function () {
     testutils.assertCompiles(eg, expected, done);
   });
 
-  it("cannot access check existance of file outside the security sandbox", function(done) {
+  it("should allow a string to be passed to fsSandbox option", function (done) {
+    var rootDir = testutils.fixtureDirectory("app_assets");
+
+    var input = "@import 'fs(my-id)';" +
+                "fs {" +
+                "  absolute: fs-absolute-path(my-id, 'images/foo.png');" +
+                "  exists: fs-exists(fs-absolute-path(my-id, 'uses_mod_1.scss'));" +
+                "  missing: fs-exists(fs-absolute-path(my-id, 'images/foo.png'));" +
+                "}";
+    var expected = "fs {\n" +
+                   "  absolute: " + path.join(rootDir, "sass", "images", "foo.png") + ";\n" +
+                   "  exists: true;\n" +
+                   "  missing: false; }\n";
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: rootDir,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "sass", "uses_mod_1.scss"),
+    });
+
+    testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("cannot access check existence of file outside the security sandbox", function(done) {
     var rootDir = testutils.fixtureDirectory("app_assets");
 
     var input = "@import 'fs(my-id)';" +
@@ -508,5 +537,133 @@ describe("fs", function () {
     });
 
     testutils.assertCompiles(eg, expected, done);
+  });
+
+  it("should throw security violation on files outside of the sandbox", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+    var parentDir = path.dirname(rootDir);
+
+    var input = "@import 'eyeglass/fs'; /* #{fs-list-files('" + parentDir + "')} */";
+
+    var expectedError = {
+      message: "Security violation: Cannot access " + parentDir
+    };
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: true,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "haserror.scss")
+    });
+
+    testutils.assertCompilationError(eg, expectedError, done);
+  });
+
+  it("should throw security violation on files outside of the sandbox (via glob)", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+
+    var input = "@import 'eyeglass/fs';"
+              + "/* #{fs-list-files('" + rootDir + "', '../../../package.json')} */";
+
+    var expectedError = {
+      message: "Security violation: Cannot access ../../../package.json"
+    };
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: true,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "haserror.scss")
+    });
+
+    testutils.assertCompilationError(eg, expectedError, done);
+  });
+
+  it("should throw violation outside the sandbox (fs-read-file)", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+    var file = path.join(rootDir, "../../../package.json");
+
+    var input = "@import 'eyeglass/fs';"
+              + "/* #{fs-read-file('" + file + "')} */";
+
+    var expectedError = {
+      message: "Security violation: Cannot access " + file
+    };
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: true,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "haserror.scss")
+    });
+
+    testutils.assertCompilationError(eg, expectedError, done);
+  });
+
+  it("should throw if path not registered", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+
+    var input = "@import 'fs(root)';" +
+                "/* #{fs-absolute-path(invalid-path)} */";
+
+    var expectedError = {
+      message: "No path is registered for invalid-path"
+    };
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: true,
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "haserror.scss")
+    });
+
+    testutils.assertCompilationError(eg, expectedError, done);
+  });
+
+  it("should throw if an invalid fsSandbox option is passed", function (done) {
+    var rootDir = testutils.fixtureDirectory("filesystem");
+
+    var input = "@import 'fs(root)';" +
+                "fs {" +
+                "  error: fs-info(fs-absolute-path(root, '..', '..', 'foo.txt'));" +
+                "}";
+
+    var expectedError = {
+      message: "unknown value for sandbox"
+    };
+
+    var eg = new Eyeglass({
+      eyeglass: {
+        root: rootDir,
+        fsSandbox: {}, // invalid value for fsSandbox (must be Array, String, or `true`)
+        engines: {
+          sass: sass
+        }
+      },
+      data: input,
+      file: path.join(rootDir, "haserror.scss")
+    });
+
+    testutils.assertCompilationError(eg, expectedError, done);
   });
 });
