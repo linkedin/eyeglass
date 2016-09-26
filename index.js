@@ -90,7 +90,7 @@ module.exports = {
         config.eyeglass = config.eyeglass || {}
         config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
                                    config.httpRoot ||
-                                   projectConfig.baseURL;
+                                   projectConfig.rootURL;
         config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
 
         if (config.eyeglass.modules) {
