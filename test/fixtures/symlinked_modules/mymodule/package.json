@@ -1,0 +1,21 @@
+{
+  "name": "mymodule",
+  "version": "1.0.0",
+  "description": "this is my module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "eyeglass-module"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "eyeglass": {
+    "exports": false,
+    "sassDir": "sass",
+    "needs": "*"
+  },
+  "dependencies": {
+    "shared_dep": "*"
+  }
+}

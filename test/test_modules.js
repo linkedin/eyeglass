@@ -5,6 +5,7 @@ var fs = require("fs");
 var path = require("path");
 var glob = require("glob");
 var assert = require("assert");
+var testutils = require("./testutils");
 
 var fixtureDir = path.join(__dirname, "fixtures/EyeglassModules");
 var fixtures = glob.sync(path.join(fixtureDir, "*"));
@@ -62,5 +63,32 @@ describe("EyeglassModules", function () {
         expectationFn(modules, err, expectationContents);
       });
     });
+  });
+
+  it("handles symlinked node modules", function(done) {
+    var fixtureDir = path.join(__dirname, "fixtures", "symlinked_modules");
+    var symlinkPath = path.join(fixtureDir, "project", "node_modules", "mymodule");
+    var modulePath = path.join(fixtureDir, "mymodule");
+    fs.symlinkSync(modulePath, symlinkPath, "dir");
+
+    var opts = {
+      data: '@import "mymodule"; @import "shared_dep";',
+      eyeglass: {
+        root: path.join(fixtureDir, "project")
+      }
+    };
+
+    var expected = ".shared {\n" +
+                   "  float: upside-down;\n" +
+                   "  version: 1.2.0; }\n" +
+                   "\n" +
+                   ".mymodule {\n" +
+                   "  color: red; }\n";
+
+    testutils.assertCompiles(opts, expected, function() {
+      fs.unlinkSync(symlinkPath);
+      done();
+    });
+
   });
 });

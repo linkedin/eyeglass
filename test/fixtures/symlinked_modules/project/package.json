@@ -1,0 +1,10 @@
+{
+  "name": "myproject",
+  "version": "0.0.1",
+  "main": "package.json",
+  "private": true,
+  "dependencies": {
+    "mymodule": "*",
+    "shared_dep": "*"
+  }
+}
