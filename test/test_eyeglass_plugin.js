@@ -827,6 +827,49 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("restored side-effect outputs when cached.", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "sass": {
+          "project.scss": '@import "assets";\n' +
+                          '.shape { content: asset-url("shape.svg"); }',
+        },
+        "assets": {
+          "shape.svg": rectangleSVG
+        }
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": '.shape {\n  content: url("/shape.svg"); }\n',
+        "shape.svg": rectangleSVG
+      });
+
+      var compiledFiles = [];
+      var builders = warmBuilders(projectDir, {
+        sassDir: "sass",
+        assets: "assets",
+        cssDir: ".",
+        persistentCache: true,
+        eyeglass: {
+          root: projectDir
+        }
+      }, function(details) {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+      return build(builders[0])
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          return build(builders[1])
+            .then(function(outputDir2) {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 0);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
+
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
   });
