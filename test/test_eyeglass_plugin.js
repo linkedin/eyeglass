@@ -870,6 +870,8 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("invalidates when non-sass file dependencies change.");
+    it("invalidates when node modules change.");
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
   });
