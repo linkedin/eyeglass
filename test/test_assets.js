@@ -282,7 +282,7 @@ describe("assets", function () {
                "$uri: 'assets/foo/bar.png');" +
                ".test { foo: inspect($eg-registered-assets); }";
     var filepath = path.join("images", "foo", "bar.png").replace(/\\/g, "\\\\");
-    var expected = '.test {\n  foo: (module-a: ("foo/bar.png": (' +
+    var expected = ".test {\n  foo: (module-a: (foo/bar.png: (" +
                    'filepath: "' + filepath + '", ' +
                    'uri: "assets/foo/bar.png"))); }\n';
     var rootDir = testutils.fixtureDirectory("app_assets");
@@ -863,9 +863,9 @@ describe("assets", function () {
     }
 
     function test(options, shouldNormalize, done) {
-      var expected = "/* \""
-      + escapeBackslash(shouldNormalize ? normalizedUri : otherUri)
-      + "\" */\n";
+      var expected = "/* "
+      + (shouldNormalize ? normalizedUri : otherUri)
+      + " */\n";
 
       options = merge({
         data: input,
