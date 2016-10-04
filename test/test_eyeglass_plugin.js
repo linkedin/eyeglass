@@ -1011,9 +1011,45 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("can force invalidate the persistent cache", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "related";',
+        "_related.scss": "/* This is related to something. */"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": "/* This is related to something. */\n"
+      });
+
+      var compiledFiles = [];
+      var builders = warmBuilders(2, projectDir, {
+        cssDir: ".",
+        persistentCache: "test"
+      }, function(details) {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+      return build(builders[0])
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          process.env["BROCCOLI_EYEGLASS"] = "forceInvalidateCache";
+
+          return build(builders[1])
+            .then(function(outputDir2) {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(1, compiledFiles.length);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            })
+            .finally(function() {
+              delete process.env["BROCCOLI_EYEGLASS"];
+            });
+        });
+    });
+
     it("doesn't check the persistent cache when doing a rebuild in the same instance.");
     it("busts cache when options used for compilation are different");
     it("busts cache when a file higher in the load path order is added");
-    it("can force invalidate the persistent cache");
   });
 });

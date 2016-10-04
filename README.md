@@ -195,6 +195,12 @@ option from the eyeglass exports file will cause `broccoli-eyeglass` to
 more carefully check for invalidations in that module instead of just
 relying on semver.
 
+### Debugging the cache
+
+As above, set `DEBUG="broccoli-eyeglass"` to see debug output that may
+help you report a bug or diagnose why caching isn't working like you
+thnk it should.
+
 ## Examples
 
 Do you like examples? You’re in luck!
