@@ -1048,7 +1048,7 @@ describe("EyeglassCompiler", function () {
         });
     });
 
-    it.only("busts cache when options used for compilation are different", function() {
+    it("busts cache when options used for compilation are different", function() {
       var projectDir = makeFixtures("projectDir.tmp", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
