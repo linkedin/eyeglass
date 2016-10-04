@@ -30,8 +30,8 @@ $eg-registered-assets: () !default;
   $eg-registered-assets: map-merge($eg-registered-assets, (
     $module: map-merge($mod-assets, (
       $url: (
-        filepath: $path,
-        uri: $uri
+        filepath: quote($path),
+        uri: quote($uri)
       )
     ))
   )) !global;
@@ -90,7 +90,7 @@ $eg-registered-assets: () !default;
   $mod-assets: map-get($eg-registered-assets, $module) or ();
   @each $url, $path in $mod-assets {
     $url: if($module, $module + "/" + $url, $url);
-    $asset-urls: append($asset-urls, $url, comma);
+    $asset-urls: append($asset-urls, quote($url), comma);
   }
   @return $asset-urls;
 }
