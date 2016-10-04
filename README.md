@@ -79,6 +79,9 @@ The following options are specific to this plugin:
 * `sourceFiles` - Array of file names or glob patterns (relative to the
   sass directory) that should be compiled. Note that file names must include
   the file extension (unlike `@import` in Sass). E.g.: `['application.scss']`
+* `persistentCache` - String. Set to the name of your application so
+  that your cache is isolated from other `broccoli-eyeglass` based
+  builds. When falsy, persistent caching is disabled.
 * `optionsGenerator` - Function that accepts four arguments:
 
   * `sassFile` - The sass file being compiled.
@@ -127,6 +130,76 @@ Eyeglass-specific debugging can by enabled by setting `DEBUG="eyeglass:*"`
 
 For more details, see the documentation on [debug](https://github.com/visionmedia/debug).
 
+## Caching
+
+This broccoli plugin uses two different caching layers to avoid
+unecessary builds of sass files.
+
+### Rebuild Caching
+
+When the same broccoli-eyeglass instance is ran more than once, the
+rebuild is avoided by checking mtimes of dependencies to see if they
+have changed since the last build.
+
+This is a very fast and highly accurate caching system that avoids
+rebuilds while running a single build instance (for things like `ember serve`)
+because mtime checks are pretty fast and only dependencies are stat'ed.
+
+Unfortunately, this caching system only helps for rebuilds within the
+same instance as all the cache state is held in memory -- a first build
+is required every time.
+
+### Persistent Caching
+
+Persistent Caching is more slightly expensive because it is content based (as
+opposed to mtimes) and because it has to check more things (npm modules
+might have been upgraded, etc), but it
+allows `broccoli-eyeglass` to skip the first build when nothing has
+changed, which is often the case between successive rebuilds.
+
+Because it's more expensive, in some cases it may actually be slower
+than just building your stylesheets depending on the size/complexity of
+your Sass files. You should test with and without and verify a speedup
+before enabling this.
+
+To enable persistent caching set the `persistentCache` option as
+described above.
+
+### Forcing Invalidation
+
+The easiest way to force invalidate the rebuild cache is to just save
+the main sass file that needs to be rebuilt (see also: the unix `touch`
+command). There's not currently a way to disable the rebuild cache, we
+could add one, but we'd rather understand why it's not working first and
+try to address that.
+
+To force an initial build and skip the persistent cache set the
+environment variable `BROCCOLI_EYEGLASS=forceInvalidateCache`.
+
+### General Cache Invalidation
+
+The caches will only be invalidated correctly if this broccoli plugin
+knows what files are depended on and output. Sass files and eyeglass
+assets are already tracked. But other files migh be involved in your
+build, if that is the case, `eyeglassCompiler.events.emit("dependency", absolutePath)`
+must be called during the build. Similarly, if there are
+other files output during compilation, then you must call
+`eyeglassCompiler.events.emit("additional-output", absolutePath)`.
+
+### Caching while developing eyeglass modules
+
+When developing against an eyeglass module, it's common for the files in
+the module to change without a corresponding version change. If an
+eyeglass module is in development returning `inDevelopment: true` as an
+option from the eyeglass exports file will cause `broccoli-eyeglass` to
+more carefully check for invalidations in that module instead of just
+relying on semver.
+
+### Debugging the cache
+
+As above, set `DEBUG="broccoli-eyeglass"` to see debug output that may
+help you report a bug or diagnose why caching isn't working like you
+thnk it should.
 
 ## Examples
 

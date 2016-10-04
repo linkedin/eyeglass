@@ -20,6 +20,7 @@
     "eyeglass"
   ],
   "dependencies": {
+    "async-disk-cache": "^1.0.8",
     "broccoli-merge-trees": "^1.1.4",
     "broccoli-plugin": "^1.2.2",
     "chained-emitter": "^0.1.2",
@@ -28,9 +29,14 @@
     "eyeglass": "^1.1.0",
     "fs-tree-diff": "^0.5.3",
     "glob": "^5.0.3",
+    "hash-for-dep": "^1.0.3",
+    "json-stable-stringify": "^1.0.1",
+    "lodash.merge": "^4.6.0",
+    "lodash.sortby": "^4.7.0",
     "mkdirp": "^0.5.1",
     "node-sass": "^3.9.3",
     "rsvp": "^3.0.21",
+    "string.prototype.startswith": "^0.2.0",
     "walk-sync": "^0.3.1"
   },
   "devDependencies": {
