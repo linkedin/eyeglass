@@ -1082,8 +1082,58 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("can use the rebuild cache after restoring from the persistent cache.", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss": '@import "related";',
+        "_related.scss": "/* This is related to something. */"
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": "/* This is related to something. */\n"
+      });
+
+      var compiledFiles = [];
+      var hotCompiledFiles = [];
+      var builders = warmBuilders(2, projectDir, {
+        cssDir: ".",
+        persistentCache: "test",
+        optionsGenerator: function(sassFile, cssFile, options, cb) {
+          hotCompiledFiles.push(sassFile);
+          cb(cssFile, options);
+        }
+      }, function(details) {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+      return build(builders[0])
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          assert.equal(1, hotCompiledFiles.length);
+          compiledFiles = [];
+          hotCompiledFiles = [];
+
+          return build(builders[1])
+            .then(function(outputDir2) {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 0);
+              assert.equal(hotCompiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+
+              compiledFiles = [];
+              hotCompiledFiles = [];
+
+              return build(builders[1])
+                .then(function(outputDir2) {
+                  assert.notEqual(outputDir, outputDir2);
+                  assert.equal(compiledFiles.length, 0);
+                  assert.equal(hotCompiledFiles.length, 0);
+                  assertEqualDirs(outputDir2, expectedOutputDir);
+                });
+            });
+        });
+    });
+
     it("doesn't check the persistent cache when doing a rebuild in the same instance.");
-    it("can use the rebuild cache after restoring from the persistent cache.");
     it("busts cache when a file higher in the load path order is added");
   });
 });
