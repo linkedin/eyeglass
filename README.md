@@ -128,6 +128,8 @@ issues with build caching and cache invalidation.
 
 Eyeglass-specific debugging can by enabled by setting `DEBUG="eyeglass:*"`
 
+You can debug with both of those set as well: `DEBUG="broccoli-eyeglass,eyeglass:*"`
+
 For more details, see the documentation on [debug](https://github.com/visionmedia/debug).
 
 ## Caching
