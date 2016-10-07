@@ -1011,6 +1011,94 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it.only("invalidates when eyeglass modules javascript files changes (package.json).", function() {
+      var projectDir = makeFixtures("projectDir.tmp", {
+        "project.scss":
+          ".foo { content: foo(); }\n"
+      });
+      var eyeglassModDir = makeFixtures("eyeglassmod3.tmp", {
+        "package.json": "{\n" +
+                        '  "name": "is_a_module",\n' +
+                        '  "keywords": ["eyeglass-module"],\n' +
+                        '  "main": "eyeglass-exports.js",\n' +
+                        '  "private": true,\n' +
+                        '  "files": ["eyeglass-exports.js", "sass", "lib", "images"],' +
+                        '  "eyeglass": {\n' +
+                        '    "inDevelopment": true,\n' +
+                        '    "name": "eyeglass-module",\n' +
+                        '    "needs": "*"\n' +
+                        "  }\n" +
+                        "}",
+        "eyeglass-exports.js":
+          'var path = require("path");\n' +
+          'var foo = require("./lib/foo");\n' +
+          "module.exports = function(eyeglass, sass) {\n" +
+          "  return {\n" +
+          "    sassDir: path.join(__dirname, 'sass'), // directory where the sass files are.\n" +
+          '    assets: eyeglass.assets.export(path.join(__dirname, "images")),\n' +
+          "    functions: {\n" +
+          '      "foo()": function() { return sass.types.String(foo); }\n' +
+          "    }\n" +
+          "  };\n" +
+          "};",
+        "sass": {
+          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        },
+        "lib": {
+          "foo.js": "module.exports = 'foo';\n"
+        },
+        "images": {
+          "shape.svg": rectangleSVG
+        }
+      });
+
+      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+        "project.css": ".foo {\n  content: foo; }\n"
+      });
+
+      var compiledFiles = [];
+
+      var builders = warmBuilders(2, projectDir, {
+        cssDir: ".",
+        persistentCache: "test",
+        eyeglass: {
+          modules: [
+            {path: eyeglassModDir}
+          ]
+        }
+      }, function(details) {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+
+      return build(builders[0])
+        .then(function(outputDir) {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles = [];
+
+          fixturify.writeSync(eyeglassModDir, {
+            "lib": {
+              "foo.js": "module.exports = 'changed-foo';\n"
+            }
+          });
+
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css": ".foo {\n  content: changed-foo; }\n"
+          });
+
+          delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
+          delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
+
+          return build(builders[1])
+            .then(function(outputDir2) {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
+
     it("can force invalidate the persistent cache", function() {
       var projectDir = makeFixtures("projectDir.tmp", {
         "project.scss": '@import "related";',
