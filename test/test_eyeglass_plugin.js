@@ -1133,7 +1133,7 @@ describe("EyeglassCompiler", function () {
         });
     });
 
-    it.only("busts the rebuild cache after restoring from the persistent cache.", function() {
+    it("busts the rebuild cache after restoring from the persistent cache.", function() {
       var projectDir = makeFixtures("projectDir.tmp", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
