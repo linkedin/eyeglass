@@ -95,7 +95,8 @@ module.exports = {
         config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
 
         if (config.eyeglass.modules) {
-          config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
+          config.eyeglass.modules =
+            config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
         } else {
           config.eyeglass.modules = localEyeglassAddons(addon.parent);
         }
