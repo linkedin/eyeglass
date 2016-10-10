@@ -82,6 +82,10 @@ The following options are specific to this plugin:
 * `persistentCache` - String. Set to the name of your application so
   that your cache is isolated from other `broccoli-eyeglass` based
   builds. When falsy, persistent caching is disabled.
+* `maxListeners` - Integer. Set to the maximum number of listeners
+  your use of eyeglass compiler needs. Defaults to 10. Note: do not
+  set `eyeglassCompiler.events.setMaxListeners()` yourself as eyeglass
+  has its own listeners it uses internally.
 * `optionsGenerator` - Function that accepts four arguments:
 
   * `sassFile` - The sass file being compiled.
