@@ -1,7 +1,7 @@
 {
   "name": "broccoli-eyeglass",
   "description": "Sass compiler for Broccoli with Eyeglass Integration",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "main": "lib/index.js",
   "license": "Apache License 2.0",
