@@ -32,8 +32,10 @@ function fixtureOutputDir(name) {
   return path.resolve(fixtureDir(name), "output");
 }
 
+var fixtureDirCount = 0;
 function makeFixtures(name, files) {
-  var dirname = fixtureDir(name);
+  fixtureDirCount = fixtureDirCount + 1;
+  var dirname = fixtureDir(name + fixtureDirCount + ".tmp");
   fs.mkdirSync(dirname);
   fixturify.writeSync(dirname, files);
   return dirname;
@@ -268,14 +270,14 @@ describe("EyeglassCompiler", function () {
     });
 
     it("caches on the 3rd build", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "external";',
         "_unrelated.scss": "/* This is unrelated to anything. */"
       });
-      var includeDir = makeFixtures("includeDir.tmp", {
+      var includeDir = makeFixtures("includeDir", {
         "external.scss": ".external { float: left; }"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".external {\n  float: left; }\n"
       });
 
@@ -322,13 +324,13 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when file reached via includePaths changes", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "external";'
       });
-      var includeDir = makeFixtures("includeDir.tmp", {
+      var includeDir = makeFixtures("includeDir", {
         "external.scss": ".external { float: left; }"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".external {\n  float: left; }\n"
       });
 
@@ -368,13 +370,13 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when file mode changes", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "external";'
       });
-      var includeDir = makeFixtures("includeDir.tmp", {
+      var includeDir = makeFixtures("includeDir", {
         "external.scss": ".external { float: left; }"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".external {\n  float: left; }\n"
       });
 
@@ -408,10 +410,10 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when an eyeglass module is upgraded", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "eyeglass-module";'
       });
-      var eyeglassModDir = makeFixtures("eyeglassmod.tmp", {
+      var eyeglassModDir = makeFixtures("eyeglassmod", {
         "package.json": "{\n" +
                         '  "name": "is_a_module",\n' +
                         '  "keywords": ["eyeglass-module"],\n' +
@@ -427,7 +429,7 @@ describe("EyeglassCompiler", function () {
           "index.scss": ".eyeglass-mod { content: eyeglass }"
         }
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".eyeglass-mod {\n  content: eyeglass; }\n"
       });
 
@@ -473,12 +475,12 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when an eyeglass asset changes", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss":
           '@import "eyeglass-module/assets";\n' +
           '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n'
       });
-      var eyeglassModDir = makeFixtures("eyeglassmod2.tmp", {
+      var eyeglassModDir = makeFixtures("eyeglassmod2", {
         "package.json": "{\n" +
                         '  "name": "is_a_module",\n' +
                         '  "keywords": ["eyeglass-module"],\n' +
@@ -505,7 +507,7 @@ describe("EyeglassCompiler", function () {
         }
       });
 
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "eyeglass-module": {
           "shape.svg": rectangleSVG
         },
@@ -558,16 +560,16 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when file reached via ../ outside the load path changes", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "external";'
       });
-      var includeDir = makeFixtures("includeDir.tmp", {
-        "external.scss": '@import "../relativeIncludeDir.tmp/relative";'
-      });
-      var relativeIncludeDir = makeFixtures("relativeIncludeDir.tmp", {
+      var relativeIncludeDir = makeFixtures("relativeIncludeDir", {
         "relative.scss": ".external { float: left; }"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var includeDir = makeFixtures("includeDir", {
+        "external.scss": '@import "../relativeIncludeDir' + fixtureDirCount + '.tmp/relative";'
+      });
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".external {\n  float: left; }\n"
       });
 
@@ -607,10 +609,10 @@ describe("EyeglassCompiler", function () {
     });
 
     it("removes a css file when the corresponding sass file is removed", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": "/* project */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* project */\n"
       });
 
@@ -649,12 +651,12 @@ describe("EyeglassCompiler", function () {
     });
 
     it("removes an asset file when the corresponding sass file is removed", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss":
           '@import "eyeglass-module/assets";\n' +
           '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n'
       });
-      var eyeglassModDir = makeFixtures("eyeglassmod2.tmp", {
+      var eyeglassModDir = makeFixtures("eyeglassmod", {
         "package.json": "{\n" +
                         '  "name": "is_a_module",\n' +
                         '  "keywords": ["eyeglass-module"],\n' +
@@ -681,7 +683,7 @@ describe("EyeglassCompiler", function () {
         }
       });
 
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "eyeglass-module": {
           "shape.svg": rectangleSVG
         },
@@ -755,11 +757,11 @@ describe("EyeglassCompiler", function () {
     afterEach(cleanupTempDirs);
 
     it("preserves cache across builder instances", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
@@ -787,11 +789,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("invalidates when a dependent file changes.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
@@ -827,7 +829,7 @@ describe("EyeglassCompiler", function () {
     });
 
     it("restored side-effect outputs when cached.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "sass": {
           "project.scss": '@import "assets";\n' +
                           '.shape { content: asset-url("shape.svg"); }',
@@ -836,7 +838,7 @@ describe("EyeglassCompiler", function () {
           "shape.svg": rectangleSVG
         }
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": '.shape {\n  content: url("/shape.svg"); }\n',
         "shape.svg": rectangleSVG
       });
@@ -870,7 +872,7 @@ describe("EyeglassCompiler", function () {
     });
 
     it("invalidates when non-sass file dependencies change.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "sass": {
           "project.scss": '@import "assets";\n' +
                           '.shape { content: asset-url("shape.svg"); }',
@@ -880,7 +882,7 @@ describe("EyeglassCompiler", function () {
         }
       });
 
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": '.shape {\n  content: url("/shape.svg"); }\n',
         "shape.svg": rectangleSVG
       });
@@ -924,11 +926,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("invalidates when eyeglass modules javascript files changes.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss":
           ".foo { content: foo(); }\n"
       });
-      var eyeglassModDir = makeFixtures("eyeglassmod3.tmp", {
+      var eyeglassModDir = makeFixtures("eyeglassmod", {
         "package.json": "{\n" +
                         '  "name": "is_a_module",\n' +
                         '  "keywords": ["eyeglass-module"],\n' +
@@ -964,7 +966,7 @@ describe("EyeglassCompiler", function () {
         }
       });
 
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".foo {\n  content: foo; }\n"
       });
 
@@ -1011,12 +1013,12 @@ describe("EyeglassCompiler", function () {
         });
     });
 
-    it.only("invalidates when eyeglass modules javascript files changes (package.json).", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+    it("invalidates when eyeglass modules javascript files changes (package.json).", function() {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss":
           ".foo { content: foo(); }\n"
       });
-      var eyeglassModDir = makeFixtures("eyeglassmod3.tmp", {
+      var eyeglassModDir = makeFixtures("eyeglassmod3", {
         "package.json": "{\n" +
                         '  "name": "is_a_module",\n' +
                         '  "keywords": ["eyeglass-module"],\n' +
@@ -1052,7 +1054,7 @@ describe("EyeglassCompiler", function () {
         }
       });
 
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": ".foo {\n  content: foo; }\n"
       });
 
@@ -1100,11 +1102,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("can force invalidate the persistent cache", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
@@ -1137,11 +1139,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts cache when options used for compilation are different", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
@@ -1171,11 +1173,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("can use the rebuild cache after restoring from the persistent cache.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
@@ -1222,11 +1224,11 @@ describe("EyeglassCompiler", function () {
     });
 
     it("busts the rebuild cache after restoring from the persistent cache.", function() {
-      var projectDir = makeFixtures("projectDir.tmp", {
+      var projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
         "_related.scss": "/* This is related to something. */"
       });
-      var expectedOutputDir = makeFixtures("expectedOutputDir.tmp", {
+      var expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": "/* This is related to something. */\n"
       });
 
