@@ -91,4 +91,20 @@ describe("EyeglassModules", function () {
     });
 
   });
+
+  it("throws when an invalid module path is provided", function(done) {
+    var rootDir = testutils.fixtureDirectory("simple_module");
+    var invalidPath = testutils.fixtureDirectory("does_not_exist");
+    var expectedError = "Could not find a valid package.json at " + invalidPath;
+    var options = {
+      data: "// should not compile",
+      eyeglass: {
+        root: rootDir,
+        modules: [{
+          path: invalidPath
+        }]
+      }
+    };
+    testutils.assertCompilationError(options, expectedError, done);
+  });
 });
