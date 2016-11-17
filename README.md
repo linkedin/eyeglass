@@ -61,10 +61,14 @@ var options = {
           ...
         }
       }
-    ]
+    ],
+
+    engines: {
+      sass: sass
+    }
   }
 };
-sass.render(eyeglass(options), sass));
+sass.render(eyeglass(options)));
 ```
 
 When adding a module by object, the object has the same format as the
@@ -144,11 +148,15 @@ options.eyeglass = {
     sources: [
       {directory: assetsDir, globOpts: { ignore: ["**/*.js", "**/*.scss"] }}
     ]
+  },
+
+  engines: {
+    sass: sass
   }
 }
 
 // Standard node-sass rendering of a single file.
-sass.render(eyeglass(options, sass), function(err, result) {
+sass.render(eyeglass(options), function(err, result) {
   // handle results
 });
 ```
@@ -576,10 +584,13 @@ var sass = require("node-sass");
 var eyeglass = require("eyeglass");
 var options = {
   eyeglass: {
+    engines: {
+      sass: sass
+    },
     normalizePaths: false
   }
 };
-sass.render(eyeglass(options), sass));
+sass.render(eyeglass(options)));
 ```
 
 ## `asset-uri`/`asset-url` string literals are not normalized
