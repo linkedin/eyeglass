@@ -1,0 +1,7 @@
+{
+  "name": "scoped_module",
+  "private": true,
+  "dependencies": {
+    "@scope/foo": "*"
+  }
+}
