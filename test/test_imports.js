@@ -498,6 +498,18 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+
+  it("should import from a scoped module name", function (done) {
+    var options = {
+      data: '@import "@scope/foo";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("scoped_module")
+      }
+    };
+    var expected = "/* @scope/foo */\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   describe("manual modules", function() {
     it("should support manually added module", function(done) {
       var manualModule = require(testutils.fixtureDirectory("manual_module"));
