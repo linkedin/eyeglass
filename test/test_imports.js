@@ -510,6 +510,18 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+  // back-compat
+  it("should import using scoped module workaround", function (done) {
+    var options = {
+      data: '@import "@scope-foo/bar";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("scoped_workaround")
+      }
+    };
+    var expected = "/* @scope/foo/bar */\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   describe("manual modules", function() {
     it("should support manually added module", function(done) {
       var manualModule = require(testutils.fixtureDirectory("manual_module"));
