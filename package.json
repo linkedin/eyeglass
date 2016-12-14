@@ -26,7 +26,7 @@
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "debug": "^2.2.0",
-    "eyeglass": "^1.1.4",
+    "eyeglass": "^1.2.1",
     "fs-tree-diff": "^0.5.3",
     "glob": "^5.0.3",
     "hash-for-dep": "^1.0.3",
@@ -34,7 +34,7 @@
     "lodash.merge": "^4.6.0",
     "lodash.sortby": "^4.7.0",
     "mkdirp": "^0.5.1",
-    "node-sass": "^4.0.0",
+    "node-sass": "^4.0.0 || ^3.10.1",
     "rsvp": "^3.0.21",
     "string.prototype.startswith": "^0.2.0",
     "walk-sync": "^0.3.1"
