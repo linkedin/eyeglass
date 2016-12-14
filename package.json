@@ -35,7 +35,7 @@
     "glob": "^7.1.0",
     "lodash.includes": "^4.3.0",
     "lodash.merge": "^4.6.0",
-    "node-sass": "^4.0.0",
+    "node-sass": "^4.0.0 || ^3.10.1",
     "node-sass-utils": "^1.1.2",
     "semver": "^5.0.3"
   },
