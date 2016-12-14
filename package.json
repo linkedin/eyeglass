@@ -45,7 +45,7 @@
     "broccoli"
   ],
   "dependencies": {
-    "broccoli-eyeglass": "^2.3.3",
+    "broccoli-eyeglass": "^2.3.4",
     "broccoli-funnel": "^1.0.7",
     "broccoli-merge-trees": "^1.1.4"
   },
