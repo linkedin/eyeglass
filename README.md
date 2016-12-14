@@ -126,9 +126,15 @@ intelligent decisions about how to handle it.
 
 ## Debugging
 
-Set the an environment variable `DEBUG="broccoli-eyeglass"` to get lots of
+Set the an environment variable `DEBUG="broccoli-eyeglass:*"` to get lots of
 debugging output that can help diagnose build issues -- especially
-issues with build caching and cache invalidation.
+issues with build caching and cache invalidation. You can also
+specifically use the following debug traits:
+
+* `DEBUG="broccoli-eyeglass:persistent-cache"` - Detailed logging for the
+  cross-build persistent cache.
+* `DEBUG="broccoli-eyeglass:hot-cache"` - Detailed logging for the
+  hot-cache that is used for rebuilds in the same broccoli process.
 
 Eyeglass-specific debugging can by enabled by setting `DEBUG="eyeglass:*"`
 
