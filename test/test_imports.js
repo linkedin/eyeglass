@@ -269,6 +269,17 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+  it("imports for modules such as ./foo/foo where foo is a module name (#159)", function (done) {
+    var options = {
+      data: '@import "module_a/issue_159";',
+      eyeglass: {
+        root: testutils.fixtureDirectory("redundantly_named_modules")
+      }
+    };
+    var expected = "/* module_a/_module_a.scss */\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   it("eyeglass exports can be specified through the " +
   " eyeglass property of package.json.", function (done) {
     var options = {

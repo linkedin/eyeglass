@@ -16,7 +16,7 @@ module.exports = function(gulp, depends, name) {
         thresholds: {
           global: {
             statements: 99.8,
-            branches: 99.25,
+            branches: 99.04,
             functions: 100,
             lines: 99.8
           }
