@@ -7,6 +7,13 @@ var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
 
+function getDefaultAssetHttpPrefix(parent) {
+  if (parent && parent.options && parent.options.lazyLoading) {
+    return '/engines-dist/' + parent.name + '/assets';
+  }
+  return 'assets';
+}
+
 /* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
  * ember addon dependencies.  However there's no path information in the addon object,
  * but each addon object has some disconnected metadata in addon.addonPackages
@@ -92,7 +99,7 @@ module.exports = {
         config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
                                    config.httpRoot ||
                                    projectConfig.rootURL;
-        config.assetsHttpPrefix = config.assetsHttpPrefix || "assets";
+        config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
 
         if (config.eyeglass.modules) {
           config.eyeglass.modules =
