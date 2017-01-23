@@ -8,7 +8,7 @@ var merge = require("broccoli-merge-trees");
 var path = require("path");
 
 function getDefaultAssetHttpPrefix(parent) {
-  if (parent && parent.options && parent.options.lazyLoading) {
+  if (parent && parent.lazyLoading) {
     return '/engines-dist/' + parent.name + '/assets';
   }
   return 'assets';
