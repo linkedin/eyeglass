@@ -6,6 +6,7 @@ var findHost = require("./lib/findHost");
 var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
+var calculateCacheKeyForTree = require('calculate-cache-key-for-tree');
 
 /* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
  * ember addon dependencies.  However there's no path information in the addon object,
@@ -144,5 +145,29 @@ module.exports = {
     }
 
     return tree;
+  },
+
+  /**
+   * Since we override a treeFor hook, we need to implement a caching strategy
+   * for the returned tree. That way, if we use this addon multiple times in a
+   * build, we don't incur the cost multiple times.
+   *
+   * @override
+   */
+  cacheKeyForTree: function(treeType) {
+    if (treeType === 'public') {
+      var host = findHost(this);
+      var inApp = (host === this.app);
+
+      // The public hook only returns a different value based on the host if
+      // we're in an application.
+      if (inApp) {
+        return calculateCacheKeyForTree(treeType, host);
+      } else {
+        return calculateCacheKeyForTree(treeType, this);
+      }
+    } else {
+      return this._super.cacheKeyForTree.apply(this, arguments);
+    }
   }
 };
