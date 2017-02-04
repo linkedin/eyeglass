@@ -67,6 +67,7 @@ module.exports = {
         // These start with a slash and that messes things up.
         var cssDir = outputPath.slice(1);
         var sassDir = inputPath.slice(1);
+        var parentName = typeof addon.parent.name === "function" ? addon.parent.name() : addon.parent.name;
 
         // If cssDir and sassDir are now empty, that means they point to the
         // root directory of the tree.
@@ -82,6 +83,7 @@ module.exports = {
         }
         // setup eyeglass for this project's configuration
         var config = projectConfig.eyeglass || {};
+        config.annotation = "EyeglassCompiler: " + parentName;
         if (!config.sourceFiles && !config.discover) {
           config.sourceFiles = [isApp ? 'app.scss' : 'addon.scss'];
         }
