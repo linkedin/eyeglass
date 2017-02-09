@@ -6,6 +6,7 @@ var findHost = require("./lib/findHost");
 var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
+var calculateCacheKeyForTree = require('calculate-cache-key-for-tree');
 
 /* addon.addons forms a tree(graph?) of addon objects that allow us to traverse the
  * ember addon dependencies.  However there's no path information in the addon object,
@@ -63,7 +64,8 @@ module.exports = {
       ext: 'scss',
       toTree: function(tree, inputPath, outputPath, options) {
         var host = findHost(addon);
-        var isApp = (host === addon.app);
+        var inApp = (host === addon.app);
+
         // These start with a slash and that messes things up.
         var cssDir = outputPath.slice(1);
         var sassDir = inputPath.slice(1);
@@ -85,7 +87,7 @@ module.exports = {
         var config = projectConfig.eyeglass || {};
         config.annotation = "EyeglassCompiler: " + parentName;
         if (!config.sourceFiles && !config.discover) {
-          config.sourceFiles = [isApp ? 'app.scss' : 'addon.scss'];
+          config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
         }
         config.cssDir = cssDir;
         config.sassDir = sassDir;
@@ -107,11 +109,12 @@ module.exports = {
         // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
         var originalGenerator = config.optionsGenerator;
         config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
-          if (isApp) {
+          if (inApp) {
             cssFile = cssFile.replace(/app\.css$/, addon.app.name + ".css");
           } else {
             cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + ".css");
           }
+
           if (originalGenerator) {
             originalGenerator(sassFile, cssFile, sassOptions, compilationCallback);
           } else {
@@ -124,7 +127,7 @@ module.exports = {
         // Ember CLI will ignore any non-CSS files returned in the tree for an
         // addon. So that non-CSS assets aren't lost, we'll store them in a
         // separate tree for now and return them in a later hook.
-        if (!isApp) {
+        if (!inApp) {
           addon.addonAssetsTree = funnel(tree, {include: ['**/*.!(css)']});
         }
 
@@ -144,5 +147,29 @@ module.exports = {
     }
 
     return tree;
+  },
+
+  /**
+   * Since we override a treeFor hook, we need to implement a caching strategy
+   * for the returned tree. That way, if we use this addon multiple times in a
+   * build, we don't incur the cost multiple times.
+   *
+   * @override
+   */
+  cacheKeyForTree: function(treeType) {
+    if (treeType === 'public') {
+      var host = findHost(this);
+      var inApp = (host === this.app);
+
+      // The public hook only returns a different value based on the host if
+      // we're in an application.
+      if (inApp) {
+        return calculateCacheKeyForTree(treeType, host);
+      } else {
+        return calculateCacheKeyForTree(treeType, this);
+      }
+    } else {
+      return this._super.cacheKeyForTree.apply(this, arguments);
+    }
   }
 };
