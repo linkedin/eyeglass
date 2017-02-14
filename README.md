@@ -451,6 +451,20 @@ sass: {
 ...
 ```
 
+### Example: integration with gulp and gulp-sass
+
+```js
+var gulp = require('gulp');
+var sass = require('gulp-sass');
+var eyeglass = require("eyeglass");
+ 
+gulp.task('sass', function () {
+  return gulp.src('./sass/**/*.scss')
+    .pipe(sass(eyeglass({sourceMap: true}).on('error', sass.logError))
+    .pipe(gulp.dest('./css'));
+});
+```
+
 # Writing an Eyeglass Module
 
 node-sass allows you to register custom functions for advanced
