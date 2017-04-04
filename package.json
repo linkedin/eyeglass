@@ -47,8 +47,7 @@
   "dependencies": {
     "broccoli-eyeglass": "^2.4.1",
     "broccoli-funnel": "^1.0.7",
-    "broccoli-merge-trees": "^1.1.4",
-    "calculate-cache-key-for-tree": "^1.1.0"
+    "broccoli-merge-trees": "^1.1.4"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
