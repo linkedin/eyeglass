@@ -8,9 +8,21 @@ var merge = require("broccoli-merge-trees");
 var path = require("path");
 
 function getDefaultAssetHttpPrefix(parent) {
-  if (parent && parent.lazyLoading) {
-    return '/engines-dist/' + parent.name + '/assets';
+  // the default http prefix differs between Ember app and lazy Ember engine
+  // iterate over the parent's chain and look for a lazy engine or there are
+  // no more parents, which means we've reached the Ember app project
+  var current = parent;
+
+  while(current.parent) {
+    if (current.lazyLoading === true && current.useDeprecatedIncorrectCSSProcessing !== true) {
+      // only lazy engines with disabled deprecated CSS processing will inline their assets in
+      // the engines-dist folder
+      return '/engines-dist/' + current.name + '/assets';
+    }
+    current = current.parent;
   }
+
+  // at this point, the highlevel container is Ember app and we should use the default "assets" prefix
   return 'assets';
 }
 
