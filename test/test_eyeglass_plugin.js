@@ -1001,6 +1001,7 @@ describe("EyeglassCompiler", function () {
             "project.css": ".foo {\n  content: changed-foo; }\n"
           });
 
+          require("hash-for-dep")._resetCache();
           delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
           delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
 
@@ -1089,6 +1090,7 @@ describe("EyeglassCompiler", function () {
             "project.css": ".foo {\n  content: changed-foo; }\n"
           });
 
+          require("hash-for-dep")._resetCache();
           delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
           delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
 
