@@ -460,7 +460,7 @@ var eyeglass = require("eyeglass");
  
 gulp.task('sass', function () {
   return gulp.src('./sass/**/*.scss')
-    .pipe(sass(eyeglass({sourceMap: true}).on('error', sass.logError))
+    .pipe(sass(eyeglass({sourceMap: true})).on('error', sass.logError))
     .pipe(gulp.dest('./css'));
 });
 ```
