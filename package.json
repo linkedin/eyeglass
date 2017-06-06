@@ -10,7 +10,7 @@
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "scripts": {
-    "test": "gulp test --verbose"
+    "test": "gulp test"
   },
   "keywords": [
     "broccoli-plugin",
