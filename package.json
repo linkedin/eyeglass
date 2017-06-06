@@ -10,7 +10,7 @@
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test --verbose"
   },
   "keywords": [
     "broccoli-plugin",
@@ -21,6 +21,7 @@
   ],
   "dependencies": {
     "async-disk-cache": "^1.0.8",
+    "async-promise-queue": "^1.0.1",
     "broccoli-merge-trees": "^1.1.4",
     "broccoli-plugin": "^1.2.2",
     "chained-emitter": "^0.1.2",
