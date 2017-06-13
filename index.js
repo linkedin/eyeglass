@@ -7,6 +7,17 @@ var funnel = require("broccoli-funnel");
 var merge = require("broccoli-merge-trees");
 var path = require("path");
 
+function isLazyEngine(addon) {
+  if (addon.lazyLoading === true) {
+    // pre-ember-engines 0.5.6 lazyLoading flag
+    return true;
+  }
+  if (addon.lazyLoading && addon.lazyLoading.enabled === true) {
+    return true;
+  }
+  return false;
+}
+
 function getDefaultAssetHttpPrefix(parent) {
   // the default http prefix differs between Ember app and lazy Ember engine
   // iterate over the parent's chain and look for a lazy engine or there are
@@ -14,7 +25,7 @@ function getDefaultAssetHttpPrefix(parent) {
   var current = parent;
 
   while(current.parent) {
-    if (current.lazyLoading === true && current.useDeprecatedIncorrectCSSProcessing !== true) {
+    if (isLazyEngine(current) && current.useDeprecatedIncorrectCSSProcessing !== true) {
       // only lazy engines with disabled deprecated CSS processing will inline their assets in
       // the engines-dist folder
       return '/engines-dist/' + current.name + '/assets';
