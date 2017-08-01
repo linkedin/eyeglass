@@ -1,11 +1,11 @@
 /* jshint node: true */
 'use strict';
 
-var EyeglassCompiler = require("broccoli-eyeglass");
-var findHost = require("./lib/findHost");
-var funnel = require("broccoli-funnel");
-var merge = require("broccoli-merge-trees");
-var path = require("path");
+const EyeglassCompiler = require("broccoli-eyeglass");
+const findHost = require("./lib/findHost");
+const funnel = require("broccoli-funnel");
+const merge = require("broccoli-merge-trees");
+const path = require("path");
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -22,7 +22,7 @@ function getDefaultAssetHttpPrefix(parent) {
   // the default http prefix differs between Ember app and lazy Ember engine
   // iterate over the parent's chain and look for a lazy engine or there are
   // no more parents, which means we've reached the Ember app project
-  var current = parent;
+  let current = parent;
 
   while(current.parent) {
     if (isLazyEngine(current) && current.useDeprecatedIncorrectCSSProcessing !== true) {
@@ -48,27 +48,27 @@ function getDefaultAssetHttpPrefix(parent) {
  * modules.
  **/
 function localEyeglassAddons(addon) {
-  var paths = [];
+  let paths = [];
   if (typeof(addon.addons) !== "object" ||
       typeof(addon.addonPackages) !== "object") {
     return paths;
   }
 
-  var packages = Object.keys(addon.addonPackages);
+  let packages = Object.keys(addon.addonPackages);
 
-  for (var i = 0; i < packages.length; i++) {
-    var p = addon.addonPackages[packages[i]];
+  for (let i = 0; i < packages.length; i++) {
+    let p = addon.addonPackages[packages[i]];
     // Note: this will end up creating manual addons for things in node modules
     // that are actually auto discovered, these manual modules will get deduped
     // out.  but we need to add all of them because the some eyeglass modules
     // for addons & engines won't get autodiscovered otherwise unless the
     // addons/engines are themselves eyeglass modules (which we don't want to require).
-    if (p.pkg.keywords.some(function(kw) {return kw == "eyeglass-module";})) {
+    if (p.pkg.keywords.some(kw => kw == "eyeglass-module")) {
       paths.push({path: p.path})
     }
   }
   // TODO: if there's a cycle in the addon graph don't recurse.
-  for (var i = 0; i < addon.addons.length; i++) {
+  for (let i = 0; i < addon.addons.length; i++) {
     paths = paths.concat(localEyeglassAddons(addon.addons[i]));
   }
   return paths;
@@ -77,28 +77,28 @@ function localEyeglassAddons(addon) {
 module.exports = {
   name: 'ember-cli-eyeglass',
 
-  config: function(env, baseConfig) {
-    var defaults = {eyeglass: {}};
+  config(env, baseConfig) {
+    let defaults = {eyeglass: {}};
     if (env != "production") {
       defaults.eyeglass.verbose = false
     }
     return defaults;
   },
 
-  setupPreprocessorRegistry: function(type, registry) {
-    var addon = this;
+  setupPreprocessorRegistry(type, registry) {
+    let addon = this;
 
     registry.add('css', {
       name: 'eyeglass',
       ext: 'scss',
-      toTree: function(tree, inputPath, outputPath, options) {
-        var host = findHost(addon);
-        var inApp = (host === addon.app);
+      toTree(tree, inputPath, outputPath, options) {
+        let host = findHost(addon);
+        let inApp = (host === addon.app);
 
         // These start with a slash and that messes things up.
-        var cssDir = outputPath.slice(1);
-        var sassDir = inputPath.slice(1);
-        var parentName = typeof addon.parent.name === "function" ? addon.parent.name() : addon.parent.name;
+        let cssDir = outputPath.slice(1);
+        let sassDir = inputPath.slice(1);
+        let parentName = typeof addon.parent.name === "function" ? addon.parent.name() : addon.parent.name;
 
         // If cssDir and sassDir are now empty, that means they point to the
         // root directory of the tree.
@@ -108,12 +108,12 @@ module.exports = {
         // limit to only files in the sass directory.
         tree = funnel(tree, {include: [path.join(sassDir, "/**/*")]});
 
-        var projectConfig = addon.project.config(host.env);
+        let projectConfig = addon.project.config(host.env);
         if (addon.parent && addon.parent.engineConfig) {
           projectConfig = addon.parent.engineConfig(host.env, projectConfig);
         }
         // setup eyeglass for this project's configuration
-        var config = projectConfig.eyeglass || {};
+        let config = projectConfig.eyeglass || {};
         config.annotation = "EyeglassCompiler: " + parentName;
         if (!config.sourceFiles && !config.discover) {
           config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
@@ -136,7 +136,7 @@ module.exports = {
 
         // If building an app, rename app.css to <project>.css per Ember conventions.
         // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
-        var originalGenerator = config.optionsGenerator;
+        let originalGenerator = config.optionsGenerator;
         config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
           if (inApp) {
             cssFile = cssFile.replace(/app\.css$/, addon.app.name + ".css");
@@ -165,7 +165,7 @@ module.exports = {
     });
   },
 
-  treeForPublic: function(tree) {
+  treeForPublic(tree) {
     tree = this._super.treeForPublic(tree);
 
     // If we're processing an addon and stored some assets for it, add them
