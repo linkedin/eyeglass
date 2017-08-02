@@ -6,6 +6,7 @@ const findHost = require("./lib/findHost");
 const funnel = require("broccoli-funnel");
 const merge = require("broccoli-merge-trees");
 const path = require("path");
+const cloneDeep = require('lodash.clonedeep');
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -91,7 +92,7 @@ module.exports = {
     registry.add('css', {
       name: 'eyeglass',
       ext: 'scss',
-      toTree(tree, inputPath, outputPath, options) {
+      toTree(tree, inputPath, outputPath) {
         let host = findHost(addon);
         let inApp = (host === addon.app);
 
@@ -112,8 +113,10 @@ module.exports = {
         if (addon.parent && addon.parent.engineConfig) {
           projectConfig = addon.parent.engineConfig(host.env, projectConfig);
         }
+
         // setup eyeglass for this project's configuration
-        let config = projectConfig.eyeglass || {};
+        const config = projectConfig.eyeglass ? cloneDeep(projectConfig.eyeglass) : {};
+
         config.annotation = "EyeglassCompiler: " + parentName;
         if (!config.sourceFiles && !config.discover) {
           config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
