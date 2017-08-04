@@ -10,7 +10,7 @@
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "mocha test/test_*.js"
   },
   "keywords": [
     "broccoli-plugin",
@@ -22,37 +22,32 @@
   "dependencies": {
     "async-disk-cache": "^1.0.8",
     "async-promise-queue": "^1.0.1",
-    "broccoli-merge-trees": "^1.1.4",
+    "broccoli-merge-trees": "^2.0.0",
     "broccoli-plugin": "^1.2.2",
     "chained-emitter": "^0.1.2",
     "colors": "^1.0.3",
     "debug": "^2.2.0",
     "eyeglass": "^1.2.1",
     "fs-tree-diff": "^0.5.3",
-    "glob": "^5.0.3",
-    "hash-for-dep": "^1.0.3",
+    "glob": "^7.1.2",
+    "hash-for-dep": "^1.2.0",
     "json-stable-stringify": "^1.0.1",
     "lodash.merge": "^4.6.0",
     "lodash.sortby": "^4.7.0",
     "mkdirp": "^0.5.1",
     "node-sass": "^4.0.0 || ^3.10.1",
-    "rsvp": "^3.0.21",
+    "rsvp": "^4.0.1",
     "string.prototype.startswith": "^0.2.0",
     "walk-sync": "^0.3.1"
   },
   "devDependencies": {
     "broccoli": "^0.16.5",
-    "eslint": "^0.22.0",
-    "eyeglass-dev-eslint": "*",
     "fixturify": "^0.3.0",
-    "grunt": "^0.4.5",
+    "grunt": "^1.0.1",
     "grunt-release": "^0.12.0",
-    "gulp": "^3.9.0",
-    "gulp-eslint": "1.1.1",
-    "gulp-jshint": "^2.0.0",
-    "gulp-mocha": "^2.2.0",
     "jshint": "^2.8.0",
-    "mocha": "^3.0.2",
+    "mocha": "^3.5.0",
+    "mocha-eslint": "^4.1.0",
     "rimraf": "^2.5.4"
   }
 }

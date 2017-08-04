@@ -1,7 +1,7 @@
-var debug = false;
-var EyeglassCompiler = require("..");
+const debug = false;
+const EyeglassCompiler = require("..");
 
-var tree = new EyeglassCompiler(["sass"], {
+const tree = new EyeglassCompiler(["sass"], {
   cssDir: "css",
   verbose: true,
   assets: "assets",
@@ -10,7 +10,7 @@ var tree = new EyeglassCompiler(["sass"], {
 });
 
 if (debug) {
-  var instrument = require("broccoli-debug").instrument;
+  let instrument = require("broccoli-debug").instrument;
   tree = instrument.print(tree);
 }
 module.exports = tree;
