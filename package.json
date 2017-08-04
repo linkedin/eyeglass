@@ -10,7 +10,8 @@
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "scripts": {
-    "test": "mocha test/test_*.js"
+    "test": "mocha test/test_*.js",
+    "test:debug": "mocha debug test/test_*.js"
   },
   "keywords": [
     "broccoli-plugin",
