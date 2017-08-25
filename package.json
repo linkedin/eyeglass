@@ -36,7 +36,6 @@
     "ember-load-initializers": "^1.0.0",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.14.1",
-    "ember-welcome-page": "^3.0.0",
     "eyeglass": "^0.8.3",
     "grunt": "^0.4.5",
     "grunt-release": "^0.12.0",
