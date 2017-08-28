@@ -18,7 +18,7 @@ const broccoli = require("broccoli");
 const RSVP = require("rsvp");
 const glob = require("glob");
 const EyeglassCompiler = require("../lib/index");
-const AsyncDiskCache = require("async-disk-cache");
+const SyncDiskCache = require("sync-disk-cache");
 
 function fixtureDir(name) {
   return path.resolve(__dirname, "fixtures", name);
@@ -736,7 +736,7 @@ describe("EyeglassCompiler", function () {
 
   describe("warm caching", function() {
     afterEach(function() {
-      let cache = new AsyncDiskCache("test");
+      let cache = new SyncDiskCache("test");
       return cache.clear();
     });
 
@@ -776,7 +776,7 @@ describe("EyeglassCompiler", function () {
         .then(outputDir => {
           assertEqualDirs(outputDir, expectedOutputDir);
           assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+          compiledFiles.length = 0;
 
           return build(builders[1])
             .then(outputDir2 => {
