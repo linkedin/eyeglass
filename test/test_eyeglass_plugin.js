@@ -43,6 +43,7 @@ function makeFixtures(name, files) {
 }
 
 
+
 function build(builder) {
   return RSVP.Promise.resolve()
     .then(() => builder.build())
@@ -91,9 +92,23 @@ describe("EyeglassCompiler", function () {
     assert(optimizer instanceof EyeglassCompiler);
   });
 
-  it("compiles sass files", function () {
+  it("compiles sass files with the minimal options", function () {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: "."
+    });
+
+    let builder = new broccoli.Builder(optimizer);
+
+    return build(builder)
+      .then(outputDir => {
+        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+      });
+  });
+
+  it("compiles sass files with option.relativeAssets set", function () {
+    let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+      cssDir: ".",
+      relativeAssets: true
     });
 
     let builder = new broccoli.Builder(optimizer);
