@@ -31,6 +31,7 @@
     "archy": "^1.0.0",
     "deasync": "^0.1.4",
     "debug": "^2.2.0",
+    "ensure-symlink": "^1.0.0",
     "fs-extra": "^0.30.0",
     "glob": "^7.1.0",
     "lodash.includes": "^4.3.0",
