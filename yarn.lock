@@ -304,7 +304,7 @@ ast-types@0.9.6:
   version "0.9.6"
   resolved "https://registry.npmjs.org/ast-types/-/ast-types-0.9.6.tgz#102c9e9e9005d3e7e3829bf0c4fa24ee862ee9b9"
 
-async-disk-cache@^1.0.8, async-disk-cache@^1.2.1:
+async-disk-cache@^1.2.1:
   version "1.3.2"
   resolved "https://registry.npmjs.org/async-disk-cache/-/async-disk-cache-1.3.2.tgz#ac53d6152843df202c9406e28d774362608d74dd"
   dependencies:
@@ -1076,18 +1076,17 @@ broccoli-debug@^0.6.1, broccoli-debug@^0.6.2:
     symlink-or-copy "^1.1.8"
     tree-sync "^1.2.2"
 
-broccoli-eyeglass@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/broccoli-eyeglass/-/broccoli-eyeglass-4.0.1.tgz#aee34933358e0194592e2351718bf4b7c6156887"
+broccoli-eyeglass@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/broccoli-eyeglass/-/broccoli-eyeglass-4.1.0.tgz#b55264bf3e3ea206e1beab3d49c88c599f44c45a"
   dependencies:
-    async-disk-cache "^1.0.8"
     async-promise-queue "^1.0.1"
     broccoli-merge-trees "^2.0.0"
     broccoli-plugin "^1.2.2"
     chained-emitter "^0.1.2"
     colors "^1.0.3"
     debug "^2.2.0"
-    eyeglass "^1.2.1"
+    eyeglass "^1.3.0"
     fs-tree-diff "^0.5.3"
     glob "^7.1.2"
     hash-for-dep "^1.2.0"
@@ -1097,6 +1096,7 @@ broccoli-eyeglass@^4.0.1:
     mkdirp "^0.5.1"
     node-sass "^4.0.0 || ^3.10.1"
     rsvp "^4.0.1"
+    sync-disk-cache "^1.3.2"
     walk-sync "^0.3.1"
 
 broccoli-funnel-reducer@^1.0.0:
@@ -2304,6 +2304,10 @@ ensure-posix-path@^1.0.0, ensure-posix-path@^1.0.1, ensure-posix-path@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/ensure-posix-path/-/ensure-posix-path-1.0.2.tgz#a65b3e42d0b71cfc585eb774f9943c8d9b91b0c2"
 
+ensure-symlink@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ensure-symlink/-/ensure-symlink-1.0.1.tgz#78e6494a457c4c049bc522d0c56b2036354d8a36"
+
 entities@~1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
@@ -2577,13 +2581,14 @@ eyeglass@^0.8.3:
     semver "^5.0.3"
     tmp "0.0.28"
 
-eyeglass@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/eyeglass/-/eyeglass-1.2.1.tgz#68c12a60b06e8358972abc36479e2a9f364e6ad7"
+eyeglass@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/eyeglass/-/eyeglass-1.3.0.tgz#bcf293c701ca731b7f6f8e727d8b2aadd016c676"
   dependencies:
     archy "^1.0.0"
     deasync "^0.1.4"
     debug "^2.2.0"
+    ensure-symlink "^1.0.0"
     fs-extra "^0.30.0"
     glob "^7.1.0"
     lodash.includes "^4.3.0"
@@ -5413,6 +5418,16 @@ supports-color@^4.0.0:
 symlink-or-copy@^1.0.0, symlink-or-copy@^1.0.1, symlink-or-copy@^1.1.8:
   version "1.1.8"
   resolved "https://registry.npmjs.org/symlink-or-copy/-/symlink-or-copy-1.1.8.tgz#cabe61e0010c1c023c173b25ee5108b37f4b4aa3"
+
+sync-disk-cache@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/sync-disk-cache/-/sync-disk-cache-1.3.2.tgz#cec2889f51187632665e2639ef47dd92cdaa8938"
+  dependencies:
+    debug "^2.1.3"
+    heimdalljs "^0.2.3"
+    mkdirp "^0.5.0"
+    rimraf "^2.2.8"
+    username-sync "1.0.1"
 
 table@^4.0.1:
   version "4.0.1"
