@@ -19,15 +19,6 @@ const RSVP = require("rsvp");
 const glob = require("glob");
 const EyeglassCompiler = require("../lib/index");
 const SyncDiskCache = require("sync-disk-cache");
-const walkSync = require("walk-sync");
-
-function allFilesAreSymlinks(root) {
-  walkSync(root, {directories: false}).forEach(filepath => {
-    fs.readlinkSync(root + "/" + filepath); // throws if the file is not a link
-  });
-
-  assert(true, "all files are symlinks");
-}
 
 function fixtureDir(name) {
   return path.resolve(__dirname, "fixtures", name);
@@ -778,42 +769,6 @@ describe("EyeglassCompiler", function () {
     }
 
     afterEach(cleanupTempDirs);
-    it("output files are symlinks", function() {
-      let projectDir = makeFixtures("projectDir", {
-        "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
-      });
-      let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
-      });
-
-      let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
-
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles.length = 0;
-
-          allFilesAreSymlinks(outputDir);
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-
-              allFilesAreSymlinks(outputDir2);
-            });
-        });
-    });
-
 
     it("preserves cache across builder instances", function() {
       let projectDir = makeFixtures("projectDir", {

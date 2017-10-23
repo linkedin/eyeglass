@@ -620,10 +620,6 @@ ensure-posix-path@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/ensure-posix-path/-/ensure-posix-path-1.0.2.tgz#a65b3e42d0b71cfc585eb774f9943c8d9b91b0c2"
 
-ensure-symlink@^1.0.0, ensure-symlink@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/ensure-symlink/-/ensure-symlink-1.0.2.tgz#58ebc26d15a9539b9e79d00aa9623f8fa65ff18d"
-
 entities@1.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.0.0.tgz#b2987aa3821347fcde642b24fdfc9e4fb712bf26"
@@ -758,14 +754,13 @@ extsprintf@1.3.0, extsprintf@^1.2.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.3.0.tgz#96918440e3041a7a414f8c52e3c574eb3c3e1e05"
 
-eyeglass@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/eyeglass/-/eyeglass-1.3.0.tgz#bcf293c701ca731b7f6f8e727d8b2aadd016c676"
+eyeglass@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/eyeglass/-/eyeglass-1.2.1.tgz#68c12a60b06e8358972abc36479e2a9f364e6ad7"
   dependencies:
     archy "^1.0.0"
     deasync "^0.1.4"
     debug "^2.2.0"
-    ensure-symlink "^1.0.0"
     fs-extra "^0.30.0"
     glob "^7.1.0"
     lodash.includes "^4.3.0"
