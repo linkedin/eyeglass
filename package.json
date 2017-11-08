@@ -14,7 +14,7 @@
   "repository": "sass-eyeglass/ember-cli-eyeglass",
   "homepage": "https://github.com/sass-eyeglass/ember-cli-eyeglass",
   "engines": {
-    "node": "6.* || >= 7.*"
+    "node": "^6.* || >= 7.*"
   },
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "license": "Apache-2.0",

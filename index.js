@@ -1,11 +1,11 @@
 /* eslint-env node */
 'use strict';
 
-const EyeglassCompiler = require("broccoli-eyeglass");
-const findHost = require("./lib/findHost");
-const funnel = require("broccoli-funnel");
-const merge = require("broccoli-merge-trees");
-const path = require("path");
+const EyeglassCompiler = require('broccoli-eyeglass');
+const findHost = require('./lib/findHost');
+const funnel = require('broccoli-funnel');
+const merge = require('broccoli-merge-trees');
+const path = require('path');
 const cloneDeep = require('lodash.clonedeep');
 
 function isLazyEngine(addon) {
@@ -25,7 +25,7 @@ function getDefaultAssetHttpPrefix(parent) {
   // no more parents, which means we've reached the Ember app project
   let current = parent;
 
-  while(current.parent) {
+  while (current.parent) {
     if (isLazyEngine(current) && current.useDeprecatedIncorrectCSSProcessing !== true) {
       // only lazy engines with disabled deprecated CSS processing will inline their assets in
       // the engines-dist folder
@@ -34,7 +34,7 @@ function getDefaultAssetHttpPrefix(parent) {
     current = current.parent;
   }
 
-  // at this point, the highlevel container is Ember app and we should use the default "assets" prefix
+  // at this point, the highlevel container is Ember app and we should use the default 'assets' prefix
   return 'assets';
 }
 
@@ -50,8 +50,9 @@ function getDefaultAssetHttpPrefix(parent) {
  **/
 function localEyeglassAddons(addon) {
   let paths = [];
-  if (typeof(addon.addons) !== "object" ||
-      typeof(addon.addonPackages) !== "object") {
+
+  if (typeof addon.addons !== 'object' ||
+    typeof addon.addonPackages !== 'object') {
     return paths;
   }
 
@@ -64,10 +65,11 @@ function localEyeglassAddons(addon) {
     // out.  but we need to add all of them because the some eyeglass modules
     // for addons & engines won't get autodiscovered otherwise unless the
     // addons/engines are themselves eyeglass modules (which we don't want to require).
-    if (p.pkg.keywords.some(kw => kw == "eyeglass-module")) {
-      paths.push({path: p.path})
+    if (p.pkg.keywords.some(kw => kw == 'eyeglass-module')) {
+      paths.push({ path: p.path })
     }
   }
+
   // TODO: if there's a cycle in the addon graph don't recurse.
   for (let i = 0; i < addon.addons.length; i++) {
     paths = paths.concat(localEyeglassAddons(addon.addons[i]));
@@ -78,9 +80,9 @@ function localEyeglassAddons(addon) {
 module.exports = {
   name: 'ember-cli-eyeglass',
 
-  config(env, baseConfig) {
-    let defaults = {eyeglass: {}};
-    if (env != "production") {
+  config(env/* baseConfig */) {
+    let defaults = { eyeglass: {} };
+    if (env != 'production') {
       defaults.eyeglass.verbose = false
     }
     return defaults;
@@ -99,7 +101,7 @@ module.exports = {
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1);
         let sassDir = inputPath.slice(1);
-        let parentName = typeof addon.parent.name === "function" ? addon.parent.name() : addon.parent.name;
+        let parentName = typeof addon.parent.name === 'function' ? addon.parent.name() : addon.parent.name;
 
         // If cssDir and sassDir are now empty, that means they point to the
         // root directory of the tree.
@@ -107,7 +109,7 @@ module.exports = {
         sassDir = sassDir || './';
 
         // limit to only files in the sass directory.
-        tree = funnel(tree, {include: [path.join(sassDir, "/**/*")]});
+        tree = funnel(tree, { include: [path.join(sassDir, '/**/*')] });
 
         let projectConfig = addon.project.config(host.env);
         if (addon.parent && addon.parent.engineConfig) {
@@ -117,17 +119,17 @@ module.exports = {
         // setup eyeglass for this project's configuration
         const config = projectConfig.eyeglass ? cloneDeep(projectConfig.eyeglass) : {};
 
-        config.annotation = "EyeglassCompiler: " + parentName;
+        config.annotation = 'EyeglassCompiler: ' + parentName;
         if (!config.sourceFiles && !config.discover) {
           config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
         }
         config.cssDir = cssDir;
         config.sassDir = sassDir;
-        config.assets = ["public", "app"].concat(config.assets || []);
+        config.assets = ['public', 'app'].concat(config.assets || []);
         config.eyeglass = config.eyeglass || {}
         config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
-                                   config.httpRoot ||
-                                   projectConfig.rootURL;
+          config.httpRoot ||
+          projectConfig.rootURL;
         config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
 
         if (config.eyeglass.modules) {
@@ -142,9 +144,9 @@ module.exports = {
         let originalGenerator = config.optionsGenerator;
         config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
           if (inApp) {
-            cssFile = cssFile.replace(/app\.css$/, addon.app.name + ".css");
+            cssFile = cssFile.replace(/app\.css$/, addon.app.name + '.css');
           } else {
-            cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + ".css");
+            cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + '.css');
           }
 
           if (originalGenerator) {
@@ -160,7 +162,7 @@ module.exports = {
         // addon. So that non-CSS assets aren't lost, we'll store them in a
         // separate tree for now and return them in a later hook.
         if (!inApp) {
-          addon.addonAssetsTree = funnel(tree, {include: ['**/*.!(css)']});
+          addon.addonAssetsTree = funnel(tree, { include: ['**/*.!(css)'] });
         }
 
         return tree;
