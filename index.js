@@ -7,6 +7,7 @@ const funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 const path = require('path');
 const cloneDeep = require('lodash.clonedeep');
+const defaultsDeep = require('lodash.defaultsdeep');
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -79,15 +80,6 @@ function localEyeglassAddons(addon) {
 
 module.exports = {
   name: 'ember-cli-eyeglass',
-
-  config(env/* baseConfig */) {
-    let defaults = { eyeglass: {} };
-    if (env != 'production') {
-      defaults.eyeglass.verbose = false
-    }
-    return defaults;
-  },
-
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
 
@@ -97,6 +89,7 @@ module.exports = {
       toTree(tree, inputPath, outputPath) {
         let host = findHost(addon);
         let inApp = (host === addon.app);
+        let isNestedAddon = typeof addon.parent.parent === 'object';
 
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1);
@@ -111,13 +104,25 @@ module.exports = {
         // limit to only files in the sass directory.
         tree = funnel(tree, { include: [path.join(sassDir, '/**/*')] });
 
+        // TODO: this is legacy compat
         let projectConfig = addon.project.config(host.env);
         if (addon.parent && addon.parent.engineConfig) {
           projectConfig = addon.parent.engineConfig(host.env, projectConfig);
         }
 
-        // setup eyeglass for this project's configuration
-        const config = projectConfig.eyeglass ? cloneDeep(projectConfig.eyeglass) : {};
+        let config;
+        if (projectConfig.eyeglass) {
+          // TODO: WTF engines
+          let from = addon.parent.root + '/config/environment';
+          let to = addon.parent.root + '/ember-cli-build';
+          addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
+          config = cloneDeep(projectConfig.eyeglass);
+        } else {
+          // setup eyeglass for this project's configuration
+          const hostConfig = cloneDeep(host.options.eyeglass || {});
+          const addonConfig = isNestedAddon ? cloneDeep(addon.parent.options.eyeglass || {}) : {};
+          config = defaultsDeep(addonConfig, hostConfig);
+        }
 
         config.annotation = 'EyeglassCompiler: ' + parentName;
         if (!config.sourceFiles && !config.discover) {
@@ -127,9 +132,8 @@ module.exports = {
         config.sassDir = sassDir;
         config.assets = ['public', 'app'].concat(config.assets || []);
         config.eyeglass = config.eyeglass || {}
-        config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
-          config.httpRoot ||
-          projectConfig.rootURL;
+        config.eyeglass.httpRoot = config.eyeglass.httpRoot || config.httpRoot;
+
         config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
 
         if (config.eyeglass.modules) {

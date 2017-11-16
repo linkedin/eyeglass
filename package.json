@@ -53,12 +53,10 @@
     "broccoli-eyeglass": "^4.1.2",
     "broccoli-funnel": "^2.0.1",
     "broccoli-merge-trees": "^2.0.0",
-    "lodash.clonedeep": "^4.5.0"
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.defaultsdeep": "^4.6.0"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
-  },
-  "engines": {
-    "node": "^4.5 || 6.* || >= 7.*"
   }
 }

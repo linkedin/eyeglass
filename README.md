@@ -11,10 +11,28 @@ Then rename all your `.css` files so they have the `.scss` extension.
 
 ## Configuration
 
-In your application's config/environment.js the key `"eyeglass"` can be
+In your application's ember-cli-build.js the key `"eyeglass"` can be
 set to an options object that will be passed to broccoli-eyeglass. For
 details on the options available, please read the [broccoli-eyeglass
 options documentation](https://github.com/sass-eyeglass/broccoli-eyeglass#options).
+
+### Apps
+
+```js
+// path/to/app/ember-cli-build.js
+const app = new EmberApp(defaults, {
+  eyeglass: { /* configuration */ }
+});
+```
+
+### Engines
+
+```js
+// path/to/engine/index.js
+const app = new EmberEngine(defaults, {
+  eyeglass: { /* configuration */ }
+});
+```
 
 ## Building
 
