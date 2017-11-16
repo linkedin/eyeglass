@@ -9,7 +9,10 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:each"
+    "test": "mocha node-tests/**/*-test.js && ember try:each",
+    "test:node": "mocha node-tests/**/*-test.js",
+    "test:node:debug": "mocha debug node-tests/**/*-test.js",
+    "test:web": "ember try:each"
   },
   "repository": "sass-eyeglass/ember-cli-eyeglass",
   "homepage": "https://github.com/sass-eyeglass/ember-cli-eyeglass",
