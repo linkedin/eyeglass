@@ -21,7 +21,9 @@ options documentation](https://github.com/sass-eyeglass/broccoli-eyeglass#option
 ```js
 // path/to/app/ember-cli-build.js
 const app = new EmberApp(defaults, {
-  eyeglass: { /* configuration */ }
+  options: {
+    eyeglass: { /* configuration */ }
+  }
 });
 ```
 
@@ -30,7 +32,9 @@ const app = new EmberApp(defaults, {
 ```js
 // path/to/engine/index.js
 const app = new EmberEngine(defaults, {
-  eyeglass: { /* configuration */ }
+  options: {
+    eyeglass: { /* configuration */ }
+  }
 });
 ```
 
