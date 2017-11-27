@@ -215,6 +215,33 @@ describe("EyeglassCompiler", function () {
     tmpDirs.forEach(tmpDir => rimraf.sync(tmpDir));
   }
 
+  describe("optionsGenerator", function() {
+    it("allow outputFile names to be safely overwritten", function() {
+      let sourceDir = fixtureSourceDir("assetsProject");
+      let compiler = new EyeglassCompiler(sourceDir, {
+        cssDir: ".",
+        optionsGenerator(sassFile, cssFile, options, cb) {
+          // 1 cssFile, but two `cb()` with different names, should result in
+          // two seperate outputfiles
+          cb("first.css", options);
+          cb("second.css", options);
+        }
+      });
+
+      let builder = new broccoli.Builder(compiler);
+
+      return build(builder)
+        .then(outputDir => {
+          let first = fs.readlinkSync(outputDir + "/first.css");
+          let second = fs.readlinkSync(outputDir + "/second.css");
+
+          assert.notEqual(first, second);
+          assert.equal(path.basename(first), "first.css");
+          assert.equal(path.basename(second), "second.css");
+        });
+    });
+  });
+
   describe("caching", function() {
     afterEach(cleanupTempDirs);
 
