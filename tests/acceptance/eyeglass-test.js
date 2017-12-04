@@ -30,5 +30,10 @@ test('assets', function(assert) {
   return fetch('/assets/dummy.css').then(req => req.text()).then(text => {
     assert.contains('.warning', text);
     assert.contains('.error', text);
+
+    return fetch('/assets/other.css').then(req => req.text()).then(text => {
+      assert.contains('.warning', text);
+      assert.contains('.error', text);
+    });
   });
 });
