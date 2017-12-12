@@ -6,6 +6,14 @@ const expect = require('chai').expect;
 
 describe('extractOptions', function() {
   describe('top-level addon', function() {
+    beforeEach(function() {
+      process.env.EYEGLASS_DEPRECATE_ON_BROWSER_CONFIG = true;
+    });
+
+    afterEach(function() {
+      delete process.env.EYEGLASS_DEPRECATE_ON_BROWSER_CONFIG;
+    });
+
     it('no config', function() {
       const addon = {
         project: {
