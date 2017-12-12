@@ -83,12 +83,10 @@ module.exports = {
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
 
-    debugger;
     registry.add('css', {
       name: 'eyeglass',
       ext: 'scss',
       toTree(tree, inputPath, outputPath) {
-        debugger;
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1) || './';
         let sassDir = inputPath.slice(1) || './';
