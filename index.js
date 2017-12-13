@@ -3,10 +3,11 @@
 
 const EyeglassCompiler = require('broccoli-eyeglass');
 const findHost = require('./lib/findHost');
-const funnel = require('broccoli-funnel');
+const Funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 const path = require('path');
 const cloneDeep = require('lodash.clonedeep');
+const defaultsDeep = require('lodash.defaultsdeep');
 
 function isLazyEngine(addon) {
   if (addon.lazyLoading === true) {
@@ -79,15 +80,6 @@ function localEyeglassAddons(addon) {
 
 module.exports = {
   name: 'ember-cli-eyeglass',
-
-  config(env/* baseConfig */) {
-    let defaults = { eyeglass: {} };
-    if (env != 'production') {
-      defaults.eyeglass.verbose = false
-    }
-    return defaults;
-  },
-
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
 
@@ -95,66 +87,29 @@ module.exports = {
       name: 'eyeglass',
       ext: 'scss',
       toTree(tree, inputPath, outputPath) {
+        // These start with a slash and that messes things up.
+        let cssDir = outputPath.slice(1) || './';
+        let sassDir = inputPath.slice(1) || './';
+
         let host = findHost(addon);
         let inApp = (host === addon.app);
 
-        // These start with a slash and that messes things up.
-        let cssDir = outputPath.slice(1);
-        let sassDir = inputPath.slice(1);
-        let parentName = typeof addon.parent.name === 'function' ? addon.parent.name() : addon.parent.name;
-
-        // If cssDir and sassDir are now empty, that means they point to the
-        // root directory of the tree.
-        cssDir = cssDir || './';
-        sassDir = sassDir || './';
-
-        // limit to only files in the sass directory.
-        tree = funnel(tree, { include: [path.join(sassDir, '/**/*')] });
-
-        let projectConfig = addon.project.config(host.env);
-        if (addon.parent && addon.parent.engineConfig) {
-          projectConfig = addon.parent.engineConfig(host.env, projectConfig);
+        if (path.posix.join(sassDir, '/**/*') === '**/*') {
+          // limit to only files in the sass directory,
+          // but don't bother funneling if we just want everything anyways e.g. **/*
+          tree = new Funnel(tree, {
+            include: [ path.join(sassDir, '/**/*') ]
+          });
         }
 
-        // setup eyeglass for this project's configuration
-        const config = projectConfig.eyeglass ? cloneDeep(projectConfig.eyeglass) : {};
+        let extracted = extractConfig(host, addon);
 
-        config.annotation = 'EyeglassCompiler: ' + parentName;
-        if (!config.sourceFiles && !config.discover) {
-          config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
-        }
-        config.cssDir = cssDir;
-        config.sassDir = sassDir;
-        config.assets = ['public', 'app'].concat(config.assets || []);
-        config.eyeglass = config.eyeglass || {}
-        config.eyeglass.httpRoot = config.eyeglass.httpRoot ||
-          config.httpRoot ||
-          projectConfig.rootURL;
-        config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
-
-        if (config.eyeglass.modules) {
-          config.eyeglass.modules =
-            config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
-        } else {
-          config.eyeglass.modules = localEyeglassAddons(addon.parent);
-        }
-
-        // If building an app, rename app.css to <project>.css per Ember conventions.
-        // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
-        let originalGenerator = config.optionsGenerator;
-        config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
-          if (inApp) {
-            cssFile = cssFile.replace(/app\.css$/, addon.app.name + '.css');
-          } else {
-            cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + '.css');
-          }
-
-          if (originalGenerator) {
-            originalGenerator(sassFile, cssFile, sassOptions, compilationCallback);
-          } else {
-            compilationCallback(cssFile, sassOptions);
-          }
-        };
+        extracted.cssDir = cssDir;
+        extracted.sassDir = sassDir;
+        const config = setupConfig(extracted, {
+          inApp,
+          addon
+        });
 
         tree = new EyeglassCompiler(tree, config);
 
@@ -162,7 +117,7 @@ module.exports = {
         // addon. So that non-CSS assets aren't lost, we'll store them in a
         // separate tree for now and return them in a later hook.
         if (!inApp) {
-          addon.addonAssetsTree = funnel(tree, { include: ['**/*.!(css)'] });
+          addon.addonAssetsTree = new Funnel(tree, { include: ['**/*.!(css)'] });
         }
 
         return tree;
@@ -183,3 +138,74 @@ module.exports = {
     return tree;
   }
 };
+
+module.exports.extractConfig = extractConfig;
+function extractConfig(host, addon) {
+  // TODO: this is legacy compat, and will go away in the next release
+  let projectConfig = addon.project.config(host.env);
+  if (addon.parent && addon.parent.engineConfig) {
+    projectConfig = addon.parent.engineConfig(host.env, projectConfig);
+  }
+
+  let config;
+  if (projectConfig.eyeglass) {
+    // TODO: WTF engines
+    if (process.env.EYEGLASS_DEPRECATE_ON_BROWSER_CONFIG) {
+      let from = addon.parent.root + '/config/environment';
+      let to = addon.parent.root + '/ember-cli-build';
+      addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
+    }
+    config = cloneDeep(projectConfig.eyeglass);
+  } else {
+    const isNestedAddon = typeof addon.parent.parent === 'object';
+    // setup eyeglass for this project's configuration
+    const hostConfig = cloneDeep(host.options.eyeglass || {});
+    const addonConfig = isNestedAddon ? cloneDeep(addon.parent.options.eyeglass || {}) : {};
+    config = defaultsDeep(addonConfig, hostConfig);
+  }
+  return config;
+}
+
+module.exports.setupConfig = setupConfig;
+function setupConfig(config, options) {
+  let addon = options.addon;
+  let inApp = options.inApp;
+
+  let parentName = typeof addon.parent.name === 'function' ? addon.parent.name() : addon.parent.name;
+
+  config.annotation = 'EyeglassCompiler: ' + parentName;
+  if (!config.sourceFiles && !config.discover) {
+    config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
+  }
+  config.assets = ['public', 'app'].concat(config.assets || []);
+  config.eyeglass = config.eyeglass || {}
+  config.eyeglass.httpRoot = config.eyeglass.httpRoot || config.httpRoot;
+
+  config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
+
+  if (config.eyeglass.modules) {
+    config.eyeglass.modules =
+      config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
+  } else {
+    config.eyeglass.modules = localEyeglassAddons(addon.parent);
+  }
+
+  // If building an app, rename app.css to <project>.css per Ember conventions.
+  // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
+  let originalGenerator = config.optionsGenerator;
+  config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
+    if (inApp) {
+      cssFile = cssFile.replace(/app\.css$/, addon.app.name + '.css');
+    } else {
+      cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + '.css');
+    }
+
+    if (originalGenerator) {
+      originalGenerator(sassFile, cssFile, sassOptions, compilationCallback);
+    } else {
+      compilationCallback(cssFile, sassOptions);
+    }
+  };
+
+  return config;
+}
