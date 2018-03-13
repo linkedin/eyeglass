@@ -983,6 +983,71 @@ describe("assets", function () {
           });
         });
       });
+
+      describe("caching generated Scss", function() {
+        var rootDir = testutils.fixtureDirectory("app_assets");
+        var rootDir2 = testutils.fixtureDirectory("app_assets_odd_names");
+
+        it("generates different cacheKey for different httpPrefix", function(done) {
+          var source1 = new AssetsSource(rootDir, {
+            httpPrefix: "foo",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            httpPrefix: "bar",
+          });
+          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          done();
+        });
+
+        it("generates different cacheKey for different name", function(done) {
+          var source1 = new AssetsSource(rootDir, {
+            name: "foo",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            name: "bar",
+          });
+          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          done();
+        });
+
+        it("generates different cacheKey for different namespace", function(done) {
+          var source1 = new AssetsSource(rootDir, {
+          });
+          assert.notEqual(source1.cacheKey("foo"), source1.cacheKey("bar"));
+          done();
+        });
+
+        it("generates different cacheKey for different srcPath", function(done) {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir2, {});
+          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          done();
+        });
+
+        it("generates different cacheKey for different pattern", function(done) {
+          var source1 = new AssetsSource(rootDir, {
+            pattern: "images/**/*",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            pattern: "images/**/*.jpg",
+          });
+          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          done();
+        });
+
+        it("generates different cacheKey for different globOpts", function(done) {
+          var source1 = new AssetsSource(rootDir, {
+          });
+          var source2 = new AssetsSource(rootDir, {
+            globOpts: {
+              dot: true
+            }
+          });
+          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          done();
+        });
+
+      });
     });
   });
 });
