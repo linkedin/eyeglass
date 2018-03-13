@@ -6,6 +6,7 @@ var testutils = require("./testutils");
 var assert = require("assert");
 var fse = require("fs-extra");
 var glob = require("glob");
+var touch = require("touch");
 
 var Eyeglass = require("../lib");
 var AssetsSource = require("../lib/assets/AssetsSource");
@@ -987,6 +988,26 @@ describe("assets", function () {
       describe("caching generated Scss", function() {
         var rootDir = testutils.fixtureDirectory("app_assets");
         var rootDir2 = testutils.fixtureDirectory("app_assets_odd_names");
+        var newFile = path.join(rootDir, "cached_images", "two.png");
+
+        var eg = new Eyeglass({
+          file: path.join(rootDir, "sass", "caching_assets.scss"),
+          eyeglass: {
+            root: rootDir,
+            installWithSymlinks: installWithSymlinks,
+            engines: {
+              sass: sass
+            }
+          }
+        });
+
+        afterEach(function(done) {
+          eg.resetAssetCache();
+          if (fse.existsSync(newFile)) {
+            fse.unlinkSync(newFile);
+          }
+          done();
+        });
 
         it("generates different cacheKey for different httpPrefix", function(done) {
           var source1 = new AssetsSource(rootDir, {
@@ -1045,6 +1066,33 @@ describe("assets", function () {
           });
           assert.notEqual(source1.cacheKey(), source2.cacheKey());
           done();
+        });
+
+        it("returns generated Scss from cache, and clears the cache", function(done) {
+          var expected = ".all-assets {\n" +
+            "  app-assets: \"cached_images/one.png\"; }\n";
+
+          var expectedNewFile = ".all-assets {\n" +
+            "  app-assets: \"cached_images/one.png\", \"cached_images/two.png\"; }\n";
+
+
+          eg.assets.addSource(rootDir, {pattern: "cached_images/**/*"});
+
+          new Promise(function(resolve) {
+            testutils.assertCompiles(eg, expected, resolve);
+          })
+          .then(function() {
+            // returns the same result from cache, not including the file that is added
+            return new Promise(function(resolve) {
+              touch.sync(newFile);
+              testutils.assertCompiles(eg, expected, resolve);
+            });
+          })
+          .then(function() {
+            // resetting the cache should give updated output
+            eg.resetAssetCache();
+            testutils.assertCompiles(eg, expectedNewFile, done);
+          });
         });
 
       });
