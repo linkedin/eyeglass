@@ -9,6 +9,7 @@ var glob = require("glob");
 
 var Eyeglass = require("../lib");
 var AssetsSource = require("../lib/assets/AssetsSource");
+var AssetsCollection = require("../lib/assets/AssetsCollection");
 
 function escapeBackslash(str) {
   return str.replace(/\\/g, "\\\\");
@@ -984,68 +985,103 @@ describe("assets", function () {
         });
       });
 
-      describe("cache key", function() {
+      describe("cache keys", function() {
         var rootDir = testutils.fixtureDirectory("app_assets");
         var rootDir2 = testutils.fixtureDirectory("app_assets_odd_names");
 
-        it("generates different cacheKey for different httpPrefix", function(done) {
+        it("Assets.cacheKey includes httpPrefix", function(done) {
           var source1 = new AssetsSource(rootDir, {
             httpPrefix: "foo",
           });
           var source2 = new AssetsSource(rootDir, {
+            httpPrefix: "foo",
+          });
+          var source3 = new AssetsSource(rootDir, {
             httpPrefix: "bar",
           });
-          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
           done();
         });
 
-        it("generates different cacheKey for different name", function(done) {
+        it("Assets.cacheKey includes name", function(done) {
           var source1 = new AssetsSource(rootDir, {
             name: "foo",
           });
           var source2 = new AssetsSource(rootDir, {
+            name: "foo",
+          });
+          var source3 = new AssetsSource(rootDir, {
             name: "bar",
           });
-          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
           done();
         });
 
-        it("generates different cacheKey for different namespace", function(done) {
-          var source1 = new AssetsSource(rootDir, {
-          });
-          assert.notEqual(source1.cacheKey("foo"), source1.cacheKey("bar"));
-          done();
-        });
-
-        it("generates different cacheKey for different srcPath", function(done) {
+        it("Assets.cacheKey includes namespace", function(done) {
           var source1 = new AssetsSource(rootDir, {});
-          var source2 = new AssetsSource(rootDir2, {});
-          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          var source2 = new AssetsSource(rootDir, {});
+          assert.equal(source1.cacheKey("foo"), source2.cacheKey("foo"));
+          assert.notEqual(source1.cacheKey("foo"), source2.cacheKey("bar"));
           done();
         });
 
-        it("generates different cacheKey for different pattern", function(done) {
+        it("Assets.cacheKey includes srcPath", function(done) {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {});
+          var source3 = new AssetsSource(rootDir2, {});
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+          done();
+        });
+
+        it("Assets.cacheKey includes pattern", function(done) {
           var source1 = new AssetsSource(rootDir, {
             pattern: "images/**/*",
           });
           var source2 = new AssetsSource(rootDir, {
+            pattern: "images/**/*",
+          });
+          var source3 = new AssetsSource(rootDir, {
             pattern: "images/**/*.jpg",
           });
-          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
           done();
         });
 
-        it("generates different cacheKey for different globOpts", function(done) {
-          var source1 = new AssetsSource(rootDir, {
-          });
-          var source2 = new AssetsSource(rootDir, {
+        it("Assets.cacheKey includes globOpts", function(done) {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {});
+          var source3 = new AssetsSource(rootDir, {
             globOpts: {
               dot: true
             }
           });
-          assert.notEqual(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
           done();
         });
+
+        it("AssetsCollection.cacheKey includes collection sources", function(done) {
+          var collection1 = new AssetsCollection();
+          var collection2 = new AssetsCollection();
+          var collection3 = new AssetsCollection();
+          var collection4 = new AssetsCollection();
+
+          collection1.addSource(rootDir);
+          collection2.addSource(rootDir);
+          collection3.addSource(rootDir2);
+          collection4.addSource(rootDir);
+          collection4.addSource(rootDir2);
+
+          assert.equal(collection1.cacheKey(), collection2.cacheKey());
+          assert.notEqual(collection1.cacheKey(), collection3.cacheKey());
+          assert.notEqual(collection1.cacheKey(), collection4.cacheKey());
+          done();
+        });
+
       });
     });
   });
