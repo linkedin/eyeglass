@@ -1064,6 +1064,23 @@ describe("assets", function () {
           done();
         });
 
+        it("Assets.cacheKey ignores globOpts that are overridden", function(done) {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {
+            globOpts: {
+              nonegate: false
+            }
+          });
+          var source3 = new AssetsSource(rootDir, {
+            globOpts: {
+              nonegate: true
+            }
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source3.cacheKey());
+          done();
+        });
+
         it("AssetsCollection.cacheKey includes collection sources", function(done) {
           var collection1 = new AssetsCollection();
           var collection2 = new AssetsCollection();
