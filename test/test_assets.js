@@ -9,6 +9,7 @@ var glob = require("glob");
 
 var Eyeglass = require("../lib");
 var AssetsSource = require("../lib/assets/AssetsSource");
+var AssetsCollection = require("../lib/assets/AssetsCollection");
 
 function escapeBackslash(str) {
   return str.replace(/\\/g, "\\\\");
@@ -874,6 +875,26 @@ describe("assets", function () {
         testutils.assertCompiles(eg, expected, done);
       });
 
+      it("should keep track of module collections", function() {
+        var rootDir = testutils.fixtureDirectory("app_assets");
+
+        var egMod = new Eyeglass({
+          // file containing '@import "mod-one/assets"'
+          file: path.join(rootDir, "sass", "uses_mod_1.scss"),
+          eyeglass: {
+            root: rootDir,
+            installWithSymlinks: installWithSymlinks,
+            engines: {
+              sass: sass
+            }
+          }
+        });
+
+        assert.ok(egMod.assets.moduleCollections !== undefined);
+        assert.ok(Array.isArray(egMod.assets.moduleCollections));
+        assert.equal(egMod.assets.moduleCollections.length, 1);
+      });
+
       describe("path separator normalization", function() {
         var originalEnv = process.env.EYEGLASS_NORMALIZE_PATHS;
         var merge = require("lodash.merge");
@@ -982,6 +1003,143 @@ describe("assets", function () {
             });
           });
         });
+      });
+
+      describe("cache keys", function() {
+        var rootDir = testutils.fixtureDirectory("app_assets");
+        var rootDir2 = testutils.fixtureDirectory("app_assets_odd_names");
+
+        it("Assets.cacheKey includes httpPrefix", function() {
+          var source1 = new AssetsSource(rootDir, {
+            httpPrefix: "foo",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            httpPrefix: "foo",
+          });
+          var source3 = new AssetsSource(rootDir, {
+            httpPrefix: "bar",
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey includes name", function() {
+          var source1 = new AssetsSource(rootDir, {
+            name: "foo",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            name: "foo",
+          });
+          var source3 = new AssetsSource(rootDir, {
+            name: "bar",
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey includes namespace", function() {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {});
+          assert.equal(source1.cacheKey("foo"), source2.cacheKey("foo"));
+          assert.notEqual(source1.cacheKey("foo"), source2.cacheKey("bar"));
+        });
+
+        it("Assets.cacheKey includes srcPath", function() {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {});
+          var source3 = new AssetsSource(rootDir2, {});
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey includes pattern", function() {
+          var source1 = new AssetsSource(rootDir, {
+            pattern: "images/**/*",
+          });
+          var source2 = new AssetsSource(rootDir, {
+            pattern: "images/**/*",
+          });
+          var source3 = new AssetsSource(rootDir, {
+            pattern: "images/**/*.jpg",
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey includes globOpts", function() {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {});
+          var source3 = new AssetsSource(rootDir, {
+            globOpts: {
+              dot: true
+            }
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.notEqual(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey ignores globOpts that are overridden", function() {
+          var source1 = new AssetsSource(rootDir, {});
+          var source2 = new AssetsSource(rootDir, {
+            globOpts: {
+              nonegate: false
+            }
+          });
+          var source3 = new AssetsSource(rootDir, {
+            globOpts: {
+              nonegate: true
+            }
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+          assert.equal(source1.cacheKey(), source3.cacheKey());
+        });
+
+        it("Assets.cacheKey globOpts order doesn't matter", function() {
+          var source1 = new AssetsSource(rootDir, {
+            globOpts: {
+              dot: true,
+              nonull: true
+            }
+          });
+          var source2 = new AssetsSource(rootDir, {
+            globOpts: {
+              nonull: true,
+              dot: true
+            }
+          });
+          assert.equal(source1.cacheKey(), source2.cacheKey());
+        });
+
+        it("AssetsCollection.cacheKey includes collection sources", function() {
+          var collection1 = new AssetsCollection();
+          var collection2 = new AssetsCollection();
+          var collection3 = new AssetsCollection();
+          var collection4 = new AssetsCollection();
+
+          collection1.addSource(rootDir);
+          collection2.addSource(rootDir);
+          collection3.addSource(rootDir2);
+          collection4.addSource(rootDir);
+          collection4.addSource(rootDir2);
+
+          assert.equal(collection1.cacheKey(), collection2.cacheKey());
+          assert.notEqual(collection1.cacheKey(), collection3.cacheKey());
+          assert.notEqual(collection1.cacheKey(), collection4.cacheKey());
+        });
+
+        it("AssetsCollection.cacheKey source order doesn't matter", function() {
+          var collection1 = new AssetsCollection();
+          var collection2 = new AssetsCollection();
+
+          collection1.addSource(rootDir);
+          collection1.addSource(rootDir2);
+
+          collection2.addSource(rootDir2);
+          collection2.addSource(rootDir);
+
+          assert.equal(collection1.cacheKey(), collection2.cacheKey());
+        });
+
       });
     });
   });

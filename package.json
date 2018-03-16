@@ -34,6 +34,7 @@
     "ensure-symlink": "^1.0.0",
     "fs-extra": "^0.30.0",
     "glob": "^7.1.0",
+    "json-stable-stringify": "^1.0.1",
     "lodash.includes": "^4.3.0",
     "lodash.merge": "^4.6.0",
     "node-sass": "^4.0.0 || ^3.10.1",
