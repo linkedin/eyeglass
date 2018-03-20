@@ -141,27 +141,11 @@ module.exports = {
 
 module.exports.extractConfig = extractConfig;
 function extractConfig(host, addon) {
-  // TODO: this is legacy compat, and will go away in the next release
-  let projectConfig = addon.project.config(host.env);
-  if (addon.parent && addon.parent.engineConfig) {
-    projectConfig = addon.parent.engineConfig(host.env, projectConfig);
-  }
-
-  let config;
-  if (projectConfig.eyeglass) {
-    // TODO: WTF engines
-    let from = addon.parent.root + '/config/environment';
-    let to = addon.parent.root + '/ember-cli-build';
-    addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
-    config = cloneDeep(projectConfig.eyeglass);
-  } else {
-    const isNestedAddon = typeof addon.parent.parent === 'object';
-    // setup eyeglass for this project's configuration
-    const hostConfig = cloneDeep(host.options.eyeglass || {});
-    const addonConfig = isNestedAddon ? cloneDeep(addon.parent.options.eyeglass || {}) : {};
-    config = defaultsDeep(addonConfig, hostConfig);
-  }
-  return config;
+  const isNestedAddon = typeof addon.parent.parent === 'object';
+  // setup eyeglass for this project's configuration
+  const hostConfig = cloneDeep(host.options.eyeglass || {});
+  const addonConfig = isNestedAddon ? cloneDeep(addon.parent.options.eyeglass || {}) : {};
+  return defaultsDeep(addonConfig, hostConfig);
 }
 
 module.exports.setupConfig = setupConfig;
