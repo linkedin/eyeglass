@@ -895,6 +895,60 @@ describe("assets", function () {
         assert.equal(egMod.assets.moduleCollections.length, 1);
       });
 
+      it("should cache asset import code with assetsCache()", function() {
+        var expected = ".test {\n" +
+          "  background: url(\"/mod-one/mod-one.jpg\");\n" +
+          "  background: url(\"/mod-one/subdir/sub.png\"); }\n" +
+          "\n" +
+          ".all-assets {\n" +
+          "  app-assets: \"images/foo.png\", \"fonts/foo.woff\";\n" +
+          "  mod-assets: \"mod-one/mod-one.jpg\", \"mod-one/subdir/sub.png\"; }\n";
+        var rootDir = testutils.fixtureDirectory("app_assets");
+        var testCache = {};
+        var cacheHits = 0;
+        var cacheMisses = 0;
+
+        function assetsCache(key, getValue) {
+          if (testCache[key]) {
+            cacheHits += 1;
+            return testCache[key];
+          }
+          cacheMisses += 1;
+          return testCache[key] = getValue();
+        }
+
+        var eg = new Eyeglass({
+          file: path.join(rootDir, "sass", "uses_mod_1.scss"),
+          eyeglass: {
+            root: rootDir,
+            installWithSymlinks: installWithSymlinks,
+            engines: {
+              sass: sass
+            }
+          },
+          assetsCache: assetsCache,
+        });
+
+        eg.assets.addSource(rootDir, {pattern: "images/**/*"});
+        eg.assets.addSource(rootDir, {pattern: "fonts/**/*"});
+
+        return new Promise(function(resolve) {
+          testutils.assertCompiles(eg, expected, resolve);
+        }).then(function() {
+          // the first time this is compiled no cache hits
+          assert.equal(cacheMisses, 2);
+          assert.equal(cacheHits, 0);
+
+          return new Promise(function(resolve) {
+            testutils.assertCompiles(eg, expected, resolve);
+          });
+        }).then(function() {
+          // the second time, both should hit the cache
+          assert.equal(cacheMisses, 2);
+          assert.equal(cacheHits, 2);
+        });
+      });
+
       describe("path separator normalization", function() {
         var originalEnv = process.env.EYEGLASS_NORMALIZE_PATHS;
         var merge = require("lodash.merge");
