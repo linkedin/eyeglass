@@ -150,11 +150,9 @@ function extractConfig(host, addon) {
   let config;
   if (projectConfig.eyeglass) {
     // TODO: WTF engines
-    if (process.env.EYEGLASS_DEPRECATE_ON_BROWSER_CONFIG) {
-      let from = addon.parent.root + '/config/environment';
-      let to = addon.parent.root + '/ember-cli-build';
-      addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
-    }
+    let from = addon.parent.root + '/config/environment';
+    let to = addon.parent.root + '/ember-cli-build';
+    addon.ui.writeDeprecateLine(`'eyeglass' configuration within config/environment is no longer supported\n  please move this configuration:\n\tfrom: '${from}' (or however configured) \n\tto:   '${to}' (or however configured)\n`);
     config = cloneDeep(projectConfig.eyeglass);
   } else {
     const isNestedAddon = typeof addon.parent.parent === 'object';
