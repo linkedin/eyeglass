@@ -1189,6 +1189,91 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("caches main asset import scss", function() {
+      let projectDir = makeFixtures("projectDir", {
+        "file1.scss": '@import "assets";\n',
+        "file2.scss": '@import "assets";\n',
+      });
+      let expectedOutputDir = makeFixtures("expectedOutputDir", {
+        "file1.css": "",
+        "file2.css": "",
+      });
+
+      let compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+      });
+      let builder = new broccoli.Builder(compiler);
+
+      // cache should start empty
+      assert.deepEqual(compiler._assetImportCache, {});
+
+      return build(builder)
+        .then(outputDir => {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          // cache should have one entry
+          assert.notDeepEqual(compiler._assetImportCache, {});
+          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+          // first file should be a miss, 2nd should return from cache
+          assert.equal(compiler._assetImportCacheStats.misses, 1);
+          assert.equal(compiler._assetImportCacheStats.hits, 1);
+        });
+    });
+
+    it("caches module asset import scss", function() {
+      let projectDir = makeFixtures("projectDir", {
+        "file1.scss": '@import "eyeglass-module/assets";\n',
+        "file2.scss": '@import "eyeglass-module/assets";\n',
+      });
+      let eyeglassModDir = makeFixtures("eyeglassmod", {
+        "package.json": "{\n" +
+                        '  "name": "is_a_module",\n' +
+                        '  "keywords": ["eyeglass-module"],\n' +
+                        '  "main": "eyeglass-exports.js",\n' +
+                        '  "private": true,\n' +
+                        '  "eyeglass": {\n' +
+                        '    "name": "eyeglass-module",\n' +
+                        '    "needs": "*"\n' +
+                        "  }\n" +
+                        "}",
+        "eyeglass-exports.js":
+          'var path = require("path");\n' +
+          "module.exports = function(eyeglass, sass) {\n" +
+          "  return {\n" +
+          "    sassDir: __dirname, // directory where the sass files are.\n" +
+          '    assets: eyeglass.assets.export(path.join(__dirname, "images"))\n' +
+          "  };\n" +
+          "};",
+      });
+      let expectedOutputDir = makeFixtures("expectedOutputDir", {
+        "file1.css": "",
+        "file2.css": ""
+      });
+
+      let compiler = new EyeglassCompiler(projectDir, {
+        cssDir: ".",
+        eyeglass: {
+          modules: [
+            {path: eyeglassModDir}
+          ]
+        }
+      });
+      let builder = new broccoli.Builder(compiler);
+
+      // cache should start empty
+      assert.deepEqual(compiler._assetImportCache, {});
+
+      return build(builder)
+        .then(outputDir => {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          // cache should have one entry
+          assert.notDeepEqual(compiler._assetImportCache, {});
+          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+          // first file should be a miss, 2nd should return from cache
+          assert.equal(compiler._assetImportCacheStats.misses, 1);
+          assert.equal(compiler._assetImportCacheStats.hits, 1);
+        });
+    });
+
     it("can force invalidate the persistent cache", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
