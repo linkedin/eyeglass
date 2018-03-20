@@ -28,7 +28,7 @@
     "colors": "^1.0.3",
     "debug": "^2.2.0",
     "ensure-symlink": "^1.0.2",
-    "eyeglass": "^1.4.0",
+    "eyeglass": "^1.4.1",
     "fs-tree-diff": "^0.5.3",
     "glob": "^7.1.2",
     "hash-for-dep": "^1.2.0",

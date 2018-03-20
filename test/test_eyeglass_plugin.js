@@ -1205,14 +1205,14 @@ describe("EyeglassCompiler", function () {
       let builder = new broccoli.Builder(compiler);
 
       // cache should start empty
-      assert.deepEqual(compiler.assetImportCache, {});
+      assert.deepEqual(compiler._assetImportCache, {});
 
       return build(builder)
         .then(outputDir => {
           assertEqualDirs(outputDir, expectedOutputDir);
           // cache should have one entry
-          assert.notDeepEqual(compiler.assetImportCache, {});
-          assert.equal(Object.keys(compiler.assetImportCache).length, 1);
+          assert.notDeepEqual(compiler._assetImportCache, {});
+          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
           // first file should be a miss, 2nd should return from cache
           assert.equal(compiler._assetImportCacheStats.misses, 1);
           assert.equal(compiler._assetImportCacheStats.hits, 1);
@@ -1260,14 +1260,14 @@ describe("EyeglassCompiler", function () {
       let builder = new broccoli.Builder(compiler);
 
       // cache should start empty
-      assert.deepEqual(compiler.assetImportCache, {});
+      assert.deepEqual(compiler._assetImportCache, {});
 
       return build(builder)
         .then(outputDir => {
           assertEqualDirs(outputDir, expectedOutputDir);
           // cache should have one entry
-          assert.notDeepEqual(compiler.assetImportCache, {});
-          assert.equal(Object.keys(compiler.assetImportCache).length, 1);
+          assert.notDeepEqual(compiler._assetImportCache, {});
+          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
           // first file should be a miss, 2nd should return from cache
           assert.equal(compiler._assetImportCacheStats.misses, 1);
           assert.equal(compiler._assetImportCacheStats.hits, 1);
