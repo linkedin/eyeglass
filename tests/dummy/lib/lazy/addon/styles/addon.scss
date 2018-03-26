@@ -1,3 +1,6 @@
+@import "assets";
+
 .lazy {
   background: blue;
+  border-image: asset-url('img/test.svg');
 }
