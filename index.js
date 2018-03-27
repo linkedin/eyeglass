@@ -27,9 +27,8 @@ function getDefaultAssetHttpPrefix(parent) {
   let current = parent;
 
   while (current.parent) {
-    if (isLazyEngine(current) && current.useDeprecatedIncorrectCSSProcessing !== true) {
-      // only lazy engines with disabled deprecated CSS processing will inline their assets in
-      // the engines-dist folder
+    if (isLazyEngine(current)) {
+      // only lazy engines will inline their assets in the engines-dist folder
       return '/engines-dist/' + current.name + '/assets';
     }
     current = current.parent;

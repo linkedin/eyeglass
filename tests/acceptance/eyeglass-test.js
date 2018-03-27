@@ -61,6 +61,18 @@ test('visiting /lazy', function(assert) {
   });
 });
 
+test('lazy asset-url points to engines-dist', function(assert) {
+  visit('/lazy');
+
+  andThen(function() {
+    assert.equal(currentURL(), '/lazy');
+
+    const lazyStyle = self.getComputedStyle(document.querySelector('.lazy'));
+
+    assert.contains('/engines-dist/lazy/assets/img/test.svg', lazyStyle.borderImage);
+  });
+});
+
 test('/assets/dummy.css', function(assert) {
   return fetch('/assets/dummy.css').then(req => req.text()).then(text => {
     assert.contains('.warning', text);
