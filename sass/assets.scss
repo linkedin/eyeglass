@@ -11,6 +11,13 @@
 // output URL which is namespaced to avoid conflicts with application urls.
 $eg-registered-assets: () !default;
 
+@function eyeglass-normalize-uri($uri, $type: web) {
+  @if function-exists(-eyeglass-normalize-uri) {
+    @return -eyeglass-normalize-uri($uri, $type);
+  }
+
+  @return $uri;
+}
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
 // @param $url the source url of the asset. This is what is passed to asset-url().
