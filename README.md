@@ -394,6 +394,7 @@ build-tool plugin. The following plugins are available:
 
 * [broccoli-eyeglass](https://github.com/sass-eyeglass/broccoli-eyeglass)
 * [ember-cli-eyeglass](https://github.com/sass-eyeglass/ember-cli-eyeglass)
+* [sheetify-eyeglass](https://github.com/scriptollc/sheetify-eyeglass)
 
 
 ## Integrating with other build systems
