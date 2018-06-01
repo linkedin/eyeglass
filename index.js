@@ -1,4 +1,3 @@
-/* eslint-env node */
 'use strict';
 
 const EyeglassCompiler = require('broccoli-eyeglass');
