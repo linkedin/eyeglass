@@ -1,21 +1,21 @@
-/* eslint-env node */
 'use strict';
 
 const path = require('path');
+// eslint-disable-next-line node/no-extraneous-require
 const EngineAddon = require('ember-engines/lib/engine-addon');
 const assetsDir = path.join(__dirname, '/public/assets');
 
 module.exports = EngineAddon.extend({
   name: 'lazy',
 
-  eyeglass: {
+  eyeglass: Object.freeze({
     discover: true,
     assets: assetsDir,
-  },
+  }),
 
-  lazyLoading: {
+  lazyLoading: Object.freeze({
     enabled: true
-  },
+  }),
 
   isDevelopingAddon() {
     return true;
