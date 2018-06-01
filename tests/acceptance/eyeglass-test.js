@@ -1,6 +1,8 @@
-import { test } from 'qunit';
-import moduleForAcceptance from '../../tests/helpers/module-for-acceptance';
+import { currentURL, visit } from '@ember/test-helpers';
+import { module, test } from 'qunit';
 import QUnit from 'qunit';
+
+import { setupApplicationTest } from 'ember-qunit';
 
 QUnit.assert.contains = function(needle, haystack) {
   const actual = haystack.indexOf(needle) > -1;
@@ -17,12 +19,12 @@ ${haystack}
 ` });
 };
 
-moduleForAcceptance('Acceptance | eyeglass');
+module('Acceptance | eyeglass', function(hooks) {
+  setupApplicationTest(hooks);
 
-test('visiting /', function(assert) {
-  visit('/');
+  test('visiting /', async function(assert) {
+    await visit('/');
 
-  andThen(function() {
     assert.equal(currentURL(), '/');
 
     const warningStyle = self.getComputedStyle(document.querySelector('.warning'));
@@ -34,12 +36,10 @@ test('visiting /', function(assert) {
     assert.equal(errorStyle.color, 'rgb(0, 0, 0)', '.error#color');
     assert.equal(errorStyle.backgroundColor, 'rgb(204, 0, 0)', '.error#background-color');
   });
-});
 
-test('visiting /eager', function(assert) {
-  visit('/eager');
+  test('visiting /eager', async function(assert) {
+    await visit('/eager');
 
-  andThen(function() {
     assert.equal(currentURL(), '/eager');
 
     const eagerStyle = self.getComputedStyle(document.querySelector('.eager'));
@@ -47,60 +47,56 @@ test('visiting /eager', function(assert) {
     assert.equal(eagerStyle.backgroundColor, 'rgb(255, 0, 0)', '.eager#backgroundColor');
     assert.equal(eagerAddonStyle.color, 'rgb(255, 255, 0)', '.eager-addon#backgroundColor');
   });
-});
 
-test('visiting /lazy', function(assert) {
-  visit('/lazy');
+  test('visiting /lazy', async function(assert) {
+    await visit('/lazy');
 
-  andThen(function() {
     assert.equal(currentURL(), '/lazy');
 
     const eagerStyle = self.getComputedStyle(document.querySelector('.lazy'));
 
     assert.equal(eagerStyle.backgroundColor, 'rgb(0, 0, 255)', '.lazy#backgroundColor');
   });
-});
 
-test('lazy asset-url points to engines-dist', function(assert) {
-  visit('/lazy');
+  test('lazy asset-url points to engines-dist', async function(assert) {
+    await visit('/lazy');
 
-  andThen(function() {
     assert.equal(currentURL(), '/lazy');
 
     const lazyStyle = self.getComputedStyle(document.querySelector('.lazy'));
 
     assert.contains('/engines-dist/lazy/assets/img/test.svg', lazyStyle.borderImage);
   });
-});
 
-test('/assets/dummy.css', function(assert) {
-  return fetch('/assets/dummy.css').then(req => req.text()).then(text => {
-    assert.contains('.warning', text);
-    assert.contains('.error', text);
+  test('/assets/dummy.css', function(assert) {
+    return fetch('/assets/dummy.css').then(req => req.text()).then(text => {
+      assert.contains('.warning', text);
+      assert.contains('.error', text);
+    });
   });
-});
 
-test('/assets/vendor.css', function(assert) {
-  return fetch('/assets/vendor.css').then(req => req.text()).then(text => {
-    assert.contains('.eager-addon', text);
+  test('/assets/vendor.css', function(assert) {
+    return fetch('/assets/vendor.css').then(req => req.text()).then(text => {
+      assert.contains('.eager-addon', text);
+    });
   });
-});
 
-test('/assets/other.css', function(assert) {
-  return fetch('/assets/other.css').then(req => req.text()).then(text => {
-    assert.contains('.warning', text);
-    assert.contains('.error', text);
+  test('/assets/other.css', function(assert) {
+    return fetch('/assets/other.css').then(req => req.text()).then(text => {
+      assert.contains('.warning', text);
+      assert.contains('.error', text);
+    });
   });
-});
 
-test('/assets/eager.css', function(assert) {
-  return fetch('/assets/eager.css').then(req => req.text()).then(text => {
-    assert.contains('.eager', text);
+  test('/assets/eager.css', function(assert) {
+    return fetch('/assets/eager.css').then(req => req.text()).then(text => {
+      assert.contains('.eager', text);
+    });
   });
-});
 
-test('/engines-dist/lazy/assets/engine.css', function(assert) {
-  return fetch('/engines-dist/lazy/assets/engine.css').then(req => req.text()).then(text => {
-    assert.contains('.lazy', text);
+  test('/engines-dist/lazy/assets/engine.css', function(assert) {
+    return fetch('/engines-dist/lazy/assets/engine.css').then(req => req.text()).then(text => {
+      assert.contains('.lazy', text);
+    });
   });
 });
