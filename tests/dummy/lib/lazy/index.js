@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+// eslint-disable-next-line node/no-extraneous-require
 const EngineAddon = require('ember-engines/lib/engine-addon');
 const assetsDir = path.join(__dirname, '/public/assets');
 

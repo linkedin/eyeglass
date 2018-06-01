@@ -8,8 +8,7 @@
   "dependencies": {
     "ember-cli-htmlbars": "*",
     "ember-cli-babel": "*",
-    "ember-cli-eyeglass": "*",
-    "ember-engines": "*"
+    "ember-cli-eyeglass": "*"
   },
   "ember-addon": {
     "engineConfigPath": "config",

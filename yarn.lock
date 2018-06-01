@@ -2109,7 +2109,6 @@ duplexer3@^0.1.4:
     ember-cli-babel "*"
     ember-cli-eyeglass "*"
     ember-cli-htmlbars "*"
-    ember-engines "*"
 
 ecc-jsbn@~0.1.1:
   version "0.1.1"
@@ -2404,7 +2403,7 @@ ember-disable-prototype-extensions@^1.1.2:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/ember-disable-prototype-extensions/-/ember-disable-prototype-extensions-1.1.3.tgz#1969135217654b5e278f9fe2d9d4e49b5720329e"
 
-ember-engines@*, ember-engines@^0.5.14:
+ember-engines@^0.5.14:
   version "0.5.20"
   resolved "https://registry.yarnpkg.com/ember-engines/-/ember-engines-0.5.20.tgz#b252f16ba2d1ee8f35dba3016f070c0b4289d63f"
   dependencies:
@@ -4463,7 +4462,6 @@ lazy-cache@^1.0.3:
     ember-cli-babel "*"
     ember-cli-eyeglass "*"
     ember-cli-htmlbars "*"
-    ember-engines "*"
 
 lcid@^1.0.0:
   version "1.0.0"
