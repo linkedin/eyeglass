@@ -10,6 +10,7 @@
     "build": "ember build",
     "lint:js": "eslint .",
     "start": "ember serve",
+    "symlink-test-addons": "node bin/install-test-addons.js",
     "test": "ember test",
     "test:all": "ember try:each",
     "test:node": "mocha node-tests/**/*-test.js",
