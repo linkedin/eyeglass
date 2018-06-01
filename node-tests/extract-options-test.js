@@ -1,4 +1,3 @@
-/* eslint-env mocha, node */
 'use strict';
 
 const extractConfig = require('..').extractConfig;

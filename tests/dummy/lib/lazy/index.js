@@ -1,4 +1,3 @@
-/* eslint-env node */
 'use strict';
 
 const path = require('path');
@@ -8,14 +7,14 @@ const assetsDir = path.join(__dirname, '/public/assets');
 module.exports = EngineAddon.extend({
   name: 'lazy',
 
-  eyeglass: {
+  eyeglass: Object.freeze({
     discover: true,
     assets: assetsDir,
-  },
+  }),
 
-  lazyLoading: {
+  lazyLoading: Object.freeze({
     enabled: true
-  },
+  }),
 
   isDevelopingAddon() {
     return true;

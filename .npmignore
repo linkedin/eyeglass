@@ -1,7 +1,9 @@
 /bower_components
 /config/ember-try.js
+/bin
 /dist
 /tests
+/node-tests
 /tmp
 **/.gitkeep
 .bowerrc
