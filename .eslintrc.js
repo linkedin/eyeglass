@@ -26,13 +26,16 @@ module.exports = {
         'Gruntfile.js',
         'blueprints/*/index.js',
         'config/**/*.js',
+        'node-tests/**/*.js',
         'tests/dummy/config/**/*.js',
+        'tests/dummy/lib/**/*.js',
       ],
       excludedFiles: [
         'addon/**',
         'addon-test-support/**',
         'app/**',
-        'tests/dummy/app/**'
+        'tests/dummy/app/**',
+        'tests/dummy/lib/*/addon/**/*.js',
       ],
       parserOptions: {
         sourceType: 'script',
