@@ -27,7 +27,7 @@
   "devDependencies": {
     "broccoli-stew": "^1.5.0",
     "chai": "^4.1.2",
-    "eager": "file:./tests/dummy/lib/eager/",
+    "eager": "link:./tests/dummy/lib/eager/",
     "ember-cli": "~3.2.0-beta.2",
     "ember-cli-app-version": "^3.1.0",
     "ember-cli-babel": "^6.9.0",
@@ -54,7 +54,7 @@
     "fs-extra": "^4.0.2",
     "grunt": "^0.4.5",
     "grunt-release": "^0.12.0",
-    "lazy": "file:./tests/dummy/lib/lazy/",
+    "lazy": "link:./tests/dummy/lib/lazy/",
     "loader.js": "^4.0.1",
     "mocha": "^4.0.1",
     "qunit-dom": "^0.6.2"

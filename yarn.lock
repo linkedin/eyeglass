@@ -2131,12 +2131,9 @@ duplexer3@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
 
-"eager@file:./tests/dummy/lib/eager":
+"eager@link:./tests/dummy/lib/eager":
   version "0.0.0"
-  dependencies:
-    ember-cli-babel "*"
-    ember-cli-eyeglass "*"
-    ember-cli-htmlbars "*"
+  uid ""
 
 ecc-jsbn@~0.1.1:
   version "0.1.1"
@@ -4480,12 +4477,9 @@ lazy-cache@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-1.0.4.tgz#a1d78fc3a50474cb80845d3b3b6e1da49a446e8e"
 
-"lazy@file:./tests/dummy/lib/lazy":
+"lazy@link:./tests/dummy/lib/lazy":
   version "0.0.0"
-  dependencies:
-    ember-cli-babel "*"
-    ember-cli-eyeglass "*"
-    ember-cli-htmlbars "*"
+  uid ""
 
 lcid@^1.0.0:
   version "1.0.0"
