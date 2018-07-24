@@ -28,14 +28,6 @@ module.exports = function() {
           }
         },
         {
-          name: 'ember-beta',
-          npm: {
-            devDependencies: {
-              'ember-source': urls[1]
-            }
-          }
-        },
-        {
           name: 'ember-canary',
           npm: {
             devDependencies: {
