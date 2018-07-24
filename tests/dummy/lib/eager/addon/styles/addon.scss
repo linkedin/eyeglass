@@ -1,3 +1,6 @@
+@import "assets";
+
 .eager-addon {
-  color: yellow;
+  color: blue;
+  background-image: asset-url('img/test.jpg')
 }
