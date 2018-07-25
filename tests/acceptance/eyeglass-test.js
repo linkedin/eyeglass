@@ -45,7 +45,7 @@ module('Acceptance | eyeglass', function(hooks) {
     const eagerStyle = self.getComputedStyle(document.querySelector('.eager'));
     const eagerAddonStyle = self.getComputedStyle(document.querySelector('.eager-addon'));
     assert.equal(eagerStyle.backgroundColor, 'rgb(255, 0, 0)', '.eager#backgroundColor');
-    assert.equal(eagerAddonStyle.color, 'rgb(255, 255, 0)', '.eager-addon#backgroundColor');
+    assert.equal(eagerAddonStyle.color, 'rgb(0, 0, 255)', '.eager-addon#color');
   });
 
   test('visiting /lazy', async function(assert) {
