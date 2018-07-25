@@ -1041,8 +1041,8 @@ broccoli-clean-css@^1.1.0:
     json-stable-stringify "^1.0.0"
 
 broccoli-concat@^3.0.1, broccoli-concat@^3.2.2:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/broccoli-concat/-/broccoli-concat-3.4.0.tgz#1b7cd73995cbff170d958b3c81496e59313ed14f"
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/broccoli-concat/-/broccoli-concat-3.5.1.tgz#25d5bff467e451a03ae2a93b3fc8701b3955a732"
   dependencies:
     broccoli-kitchen-sink-helpers "^0.3.1"
     broccoli-plugin "^1.3.0"
