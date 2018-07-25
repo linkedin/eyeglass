@@ -92,6 +92,7 @@ module.exports = {
         let host = findHost(addon);
         let inApp = (host === addon.app);
 
+        // TODO: we should explore removing
         if (path.posix.join(sassDir, '/**/*') === '**/*') {
           // limit to only files in the sass directory,
           // but don't bother funneling if we just want everything anyways e.g. **/*
@@ -115,6 +116,7 @@ module.exports = {
         // addon. So that non-CSS assets aren't lost, we'll store them in a
         // separate tree for now and return them in a later hook.
         if (!inApp) {
+          // TODO: we should explore removing (this may have been fixed upstream);
           addon.addonAssetsTree = new Funnel(tree, { include: ['**/*.!(css)'] });
         }
 
@@ -124,7 +126,7 @@ module.exports = {
   },
 
   treeForPublic(tree) {
-    tree = this._super.treeForPublic(tree);
+    tree = this._super.treeForPublic.call(this, tree);
 
     // If we're processing an addon and stored some assets for it, add them
     // to the addon's public tree so they'll be available in the app's build
