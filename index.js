@@ -126,7 +126,7 @@ module.exports = {
   },
 
   treeForPublic(tree) {
-    tree = this._super.treeForPublic(tree);
+    tree = this._super.treeForPublic.call(this, tree);
 
     // If we're processing an addon and stored some assets for it, add them
     // to the addon's public tree so they'll be available in the app's build
