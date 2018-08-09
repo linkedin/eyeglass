@@ -46,6 +46,15 @@ module('Acceptance | eyeglass', function(hooks) {
     const eagerAddonStyle = self.getComputedStyle(document.querySelector('.eager-addon'));
     assert.equal(eagerStyle.backgroundColor, 'rgb(255, 0, 0)', '.eager#backgroundColor');
     assert.equal(eagerAddonStyle.color, 'rgb(0, 0, 255)', '.eager-addon#color');
+    let imageUrl = eagerAddonStyle.backgroundImage.substring(5, eagerAddonStyle.backgroundImage.length - 2);
+    assert.contains("http://", imageUrl);
+    assert.contains("/eager/assets/img/test.jpg", imageUrl);
+    try {
+      let response = await fetch(imageUrl);
+      assert.equal(response.ok, true, `Background image ${imageUrl} returned ${response.status}`);
+    } catch (e) {
+      assert.notOk(e);
+    }
   });
 
   test('visiting /lazy', async function(assert) {
