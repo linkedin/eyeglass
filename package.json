@@ -6,6 +6,7 @@
     "doc": "doc",
     "test": "tests"
   },
+  "main": "src/index.js",
   "scripts": {
     "build": "ember build",
     "lint:js": "eslint .",

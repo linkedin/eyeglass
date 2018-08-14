@@ -1,7 +1,7 @@
 'use strict';
 
 const EyeglassCompiler = require('broccoli-eyeglass');
-const findHost = require('./lib/findHost');
+const findHost = require('./findHost');
 const Funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 const path = require('path');
