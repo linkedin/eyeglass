@@ -1,12 +1,10 @@
-'use strict'
-
 /**
  * Finds the host app under which an addon is running.
  *
  * This allows us to easily look up the host app from a nested addon (an addon
  * running under another addon).
  */
-module.exports = function findHost(addon) {
+function findHost(addon) {
   // If the addon has the _findHost() method (in ember-cli >= 2.7.0), we'll just
   // use that.
   if (typeof addon._findHost === 'function') {
@@ -26,3 +24,5 @@ module.exports = function findHost(addon) {
 
   return app;
 }
+
+export default findHost;

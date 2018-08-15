@@ -5,6 +5,7 @@
 /tests
 /node-tests
 /tmp
+/src
 **/.gitkeep
 .bowerrc
 .editorconfig

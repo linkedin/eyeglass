@@ -6,8 +6,10 @@
     "doc": "doc",
     "test": "tests"
   },
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
+    "prepare": "tsc",
+    "pretest": "tsc",
     "build": "ember build",
     "lint:js": "eslint .",
     "start": "ember serve",
@@ -26,6 +28,7 @@
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/node": "^10.7.0",
     "broccoli-stew": "^1.5.0",
     "chai": "^4.1.2",
     "eager": "link:./tests/dummy/lib/eager/",
@@ -58,7 +61,8 @@
     "lazy": "link:./tests/dummy/lib/lazy/",
     "loader.js": "^4.0.1",
     "mocha": "^4.0.1",
-    "qunit-dom": "^0.6.2"
+    "qunit-dom": "^0.6.2",
+    "typescript": "~3.0.1"
   },
   "keywords": [
     "ember-addon",
