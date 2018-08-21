@@ -1,0 +1,65 @@
+{
+  "name": "eyeglass",
+  "description": "Sass modules for npm.",
+  "version": "1.5.0",
+  "author": {
+    "name": "The eyeglass team and contributors",
+    "url": "https://github.com/sass-eyeglass/eyeglass/graphs/contributors"
+  },
+  "engines": {
+    "node": ">=0.12"
+  },
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "README": "README.md",
+  "scripts": {
+    "prepare": "tsc",
+    "pretest": "tsc",
+    "test": "./test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sass-eyeglass/eyeglass.git"
+  },
+  "keywords": [
+    "sass",
+    "eyeglass-module"
+  ],
+  "eyeglass": {
+    "exports": "lib/eyeglass-exports",
+    "needs": "*"
+  },
+  "dependencies": {
+    "archy": "^1.0.0",
+    "deasync": "^0.1.4",
+    "debug": "^2.2.0",
+    "ensure-symlink": "^1.0.0",
+    "fs-extra": "^0.30.0",
+    "glob": "^7.1.0",
+    "json-stable-stringify": "^1.0.1",
+    "lodash.includes": "^4.3.0",
+    "lodash.merge": "^4.6.0",
+    "node-sass": "^4.0.0 || ^3.10.1",
+    "node-sass-utils": "^1.1.2",
+    "semver": "^5.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^1.7.1",
+    "eyeglass-dev-eslint": "^2.0.0",
+    "eyeglass-dev-site-builder": "0.0.5",
+    "grunt": "^0.4.5",
+    "grunt-release": "^0.13.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "^1.0.0",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-istanbul": "^0.10.1",
+    "gulp-mocha": "^2.1.3",
+    "handlebars": "^4.0.5",
+    "mocha": "^3.1.0",
+    "should": "^11.1.0"
+  },
+  "files": [
+    "lib",
+    "sass"
+  ]
+}
