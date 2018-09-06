@@ -1,0 +1,9 @@
+{
+  "name": "manual",
+  "version": "0.0.1",
+  "keywords": ["eyeglass-module"],
+  "eyeglass": {
+    "exports": "eyeglass-exports.js",
+    "needs": "*"
+  }
+}

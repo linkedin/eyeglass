@@ -1,0 +1,9 @@
+@import "partial";
+@import "assets";
+
+$test: world;
+.test {
+  hello: $test;
+  from-partial: $partial;
+  background: asset-url("images/foo.png");
+}
