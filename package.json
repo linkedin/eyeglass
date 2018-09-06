@@ -2,7 +2,7 @@
   "name": "eyeglass-multirepo",
   "private": true,
   "devDependencies": {
-    "lerna": "^2.4.0",
+    "lerna": "^3.3.0",
     "yarn": "^1.9.4"
   },
   "scripts": {
