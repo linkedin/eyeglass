@@ -20,23 +20,22 @@ module.exports = {
     // node files
     {
       files: [
-        'Gruntfile.js',
         'ember-cli-build.js',
         'index.js',
         'testem.js',
+        'Gruntfile.js',
         'blueprints/*/index.js',
         'config/**/*.js',
-        'tests/dummy/config/**/*.js',
-        'tests/dummy/lib/*/*.js',
-        'tests/dummy/lib/*/config/**/*.js',
-        'bin/**/*.js',
         'node-tests/**/*.js',
+        'tests/dummy/config/**/*.js',
+        'tests/dummy/lib/**/*.js',
       ],
       excludedFiles: [
         'addon/**',
         'addon-test-support/**',
         'app/**',
-        'tests/dummy/app/**'
+        'tests/dummy/app/**',
+        'tests/dummy/lib/*/addon/**/*.js',
       ],
       parserOptions: {
         sourceType: 'script',

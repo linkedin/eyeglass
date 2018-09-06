@@ -1,2 +1,18 @@
 /blueprints/*/files/**/*.js
-/dist/**/*.js
+# unconventional js
+/vendor/
+
+# compiled output
+/dist/
+/tmp/
+
+# dependencies
+/bower_components/
+
+# misc
+/coverage/
+
+# ember-try
+/.node_modules.ember-try/
+
+/bin/install-test-addons.js

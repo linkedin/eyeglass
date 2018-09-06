@@ -1,9 +1,8 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
-const EngineAddon = require('ember-engines/lib/engine-addon');
 const path = require('path');
 const assetsDir = path.join(__dirname, '/public/assets');
+const EngineAddon = require('ember-engines/lib/engine-addon'); // eslint-disable-line node/no-extraneous-require
 
 module.exports = EngineAddon.extend({
   name: 'eager',

@@ -4,7 +4,10 @@ const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
 module.exports = function(defaults) {
   let app = new EmberAddon(defaults, {
-    eyeglass: { omg: true, discover: true }
+    eyeglass: { omg: true, discover: true },
+    'ember-cli-babel': {
+      throwUnlessParallelizable: true
+    }
     // Add options here
   });
 
