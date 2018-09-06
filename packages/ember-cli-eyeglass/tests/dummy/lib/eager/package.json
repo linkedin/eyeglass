@@ -1,0 +1,17 @@
+{
+  "name": "eager",
+  "version": "0.0.0",
+  "keywords": [
+    "ember-addon",
+    "ember-engine"
+  ],
+  "dependencies": {
+    "ember-cli-htmlbars": "*",
+    "ember-cli-babel": "*",
+    "ember-cli-eyeglass": "*"
+  },
+  "ember-addon": {
+    "engineConfigPath": "config",
+    "paths": []
+  }
+}
