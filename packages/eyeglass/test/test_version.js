@@ -1,7 +1,7 @@
 "use strict";
 
 var testutils = require("./testutils");
-var Eyeglass = require("../lib/index");
+var Eyeglass = require("../lib");
 
 describe("sass version function", function () {
  it("should return the eyeglass version", function (done) {

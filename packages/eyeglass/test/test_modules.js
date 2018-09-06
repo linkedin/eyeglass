@@ -1,6 +1,6 @@
 "use strict";
 
-var EyeglassModules = require("../lib/modules/EyeglassModules");
+var EyeglassModules = require("../lib/modules/EyeglassModules").default;
 var fs = require("fs");
 var path = require("path");
 var glob = require("glob");
@@ -13,7 +13,7 @@ var fixtures = glob.sync(path.join(fixtureDir, "*"));
 var TESTS = {
   // tests that the graph is accurate
   graph: function(modules, err, expected) {
-    assert.ok(!err);
+    assert.ok(!err, err ? err.toString() : "");
     assert.ok(modules);
     // get the module graph, stripping off the local eyeglass version
     var graph = modules.getGraph().replace(/(\seyeglass)(?:@\S+)?/g, "$1");

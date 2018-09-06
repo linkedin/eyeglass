@@ -4,8 +4,8 @@ var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
 var merge = require("lodash.merge");
-var URI = require("../util/URI");
-var fileUtils = require("../util/files");
+import { URI } from "../util/URI";
+import * as fileUtils from "../util/files";
 var stringify = require("json-stable-stringify");
 
 /* class AssetsSource
@@ -22,7 +22,7 @@ var stringify = require("json-stable-stringify");
  * Option: globOpts [Optional] - Options to use for globbing.
  *   See: https://github.com/isaacs/node-glob#options
  */
-function AssetsSource(srcPath, options) {
+export default function AssetsSource(srcPath, options) {
   options = options || {};
 
   if (fileUtils.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
@@ -112,5 +112,3 @@ AssetsSource.prototype.cacheKey = function(namespace) {
     ";opts=" + stringify(this.globOpts, {replacer: skipSomeKeys}) +
     "]";
 };
-
-module.exports = AssetsSource;

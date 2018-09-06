@@ -1,8 +1,13 @@
 {
     "compilerOptions": {
+        "moduleResolution": "node",
         "outDir": "./lib",
         "allowJs": true,
-        "target": "es5"
+        "lib": [
+            "es6"
+        ],
+        "target": "es5",
+        "sourceMap": true
     },
     "include": [
         "./src/**/*"

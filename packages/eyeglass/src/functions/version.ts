@@ -1,8 +1,8 @@
 "use strict";
 
-var stringUtils = require("../util/strings");
+import * as stringUtils from "../util/strings";
 
-module.exports = function(eyeglass, sass) {
+export default function(eyeglass, sass) {
   return {
     "eyeglass-version($module: eyeglass)": function(moduleName) {
       var name = stringUtils.unquote(moduleName.getValue());

@@ -1,14 +1,14 @@
 "use strict";
 
-var EyeglassModules = require("./modules/EyeglassModules");
-var ModuleFunctions = require("./modules/ModuleFunctions");
-var ModuleImporter = require("./importers/ModuleImporter");
-var AssetImporter = require("./importers/AssetImporter");
-var FSImporter = require("./importers/FSImporter");
-var Options = require("./util/Options");
-var Assets = require("./assets/Assets");
-var Deprecator = require("./util/deprecator");
-var semverChecker = require("./util/semverChecker");
+var EyeglassModules = require("./modules/EyeglassModules").default;
+var ModuleFunctions = require("./modules/ModuleFunctions").default;
+var ModuleImporter = require("./importers/ModuleImporter").default;
+var AssetImporter = require("./importers/AssetImporter").default;
+var FSImporter = require("./importers/FSImporter").default;
+var Options = require("./util/Options").default;
+var Assets = require("./assets/Assets").default;
+var deprecator = require("./util/deprecator");
+var semverChecker = require("./util/semverChecker").default;
 var fs = require("fs-extra");
 var pkg = require("../package.json");
 
@@ -19,7 +19,10 @@ function Eyeglass(options, deprecatedNodeSassArg) {
   }
 
   // an interface for deprecation warnings
-  this.deprecate = new Deprecator(options);
+  var aDeprecator = new deprecator.Deprecator(options);
+  this.deprecate = function(sinceVersion, removeVersion, message) {
+    aDeprecator.deprecate(sinceVersion, removeVersion, message);
+  };
 
   this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
   this.assets = new Assets(this, this.options.eyeglass.engines.sass);

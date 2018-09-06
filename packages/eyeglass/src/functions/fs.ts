@@ -18,7 +18,7 @@ function pathInSandboxDir(fsPath, sandboxDir) {
   }
 }
 
-module.exports = function(eyeglass, sass) {
+export default function(eyeglass, sass) {
   var sassUtils = require("node-sass-utils")(sass);
 
   function accessViolation(location) {

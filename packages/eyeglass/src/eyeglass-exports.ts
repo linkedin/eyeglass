@@ -1,11 +1,10 @@
-"use strict";
-
-var path = require("path");
+import * as path from "path";
+import eyeglassFunctions from "./functions";
 
 module.exports = function(eyeglass, sass) {
   var opts = {
     sassDir: path.join(__dirname, "..", "sass"), // directory where the sass files are.
-    functions: require("./functions/index")(eyeglass, sass)
+    functions: eyeglassFunctions(eyeglass, sass)
   };
   return opts;
 };

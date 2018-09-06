@@ -1,6 +1,5 @@
-"use strict";
 
-module.exports = function(eyeglass, sass, options, version) {
+export default function(eyeglass, sass, options, version) {
   var strictMode = options.strictModuleVersions;
   var modules = eyeglass.modules;
   var issues = modules.issues.engine;

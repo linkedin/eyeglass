@@ -1,15 +1,15 @@
 "use strict";
 
-var packageUtils = require("../util/package");
-var ImportUtilities = require("./ImportUtilities");
-var EyeglassModule = require("../modules/EyeglassModule");
-var URI = require("../util/URI");
-var fileUtils = require("../util/files");
+import * as packageUtils from "../util/package";
+import ImportUtilities from "./ImportUtilities";
+import EyeglassModule from "../modules/EyeglassModule";
+import { URI } from "../util/URI";
+import * as fileUtils from "../util/files";
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
 var rAssetsImport = /^(?:([^\/]+)\/)?assets$/;
 
-function AssetImporter(eyeglass, sass, options, fallbackImporter) {
+export default function AssetImporter(eyeglass, sass, options, fallbackImporter) {
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
     var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
@@ -89,5 +89,3 @@ function AssetImporter(eyeglass, sass, options, fallbackImporter) {
     }
   });
 }
-
-module.exports = AssetImporter;

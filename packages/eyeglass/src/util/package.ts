@@ -1,12 +1,9 @@
-"use strict";
-
 var PACKAGE_JSON = "package.json";
+import * as path from "path";
+import { URI } from "./URI";
+import * as fileUtils from "./files";
 
-var path = require("path");
-var URI = require("./URI");
-var fileUtils = require("./files");
-
-function getPackageData(pkgPath) {
+export function getPackageData(pkgPath) {
   try {
     return require(pkgPath);
   } catch (e) {
@@ -15,7 +12,7 @@ function getPackageData(pkgPath) {
   }
 }
 
-function getPackage(dir) {
+export function getPackage(dir) {
   var pkgPath = getPackagePath(dir);
   return {
     path: pkgPath,
@@ -23,12 +20,12 @@ function getPackage(dir) {
   };
 }
 
-function getPackagePath(dir) {
+export function getPackagePath(dir) {
   dir = URI.system(dir);
   return (path.basename(dir) === PACKAGE_JSON) ? dir : path.join(dir, PACKAGE_JSON);
 }
 
-function findNearestPackage(dir) {
+export function findNearestPackage(dir) {
   dir = URI.system(dir);
   var prevDir;
   while (dir !== prevDir) {
@@ -41,11 +38,3 @@ function findNearestPackage(dir) {
   /* istanbul ignore next - should never happen and not possible to test */
   return false;
 }
-
-
-module.exports = {
-  getPackage: getPackage,
-  getPackageData: getPackageData,
-  getPackagePath: getPackagePath,
-  findNearestPackage: findNearestPackage
-};

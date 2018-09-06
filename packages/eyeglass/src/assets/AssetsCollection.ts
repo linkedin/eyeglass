@@ -1,12 +1,12 @@
 "use strict";
 
-var AssetsSource = require("./AssetsSource");
-var stringUtils = require("../util/strings");
-var URI = require("../util/URI");
+import AssetsSource from "./AssetsSource";
+import * as stringUtils from "../util/strings";
+import { URI } from "../util/URI";
 
 var assetRegisterTmpl = "@include asset-register(${namespace}, ${name}, ${sourcePath}, ${uri});\n";
 
-function AssetsCollection() {
+export default function AssetsCollection() {
   this.sources = [];
 }
 
@@ -61,5 +61,3 @@ AssetsCollection.prototype.cacheKey = function(name) {
     return source.cacheKey(name);
   }).sort().join(":");
 };
-
-module.exports = AssetsCollection;

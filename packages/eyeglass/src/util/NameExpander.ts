@@ -1,8 +1,6 @@
-"use strict";
-
-var path = require("path");
-var validExtensions = [".scss", ".sass", ".css"];
-var partialPrefix = "_";
+import * as path from "path";
+const VALID_EXTENSIONS = [".scss", ".sass", ".css"];
+const PARTIAL_PREFIX = "_";
 
 /**
   * provides an interface for expanding a given URI to valid import locations
@@ -10,56 +8,61 @@ var partialPrefix = "_";
   * @constructor
   * @param   {String} uri - the base URI to be expanded
   */
-function NameExpander(uri) {
-  // normalize the uri
-  this.uri = normalizeURI(uri);
-  // the collection of possible files
-  this.files = new Set();
-}
+export class NameExpander {
+  uri: string;
+  files: Set<string>;
 
-/**
-  * given a location, expands the collection of possible file imports
-  *
-  * @param   {String} location - the location path the expand the URI against
-  */
-NameExpander.prototype.addLocation = function(location) {
-  /* istanbul ignore else - defensive conditional, don't care about else-case */
-  if (location && location !== "stdin") {
-    // get the full path to the uri
-    var fullLocation = path.join(location, this.uri);
+  constructor(uri: string) {
+    // normalize the uri
+    this.uri = normalizeURI(uri);
+    // the collection of possible files
+    this.files = new Set();
+  }
 
-    // expand the possible variants for the file itself...
-    //  path/to/foo.scss:
-    //    - path/to/foo.scss
-    //    - path/to/_foo.scss
-    //  path/to/foo:
-    //    - path/to/foo.scss
-    //    - path/to/foo.sass
-    //    - path/to/foo.css
-    //    - path/to/_foo.scss
-    //    - path/to/_foo.sass
-    //    - path/to/_foo.css
-    withFileVariants(path.basename(fullLocation), function (name) {
-      var dir = path.dirname(fullLocation);
-      this.files.add(path.join(dir, name));
-    }.bind(this));
+  /**
+    * given a location, expands the collection of possible file imports
+    *
+    * @param   {String} location - the location path the expand the URI against
+    */
+  addLocation(location: string) {
+    /* istanbul ignore else - defensive conditional, don't care about else-case */
+    if (location && location !== "stdin") {
+      // get the full path to the uri
+      var fullLocation = path.join(location, this.uri);
 
-    // if the full location does not contain a valid extension...
-    if (!hasValidImportExtension(fullLocation)) {
-      // then expand out the `index` variants in order...
+      // expand the possible variants for the file itself...
+      //  path/to/foo.scss:
+      //    - path/to/foo.scss
+      //    - path/to/_foo.scss
       //  path/to/foo:
-      //   - path/to/foo/index.scss
-      //   - path/to/foo/index.sass
-      //   - path/to/foo/index.css
-      //   - path/to/foo/_index.scss
-      //   - path/to/foo/_index.sass
-      //   - path/to/foo/_index.css
-      withFileVariants("index", function (name) {
-        this.files.add(path.join(fullLocation, name));
+      //    - path/to/foo.scss
+      //    - path/to/foo.sass
+      //    - path/to/foo.css
+      //    - path/to/_foo.scss
+      //    - path/to/_foo.sass
+      //    - path/to/_foo.css
+      withFileVariants(path.basename(fullLocation), function (name) {
+        var dir = path.dirname(fullLocation);
+        this.files.add(path.join(dir, name));
       }.bind(this));
+
+      // if the full location does not contain a valid extension...
+      if (!hasValidImportExtension(fullLocation)) {
+        // then expand out the `index` variants in order...
+        //  path/to/foo:
+        //   - path/to/foo/index.scss
+        //   - path/to/foo/index.sass
+        //   - path/to/foo/index.css
+        //   - path/to/foo/_index.scss
+        //   - path/to/foo/_index.sass
+        //   - path/to/foo/_index.css
+        withFileVariants("index", function (name) {
+          this.files.add(path.join(fullLocation, name));
+        }.bind(this));
+      }
     }
   }
-};
+}
 
 /**
   * normalizes the URI path
@@ -82,8 +85,8 @@ function withFileVariants(name, callback) {
 
   var names = [name];
   // if it's not already a partial, add a partial name
-  if (name[0] !== partialPrefix) {
-    names.push(partialPrefix + name);
+  if (name[0] !== PARTIAL_PREFIX) {
+    names.push(PARTIAL_PREFIX + name);
   }
 
   // with each possible name...
@@ -91,7 +94,7 @@ function withFileVariants(name, callback) {
     // if we need to append an extension...
     if (!hasExtension) {
       // and each possible extension...
-      validExtensions.forEach(function(extension) {
+      VALID_EXTENSIONS.forEach(function(extension) {
         // hand back the permutation
         callback(name + extension);
       });
@@ -109,7 +112,5 @@ function withFileVariants(name, callback) {
   */
 function hasValidImportExtension(file) {
   var extension = path.extname(file);
-  return (validExtensions.indexOf(extension) !== -1);
+  return (VALID_EXTENSIONS.indexOf(extension) !== -1);
 }
-
-module.exports = NameExpander;

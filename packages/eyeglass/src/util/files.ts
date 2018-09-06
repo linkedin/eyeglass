@@ -1,14 +1,12 @@
-"use strict";
+import * as fs from "fs";
 
-var fs = require("fs");
-
-function existsSync(file) {
+export function existsSync(file) {
   // This fs method is going to be deprecated
   // but can be re-implemented with fs.accessSync later.
   return fs.existsSync(file);
 }
 
-function readFile(file, options, callback) {
+export function readFile(file, options, callback) {
   setImmediate(function() {
     var data;
     var err;
@@ -23,8 +21,3 @@ function readFile(file, options, callback) {
     callback(err, data);
   });
 }
-
-module.exports = {
-  existsSync: existsSync,
-  readFile: readFile
-};

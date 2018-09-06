@@ -1,10 +1,10 @@
 "use strict";
 
-var path = require("path");
-var ImportUtilities = require("./ImportUtilities");
-var fileUtils = require("../util/files");
+import * as path from "path";
+import ImportUtilities from "./ImportUtilities";
+import * as fileUtils from "../util/files";
 
-function FSImporter(eyeglass, sass, options, fallbackImporter) {
+export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
   var fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
@@ -39,5 +39,3 @@ function FSImporter(eyeglass, sass, options, fallbackImporter) {
     }
   });
 }
-
-module.exports = FSImporter;

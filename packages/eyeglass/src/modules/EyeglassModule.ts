@@ -1,94 +1,100 @@
-"use strict";
+import * as packageUtils from "../util/package";
+import * as merge from "lodash.merge";
+import * as includes from "lodash.includes";
+import * as path from "path";
+import * as fs from "fs";
 
-var packageUtils = require("../util/package");
-var merge = require("lodash.merge");
-var includes = require("lodash.includes");
-var path = require("path");
-var fs = require("fs");
 var rInvalidName = /\.(?:sass|s?css)$/;
-
 var EYEGLASS_KEYWORD = "eyeglass-module";
 
-function EyeglassModule(mod, discoverModules, isRoot) {
-  // some defaults
-  mod = merge({
-    // eyeglass config
-    eyeglass: {}
-  }, mod);
+export default class EyeglassModule {
+  eyeglass: any;
+  path: string;
+  main: any;
 
-  // if we were given a path, resolve it to the package.json
-  if (mod.path) {
-    var pkg = packageUtils.getPackage(mod.path);
+  constructor(mod, discoverModules?, isRoot?: boolean) {
+    // some defaults
+    mod = merge({
+      // eyeglass config
+      eyeglass: {}
+    }, mod);
 
-    // if pkg.data is empty, this is an invalid path, so throw an error
-    if (!pkg.data) {
-      throw new Error("Could not find a valid package.json at " + mod.path);
+    // if we were given a path, resolve it to the package.json
+    if (mod.path) {
+      var pkg = packageUtils.getPackage(mod.path);
+
+      // if pkg.data is empty, this is an invalid path, so throw an error
+      if (!pkg.data) {
+        throw new Error("Could not find a valid package.json at " + mod.path);
+      }
+
+      var modulePath = fs.realpathSync(path.dirname(pkg.path));
+      mod.path = modulePath;
+
+      mod = merge(
+        {
+          isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data)
+        },
+        mod,
+        {
+          path: modulePath,
+          name: getModuleName(pkg),
+          rawName: pkg.data.name,
+          version: pkg.data.version,
+          // only resolve dependencies if we were given a discoverModules function
+          dependencies: discoverModules && discoverModules({
+            dir: modulePath,
+            isRoot: isRoot
+          }) || mod.dependencies, // preserve any passed in dependencies
+          eyeglass: normalizeEyeglassOptions(pkg.data.eyeglass, modulePath)
+        }
+      );
+
+      if (mod.isEyeglassModule) {
+        var moduleMain = getModuleExports(pkg.data, modulePath);
+        merge(mod, {
+          main: moduleMain && require(moduleMain),
+          mainPath: moduleMain
+        });
+
+        if (rInvalidName.test(mod.name)) {
+          throw new Error("An eyeglass module cannot contain an extension in it's name: " + mod.name);
+        }
+      }
     }
 
-    var modulePath = fs.realpathSync(path.dirname(pkg.path));
-    mod.path = modulePath;
+    // if a sassDir is specified in eyeglass options, it takes precedence
+    mod.sassDir = mod.eyeglass.sassDir || mod.sassDir;
 
-    mod = merge(
-      {
-        isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data)
-      },
-      mod,
-      {
-        path: modulePath,
-        name: getModuleName(pkg),
-        rawName: pkg.data.name,
-        version: pkg.data.version,
-        // only resolve dependencies if we were given a discoverModules function
-        dependencies: discoverModules && discoverModules({
-          dir: modulePath,
-          isRoot: isRoot
-        }) || mod.dependencies, // preserve any passed in dependencies
-        eyeglass: normalizeEyeglassOptions(pkg.data.eyeglass, modulePath)
-      }
-    );
+    // set the rawName if it's not already set
+    mod.rawName = mod.rawName || mod.name;
 
-    if (mod.isEyeglassModule) {
-      var moduleMain = getModuleExports(pkg.data, modulePath);
-      merge(mod, {
-        main: moduleMain && require(moduleMain),
-        mainPath: moduleMain
-      });
-
-      if (rInvalidName.test(mod.name)) {
-        throw new Error("An eyeglass module cannot contain an extension in it's name: " + mod.name);
-      }
-    }
+    // merge the module properties into the instance
+    merge(this, mod);
   }
 
-  // if a sassDir is specified in eyeglass options, it takes precedence
-  mod.sassDir = mod.eyeglass.sassDir || mod.sassDir;
+  /**
+    * initializes the module with the given engines
+    *
+    * @param   {Eyeglass} eyeglass - the eyeglass instance
+    * @param   {Function} sass - the sass engine
+    */
+  init(eyeglass, sass) {
+    merge(this, this.main && this.main(eyeglass, sass));
+  };
 
-  // set the rawName if it's not already set
-  mod.rawName = mod.rawName || mod.name;
-
-  // merge the module properties into the instance
-  merge(this, mod);
+  /**
+    * whether or not the given package is an eyeglass module
+    *
+    * @param   {Object} pkg - the package.json
+    * @returns {Boolean} whether or not it is an eyeglass module
+    */
+  static isEyeglassModule(pkg) {
+    return !!(pkg && includes(pkg.keywords, EYEGLASS_KEYWORD));
+  };
 }
 
-/**
-  * initializes the module with the given engines
-  *
-  * @param   {Eyeglass} eyeglass - the eyeglass instance
-  * @param   {Function} sass - the sass engine
-  */
-EyeglassModule.prototype.init = function(eyeglass, sass) {
-  merge(this, this.main && this.main(eyeglass, sass));
-};
 
-/**
-  * whether or not the given package is an eyeglass module
-  *
-  * @param   {Object} pkg - the package.json
-  * @returns {Boolean} whether or not it is an eyeglass module
-  */
-EyeglassModule.isEyeglassModule = function(pkg) {
-  return !!(pkg && includes(pkg.keywords, EYEGLASS_KEYWORD));
-};
 
 /**
   * given a package.json reference, gets the Eyeglass module name
@@ -108,7 +114,7 @@ function getModuleName(pkg) {
   * @param   {String} pkgPath - The location of the package.json.
   * @returns {Object} the normalized options
   */
-function normalizeEyeglassOptions(options, pkgPath) {
+function normalizeEyeglassOptions(options, pkgPath?) {
   var normalizedOpts;
   // if it's a string, treat it as the export
   if (typeof options === "string") {
@@ -161,5 +167,3 @@ function getModuleExports(pkg, modulePath) {
     return null;
   }
 }
-
-module.exports = EyeglassModule;

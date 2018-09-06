@@ -1,13 +1,14 @@
-"use strict";
+import * as semver from "semver";
+const DEFAULT_VERSION = "0.0.0";
 
-var semver = require("semver");
-var DEFAULT_VERSION = "0.0.0";
-
-function Deprecator(options) {
+export class Deprecator {
+  ignoreDeprecations: string;
+  enabled: boolean;
+  constructor(options) {
   this.ignoreDeprecations = options && options.eyeglass && options.eyeglass.ignoreDeprecations;
 }
 
-Deprecator.prototype.isEnabled = function(sinceVersion) {
+isEnabled(sinceVersion) {
   // if `enabled` is undefined, try to set it
   if (this.enabled === undefined) {
     // if `disableDeprecations`, we fallback to the env variable
@@ -19,18 +20,25 @@ Deprecator.prototype.isEnabled = function(sinceVersion) {
   }
 
   return this.enabled;
-};
+}
 
-Deprecator.prototype.deprecate = function(sinceVersion, removeVersion, message) {
+deprecate(sinceVersion, removeVersion, message) {
   if (this.isEnabled(sinceVersion)) {
     console.warn(
       "[eyeglass:deprecation]",
        "(deprecated in " + sinceVersion + ", will be removed in " + removeVersion + ")",
        message);
   }
-};
+}
+}
 
-module.exports = function(options) {
-  var deprecator = new Deprecator(options);
+interface DeprecatorFactory {
+  (options): Deprecator;
+}
+
+const factory: DeprecatorFactory = (options) => {
+  let deprecator = new Deprecator(options);
   return deprecator.deprecate.bind(deprecator);
-};
+}
+
+export default factory;

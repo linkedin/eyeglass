@@ -1,10 +1,10 @@
 "use strict";
 
-var path = require("path");
-var merge = require("lodash.merge");
-var URI = require("./URI");
+import * as path from "path";
+import * as merge from "lodash.merge";
+import { URI } from "./URI";
 
-function Options(options, deprecate, sassArg) {
+export default function Options(options, deprecate, sassArg) {
   // get the normalized Sass options
   options = getSassOptions.apply(null, arguments);
 
@@ -201,5 +201,3 @@ function getSassOptions(options, deprecate, sassArg) {
 function defaultValue(item, value) {
   return (item === undefined) ? value : item;
 }
-
-module.exports = Options;

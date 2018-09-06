@@ -5,7 +5,7 @@ var config = require("eyeglass-dev-eslint");
 
 module.exports = function(gulp, depends) {
   gulp.task("lint", depends, function() {
-    return gulp.src(["*.js", "{build,lib,test}/**/*.js"])
+    return gulp.src(["*.js", "{build,src,test}/**/*.js"])
         .pipe(eslint(config))
         .pipe(eslint.formatEach("stylish", process.stderr))
         .pipe(eslint.failOnError());

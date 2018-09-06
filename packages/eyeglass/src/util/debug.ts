@@ -1,9 +1,6 @@
-"use strict";
+import * as debug from "debug";
 
-var debug = require("debug");
-var PREFIX = "eyeglass:";
-
-module.exports = ["import", "modules", "functions", "assets"].reduce(function(obj, item) {
-  obj[item] = debug(PREFIX + item);
-  return obj;
-}, {});
+export const importer = debug("eyeglass:importer");
+export const modules = debug("eyeglass:modules");
+export const functions = debug("eyeglass:functions");
+export const assets = debug("eyeglass:assets");

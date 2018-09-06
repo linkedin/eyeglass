@@ -1,6 +1,6 @@
 "use strict";
 
-var NameExpander = require("../lib/util/NameExpander");
+var NameExpander = require("../lib/util/NameExpander").NameExpander;
 var assert = require("assert");
 var path = require("path");
 

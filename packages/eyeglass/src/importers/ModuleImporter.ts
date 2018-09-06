@@ -1,9 +1,9 @@
 "use strict";
 
-var path = require("path");
-var NameExpander = require("../util/NameExpander");
-var fileUtils = require("../util/files");
-var ImportUtilities = require("./ImportUtilities");
+import * as path from "path";
+import { NameExpander } from "../util/NameExpander";
+import * as fileUtils from "../util/files";
+import ImportUtilities from "./ImportUtilities";
 
 /*
  * Asynchronously walks the file list until a match is found. If
@@ -80,7 +80,7 @@ function readAbstractFile(originalUri, uri, location, includePaths, moduleName, 
  * fallback importer is the importer that was specified
  * in the node-sass options if one was there.
  */
-function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
+export default function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
   var includePaths = options.includePaths;
   var root = options.eyeglass.root;
 
@@ -125,7 +125,7 @@ function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
       }
     }
 
-    function createHandler(errorHandler) {
+    function createHandler(errorHandler?) {
       errorHandler = errorHandler || function(err) {
         done(new Error(err.toString()));
       };
@@ -164,5 +164,3 @@ function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
     }
   });
 }
-
-module.exports = ModuleImporter;

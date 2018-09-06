@@ -3,10 +3,10 @@
 var assert = require("assert");
 var stringUtils = require("../lib/util/strings");
 var unquote = stringUtils.unquote;
-var sync = require("../lib/util/sync");
+var sync = require("../lib/util/sync").default;
 var sass = require("node-sass");
 var testutils = require("./testutils");
-var EyeglassModules = require("../lib/modules/EyeglassModules");
+var EyeglassModules = require("../lib/modules/EyeglassModules").default;
 
 describe("utilities", function () {
 

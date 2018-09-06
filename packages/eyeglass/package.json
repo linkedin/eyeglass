@@ -44,6 +44,9 @@
     "semver": "^5.0.3"
   },
   "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/node": "^10.7.1",
+    "@types/semver": "^5.5.0",
     "eslint": "^1.7.1",
     "eyeglass-dev-eslint": "^2.0.0",
     "eyeglass-dev-site-builder": "0.0.5",
@@ -56,7 +59,10 @@
     "gulp-mocha": "^2.1.3",
     "handlebars": "^4.0.5",
     "mocha": "^3.1.0",
-    "should": "^11.1.0"
+    "should": "^11.1.0",
+    "source-map-support": "^0.5.9",
+    "ts-node": "^7.0.1",
+    "typescript": "~3.0.3"
   },
   "files": [
     "lib",

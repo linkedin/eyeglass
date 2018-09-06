@@ -1,15 +1,17 @@
-"use strict";
+import resolve from "../util/resolve";
+import * as packageUtils from "../util/package";
+import EyeglassModule from "./EyeglassModule";
+import * as debug from "../util/debug";
+import * as path from "path";
+import * as merge from "lodash.merge";
+import * as semver from "semver";
+import * as archy from "archy";
+import * as fs from "fs";
+import { URI } from "../util/URI";
 
-var resolve = require("../util/resolve");
-var packageUtils = require("../util/package");
-var EyeglassModule = require("./EyeglassModule");
-var debug = require("../util/debug");
-var path = require("path");
-var merge = require("lodash.merge");
-var semver = require("semver");
-var archy = require("archy");
-var fs = require("fs");
-var URI = require("../util/URI");
+interface Dependencies {
+  [dep: string]: string;
+}
 
 /**
   * Discovers all of the modules for a given directory
@@ -18,7 +20,7 @@ var URI = require("../util/URI");
   * @param   {String} dir - the directory to discover modules in
   * @param   {Array} modules - the explicit modules to include
   */
-function EyeglassModules(dir, modules) {
+export default function EyeglassModules(dir, modules) {
   this.issues = {
     dependencies: {
       versions: [],
@@ -202,7 +204,8 @@ function pruneModuleTree(moduleTree) {
   var branch = {
     name: finalModule && finalModule.name || moduleTree.name,
     version: finalModule && finalModule.version || moduleTree.version,
-    path: finalModule && finalModule.path || moduleTree.path
+    path: finalModule && finalModule.path || moduleTree.path,
+    dependencies: undefined
   };
   // if the tree has dependencies
   var dependencies = moduleTree.dependencies;
@@ -279,7 +282,7 @@ function canAccessModule(name, origin) {
       }
     });
 
-    debug.import(
+    debug.importer(
       "%s can%s be imported from %s",
       name,
       (canAccess ? "" : "not"),
@@ -316,7 +319,7 @@ function canAccessModule(name, origin) {
   * @param   {Object} collection - the incoming collection
   * @returns {Object} the resulting collection
   */
-function flattenModules(branch, collection) {
+function flattenModules(branch, collection?) {
   // if the branch itself is a module, add it...
   if (branch.isEyeglassModule) {
     collection = collection || {};
@@ -442,9 +445,9 @@ function getEyeglassSelf() {
   *
   * @see resolve()
   */
-function resolveModulePackage() {
+function resolveModulePackage(...args) {
   try {
-    return resolve.apply(null, arguments);
+    return resolve.apply(null, args);
   } catch (e) {}
 }
 
@@ -458,7 +461,7 @@ function discoverModules(options) {
   var pkg = options.pkg || packageUtils.getPackage(options.dir);
 
   // get the collection of dependencies
-  var dependencies = {};
+  var dependencies: {[dep: string]: string} = {};
 
   // if there's package.json contents...
   /* istanbul ignore else - defensive conditional, don't care about else-case */
@@ -502,5 +505,3 @@ function discoverModules(options) {
 
   return Object.keys(dependencies).length ? dependencies : null;
 }
-
-module.exports = EyeglassModules;

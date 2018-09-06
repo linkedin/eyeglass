@@ -1,8 +1,6 @@
-"use strict";
-
-var syncFn = require("../util/sync");
-var debug = require("../util/debug");
-var merge = require("lodash.merge");
+import syncFn from "../util/sync";
+import * as debug from "../util/debug";
+import * as merge from "lodash.merge";
 var ARGUMENTS_REGEX = /\s*\(.*\)$/;
 var DELIM = "\n\t\u2022 ";
 
@@ -37,7 +35,7 @@ function checkConflicts(obj1, obj2) {
   });
 }
 
-function ModuleFunctions(eyeglass, sass, options, existingFunctions) {
+export default function ModuleFunctions(eyeglass, sass, options, existingFunctions) {
   var functions = eyeglass.modules.list.reduce(function(fns, mod) {
     if (!mod.functions) {
       return fns;
@@ -67,5 +65,3 @@ function ModuleFunctions(eyeglass, sass, options, existingFunctions) {
   );
   return functions;
 }
-
-module.exports = ModuleFunctions;

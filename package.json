@@ -4,5 +4,9 @@
   "devDependencies": {
     "lerna": "^2.4.0",
     "yarn": "^1.9.4"
+  },
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "test": "lerna run test"
   }
 }

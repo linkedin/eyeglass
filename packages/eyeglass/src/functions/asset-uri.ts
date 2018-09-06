@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function(eyeglass, sass) {
+export default function(eyeglass, sass) {
   return {
     "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets, $uri, done) {
       eyeglass.assets.resolveAsset($assets, $uri, function(error, assetUri, assetPath) {

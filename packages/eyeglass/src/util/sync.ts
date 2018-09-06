@@ -17,8 +17,16 @@
  */
 "use strict";
 
-var deasync = require("deasync");
-function sync(fn) {
+import * as deasync from "deasync";
+
+export interface SyncFn {
+  (fn: any): any;
+}
+export interface Sync extends SyncFn {
+  all: (obj: {[key: string]: SyncFn}) => {[key: string]: any}
+}
+
+const syncFn: SyncFn = (fn) => {
   return function() {
     var result;
     var args = [].slice.call(arguments, 0);
@@ -53,13 +61,16 @@ function sync(fn) {
 
     return result;
   };
-}
-
-sync.all = function(obj) {
-  for (var name in obj) {
-    obj[name] = sync(obj[name]);
-  }
-  return obj;
 };
 
-module.exports = sync;
+const sync: Sync = Object.assign(syncFn, {
+  all(obj) {
+    for (var name in obj) {
+      obj[name] = sync(obj[name]);
+    }
+    return obj;
+  }
+});
+
+export default sync;
+

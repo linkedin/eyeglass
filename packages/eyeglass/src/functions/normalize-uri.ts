@@ -1,9 +1,9 @@
 "use strict";
 
-var URI = require("../util/URI");
-var isWindows = /win32/.test(require("os").platform());
+import { URI } from  "../util/URI";
+const IS_WINDOWS = /win32/.test(require("os").platform());
 
-module.exports = function(eyeglass, sass) {
+export default function(eyeglass, sass) {
   var methods = {
     "eyeglass-uri-preserve($uri)": function($uri, done) {
       var uri = $uri.getValue();
@@ -19,7 +19,7 @@ module.exports = function(eyeglass, sass) {
     }
   };
 
-  if (isWindows || process.env.EYEGLASS_NORMALIZE_PATHS) {
+  if (IS_WINDOWS || process.env.EYEGLASS_NORMALIZE_PATHS) {
     methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri, $type, done) {
       var type = $type.getValue();
       var uri = $uri.getValue();

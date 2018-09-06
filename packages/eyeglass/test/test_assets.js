@@ -8,8 +8,8 @@ var fse = require("fs-extra");
 var glob = require("glob");
 
 var Eyeglass = require("../lib");
-var AssetsSource = require("../lib/assets/AssetsSource");
-var AssetsCollection = require("../lib/assets/AssetsCollection");
+var AssetsSource = require("../lib/assets/AssetsSource").default;
+var AssetsCollection = require("../lib/assets/AssetsCollection").default;
 
 function escapeBackslash(str) {
   return str.replace(/\\/g, "\\\\");

@@ -1,15 +1,16 @@
 "use strict";
 
-var fs = require("fs-extra");
-var path = require("path");
-var URI = require("../util/URI");
-var debug = require("../util/debug");
-var ensureSymlink = require("ensure-symlink");
-var AssetsCollection = require("./AssetsCollection");
-// TODO - remove when deprecated AssetPathEntry is removed
-var AssetsSource = require("./AssetsSource");
+import * as fs from "fs-extra";
+import * as path from "path";
+import { URI } from "../util/URI";
+import * as debug from "../util/debug";
+import AssetsCollection from "./AssetsCollection";
+import AssetsSource from "./AssetsSource";
 
-function Assets(eyeglass, sass) {
+const ensureSymlink = require("ensure-symlink");
+// TODO - remove when deprecated AssetPathEntry is removed
+
+export default function Assets(eyeglass, sass) {
   this.sassUtils = require("node-sass-utils")(sass);
   this.eyeglass = eyeglass;
   // create a master collection
@@ -235,5 +236,3 @@ function resolveAssetDefaults(registeredAssetsMap, relativePath) {
     return moduleAssets.coerce.get(moduleRelativePath);
   }
 }
-
-module.exports = Assets;

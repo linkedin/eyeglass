@@ -7,6 +7,9 @@ module.exports = function(gulp, depends) {
     return gulp.src([
       "test/**/test_*.js"
       ], {read: false})
-        .pipe(mocha({reporter: "spec"}));
+        .pipe(mocha({
+          reporter: "spec",
+          require: ["source-map-support/register"]
+        }));
   });
 };
