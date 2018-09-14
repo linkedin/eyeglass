@@ -20,6 +20,7 @@ const glob = require("glob");
 const EyeglassCompiler = require("../lib/index");
 const SyncDiskCache = require("sync-disk-cache");
 const walkSync = require("walk-sync");
+const EOL = require("os").EOL;
 
 function allFilesAreSymlinks(root) {
   walkSync(root, {directories: false}).forEach(filepath => {
@@ -1458,5 +1459,66 @@ describe("EyeglassCompiler", function () {
 
     it("doesn't check the persistent cache when doing a rebuild in the same instance.");
     it("busts cache when a file higher in the load path order is added");
+  });
+
+  describe("rebuild error handling", function() {
+    const helper = require("broccoli-test-helper");
+    const co = require("co");
+    const expect = require("chai").expect;
+    const createBuilder = helper.createBuilder;
+    const createTempDir = helper.createTempDir;
+    let input, output;
+
+    beforeEach(co.wrap(function* () {
+      input = yield createTempDir();
+    }));
+
+    afterEach(function() {
+      if (input) {
+        input.dispose();
+      }
+      if (output) {
+        output.dispose();
+      }
+    });
+
+    it("blows away state, so mid-build errors can be recoverable", co.wrap(function* () {
+      const subject = new EyeglassCompiler(input.path(), {
+        cssDir: "."
+      });
+      output = createBuilder(subject);
+
+      input.write({
+        "omg.scss": ".valid-1 { display: block; }"
+      });
+
+      yield output.build();
+
+      expect(output.read()).to.eql({
+        "omg.css": ".valid-1 {" + EOL + "  display: block; }" + EOL
+      });
+
+      input.write({
+        "omg.scss": "invalid"
+      });
+
+      try {
+        yield output.build();
+        expect(true).to.eql(false);
+      } catch (e) {
+        expect(e.name).to.eql("BuildError");
+      }
+      expect(output.read()).to.eql({ });
+
+      input.write({
+        "omg.scss": ".valid-2 { display: block }"
+      });
+
+      yield output.build();
+
+      expect(output.read()).to.eql({
+        "omg.css": ".valid-2 {" + EOL + "  display: block; }" + EOL
+      });
+    }));
   });
 });
