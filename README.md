@@ -147,9 +147,13 @@ For more details, see the documentation on [debug](https://github.com/visionmedi
 This broccoli plugin uses two different caching layers to avoid
 unecessary builds of sass files.
 
+By default, if the the `CI=true` environment variable is set, peristent caches
+are disabled. To force persistent caches on CI, please set the
+`FORCE_PERSISTENCE_IN_CI=true` environment variable;
+
 ### Rebuild Caching
 
-When the same broccoli-eyeglass instance is ran more than once, the
+When the same broccoli-eyeglass instance is run more than once, the
 rebuild is avoided by checking mtimes of dependencies to see if they
 have changed since the last build.
 

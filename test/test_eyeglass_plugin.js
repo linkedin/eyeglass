@@ -95,6 +95,22 @@ const circleSVG = svg(
 );
 
 describe("EyeglassCompiler", function () {
+  const hasCIValue = ("CI" in process.env);
+  const CI_VALUE = process.env.CI;
+
+  beforeEach(function() {
+    delete process.env.CI;
+  });
+
+  afterEach(function() {
+    if (hasCIValue) {
+      process.env.CI = CI_VALUE;
+    } else {
+      delete process.env.CI;
+    }
+
+  });
+
   it("can be instantiated", function () {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: "."
@@ -842,6 +858,39 @@ describe("EyeglassCompiler", function () {
         });
     });
 
+    it("DOES NOT preserve cache if process.env.CI is set", function() {
+      process.env.CI = true;
+
+      let projectDir = makeFixtures("projectDir", {
+        "project.scss": '@import "related";',
+        "_related.scss": "/* This is related to something. */"
+      });
+      let expectedOutputDir = makeFixtures("expectedOutputDir", {
+        "project.css": "/* This is related to something. */\n"
+      });
+
+      let compiledFiles = [];
+      let builders = warmBuilders(2, projectDir, {
+        cssDir: ".",
+        persistentCache: "test"
+      }, details => {
+        compiledFiles.push(details.fullSassFilename);
+      });
+
+      return build(builders[0])
+        .then(outputDir => {
+          assertEqualDirs(outputDir, expectedOutputDir);
+          assert.equal(1, compiledFiles.length);
+          compiledFiles.length = 0;
+
+          return build(builders[1])
+            .then(outputDir2 => {
+              assert.notEqual(outputDir, outputDir2);
+              assert.equal(compiledFiles.length, 1);
+              assertEqualDirs(outputDir2, expectedOutputDir);
+            });
+        });
+    });
 
     it("preserves cache across builder instances", function() {
       let projectDir = makeFixtures("projectDir", {
