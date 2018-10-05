@@ -84,6 +84,24 @@ Manually added eyeglass modules will only be able to be imported by the
 main application's sass files. Dependencies between such manual modules
 are not currently supported.
 
+## Module Caching
+
+By default, eyeglass uses a global module cache to help improve the performance of module discovery. This should be safe for almost all use cases, but if you modify your `node_modules` directory and/or `package.json` dependencies during build time, this may cause issues. You can opt-out of the by passing the eyeglass option `useGlobalModuleCache: false`.
+
+```js
+eyeglass({
+  // sass options
+  // ...
+  eyeglass: {
+    // eyeglass options
+    // ...
+    useGlobalModuleCache: false
+  }
+});
+```
+
+Alternatively, you can programmatically purge the global cache using `eyeglass.modules.cache.modules.purge()`.
+
 # Working with assets
 
 It's quite common to need to refer to assets from within your
