@@ -1,6 +1,6 @@
 var path = require("path");
 
-module.exports = function(eyeglass, sass) {
+module.exports = function() {
   return {
     sassDir: path.join(__dirname, "sass"),
   };

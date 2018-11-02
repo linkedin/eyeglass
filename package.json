@@ -26,6 +26,7 @@
   ],
   "dependencies": {
     "async-promise-queue": "^1.0.1",
+    "broccoli-debug": "^0.6.5",
     "broccoli-merge-trees": "^3.0.0",
     "broccoli-plugin": "^1.2.2",
     "broccoli-test-helper": "^1.5.0",
