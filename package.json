@@ -10,9 +10,14 @@
     "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
   },
   "scripts": {
-    "test": "mocha test/test_*.js",
+    "lint:js": "eslint .",
+    "test": "yarn lint:js && yarn test:mocha",
+    "test:mocha": "mocha test/test_*.js",
     "test:debug": "mocha debug test/test_*.js"
   },
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "broccoli-plugin",
     "sass",
@@ -22,6 +27,7 @@
   ],
   "dependencies": {
     "async-promise-queue": "^1.0.1",
+    "broccoli-debug": "^0.6.5",
     "broccoli-merge-trees": "^3.0.0",
     "broccoli-plugin": "^1.2.2",
     "broccoli-test-helper": "^1.5.0",
@@ -50,10 +56,13 @@
     "broccoli": "^0.16.5",
     "chai": "^4.1.2",
     "co": "^4.6.0",
+    "eslint": "^5.8.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-prettier": "^3.0.0",
     "fixturify": "^0.3.4",
-    "jshint": "^2.8.0",
     "mocha": "^5.2.0",
-    "mocha-eslint": "^4.1.0",
+    "prettier": "^1.14.3",
     "rimraf": "^2.6.2"
   }
 }
