@@ -1,0 +1,38 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+
+#global-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+#global-sidebar,
+#global-main {
+  box-sizing: border-box;
+}
+
+#global-main {
+  padding: 80px 20px;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 100%;
+          flex: 0 0 100%;
+}
+
+#global-sidebar {
+  font-size: 16px;
+  background-color: pink;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 240px;
+          flex: 0 0 240px;
+  padding: 40px 20px;
+}
+
+#global-sidebar + #global-main {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 calc(100% - 240px);
+          flex: 0 0 calc(100% - 240px);
+}

@@ -1,9 +1,0 @@
-@import "mod-one/assets";
-@import "assets";
-
-.test {
-  background: asset-url("images/foo.png");
-  background: asset-url("fonts/foo.woff");
-  background: asset-url("mod-one/mod-one.jpg");
-  background: asset-url("mod-one/subdir/sub.png");
-}

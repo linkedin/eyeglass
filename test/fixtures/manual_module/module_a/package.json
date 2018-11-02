@@ -1,8 +1,0 @@
-{
-  "name": "module_a",
-  "private": true,
-  "eyeglass": {
-    "needs": "*",
-    "sassDir": "./"
-  }
-}
