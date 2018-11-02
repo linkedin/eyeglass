@@ -62,7 +62,7 @@ function assertEqualDirs(actualDir, expectedDir) {
   let actualFiles = glob.sync("**/*", { cwd: actualDir }).sort();
   let expectedFiles = glob.sync("**/*", { cwd: expectedDir }).sort();
 
-  assert.deepEqual(actualFiles, expectedFiles);
+  assert.deepStrictEqual(actualFiles, expectedFiles);
 
   actualFiles.forEach(file => {
     let actualPath = path.join(actualDir, file);
@@ -70,7 +70,7 @@ function assertEqualDirs(actualDir, expectedDir) {
     let stats = fs.statSync(actualPath);
 
     if (stats.isFile()) {
-      assert.equal(
+      assert.strictEqual(
         fs.readFileSync(actualPath).toString(),
         fs.readFileSync(expectedPath).toString()
       );
@@ -147,9 +147,9 @@ describe("EyeglassCompiler", function() {
       cssDir: ".",
       foo: true,
     });
-    assert.equal(undefined, optimizer.options.cssDir);
-    assert.equal(".", optimizer.cssDir);
-    assert.equal(optimizer.options.foo, true);
+    assert.strictEqual(undefined, optimizer.options.cssDir);
+    assert.strictEqual(".", optimizer.cssDir);
+    assert.strictEqual(optimizer.options.foo, true);
   });
 
   it("forbids the file option", function() {
@@ -192,7 +192,10 @@ describe("EyeglassCompiler", function() {
         assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
       },
       error => {
-        assert.equal("property \"asdf\" must be followed by a ':'", error.message.split("\n")[0]);
+        assert.strictEqual(
+          "property \"asdf\" must be followed by a ':'",
+          error.message.split("\n")[0]
+        );
       }
     );
   });
@@ -238,9 +241,9 @@ describe("EyeglassCompiler", function() {
         let first = fs.readlinkSync(outputDir + "/first.css");
         let second = fs.readlinkSync(outputDir + "/second.css");
 
-        assert.notEqual(first, second);
-        assert.equal(path.basename(first), "first.css");
-        assert.equal(path.basename(second), "second.css");
+        assert.notStrictEqual(first, second);
+        assert.strictEqual(path.basename(first), "first.css");
+        assert.strictEqual(path.basename(second), "second.css");
       });
     });
   });
@@ -266,12 +269,12 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
 
         fs.writeFileSync(unusedSourceFile, "// changed but still not used.");
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(1, compiledFiles.length);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(1, compiledFiles.length);
         });
       });
     });
@@ -291,7 +294,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
 
         let sourceFile = path.join(sourceDir, "styles", "foo.scss");
         let originalSource = fs.readFileSync(sourceFile);
@@ -304,10 +307,10 @@ describe("EyeglassCompiler", function() {
 
         return build(builder)
           .then(outputDir2 => {
-            assert.equal(outputDir, outputDir2);
+            assert.strictEqual(outputDir, outputDir2);
             let outputFile = path.join(outputDir2, "styles", "foo.css");
-            assert.equal(newExpectedOutput, fs.readFileSync(outputFile));
-            assert.equal(2, compiledFiles.length);
+            assert.strictEqual(newExpectedOutput, fs.readFileSync(outputFile, "utf-8"));
+            assert.strictEqual(2, compiledFiles.length);
           })
           .finally(() => {
             fs.writeFileSync(sourceFile, originalSource);
@@ -341,7 +344,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(projectDir, {
@@ -349,8 +352,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
           compiledFiles = [];
           fixturify.writeSync(projectDir, {
@@ -358,8 +361,8 @@ describe("EyeglassCompiler", function() {
           });
 
           return build(builder).then(outputDir2 => {
-            assert.equal(outputDir, outputDir2);
-            assert.equal(compiledFiles.length, 0);
+            assert.strictEqual(outputDir, outputDir2);
+            assert.strictEqual(compiledFiles.length, 0);
             assertEqualDirs(outputDir2, expectedOutputDir);
           });
         });
@@ -391,7 +394,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(includeDir, {
@@ -403,8 +406,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -435,14 +438,14 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fs.chmodSync(path.join(includeDir, "external.scss"), parseInt("755", 8));
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -489,7 +492,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(eyeglassModDir, {
@@ -503,8 +506,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -567,7 +570,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(eyeglassModDir, {
@@ -584,8 +587,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -619,7 +622,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(relativeIncludeDir, {
@@ -631,8 +634,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -659,7 +662,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(projectDir, {
@@ -671,8 +674,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -735,7 +738,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(projectDir, {
@@ -750,8 +753,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builder).then(outputDir2 => {
-          assert.equal(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.strictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -804,14 +807,14 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles.length = 0;
 
         allFilesAreSymlinks(outputDir);
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
 
           allFilesAreSymlinks(outputDir2);
@@ -845,12 +848,12 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles.length = 0;
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -880,12 +883,12 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles.length = 0;
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -915,7 +918,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(projectDir, {
@@ -927,8 +930,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -968,12 +971,12 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -1014,7 +1017,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(projectDir, {
@@ -1028,8 +1031,8 @@ describe("EyeglassCompiler", function() {
         });
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -1099,7 +1102,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(eyeglassModDir, {
@@ -1117,8 +1120,8 @@ describe("EyeglassCompiler", function() {
         delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -1188,7 +1191,7 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         fixturify.writeSync(eyeglassModDir, {
@@ -1206,8 +1209,8 @@ describe("EyeglassCompiler", function() {
         delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -1229,16 +1232,15 @@ describe("EyeglassCompiler", function() {
       let builder = new broccoli.Builder(compiler);
 
       // cache should start empty
-      assert.deepEqual(compiler._assetImportCache, {});
+      assert.strictEqual(Object.keys(compiler._assetImportCache).length, 0);
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
         // cache should have one entry
-        assert.notDeepEqual(compiler._assetImportCache, {});
-        assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 1);
         // first file should be a miss, 2nd should return from cache
-        assert.equal(compiler._assetImportCacheStats.misses, 1);
-        assert.equal(compiler._assetImportCacheStats.hits, 1);
+        assert.strictEqual(compiler._assetImportCacheStats.misses, 1);
+        assert.strictEqual(compiler._assetImportCacheStats.hits, 1);
       });
     });
 
@@ -1282,16 +1284,15 @@ describe("EyeglassCompiler", function() {
       let builder = new broccoli.Builder(compiler);
 
       // cache should start empty
-      assert.deepEqual(compiler._assetImportCache, {});
+      assert.strictEqual(Object.keys(compiler._assetImportCache).length, 0);
 
       return build(builder).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
         // cache should have one entry
-        assert.notDeepEqual(compiler._assetImportCache, {});
-        assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 1);
         // first file should be a miss, 2nd should return from cache
-        assert.equal(compiler._assetImportCacheStats.misses, 1);
-        assert.equal(compiler._assetImportCacheStats.hits, 1);
+        assert.strictEqual(compiler._assetImportCacheStats.misses, 1);
+        assert.strictEqual(compiler._assetImportCacheStats.hits, 1);
       });
     });
 
@@ -1319,15 +1320,15 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         process.env["BROCCOLI_EYEGLASS"] = "forceInvalidateCache";
 
         return build(builders[1])
           .then(outputDir2 => {
-            assert.notEqual(outputDir, outputDir2);
-            assert.equal(1, compiledFiles.length);
+            assert.notStrictEqual(outputDir, outputDir2);
+            assert.strictEqual(1, compiledFiles.length);
             assertEqualDirs(outputDir2, expectedOutputDir);
           })
           .finally(() => {
@@ -1360,14 +1361,14 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
         compiledFiles = [];
 
         builders[1].compiler.options.foo = "bar";
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
         });
       });
@@ -1402,24 +1403,24 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
-        assert.equal(1, hotCompiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
+        assert.strictEqual(1, hotCompiledFiles.length);
         compiledFiles = [];
         hotCompiledFiles = [];
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
-          assert.equal(hotCompiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
+          assert.strictEqual(hotCompiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
 
           compiledFiles = [];
           hotCompiledFiles = [];
 
           return build(builders[1]).then(outputDir2 => {
-            assert.notEqual(outputDir, outputDir2);
-            assert.equal(compiledFiles.length, 0);
-            assert.equal(hotCompiledFiles.length, 0);
+            assert.notStrictEqual(outputDir, outputDir2);
+            assert.strictEqual(compiledFiles.length, 0);
+            assert.strictEqual(hotCompiledFiles.length, 0);
             assertEqualDirs(outputDir2, expectedOutputDir);
           });
         });
@@ -1455,15 +1456,15 @@ describe("EyeglassCompiler", function() {
 
       return build(builders[0]).then(outputDir => {
         assertEqualDirs(outputDir, expectedOutputDir);
-        assert.equal(1, compiledFiles.length);
-        assert.equal(1, hotCompiledFiles.length);
+        assert.strictEqual(1, compiledFiles.length);
+        assert.strictEqual(1, hotCompiledFiles.length);
         compiledFiles = [];
         hotCompiledFiles = [];
 
         return build(builders[1]).then(outputDir2 => {
-          assert.notEqual(outputDir, outputDir2);
-          assert.equal(compiledFiles.length, 0);
-          assert.equal(hotCompiledFiles.length, 1);
+          assert.notStrictEqual(outputDir, outputDir2);
+          assert.strictEqual(compiledFiles.length, 0);
+          assert.strictEqual(hotCompiledFiles.length, 1);
           assertEqualDirs(outputDir2, expectedOutputDir);
 
           compiledFiles = [];
@@ -1479,9 +1480,9 @@ describe("EyeglassCompiler", function() {
           });
 
           return build(builders[1]).then(outputDir2 => {
-            assert.notEqual(outputDir, outputDir2);
-            assert.equal(compiledFiles.length, 1);
-            assert.equal(hotCompiledFiles.length, 1);
+            assert.notStrictEqual(outputDir, outputDir2);
+            assert.strictEqual(compiledFiles.length, 1);
+            assert.strictEqual(hotCompiledFiles.length, 1);
             assertEqualDirs(outputDir2, expectedOutputDir);
           });
         });

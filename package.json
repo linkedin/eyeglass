@@ -11,7 +11,8 @@
   },
   "scripts": {
     "lint:js": "eslint .",
-    "test": "eslint . && mocha test/test_*.js",
+    "test": "yarn lint:js && yarn test:mocha",
+    "test:mocha": "mocha test/test_*.js",
     "test:debug": "mocha debug test/test_*.js"
   },
   "files": [
