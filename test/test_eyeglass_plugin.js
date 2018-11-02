@@ -23,7 +23,7 @@ const walkSync = require("walk-sync");
 const EOL = require("os").EOL;
 
 function allFilesAreSymlinks(root) {
-  walkSync(root, {directories: false}).forEach(filepath => {
+  walkSync(root, { directories: false }).forEach(filepath => {
     fs.readlinkSync(root + "/" + filepath); // throws if the file is not a link
   });
 
@@ -52,8 +52,6 @@ function makeFixtures(name, files) {
   return dirname;
 }
 
-
-
 function build(builder) {
   return RSVP.Promise.resolve()
     .then(() => builder.build())
@@ -61,8 +59,8 @@ function build(builder) {
 }
 
 function assertEqualDirs(actualDir, expectedDir) {
-  let actualFiles = glob.sync("**/*", {cwd: actualDir}).sort();
-  let expectedFiles = glob.sync("**/*", {cwd: expectedDir}).sort();
+  let actualFiles = glob.sync("**/*", { cwd: actualDir }).sort();
+  let expectedFiles = glob.sync("**/*", { cwd: expectedDir }).sort();
 
   assert.deepEqual(actualFiles, expectedFiles);
 
@@ -72,30 +70,32 @@ function assertEqualDirs(actualDir, expectedDir) {
     let stats = fs.statSync(actualPath);
 
     if (stats.isFile()) {
-      assert.equal(fs.readFileSync(actualPath).toString(),
-        fs.readFileSync(expectedPath).toString());
+      assert.equal(
+        fs.readFileSync(actualPath).toString(),
+        fs.readFileSync(expectedPath).toString()
+      );
     }
   });
 }
 
 function svg(contents) {
-  return '<svg xmlns="http://www.w3.org/2000/svg"\n' +
-         '     xmlns:xlink="http://www.w3.org/1999/xlink">\n' +
-         contents +
-         "</svg>\n";
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg"\n' +
+    '     xmlns:xlink="http://www.w3.org/1999/xlink">\n' +
+    contents +
+    "</svg>\n"
+  );
 }
 
 const rectangleSVG = svg(
   '  <rect x="10" y="10" height="100" width="100"\n' +
-  '        style="stroke:#ff0000; fill: #0000ff"/>\n'
+    '        style="stroke:#ff0000; fill: #0000ff"/>\n'
 );
 
-const circleSVG = svg(
-  '<circle cx="40" cy="40" r="24" style="stroke:#006600; fill:#00cc00"/>'
-);
+const circleSVG = svg('<circle cx="40" cy="40" r="24" style="stroke:#006600; fill:#00cc00"/>');
 
-describe("EyeglassCompiler", function () {
-  const hasCIValue = ("CI" in process.env);
+describe("EyeglassCompiler", function() {
+  const hasCIValue = "CI" in process.env;
   const CI_VALUE = process.env.CI;
 
   beforeEach(function() {
@@ -108,47 +108,44 @@ describe("EyeglassCompiler", function () {
     } else {
       delete process.env.CI;
     }
-
   });
 
-  it("can be instantiated", function () {
+  it("can be instantiated", function() {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-      cssDir: "."
+      cssDir: ".",
     });
     assert(optimizer instanceof EyeglassCompiler);
   });
 
-  it("compiles sass files with the minimal options", function () {
-    let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-      cssDir: "."
-    });
-
-    let builder = new broccoli.Builder(optimizer);
-
-    return build(builder)
-      .then(outputDir => {
-        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-      });
-  });
-
-  it("compiles sass files with option.relativeAssets set", function () {
+  it("compiles sass files with the minimal options", function() {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: ".",
-      relativeAssets: true
     });
 
     let builder = new broccoli.Builder(optimizer);
 
-    return build(builder)
-      .then(outputDir => {
-        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-      });
+    return build(builder).then(outputDir => {
+      assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+    });
+  });
+
+  it("compiles sass files with option.relativeAssets set", function() {
+    let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+      cssDir: ".",
+      relativeAssets: true,
+    });
+
+    let builder = new broccoli.Builder(optimizer);
+
+    return build(builder).then(outputDir => {
+      assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+    });
   });
 
   it("passes unknown options to eyeglass", function() {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: ".",
-      foo: true
+      foo: true,
     });
     assert.equal(undefined, optimizer.options.cssDir);
     assert.equal(".", optimizer.cssDir);
@@ -156,55 +153,48 @@ describe("EyeglassCompiler", function () {
   });
 
   it("forbids the file option", function() {
-    assert.throws(
-      () => {
-        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-          cssDir: ".",
-          file: "asdf"
-        });
-      },
-      /The node-sass option 'file' cannot be set explicitly\./
-    );
+    assert.throws(() => {
+      new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+        cssDir: ".",
+        file: "asdf",
+      });
+    }, /The node-sass option 'file' cannot be set explicitly\./);
   });
 
   it("forbids the data option", function() {
-    assert.throws(
-      () => {
-        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-          cssDir: ".",
-          data: "asdf"
-        });
-      },
-      /The node-sass option 'data' cannot be set explicitly\./
-    );
+    assert.throws(() => {
+      new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+        cssDir: ".",
+        data: "asdf",
+      });
+    }, /The node-sass option 'data' cannot be set explicitly\./);
   });
 
   it("forbids the outFile option", function() {
-    assert.throws(
-      () => {
-        new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-          cssDir: ".",
-          outFile: "asdf"
-        });
-      },
-      /The node-sass option 'outFile' cannot be set explicitly\./
-    );
+    assert.throws(() => {
+      new EyeglassCompiler(fixtureSourceDir("basicProject"), {
+        cssDir: ".",
+        outFile: "asdf",
+      });
+    }, /The node-sass option 'outFile' cannot be set explicitly\./);
   });
 
   it("outputs exceptions when the fullException option is set", function() {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("errorProject"), {
       cssDir: ".",
-      fullException: true
+      fullException: true,
     });
 
     let builder = new broccoli.Builder(optimizer);
 
-    return build(builder)
-      .then(outputDir => {
+    return build(builder).then(
+      outputDir => {
         assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-      }, error => {
+      },
+      error => {
         assert.equal("property \"asdf\" must be followed by a ':'", error.message.split("\n")[0]);
-      });
+      }
+    );
   });
 
   it("supports manual modules", function() {
@@ -212,22 +202,19 @@ describe("EyeglassCompiler", function () {
       cssDir: ".",
       fullException: true,
       eyeglass: {
-        modules: [
-          {path: fixtureDir("manualModule")}
-        ]
-      }
+        modules: [{ path: fixtureDir("manualModule") }],
+      },
     });
 
     let builder = new broccoli.Builder(optimizer);
 
-    return build(builder)
-      .then(outputDir => {
-        assertEqualDirs(outputDir, fixtureOutputDir("usesManualModule"));
-      });
+    return build(builder).then(outputDir => {
+      assertEqualDirs(outputDir, fixtureOutputDir("usesManualModule"));
+    });
   });
 
   function cleanupTempDirs() {
-    let tmpDirs = glob.sync(path.join(path.resolve(__dirname, "fixtures"),"**", "*.tmp"));
+    let tmpDirs = glob.sync(path.join(path.resolve(__dirname, "fixtures"), "**", "*.tmp"));
 
     tmpDirs.forEach(tmpDir => rimraf.sync(tmpDir));
   }
@@ -242,20 +229,19 @@ describe("EyeglassCompiler", function () {
           // two seperate outputfiles
           cb("first.css", options);
           cb("second.css", options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          let first = fs.readlinkSync(outputDir + "/first.css");
-          let second = fs.readlinkSync(outputDir + "/second.css");
+      return build(builder).then(outputDir => {
+        let first = fs.readlinkSync(outputDir + "/first.css");
+        let second = fs.readlinkSync(outputDir + "/second.css");
 
-          assert.notEqual(first, second);
-          assert.equal(path.basename(first), "first.css");
-          assert.equal(path.basename(second), "second.css");
-        });
+        assert.notEqual(first, second);
+        assert.equal(path.basename(first), "first.css");
+        assert.equal(path.basename(second), "second.css");
+      });
     });
   });
 
@@ -271,24 +257,23 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       fs.writeFileSync(unusedSourceFile, "// this isn't used.");
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-          assert.equal(1, compiledFiles.length);
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+        assert.equal(1, compiledFiles.length);
 
-          fs.writeFileSync(unusedSourceFile, "// changed but still not used.");
-          return build(builder).then(outputDir2 => {
-            assert.equal(outputDir, outputDir2);
-            assert.equal(1, compiledFiles.length);
-          });
+        fs.writeFileSync(unusedSourceFile, "// changed but still not used.");
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(1, compiledFiles.length);
         });
+      });
     });
 
     it("doesn't cache when there's a change", function() {
@@ -299,52 +284,47 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
-          assert.equal(1, compiledFiles.length);
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, fixtureOutputDir("basicProject"));
+        assert.equal(1, compiledFiles.length);
 
-          let sourceFile = path.join(sourceDir, "styles", "foo.scss");
-          let originalSource = fs.readFileSync(sourceFile);
-          let newSource = "@import \"used\";\n" +
-                          "$color: blue;\n" +
-                          ".foo {\n" +
-                          "  color: $color;\n" +
-                          "}\n";
+        let sourceFile = path.join(sourceDir, "styles", "foo.scss");
+        let originalSource = fs.readFileSync(sourceFile);
+        let newSource =
+          '@import "used";\n' + "$color: blue;\n" + ".foo {\n" + "  color: $color;\n" + "}\n";
 
-          let newExpectedOutput = ".foo {\n" +
-                                  "  color: blue; }\n";
+        let newExpectedOutput = ".foo {\n" + "  color: blue; }\n";
 
-          fs.writeFileSync(sourceFile, newSource);
+        fs.writeFileSync(sourceFile, newSource);
 
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              let outputFile = path.join(outputDir2, "styles", "foo.css");
-              assert.equal(newExpectedOutput, fs.readFileSync(outputFile));
-              assert.equal(2, compiledFiles.length);
-            })
-            .finally(() => {
-              fs.writeFileSync(sourceFile, originalSource);
-            });
-        });
+        return build(builder)
+          .then(outputDir2 => {
+            assert.equal(outputDir, outputDir2);
+            let outputFile = path.join(outputDir2, "styles", "foo.css");
+            assert.equal(newExpectedOutput, fs.readFileSync(outputFile));
+            assert.equal(2, compiledFiles.length);
+          })
+          .finally(() => {
+            fs.writeFileSync(sourceFile, originalSource);
+          });
+      });
     });
 
     it("caches on the 3rd build", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "external";',
-        "_unrelated.scss": "/* This is unrelated to anything. */"
+        "_unrelated.scss": "/* This is unrelated to anything. */",
       });
       let includeDir = makeFixtures("includeDir", {
-        "external.scss": ".external { float: left; }"
+        "external.scss": ".external { float: left; }",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".external {\n  float: left; }\n"
+        "project.css": ".external {\n  float: left; }\n",
       });
 
       let compiledFiles = [];
@@ -354,50 +334,47 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
+        fixturify.writeSync(projectDir, {
+          "_unrelated.scss": "/* This is very unrelated to anything. */",
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+          compiledFiles = [];
           fixturify.writeSync(projectDir, {
-            "_unrelated.scss": "/* This is very unrelated to anything. */"
+            "_unrelated.scss": "/* This is quite unrelated to anything. */",
           });
 
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-              compiledFiles = [];
-              fixturify.writeSync(projectDir, {
-                "_unrelated.scss": "/* This is quite unrelated to anything. */"
-              });
-
-              return build(builder)
-                .then(outputDir2 => {
-                  assert.equal(outputDir, outputDir2);
-                  assert.equal(compiledFiles.length, 0);
-                  assertEqualDirs(outputDir2, expectedOutputDir);
-                });
-            });
+          return build(builder).then(outputDir2 => {
+            assert.equal(outputDir, outputDir2);
+            assert.equal(compiledFiles.length, 0);
+            assertEqualDirs(outputDir2, expectedOutputDir);
+          });
         });
+      });
     });
 
     it("busts cache when file reached via includePaths changes", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss": '@import "external";'
+        "project.scss": '@import "external";',
       });
       let includeDir = makeFixtures("includeDir", {
-        "external.scss": ".external { float: left; }"
+        "external.scss": ".external { float: left; }",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".external {\n  float: left; }\n"
+        "project.css": ".external {\n  float: left; }\n",
       });
 
       let compiledFiles = [];
@@ -407,43 +384,41 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(includeDir, {
-            "external.scss": ".external { float: right; }"
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": ".external {\n  float: right; }\n"
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(includeDir, {
+          "external.scss": ".external { float: right; }",
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": ".external {\n  float: right; }\n",
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("busts cache when file mode changes", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss": '@import "external";'
+        "project.scss": '@import "external";',
       });
       let includeDir = makeFixtures("includeDir", {
-        "external.scss": ".external { float: left; }"
+        "external.scss": ".external { float: left; }",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".external {\n  float: left; }\n"
+        "project.css": ".external {\n  float: left; }\n",
       });
 
       let compiledFiles = [];
@@ -453,50 +428,49 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fs.chmodSync(path.join(includeDir, "external.scss"), parseInt("755", 8));
+        fs.chmodSync(path.join(includeDir, "external.scss"), parseInt("755", 8));
 
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
         });
+      });
     });
 
     it("busts cache when an eyeglass module is upgraded", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss": '@import "eyeglass-module";'
+        "project.scss": '@import "eyeglass-module";',
       });
       let eyeglassModDir = makeFixtures("eyeglassmod", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "private": true,\n' +
-                        '  "eyeglass": {\n' +
-                        '    "exports": false,\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "sassDir": "sass",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
-        "sass": {
-          "index.scss": ".eyeglass-mod { content: eyeglass }"
-        }
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "private": true,\n' +
+          '  "eyeglass": {\n' +
+          '    "exports": false,\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "sassDir": "sass",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
+        sass: {
+          "index.scss": ".eyeglass-mod { content: eyeglass }",
+        },
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".eyeglass-mod {\n  content: eyeglass; }\n"
+        "project.css": ".eyeglass-mod {\n  content: eyeglass; }\n",
       });
 
       let compiledFiles = [];
@@ -507,56 +481,53 @@ describe("EyeglassCompiler", function () {
           cb(cssFile, options);
         },
         eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
-        }
+          modules: [{ path: eyeglassModDir }],
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(eyeglassModDir, {
-            "sass": {
-              "index.scss": ".eyeglass-mod { content: eyeglass-changed }"
-            }
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": ".eyeglass-mod {\n  content: eyeglass-changed; }\n"
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(eyeglassModDir, {
+          sass: {
+            "index.scss": ".eyeglass-mod { content: eyeglass-changed }",
+          },
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": ".eyeglass-mod {\n  content: eyeglass-changed; }\n",
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("busts cache when an eyeglass asset changes", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss":
           '@import "eyeglass-module/assets";\n' +
-          '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n'
+          '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n',
       });
       let eyeglassModDir = makeFixtures("eyeglassmod2", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "main": "eyeglass-exports.js",\n' +
-                        '  "private": true,\n' +
-                        '  "eyeglass": {\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "main": "eyeglass-exports.js",\n' +
+          '  "private": true,\n' +
+          '  "eyeglass": {\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
         "eyeglass-exports.js":
           'var path = require("path");\n' +
           "module.exports = function(eyeglass, sass) {\n" +
@@ -565,19 +536,19 @@ describe("EyeglassCompiler", function () {
           '    assets: eyeglass.assets.export(path.join(__dirname, "images"))\n' +
           "  };\n" +
           "};",
-        "sass": {
-          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        sass: {
+          "index.scss": ".eyeglass-mod { content: eyeglass }",
         },
-        "images": {
-          "shape.svg": rectangleSVG
-        }
+        images: {
+          "shape.svg": rectangleSVG,
+        },
       });
 
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
         "eyeglass-module": {
-          "shape.svg": rectangleSVG
+          "shape.svg": rectangleSVG,
         },
-        "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n'
+        "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n',
       });
 
       let compiledFiles = [];
@@ -588,55 +559,50 @@ describe("EyeglassCompiler", function () {
           cb(cssFile, options);
         },
         eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
-        }
+          modules: [{ path: eyeglassModDir }],
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(eyeglassModDir, {
-            "images": {
-              "shape.svg": circleSVG
-            }
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css":
-              '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n',
-            "eyeglass-module": {
-              "shape.svg": circleSVG
-            }
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(eyeglassModDir, {
+          images: {
+            "shape.svg": circleSVG,
+          },
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n',
+          "eyeglass-module": {
+            "shape.svg": circleSVG,
+          },
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("busts cache when file reached via ../ outside the load path changes", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss": '@import "external";'
+        "project.scss": '@import "external";',
       });
       let relativeIncludeDir = makeFixtures("relativeIncludeDir", {
-        "relative.scss": ".external { float: left; }"
+        "relative.scss": ".external { float: left; }",
       });
       let includeDir = makeFixtures("includeDir", {
-        "external.scss": '@import "../relativeIncludeDir' + fixtureDirCount + '.tmp/relative";'
+        "external.scss": '@import "../relativeIncludeDir' + fixtureDirCount + '.tmp/relative";',
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".external {\n  float: left; }\n"
+        "project.css": ".external {\n  float: left; }\n",
       });
 
       let compiledFiles = [];
@@ -646,40 +612,38 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(relativeIncludeDir, {
-            "relative.scss": ".external { float: right; }"
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": ".external {\n  float: right; }\n"
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(relativeIncludeDir, {
+          "relative.scss": ".external { float: right; }",
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": ".external {\n  float: right; }\n",
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("removes a css file when the corresponding sass file is removed", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss": "/* project */"
+        "project.scss": "/* project */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* project */\n"
+        "project.css": "/* project */\n",
       });
 
       let compiledFiles = [];
@@ -688,51 +652,50 @@ describe("EyeglassCompiler", function () {
         optionsGenerator(sassFile, cssFile, options, cb) {
           compiledFiles.push(sassFile);
           cb(cssFile, options);
-        }
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(projectDir, {
-            "project.scss": null
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": null
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(projectDir, {
+          "project.scss": null,
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": null,
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("removes an asset file when the corresponding sass file is removed", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss":
           '@import "eyeglass-module/assets";\n' +
-          '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n'
+          '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n',
       });
       let eyeglassModDir = makeFixtures("eyeglassmod", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "main": "eyeglass-exports.js",\n' +
-                        '  "private": true,\n' +
-                        '  "eyeglass": {\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "main": "eyeglass-exports.js",\n' +
+          '  "private": true,\n' +
+          '  "eyeglass": {\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
         "eyeglass-exports.js":
           'var path = require("path");\n' +
           "module.exports = function(eyeglass, sass) {\n" +
@@ -741,19 +704,19 @@ describe("EyeglassCompiler", function () {
           '    assets: eyeglass.assets.export(path.join(__dirname, "images"))\n' +
           "  };\n" +
           "};",
-        "sass": {
-          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        sass: {
+          "index.scss": ".eyeglass-mod { content: eyeglass }",
         },
-        "images": {
-          "shape.svg": rectangleSVG
-        }
+        images: {
+          "shape.svg": rectangleSVG,
+        },
       });
 
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
         "eyeglass-module": {
-          "shape.svg": rectangleSVG
+          "shape.svg": rectangleSVG,
         },
-        "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n'
+        "project.css": '.rectangle {\n  background: url("/eyeglass-module/shape.svg"); }\n',
       });
 
       let compiledFiles = [];
@@ -764,43 +727,38 @@ describe("EyeglassCompiler", function () {
           cb(cssFile, options);
         },
         eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
-        }
+          modules: [{ path: eyeglassModDir }],
+        },
       });
 
       let builder = new broccoli.Builder(compiler);
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(projectDir, {
-            "project.scss": null
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": null,
-            "eyeglass-module": {
-              "shape.svg": null
-            }
-          });
-
-          return build(builder)
-            .then(outputDir2 => {
-              assert.equal(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(projectDir, {
+          "project.scss": null,
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": null,
+          "eyeglass-module": {
+            "shape.svg": null,
+          },
+        });
+
+        return build(builder).then(outputDir2 => {
+          assert.equal(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("doesn't remove an asset unless no files are using it anymore");
   });
-
 
   describe("warm caching", function() {
     afterEach(function() {
@@ -825,37 +783,40 @@ describe("EyeglassCompiler", function () {
     it("output files are symlinks", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles.length = 0;
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles.length = 0;
 
-          allFilesAreSymlinks(outputDir);
+        allFilesAreSymlinks(outputDir);
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
 
-              allFilesAreSymlinks(outputDir2);
-            });
+          allFilesAreSymlinks(outputDir2);
         });
+      });
     });
 
     it("DOES NOT preserve cache if process.env.CI is set", function() {
@@ -863,221 +824,234 @@ describe("EyeglassCompiler", function () {
 
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles.length = 0;
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles.length = 0;
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
         });
+      });
     });
 
     it("preserves cache across builder instances", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles.length = 0;
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles.length = 0;
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
         });
+      });
     });
 
     it("invalidates when a dependent file changes.", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(projectDir, {
-            "_related.scss": "/* something related changed */"
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": "/* something related changed */\n"
-          });
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(projectDir, {
+          "_related.scss": "/* something related changed */",
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": "/* something related changed */\n",
+        });
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("restored side-effect outputs when cached.", function() {
       let projectDir = makeFixtures("projectDir", {
-        "sass": {
-          "project.scss": '@import "assets";\n' +
-                          '.shape { content: asset-url("shape.svg"); }',
+        sass: {
+          "project.scss": '@import "assets";\n' + '.shape { content: asset-url("shape.svg"); }',
         },
-        "assets": {
-          "shape.svg": rectangleSVG
-        }
+        assets: {
+          "shape.svg": rectangleSVG,
+        },
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": '.shape {\n  content: url("/shape.svg"); }\n',
-        "shape.svg": rectangleSVG
+        "shape.svg": rectangleSVG,
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        sassDir: "sass",
-        assets: "assets",
-        cssDir: ".",
-        persistentCache: "test",
-        eyeglass: {
-          root: projectDir
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          sassDir: "sass",
+          assets: "assets",
+          cssDir: ".",
+          persistentCache: "test",
+          eyeglass: {
+            root: projectDir,
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assertEqualDirs(outputDir2, expectedOutputDir);
         });
+      });
     });
 
     it("invalidates when non-sass file dependencies change.", function() {
       let projectDir = makeFixtures("projectDir", {
-        "sass": {
-          "project.scss": '@import "assets";\n' +
-                          '.shape { content: asset-url("shape.svg"); }',
+        sass: {
+          "project.scss": '@import "assets";\n' + '.shape { content: asset-url("shape.svg"); }',
         },
-        "assets": {
-          "shape.svg": rectangleSVG
-        }
+        assets: {
+          "shape.svg": rectangleSVG,
+        },
       });
 
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
         "project.css": '.shape {\n  content: url("/shape.svg"); }\n',
-        "shape.svg": rectangleSVG
+        "shape.svg": rectangleSVG,
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        sassDir: "sass",
-        assets: "assets",
-        cssDir: ".",
-        persistentCache: "test",
-        eyeglass: {
-          root: projectDir
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          sassDir: "sass",
+          assets: "assets",
+          cssDir: ".",
+          persistentCache: "test",
+          eyeglass: {
+            root: projectDir,
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          fixturify.writeSync(projectDir, {
-            "assets": {
-              "shape.svg": circleSVG
-            }
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "shape.svg": circleSVG
-          });
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(projectDir, {
+          assets: {
+            "shape.svg": circleSVG,
+          },
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "shape.svg": circleSVG,
+        });
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("invalidates when eyeglass modules javascript files changes.", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss":
-          ".foo { content: foo(); }\n"
+        "project.scss": ".foo { content: foo(); }\n",
       });
       let eyeglassModDir = makeFixtures("eyeglassmod", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "main": "eyeglass-exports.js",\n' +
-                        '  "private": true,\n' +
-                        '  "files": ["eyeglass-exports.js", "sass", "lib", "images"],' +
-                        '  "eyeglass": {\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "main": "eyeglass-exports.js",\n' +
+          '  "private": true,\n' +
+          '  "files": ["eyeglass-exports.js", "sass", "lib", "images"],' +
+          '  "eyeglass": {\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
         "eyeglass-exports.js":
           'var path = require("path");\n' +
           'var foo = require("./lib/foo");\n' +
@@ -1091,83 +1065,83 @@ describe("EyeglassCompiler", function () {
           "    }\n" +
           "  };\n" +
           "};",
-        "sass": {
-          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        sass: {
+          "index.scss": ".eyeglass-mod { content: eyeglass }",
         },
-        "lib": {
-          "foo.js": "module.exports = 'foo';\n"
+        lib: {
+          "foo.js": "module.exports = 'foo';\n",
         },
-        "images": {
-          "shape.svg": rectangleSVG
-        }
+        images: {
+          "shape.svg": rectangleSVG,
+        },
       });
 
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".foo {\n  content: foo; }\n"
+        "project.css": ".foo {\n  content: foo; }\n",
       });
 
       let compiledFiles = [];
 
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test",
-        eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+          eyeglass: {
+            modules: [{ path: eyeglassModDir }],
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
-
-          fixturify.writeSync(eyeglassModDir, {
-            "lib": {
-              "foo.js": "module.exports = 'changed-foo';\n"
-            }
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": ".foo {\n  content: changed-foo; }\n"
-          });
-
-          require("hash-for-dep")._resetCache();
-          delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
-          delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(eyeglassModDir, {
+          lib: {
+            "foo.js": "module.exports = 'changed-foo';\n",
+          },
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": ".foo {\n  content: changed-foo; }\n",
+        });
+
+        require("hash-for-dep")._resetCache();
+        delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
+        delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("invalidates when eyeglass modules javascript files changes (package.json).", function() {
       let projectDir = makeFixtures("projectDir", {
-        "project.scss":
-          ".foo { content: foo(); }\n"
+        "project.scss": ".foo { content: foo(); }\n",
       });
       let eyeglassModDir = makeFixtures("eyeglassmod3", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "main": "eyeglass-exports.js",\n' +
-                        '  "private": true,\n' +
-                        '  "files": ["eyeglass-exports.js", "sass", "lib", "images"],' +
-                        '  "eyeglass": {\n' +
-                        '    "inDevelopment": true,\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "main": "eyeglass-exports.js",\n' +
+          '  "private": true,\n' +
+          '  "files": ["eyeglass-exports.js", "sass", "lib", "images"],' +
+          '  "eyeglass": {\n' +
+          '    "inDevelopment": true,\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
         "eyeglass-exports.js":
           'var path = require("path");\n' +
           'var foo = require("./lib/foo");\n' +
@@ -1180,63 +1154,63 @@ describe("EyeglassCompiler", function () {
           "    }\n" +
           "  };\n" +
           "};",
-        "sass": {
-          "index.scss": ".eyeglass-mod { content: eyeglass }"
+        sass: {
+          "index.scss": ".eyeglass-mod { content: eyeglass }",
         },
-        "lib": {
-          "foo.js": "module.exports = 'foo';\n"
+        lib: {
+          "foo.js": "module.exports = 'foo';\n",
         },
-        "images": {
-          "shape.svg": rectangleSVG
-        }
+        images: {
+          "shape.svg": rectangleSVG,
+        },
       });
 
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": ".foo {\n  content: foo; }\n"
+        "project.css": ".foo {\n  content: foo; }\n",
       });
 
       let compiledFiles = [];
 
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test",
-        eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+          eyeglass: {
+            modules: [{ path: eyeglassModDir }],
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
-
-          fixturify.writeSync(eyeglassModDir, {
-            "lib": {
-              "foo.js": "module.exports = 'changed-foo';\n"
-            }
-          });
-
-          fixturify.writeSync(expectedOutputDir, {
-            "project.css": ".foo {\n  content: changed-foo; }\n"
-          });
-
-          require("hash-for-dep")._resetCache();
-          delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
-          delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        fixturify.writeSync(eyeglassModDir, {
+          lib: {
+            "foo.js": "module.exports = 'changed-foo';\n",
+          },
         });
+
+        fixturify.writeSync(expectedOutputDir, {
+          "project.css": ".foo {\n  content: changed-foo; }\n",
+        });
+
+        require("hash-for-dep")._resetCache();
+        delete require.cache[path.join(eyeglassModDir, "eyeglass-exports.js")];
+        delete require.cache[path.join(eyeglassModDir, "lib", "foo.js")];
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+        });
+      });
     });
 
     it("caches main asset import scss", function() {
@@ -1257,16 +1231,15 @@ describe("EyeglassCompiler", function () {
       // cache should start empty
       assert.deepEqual(compiler._assetImportCache, {});
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          // cache should have one entry
-          assert.notDeepEqual(compiler._assetImportCache, {});
-          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
-          // first file should be a miss, 2nd should return from cache
-          assert.equal(compiler._assetImportCacheStats.misses, 1);
-          assert.equal(compiler._assetImportCacheStats.hits, 1);
-        });
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        // cache should have one entry
+        assert.notDeepEqual(compiler._assetImportCache, {});
+        assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+        // first file should be a miss, 2nd should return from cache
+        assert.equal(compiler._assetImportCacheStats.misses, 1);
+        assert.equal(compiler._assetImportCacheStats.hits, 1);
+      });
     });
 
     it("caches module asset import scss", function() {
@@ -1275,16 +1248,17 @@ describe("EyeglassCompiler", function () {
         "file2.scss": '@import "eyeglass-module/assets";\n',
       });
       let eyeglassModDir = makeFixtures("eyeglassmod", {
-        "package.json": "{\n" +
-                        '  "name": "is_a_module",\n' +
-                        '  "keywords": ["eyeglass-module"],\n' +
-                        '  "main": "eyeglass-exports.js",\n' +
-                        '  "private": true,\n' +
-                        '  "eyeglass": {\n' +
-                        '    "name": "eyeglass-module",\n' +
-                        '    "needs": "*"\n' +
-                        "  }\n" +
-                        "}",
+        "package.json":
+          "{\n" +
+          '  "name": "is_a_module",\n' +
+          '  "keywords": ["eyeglass-module"],\n' +
+          '  "main": "eyeglass-exports.js",\n' +
+          '  "private": true,\n' +
+          '  "eyeglass": {\n' +
+          '    "name": "eyeglass-module",\n' +
+          '    "needs": "*"\n' +
+          "  }\n" +
+          "}",
         "eyeglass-exports.js":
           'var path = require("path");\n' +
           "module.exports = function(eyeglass, sass) {\n" +
@@ -1296,214 +1270,222 @@ describe("EyeglassCompiler", function () {
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
         "file1.css": "",
-        "file2.css": ""
+        "file2.css": "",
       });
 
       let compiler = new EyeglassCompiler(projectDir, {
         cssDir: ".",
         eyeglass: {
-          modules: [
-            {path: eyeglassModDir}
-          ]
-        }
+          modules: [{ path: eyeglassModDir }],
+        },
       });
       let builder = new broccoli.Builder(compiler);
 
       // cache should start empty
       assert.deepEqual(compiler._assetImportCache, {});
 
-      return build(builder)
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          // cache should have one entry
-          assert.notDeepEqual(compiler._assetImportCache, {});
-          assert.equal(Object.keys(compiler._assetImportCache).length, 1);
-          // first file should be a miss, 2nd should return from cache
-          assert.equal(compiler._assetImportCacheStats.misses, 1);
-          assert.equal(compiler._assetImportCacheStats.hits, 1);
-        });
+      return build(builder).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        // cache should have one entry
+        assert.notDeepEqual(compiler._assetImportCache, {});
+        assert.equal(Object.keys(compiler._assetImportCache).length, 1);
+        // first file should be a miss, 2nd should return from cache
+        assert.equal(compiler._assetImportCacheStats.misses, 1);
+        assert.equal(compiler._assetImportCacheStats.hits, 1);
+      });
     });
 
     it("can force invalidate the persistent cache", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
+
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
+
+        process.env["BROCCOLI_EYEGLASS"] = "forceInvalidateCache";
+
+        return build(builders[1])
+          .then(outputDir2 => {
+            assert.notEqual(outputDir, outputDir2);
+            assert.equal(1, compiledFiles.length);
+            assertEqualDirs(outputDir2, expectedOutputDir);
+          })
+          .finally(() => {
+            delete process.env["BROCCOLI_EYEGLASS"];
+          });
       });
-
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
-
-          process.env["BROCCOLI_EYEGLASS"] = "forceInvalidateCache";
-
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(1, compiledFiles.length);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            })
-            .finally(() => {
-              delete process.env["BROCCOLI_EYEGLASS"];
-            });
-        });
     });
 
     it("busts cache when options used for compilation are different", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test"
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
+        }
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          compiledFiles = [];
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        compiledFiles = [];
 
-          builders[1].compiler.options.foo = "bar";
+        builders[1].compiler.options.foo = "bar";
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-            });
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
         });
+      });
     });
 
     it("can use the rebuild cache after restoring from the persistent cache.", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
       let hotCompiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test",
-        optionsGenerator(sassFile, cssFile, options, cb) {
-          hotCompiledFiles.push(sassFile);
-          cb(cssFile, options);
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+          optionsGenerator(sassFile, cssFile, options, cb) {
+            hotCompiledFiles.push(sassFile);
+            cb(cssFile, options);
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          assert.equal(1, hotCompiledFiles.length);
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        assert.equal(1, hotCompiledFiles.length);
+        compiledFiles = [];
+        hotCompiledFiles = [];
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assert.equal(hotCompiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+
           compiledFiles = [];
           hotCompiledFiles = [];
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assert.equal(hotCompiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
-
-              compiledFiles = [];
-              hotCompiledFiles = [];
-
-              return build(builders[1])
-                .then(outputDir2 => {
-                  assert.notEqual(outputDir, outputDir2);
-                  assert.equal(compiledFiles.length, 0);
-                  assert.equal(hotCompiledFiles.length, 0);
-                  assertEqualDirs(outputDir2, expectedOutputDir);
-                });
-            });
+          return build(builders[1]).then(outputDir2 => {
+            assert.notEqual(outputDir, outputDir2);
+            assert.equal(compiledFiles.length, 0);
+            assert.equal(hotCompiledFiles.length, 0);
+            assertEqualDirs(outputDir2, expectedOutputDir);
+          });
         });
+      });
     });
 
     it("busts the rebuild cache after restoring from the persistent cache.", function() {
       let projectDir = makeFixtures("projectDir", {
         "project.scss": '@import "related";',
-        "_related.scss": "/* This is related to something. */"
+        "_related.scss": "/* This is related to something. */",
       });
       let expectedOutputDir = makeFixtures("expectedOutputDir", {
-        "project.css": "/* This is related to something. */\n"
+        "project.css": "/* This is related to something. */\n",
       });
 
       let compiledFiles = [];
       let hotCompiledFiles = [];
-      let builders = warmBuilders(2, projectDir, {
-        cssDir: ".",
-        persistentCache: "test",
-        optionsGenerator(sassFile, cssFile, options, cb) {
-          hotCompiledFiles.push(sassFile);
-          cb(cssFile, options);
+      let builders = warmBuilders(
+        2,
+        projectDir,
+        {
+          cssDir: ".",
+          persistentCache: "test",
+          optionsGenerator(sassFile, cssFile, options, cb) {
+            hotCompiledFiles.push(sassFile);
+            cb(cssFile, options);
+          },
+        },
+        details => {
+          compiledFiles.push(details.fullSassFilename);
         }
-      }, details => {
-        compiledFiles.push(details.fullSassFilename);
-      });
+      );
 
-      return build(builders[0])
-        .then(outputDir => {
-          assertEqualDirs(outputDir, expectedOutputDir);
-          assert.equal(1, compiledFiles.length);
-          assert.equal(1, hotCompiledFiles.length);
+      return build(builders[0]).then(outputDir => {
+        assertEqualDirs(outputDir, expectedOutputDir);
+        assert.equal(1, compiledFiles.length);
+        assert.equal(1, hotCompiledFiles.length);
+        compiledFiles = [];
+        hotCompiledFiles = [];
+
+        return build(builders[1]).then(outputDir2 => {
+          assert.notEqual(outputDir, outputDir2);
+          assert.equal(compiledFiles.length, 0);
+          assert.equal(hotCompiledFiles.length, 1);
+          assertEqualDirs(outputDir2, expectedOutputDir);
+
           compiledFiles = [];
           hotCompiledFiles = [];
 
-          return build(builders[1])
-            .then(outputDir2 => {
-              assert.notEqual(outputDir, outputDir2);
-              assert.equal(compiledFiles.length, 0);
-              assert.equal(hotCompiledFiles.length, 1);
-              assertEqualDirs(outputDir2, expectedOutputDir);
+          fixturify.writeSync(projectDir, {
+            "project.scss": '@import "related"; .something { color: red; }',
+          });
 
-              compiledFiles = [];
-              hotCompiledFiles = [];
+          fixturify.writeSync(expectedOutputDir, {
+            "project.css":
+              "/* This is related to something. */\n" + ".something {\n  color: red; }\n",
+          });
 
-              fixturify.writeSync(projectDir, {
-                "project.scss": '@import "related"; .something { color: red; }'
-              });
-
-              fixturify.writeSync(expectedOutputDir, {
-                "project.css": "/* This is related to something. */\n" +
-                ".something {\n  color: red; }\n"
-              });
-
-              return build(builders[1])
-                .then(outputDir2 => {
-                  assert.notEqual(outputDir, outputDir2);
-                  assert.equal(compiledFiles.length, 1);
-                  assert.equal(hotCompiledFiles.length, 1);
-                  assertEqualDirs(outputDir2, expectedOutputDir);
-                });
-            });
+          return build(builders[1]).then(outputDir2 => {
+            assert.notEqual(outputDir, outputDir2);
+            assert.equal(compiledFiles.length, 1);
+            assert.equal(hotCompiledFiles.length, 1);
+            assertEqualDirs(outputDir2, expectedOutputDir);
+          });
         });
+      });
     });
 
     it("doesn't check the persistent cache when doing a rebuild in the same instance.");
@@ -1518,9 +1500,11 @@ describe("EyeglassCompiler", function () {
     const createTempDir = helper.createTempDir;
     let input, output;
 
-    beforeEach(co.wrap(function* () {
-      input = yield createTempDir();
-    }));
+    beforeEach(
+      co.wrap(function*() {
+        input = yield createTempDir();
+      })
+    );
 
     afterEach(function() {
       if (input) {
@@ -1531,43 +1515,46 @@ describe("EyeglassCompiler", function () {
       }
     });
 
-    it("blows away state, so mid-build errors can be recoverable", co.wrap(function* () {
-      const subject = new EyeglassCompiler(input.path(), {
-        cssDir: "."
-      });
-      output = createBuilder(subject);
+    it(
+      "blows away state, so mid-build errors can be recoverable",
+      co.wrap(function*() {
+        const subject = new EyeglassCompiler(input.path(), {
+          cssDir: ".",
+        });
+        output = createBuilder(subject);
 
-      input.write({
-        "omg.scss": ".valid-1 { display: block; }"
-      });
+        input.write({
+          "omg.scss": ".valid-1 { display: block; }",
+        });
 
-      yield output.build();
-
-      expect(output.read()).to.eql({
-        "omg.css": ".valid-1 {" + EOL + "  display: block; }" + EOL
-      });
-
-      input.write({
-        "omg.scss": "invalid"
-      });
-
-      try {
         yield output.build();
-        expect(true).to.eql(false);
-      } catch (e) {
-        expect(e.name).to.eql("BuildError");
-      }
-      expect(output.read()).to.eql({ });
 
-      input.write({
-        "omg.scss": ".valid-2 { display: block }"
-      });
+        expect(output.read()).to.eql({
+          "omg.css": ".valid-1 {" + EOL + "  display: block; }" + EOL,
+        });
 
-      yield output.build();
+        input.write({
+          "omg.scss": "invalid",
+        });
 
-      expect(output.read()).to.eql({
-        "omg.css": ".valid-2 {" + EOL + "  display: block; }" + EOL
-      });
-    }));
+        try {
+          yield output.build();
+          expect(true).to.eql(false);
+        } catch (e) {
+          expect(e.name).to.eql("BuildError");
+        }
+        expect(output.read()).to.eql({});
+
+        input.write({
+          "omg.scss": ".valid-2 { display: block }",
+        });
+
+        yield output.build();
+
+        expect(output.read()).to.eql({
+          "omg.css": ".valid-2 {" + EOL + "  display: block; }" + EOL,
+        });
+      })
+    );
   });
 });

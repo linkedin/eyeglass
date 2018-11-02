@@ -6,7 +6,7 @@ const tree = new EyeglassCompiler(["sass"], {
   verbose: true,
   assets: "assets",
   assetsHttpPrefix: "assets",
-  relativeAssets: true
+  relativeAssets: true,
 });
 
 if (debug) {
