@@ -1,7 +1,10 @@
 "use strict";
 
 var SiteBuilder = require("eyeglass-dev-site-builder");
-var ghPages = require("gulp-gh-pages");
+
+// broken gift dependency in gulp-gh-pages. Using community adopted fork
+// https://github.com/shinnn/gulp-gh-pages/pull/117
+var ghPages = require("gulp-gh-pages-will");
 var merge = require("lodash.merge");
 var fs = require("fs-extra");
 
