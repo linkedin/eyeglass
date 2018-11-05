@@ -21,6 +21,9 @@ const EyeglassCompiler = require("../lib/index");
 const SyncDiskCache = require("sync-disk-cache");
 const walkSync = require("walk-sync");
 const EOL = require("os").EOL;
+const co = require("co");
+const { createBuilder, createTempDir } = require("broccoli-test-helper");
+const expect = require("chai").expect;
 
 function allFilesAreSymlinks(root) {
   walkSync(root, { directories: false }).forEach(filepath => {
@@ -95,14 +98,27 @@ const rectangleSVG = svg(
 const circleSVG = svg('<circle cx="40" cy="40" r="24" style="stroke:#006600; fill:#00cc00"/>');
 
 describe("EyeglassCompiler", function() {
+  let input, output;
+
   const hasCIValue = "CI" in process.env;
   const CI_VALUE = process.env.CI;
 
-  beforeEach(function() {
-    delete process.env.CI;
-  });
+  beforeEach(
+    co.wrap(function*() {
+      input = yield createTempDir();
+
+      delete process.env.CI;
+    })
+  );
 
   afterEach(function() {
+    if (input) {
+      input.dispose();
+    }
+    if (output) {
+      output.dispose();
+    }
+
     if (hasCIValue) {
       process.env.CI = CI_VALUE;
     } else {
@@ -1494,28 +1510,6 @@ describe("EyeglassCompiler", function() {
   });
 
   describe("rebuild error handling", function() {
-    const helper = require("broccoli-test-helper");
-    const co = require("co");
-    const expect = require("chai").expect;
-    const createBuilder = helper.createBuilder;
-    const createTempDir = helper.createTempDir;
-    let input, output;
-
-    beforeEach(
-      co.wrap(function*() {
-        input = yield createTempDir();
-      })
-    );
-
-    afterEach(function() {
-      if (input) {
-        input.dispose();
-      }
-      if (output) {
-        output.dispose();
-      }
-    });
-
     it(
       "blows away state, so mid-build errors can be recoverable",
       co.wrap(function*() {
