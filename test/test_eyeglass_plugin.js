@@ -126,13 +126,6 @@ describe("EyeglassCompiler", function() {
     }
   });
 
-  it("can be instantiated", function() {
-    let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
-      cssDir: ".",
-    });
-    assert(optimizer instanceof EyeglassCompiler);
-  });
-
   it("compiles sass files with the minimal options", function() {
     let optimizer = new EyeglassCompiler(fixtureSourceDir("basicProject"), {
       cssDir: ".",
