@@ -52,7 +52,6 @@
     "node": "6.* || >= 7.*"
   },
   "devDependencies": {
-    "broccoli": "^0.16.5",
     "broccoli-test-helper": "^2.0.0",
     "chai": "^4.1.2",
     "co": "^4.6.0",
