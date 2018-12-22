@@ -6,13 +6,12 @@ const debugGenerator = require("debug");
 const debug = debugGenerator("broccoli-eyeglass");
 const hotCacheDebug = debugGenerator("broccoli-eyeglass:hot-cache");
 const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
-const fs = require("fs");
+const fs = require("fs-extra");
 const RSVP = require("rsvp");
 const Promise = RSVP.Promise;
 const mkdirp = require("mkdirp");
 mkdirp.promise = mkdirp.promise || RSVP.denodeify(mkdirp);
 const BroccoliPlugin = require("broccoli-plugin");
-const sass = require("node-sass");
 const glob = require("glob");
 const FSTree = require("fs-tree-diff");
 const FSTreeFromEntries = FSTree.fromEntries;
@@ -21,6 +20,17 @@ const os = require("os");
 const queue = require("async-promise-queue");
 const ensureSymlink = require("ensure-symlink");
 
+let sass;
+let renderSass;
+
+function initSass() {
+  if (!sass) {
+    sass = require("node-sass");
+    // Standard async rendering for node-sass.
+    renderSass = RSVP.denodeify(sass.render);
+  }
+}
+
 function absolutizeEntries(entries) {
   // We make everything absolute because relative path comparisons don't work for us.
   entries.forEach(entry => {
@@ -28,6 +38,18 @@ function absolutizeEntries(entries) {
     entry.relativePath = path.join(entry.basePath, entry.relativePath);
     entry.basePath = "/";
   });
+}
+
+function shouldPersist(env, persist) {
+  let result;
+
+  if (env.CI) {
+    result = env.FORCE_PERSISTENCE_IN_CI;
+  } else {
+    result = persist;
+  }
+
+  return !!result;
 }
 
 class Entry {
@@ -58,9 +80,6 @@ function unique(array) {
   }
   return rv;
 }
-
-// Standard async rendering for node-sass.
-const renderSass = RSVP.denodeify(sass.render);
 
 // This promise runs sass synchronously
 function renderSassSync(options) {
@@ -168,7 +187,6 @@ function writeDataToFile(cachedFile, outputFile, data) {
   mkdirp.sync(path.dirname(outputFile));
   ensureSymlink(cachedFile, outputFile);
 }
-
 // This Sass compiler has a different philosophy than the default one
 // that comes with broccoli. It is directory based instead of being file
 // based and can merge several input trees into a single output tree
@@ -217,11 +235,12 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
       if (inputTree.length > 1) {
         console.warn(
           "Support for passing several trees to BroccoliSassCompiler has been removed.\n" +
-          "Passing the trees to broccoli-merge-trees with the overwrite option set,\n" +
-          "but you should do this yourself if you need to compile CSS files from them\n" +
-          "or use the node-sass includePaths option if you need to import from them.");
+            "Passing the trees to broccoli-merge-trees with the overwrite option set,\n" +
+            "but you should do this yourself if you need to compile CSS files from them\n" +
+            "or use the node-sass includePaths option if you need to import from them."
+        );
         let MergeTrees = require("broccoli-merge-trees");
-        inputTree = new MergeTrees(inputTree, {overwrite: true, annotation: "Sass Trees"});
+        inputTree = new MergeTrees(inputTree, { overwrite: true, annotation: "Sass Trees" });
       } else {
         inputTree = inputTree[0];
       }
@@ -237,19 +256,25 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let EventEmitter = require("chained-emitter").EventEmitter;
     this.events = new EventEmitter();
 
-    this.currentTree = null;
-    this.dependencies = {};
-    this.outputs = {};
-    if (options.persistentCache) {
+    this._reset();
+
+    if (shouldPersist(process.env, !!options.persistentCache)) {
       let DiskCache = require("sync-disk-cache");
       this.persistentCache = new DiskCache(options.persistentCache);
     }
-    moveOption(this.options, this, "cssDir", "sassDir",
-      "optionsGenerator", "fullException",
-      "verbose", "renderSync",
-      "discover", "sourceFiles",
-      "maxListeners");
-
+    moveOption(
+      this.options,
+      this,
+      "cssDir",
+      "sassDir",
+      "optionsGenerator",
+      "fullException",
+      "verbose",
+      "renderSync",
+      "discover",
+      "sourceFiles",
+      "maxListeners"
+    );
 
     if (!this.cssDir) {
       throw new Error("Expected cssDir option.");
@@ -310,9 +335,11 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
   compileTree(srcPath, files, destDir) {
     switch (files.length) {
-      case 0: return Promise.resolve();
-      case 1: return Promise.all(this.compileSassFile(srcPath, files[0], destDir));
-      default:  {
+      case 0:
+        return Promise.resolve();
+      case 1:
+        return Promise.all(this.compileSassFile(srcPath, files[0], destDir));
+      default: {
         let numConcurrentCalls = Number(process.env.JOBS) || os.cpus().length;
 
         let worker = queue.async.asyncify(file => {
@@ -340,7 +367,9 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let promises = [];
 
     this.optionsGenerator(
-      sassFilename, cssFileName, sassOptions,
+      sassFilename,
+      cssFileName,
+      sassOptions,
       (resolvedCssFileName, resolvedOptions) => {
         let details = {
           srcPath: srcPath,
@@ -349,16 +378,18 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
           destDir: destDir,
           cssFilename: resolvedCssFileName,
           fullCssFilename: path.join(destDir, resolvedCssFileName),
-          options: copyObject(resolvedOptions)
+          options: copyObject(resolvedOptions),
         };
         details.options.outFile = details.cssFilename;
         promises.push(this.compileCssFileMaybe(details));
-      });
+      }
+    );
 
     return promises;
   }
 
   renderer() {
+    initSass();
     if (this.renderSync) {
       return renderSassSync;
     } else {
@@ -380,7 +411,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
     let hash = this.hashForFile(file);
     let hd = hash.digest("hex");
-    return (hd !== hexDigest);
+    return hd !== hexDigest;
   }
 
   /* get the cached output for a source file, or compile the file if not in cache
@@ -396,7 +427,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     try {
       let cachedDependencies = this.persistentCache.get(this.dependenciesKey(key));
       if (!cachedDependencies.isCached) {
-        let reason = {message: "no dependency data for " + details.sassFilename};
+        let reason = { message: "no dependency data for " + details.sassFilename };
         return this.handleCacheMiss(details, reason, key);
       }
 
@@ -404,21 +435,18 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
       // check dependency caches
       if (dependencies.some(dep => this.dependencyChanged(details.srcPath, dep))) {
-        let reason = {message: "dependency changed"};
+        let reason = { message: "dependency changed" };
         return this.handleCacheMiss(details, reason, key);
       }
 
       let cachedOutput = this.persistentCache.get(this.outputKey(key));
       if (!cachedOutput.isCached) {
-        let reason = {message: "no output data for " + details.sassFilename};
+        let reason = { message: "no output data for " + details.sassFilename };
         return this.handleCacheMiss(details, reason, key);
       }
 
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
-      let value = [
-        depFiles,
-        JSON.parse(cachedOutput.value)
-      ];
+      let value = [depFiles, JSON.parse(cachedOutput.value)];
       return Promise.resolve(this.handleCacheHit(details, value));
     } catch (error) {
       return this.handleCacheMiss(details, error, key);
@@ -444,7 +472,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
    * @return Promise that resolves to the cache key for the file or rejects if
    *         it can't read the file.
    **/
-  keyForSourceFile(srcDir, relativeFilename, options) {
+  keyForSourceFile(srcDir, relativeFilename /* options */) {
     let absolutePath = path.join(srcDir, relativeFilename);
     let hash = this.hashForFile(absolutePath);
     return relativeFilename + "@" + hash.digest("hex");
@@ -475,9 +503,11 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let inputFiles = inputAndOutputFiles[0];
     let outputFiles = inputAndOutputFiles[1];
 
-    persistentCacheDebug("%s is cached. Writing to %s.",
+    persistentCacheDebug(
+      "%s is cached. Writing to %s.",
       details.sassFilename,
-      details.fullCssFilename);
+      details.fullCssFilename
+    );
 
     if (this.verbose) {
       let action = this.colors.inverse.green("cached");
@@ -492,9 +522,11 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
     let files = Object.keys(outputFiles);
 
-    persistentCacheDebug("cached output files for %s are: %s",
+    persistentCacheDebug(
+      "cached output files for %s are: %s",
       details.sassFilename,
-      files.join(", "));
+      files.join(", ")
+    );
 
     return files.map(file => {
       let data = outputFiles[file];
@@ -503,7 +535,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
       // populate the output cache for rebuilds
       this.addOutput(details.fullSassFilename, outputFile);
 
-      writeDataToFile(cachedFile, outputFile, new Buffer(data, "base64"));
+      writeDataToFile(cachedFile, outputFile, Buffer.from(data, "base64"));
     });
   }
 
@@ -549,10 +581,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
         if (f.startsWith(details.srcPath)) {
           f = f.substring(details.srcPath.length + 1);
         }
-        depsWithHashes.push([
-          f,
-          h.digest("hex")
-        ]);
+        depsWithHashes.push([f, h.digest("hex")]);
       } catch (e) {
         if (typeof e === "object" && e !== null && e.code === "ENOENT") {
           persistentCacheDebug("Ignoring non-existent file: %s", f);
@@ -583,15 +612,17 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
       if (fileName.startsWith(details.destDir)) {
         content[fileName.substring(details.destDir.length + 1)] = contents;
       } else {
-        persistentCacheDebug("refusing to cache output file found outside the output tree: %s",
-          fileName);
+        persistentCacheDebug(
+          "refusing to cache output file found outside the output tree: %s",
+          fileName
+        );
       }
       return content;
     }, {});
   }
 
   /* Writes the dependencies and output contents to the persistent cache */
-  populateCache(key, details, result) {
+  populateCache(key, details /* result */) {
     persistentCacheDebug("Populating cache for " + key);
 
     let cache = this.persistentCache;
@@ -605,17 +636,18 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
   /* When the cache misses, we need to compile the file and then populate the cache */
   handleCacheMiss(details, reason, key) {
-    persistentCacheDebug("Persistent cache miss for %s. Reason: %s",
+    persistentCacheDebug(
+      "Persistent cache miss for %s. Reason: %s",
       details.sassFilename,
-      reason.message);
+      reason.message
+    );
     // for errors
     if (reason.stack) {
       persistentCacheDebug("Stacktrace:", reason.stack);
     }
-    return this.compileCssFile(details)
-      .then(result => {
-        return this.populateCache(key, details, result);
-      });
+    return this.compileCssFile(details).then(result => {
+      return this.populateCache(key, details, result);
+    });
   }
 
   /* Compile the file if it's not in the cache.
@@ -640,28 +672,27 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let success = this.handleSuccess.bind(this, details);
     let failure = this.handleFailure.bind(this, details);
 
-    return this.events.emit("compiling", details)
-      .then(() => {
-        let dependencyListener = absolutePath => {
-          this.addDependency(details.fullSassFilename, absolutePath);
-        };
+    return this.events.emit("compiling", details).then(() => {
+      let dependencyListener = absolutePath => {
+        this.addDependency(details.fullSassFilename, absolutePath);
+      };
 
-        let additionalOutputListener = filename => {
-          this.addOutput(details.fullSassFilename, filename);
-        };
+      let additionalOutputListener = filename => {
+        this.addOutput(details.fullSassFilename, filename);
+      };
 
-        this.events.addListener("additional-output", additionalOutputListener);
-        this.events.addListener("dependency", dependencyListener);
+      this.events.addListener("additional-output", additionalOutputListener);
+      this.events.addListener("dependency", dependencyListener);
 
-        return Promise.resolve(sass(details.options))
-          .finally(() => {
-            this.events.removeListener("dependency", dependencyListener);
-            this.events.removeListener("additional-output", additionalOutputListener);
-          })
-          .then(result => {
-            return success(result).then(() => result);
-          }, failure);
-      });
+      return Promise.resolve(sass(details.options))
+        .finally(() => {
+          this.events.removeListener("dependency", dependencyListener);
+          this.events.removeListener("additional-output", additionalOutputListener);
+        })
+        .then(result => {
+          return success(result).then(() => result);
+        }, failure);
+    });
   }
 
   handleSuccess(details, result) {
@@ -677,8 +708,8 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let failed = this.events.emit("failed", details, error);
     return failed.then(() => {
       if (typeof error === "object" && error !== null) {
-        error.message = error.message  +
-          "\n    at " + error.file + ":" + error.line + ":" + error.column;
+        error.message =
+          error.message + "\n    at " + error.file + ":" + error.line + ":" + error.column;
       }
       throw error;
     });
@@ -704,8 +735,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
   addOutput(sassFilename, outputFilename) {
     sassFilename = this.relativize(sassFilename);
 
-    this.outputs[sassFilename] =
-      this.outputs[sassFilename] || new Set();
+    this.outputs[sassFilename] = this.outputs[sassFilename] || new Set();
     this.outputs[sassFilename].add(outputFilename);
   }
 
@@ -750,8 +780,7 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
 
   addDependency(sassFilename, dependencyFilename) {
     sassFilename = this.relativize(sassFilename);
-    this.dependencies[sassFilename] =
-      this.dependencies[sassFilename] || new Set();
+    this.dependencies[sassFilename] = this.dependencies[sassFilename] || new Set();
     this.dependencies[sassFilename].add(dependencyFilename);
   }
 
@@ -792,8 +821,14 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     let entries = walkSync.entries(inputPath);
     absolutizeEntries(entries);
     let tree = new FSTreeFromEntries(entries);
-    tree.addEntries(this.knownDependencies(), {sortAndExpand: true});
+    tree.addEntries(this.knownDependencies(), { sortAndExpand: true });
     return tree;
+  }
+
+  _reset() {
+    this.currentTree = null;
+    this.dependencies = {};
+    this.outputs = {};
   }
 
   _build() {
@@ -875,13 +910,16 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
     this.clearDependencies(absoluteTreeFiles);
     this.clearOutputs(absoluteTreeFiles);
 
-    let internalListeners = absoluteTreeFiles.length * 2 + // 1 dep & 1 output listeners each
-      1 +                            // one compilation listener
-      (this.verbose ? 2 : 0);        // 2 logging listeners if in verbose mode
+    let internalListeners =
+      absoluteTreeFiles.length * 2 + // 1 dep & 1 output listeners each
+      1 + // one compilation listener
+      (this.verbose ? 2 : 0); // 2 logging listeners if in verbose mode
 
     debug("There are %d internal event listeners.", internalListeners);
-    debug("Setting max external listeners to %d via the maxListeners option (default: 10).",
-      this.maxListeners);
+    debug(
+      "Setting max external listeners to %d via the maxListeners option (default: 10).",
+      this.maxListeners
+    );
     this.events.setMaxListeners(internalListeners + this.maxListeners);
 
     return this.compileTree(inputPath, treeFiles, outputPath).finally(() => {
@@ -898,6 +936,16 @@ module.exports = class BroccoliSassCompiler extends BroccoliPlugin {
       persistentCacheDebug("clearing cache because forceInvalidateCache was set.");
       this.persistentCache.clear();
     }
-    return this._build();
+
+    return this._build().catch(e => {
+      this._reset();
+
+      fs.removeSync(this.outputPath);
+      fs.mkdirpSync(this.outputPath);
+
+      throw e;
+    });
   }
 };
+
+module.exports.shouldPersist = shouldPersist;
