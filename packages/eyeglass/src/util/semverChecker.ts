@@ -21,6 +21,7 @@ export default function(eyeglass, sass, options, version) {
       return "  " + mod.name + " needed eyeglass " + mod.eyeglass.needs;
     }));
 
+    // eslint-disable-next-line no-console
     console.error(incompatible.join("\n"));
   }
 
@@ -33,6 +34,7 @@ export default function(eyeglass, sass, options, version) {
     missing.push("Please add the following to the module's package.json:");
     missing.push("  \"eyeglass\": { \"needs\": \"^" + version + "\" }");
 
+    // eslint-disable-next-line no-console
     console.warn(missing.join("\n"));
   }
 

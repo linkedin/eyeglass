@@ -7,7 +7,7 @@ import { URI } from "../util/URI";
 import * as fileUtils from "../util/files";
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
-var rAssetsImport = /^(?:([^\/]+)\/)?assets$/;
+var rAssetsImport = /^(?:([^/]+)\/)?assets$/;
 
 export default function AssetImporter(eyeglass, sass, options, fallbackImporter) {
 

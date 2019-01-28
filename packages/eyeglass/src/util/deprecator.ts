@@ -24,6 +24,7 @@ isEnabled(sinceVersion) {
 
 deprecate(sinceVersion, removeVersion, message) {
   if (this.isEnabled(sinceVersion)) {
+    // eslint-disable-next-line no-console
     console.warn(
       "[eyeglass:deprecation]",
        "(deprecated in " + sinceVersion + ", will be removed in " + removeVersion + ")",

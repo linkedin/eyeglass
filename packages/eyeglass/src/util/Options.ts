@@ -4,9 +4,10 @@ import * as path from "path";
 import * as merge from "lodash.merge";
 import { URI } from "./URI";
 
-export default function Options(options, deprecate, sassArg) {
+/* eslint-disable-next-line no-unused-vars */
+export default function Options(...args: [any, any, any]) {
   // get the normalized Sass options
-  options = getSassOptions.apply(null, arguments);
+  let options = getSassOptions(...args);
 
   // merge the incoming options onto the instance
   merge(this, options);
@@ -123,6 +124,9 @@ function defaultEyeglassOptions(options) {
   options.httpRoot = defaultValue(options.httpRoot, "/");
   // default enableImportOnce
   options.enableImportOnce = defaultValue(options.enableImportOnce, true);
+
+  // use global module caching by default
+  options.useGlobalModuleCache = defaultValue(options.useGlobalModuleCache, true);
 
   return options;
 }

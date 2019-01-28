@@ -26,7 +26,11 @@ function Eyeglass(options, deprecatedNodeSassArg) {
 
   this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
   this.assets = new Assets(this, this.options.eyeglass.engines.sass);
-  this.modules = new EyeglassModules(this.options.eyeglass.root, this.options.eyeglass.modules);
+  this.modules = new EyeglassModules(
+    this.options.eyeglass.root,
+    this.options.eyeglass.modules,
+    this.options.eyeglass.useGlobalModuleCache
+  );
 
   fs.mkdirpSync(this.options.eyeglass.cacheDir);
 
@@ -63,6 +67,8 @@ function checkMissingDependencies() {
       return "  " + dep;
     }));
     warning.push("You might need to `npm install` the above.");
+
+    // eslint-disable-next-line no-console
     console.warn(warning.join("\n"));
   }
 }

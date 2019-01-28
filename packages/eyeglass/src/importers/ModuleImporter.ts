@@ -90,7 +90,7 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
     // pattern to match moduleName/relativePath
     // $1 = moduleName (foo or @scope/foo)
     // $2 = relativePath
-    var match = /^((?:@[^\/]+\/[^\/]+)|(?:[^\/]+))\/?(.*)/.exec(uri);
+    var match = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/.exec(uri);
     var moduleName = match && match[1];
     var relativePath = match && match[2];
     var mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);

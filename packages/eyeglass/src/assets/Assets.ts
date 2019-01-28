@@ -125,7 +125,8 @@ Assets.prototype.resolveAsset = function($assetsMap, $uri, cb) {
             cb(error);
           } else {
             if (file) {
-              debug.assets(
+              /* istanbul ignore next - don't test debug */
+              debug.assets && debug.assets(
                 "%s resolved to %s with URI %s",
                 originalUri,
                 path.relative(options.root, file),
@@ -185,6 +186,7 @@ Assets.prototype.install = function(file, uri, cb) {
     try {
       if (options.installWithSymlinks) {
         fs.mkdirpSync(path.dirname(dest));
+
         ensureSymlink(file, dest);
       } else {
         // we explicitly use copySync rather than copy to avoid starving system resources
@@ -192,7 +194,9 @@ Assets.prototype.install = function(file, uri, cb) {
       }
       cb(null, dest);
     } catch (error) {
+      // eslint-disable-next-line no-ex-assign
       error = new Error("Failed to install asset from " + file + "\n" + error.toString());
+
       cb(error);
     }
   } else {

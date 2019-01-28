@@ -33,6 +33,7 @@ export default class ImportUtilities {
   importOnce(data, done) {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
+      /* istanbul ignore next - don't test debug */
       debug.importer("%s was already imported", data.file);
       done({ contents: "", file: "already-imported:" + data.file });
     } else {

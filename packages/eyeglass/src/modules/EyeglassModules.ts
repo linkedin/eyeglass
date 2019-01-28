@@ -8,10 +8,13 @@ import * as semver from "semver";
 import * as archy from "archy";
 import * as fs from "fs";
 import { URI } from "../util/URI";
+import { SimpleCache } from "../util/SimpleCache";
 
 interface Dependencies {
   [dep: string]: string;
 }
+
+var globalModuleCache = new SimpleCache();
 
 /**
   * Discovers all of the modules for a given directory
@@ -19,8 +22,9 @@ interface Dependencies {
   * @constructor
   * @param   {String} dir - the directory to discover modules in
   * @param   {Array} modules - the explicit modules to include
+  * @param   {Boolean} useGlobalModuleCache - whether or not to use the global module cache
   */
-export default function EyeglassModules(dir, modules) {
+export default function EyeglassModules(dir, modules, useGlobalModuleCache) {
   this.issues = {
     dependencies: {
       versions: [],
@@ -33,7 +37,8 @@ export default function EyeglassModules(dir, modules) {
   };
 
   this.cache = {
-    access: {}
+    access: new SimpleCache(),
+    modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache()
   };
 
   // find the nearest package.json for the given directory
@@ -72,7 +77,8 @@ export default function EyeglassModules(dir, modules) {
   // check for any issues we may have encountered
   checkForIssues.call(this);
 
-  debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
+  /* istanbul ignore next - don't test debug */
+  debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
 }
 
 /**
@@ -260,39 +266,30 @@ function canAccessModule(name, origin) {
   var canAccessFrom = function canAccessFrom(origin) {
     // find the nearest package for the origin
     var pkg = packageUtils.findNearestPackage(origin);
+    var cacheKey = pkg + "!" + origin;
+    return this.cache.access.getOrElse(cacheKey, function() {
+      // find all the branches that match the origin
+      var branches = findBranchesByPath({
+        dependencies: this.tree
+      }, pkg);
 
-    var cache = this.cache.access;
-    cache[name] = cache[name] || {};
+      var canAccess = branches.some(function(branch) {
+        // if the reference is to itself (branch.name)
+        // OR it's an immediate dependency (branch.dependencies[name])
+        if (branch.name === name || branch.dependencies && branch.dependencies[name]) {
+          return true;
+        }
+      });
 
-    // check for cached result
-    if (cache[name][pkg] !== undefined) {
-      return cache[name][pkg];
-    }
-
-    // find all the branches that match the origin
-    var branches = findBranchesByPath({
-      dependencies: this.tree
-    }, pkg);
-
-    var canAccess = branches.some(function(branch) {
-      // if the reference is to itself (branch.name)
-      // OR it's an immediate dependency (branch.dependencies[name])
-      if (branch.name === name || branch.dependencies && branch.dependencies[name]) {
-        return true;
-      }
-    });
-
-    debug.importer(
-      "%s can%s be imported from %s",
-      name,
-      (canAccess ? "" : "not"),
-      origin
-    );
-
-    // cache it for future lookups
-    cache[name][pkg] = canAccess;
-
-    return canAccess;
+      /* istanbul ignore next - don't test debug */
+      debug.importer(
+        "%s can%s be imported from %s",
+        name,
+        (canAccess ? "" : "not"),
+        origin
+      );
+      return canAccess;
+    }.bind(this));
   }.bind(this);
 
   // check if we can access from the origin...
@@ -349,7 +346,8 @@ function getDependencyVersionIssues(modules, finalModule) {
   return modules.map(function(mod) {
     // if the versions are not identical, log it
     if (mod.version !== finalModule.version) {
-      debug.modules(
+      /* istanbul ignore next - don't test debug */
+      debug.modules && debug.modules(
         "asked for %s@%s but using %s",
         mod.name,
         mod.version,
@@ -414,16 +412,19 @@ function getFinalModule(name) {
   * @returns {Object} the resolved module definition
   */
 function resolveModule(pkgPath, isRoot) {
-  var pkg = packageUtils.getPackage(pkgPath);
-  var isEyeglassMod = EyeglassModule.isEyeglassModule(pkg.data);
-  // if the module is an eyeglass module OR it's the root project
-  if (isEyeglassMod || (pkg.data && isRoot)) {
-    // return a module reference
-    return new EyeglassModule({
-      isEyeglassModule: isEyeglassMod,
-      path: path.dirname(pkg.path)
-    }, discoverModules.bind(this), isRoot);
-  }
+  var cacheKey = "resolveModule~" + pkgPath + "!" + !!isRoot;
+  return this.cache.modules.getOrElse(cacheKey, function() {
+    var pkg = packageUtils.getPackage(pkgPath);
+    var isEyeglassMod = EyeglassModule.isEyeglassModule(pkg.data);
+    // if the module is an eyeglass module OR it's the root project
+    if (isEyeglassMod || (pkg.data && isRoot)) {
+      // return a module reference
+      return new EyeglassModule({
+        isEyeglassModule: isEyeglassMod,
+        path: path.dirname(pkg.path)
+      }, discoverModules.bind(this), isRoot);
+    }
+  }.bind(this));
 }
 
 /**
@@ -445,10 +446,19 @@ function getEyeglassSelf() {
   *
   * @see resolve()
   */
-function resolveModulePackage(...args) {
-  try {
-    return resolve.apply(null, args);
-  } catch (e) {}
+function resolveModulePackage(id, parent, parentDir) {
+  var cacheKey = "resolveModulePackage~" + id + "!" + parent + "!" + parentDir;
+  return this.cache.modules.getOrElse(cacheKey, function() {
+    try {
+      return resolve(id, parent, parentDir);
+    } catch (e) {
+      /* istanbul ignore next - don't test debug */
+      debug.modules && debug.modules(
+        'failed to resolve module package %s',
+        e
+      )
+    }
+  });
 }
 
 /**
@@ -460,7 +470,6 @@ function resolveModulePackage(...args) {
 function discoverModules(options) {
   var pkg = options.pkg || packageUtils.getPackage(options.dir);
 
-  // get the collection of dependencies
   var dependencies: {[dep: string]: string} = {};
 
   // if there's package.json contents...
@@ -479,7 +488,8 @@ function discoverModules(options) {
   // for each dependency...
   dependencies = Object.keys(dependencies).reduce(function(modules, dependency) {
     // resolve the package.json
-    var resolvedPkg = resolveModulePackage(
+    var resolvedPkg = resolveModulePackage.call(
+      this,
       packageUtils.getPackagePath(dependency),
       pkg.path,
       URI.system(options.dir)

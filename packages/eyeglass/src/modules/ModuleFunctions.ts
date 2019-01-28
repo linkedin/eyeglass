@@ -28,6 +28,8 @@ function checkConflicts(obj1, obj2) {
     // if the current signature does not match the new signature...
     if (currentFunction && currentFunction !== fn) {
       // throw a warning
+
+      // eslint-disable-next-line no-console
       console.warn("WARNING: Function " + fnName +
         " was redeclared with conflicting function signatures: " +
         currentFunction + " vs. " + fn);
@@ -42,7 +44,8 @@ export default function ModuleFunctions(eyeglass, sass, options, existingFunctio
     }
 
     // log any functions found in this module
-    debug.functions(
+    /* istanbul ignore next - don't test debug */
+    debug.functions && debug.functions(
       "functions discovered in module %s:%s%s",
       mod.name,
       DELIM,
@@ -58,7 +61,8 @@ export default function ModuleFunctions(eyeglass, sass, options, existingFunctio
   functions = syncFn.all(functions);
 
   // log all the functions we discovered
-  debug.functions(
+  /* istanbul ignore next - don't test debug */
+  debug.functions && debug.functions(
     "all discovered functions:%s%s",
     DELIM,
     Object.keys(functions).join(DELIM)
