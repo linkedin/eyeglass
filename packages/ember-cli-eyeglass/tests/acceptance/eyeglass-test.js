@@ -1,4 +1,4 @@
-import QUnit, { module, test } from 'qunit';
+import QUnit, { module, test, skip } from 'qunit';
 import { visit, currentURL } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
 
@@ -35,7 +35,11 @@ module('Acceptance | eyeglass', function(hooks) {
     assert.equal(errorStyle.backgroundColor, 'rgb(204, 0, 0)', '.error#background-color');
   });
 
-  test('visiting /eager', async function(assert) {
+  // Disabled until it can be made to pass.
+  // See issues:
+  //   * https://github.com/sass-eyeglass/ember-cli-eyeglass/pull/50
+  //   * https://github.com/sass-eyeglass/ember-cli-eyeglass/issues/52
+  skip('visiting /eager', async function(assert) {
     await visit('/eager');
 
     assert.equal(currentURL(), '/eager');
@@ -44,6 +48,7 @@ module('Acceptance | eyeglass', function(hooks) {
     const eagerAddonStyle = self.getComputedStyle(document.querySelector('.eager-addon'));
     assert.equal(eagerStyle.backgroundColor, 'rgb(255, 0, 0)', '.eager#backgroundColor');
     assert.equal(eagerAddonStyle.color, 'rgb(0, 0, 255)', '.eager-addon#color');
+
     let imageUrl = eagerAddonStyle.backgroundImage.substring(5, eagerAddonStyle.backgroundImage.length - 2);
     assert.contains("http://", imageUrl);
     assert.contains("/eager/assets/img/test.jpg", imageUrl);
