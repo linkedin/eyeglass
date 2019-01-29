@@ -1,5 +1,7 @@
 "use strict";
-
+/* eslint-disable @typescript-eslint/no-var-requires,
+                  @typescript-eslint/no-use-before-define,
+                  @typescript-eslint/restrict-plus-operands */
 var EyeglassModules = require("./modules/EyeglassModules").default;
 var ModuleFunctions = require("./modules/ModuleFunctions").default;
 var ModuleImporter = require("./importers/ModuleImporter").default;
@@ -157,5 +159,9 @@ function deprecateMethodWarning(method) {
   this.deprecate("0.8.0", "0.9.0",
     "`require('eyeglass')." + method + "` is deprecated. " +
     "Instead, use `require('eyeglass')`"
- );
+  );
 }
+
+/* eslint-enable @typescript-eslint/no-var-requires,
+                 @typescript-eslint/no-use-before-define,
+                 @typescript-eslint/restrict-plus-operands */
