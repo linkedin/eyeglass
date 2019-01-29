@@ -7,6 +7,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "postinstall": "lerna bootstrap"
   }
 }
