@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 import AssetsSource from "./AssetsSource";
 import * as stringUtils from "../util/strings";

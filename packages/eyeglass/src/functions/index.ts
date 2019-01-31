@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 import merge = require("lodash.merge");
 

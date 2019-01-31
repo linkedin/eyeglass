@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 import * as path from "path";
 import eyeglassFunctions from "./functions";
 

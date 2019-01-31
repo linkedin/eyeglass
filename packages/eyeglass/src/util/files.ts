@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 import * as fs from "fs";
 
 export function existsSync(file) {

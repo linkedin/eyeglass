@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 export default function(eyeglass, sass) {
   return {

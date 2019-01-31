@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 import * as path from "path";
 const VALID_EXTENSIONS = [".scss", ".sass", ".css"];
 const PARTIAL_PREFIX = "_";

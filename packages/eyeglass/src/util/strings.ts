@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 "use strict";
 
 var rUnquote = /^("|')(.*)\1$/;

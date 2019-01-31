@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 var PACKAGE_JSON = "package.json";
 import * as path from "path";
 import { URI } from "./URI";

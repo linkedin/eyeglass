@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 import { URI } from  "../util/URI";
 const IS_WINDOWS = /win32/.test(require("os").platform());

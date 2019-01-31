@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");

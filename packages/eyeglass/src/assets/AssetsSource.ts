@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 var fs = require("fs");
 var glob = require("glob");

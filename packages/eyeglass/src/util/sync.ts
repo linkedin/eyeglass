@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 /**
  * Custom function wrapper to ensure sync/async compatibility
  * ---

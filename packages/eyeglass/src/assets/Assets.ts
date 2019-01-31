@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 import * as fs from "fs-extra";
 import * as path from "path";

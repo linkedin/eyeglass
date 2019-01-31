@@ -1,4 +1,5 @@
 "use strict";
+// TODO: Annotate Types
 
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";

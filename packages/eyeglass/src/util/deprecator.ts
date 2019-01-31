@@ -1,3 +1,4 @@
+// TODO: Annotate Types
 import * as semver from "semver";
 const DEFAULT_VERSION = "0.0.0";
 
