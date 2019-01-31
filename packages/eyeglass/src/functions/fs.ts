@@ -31,7 +31,7 @@ export default function(eyeglass, sass) {
     if (!sandbox) {
       return true;
     }
-    // if we have an array of sanboxes...
+    // if we have an array of sandboxes...
     if (Array.isArray(sandbox)) {
       // iterate over them and return true if we find one that is valid
       return sandbox.some(function(sb) {

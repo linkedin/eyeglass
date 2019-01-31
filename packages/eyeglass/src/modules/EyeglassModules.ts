@@ -3,7 +3,7 @@ import * as packageUtils from "../util/package";
 import EyeglassModule from "./EyeglassModule";
 import * as debug from "../util/debug";
 import * as path from "path";
-import * as merge from "lodash.merge";
+import merge = require("lodash.merge");
 import * as semver from "semver";
 import * as archy from "archy";
 import * as fs from "fs";

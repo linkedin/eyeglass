@@ -137,6 +137,7 @@ describe("fs", function () {
     var eg = new Eyeglass({
       eyeglass: {
         root: rootDir,
+        fsSandbox: false,
         engines: {
           sass: sass
         }
@@ -246,6 +247,7 @@ describe("fs", function () {
     var eg = new Eyeglass({
       eyeglass: {
         root: rootDir,
+        fsSandbox: true,
         engines: {
           sass: sass
         }
@@ -270,6 +272,7 @@ describe("fs", function () {
     var eg = new Eyeglass({
       eyeglass: {
         root: rootDir,
+        fsSandbox: true,
         engines: {
           sass: sass
         }
@@ -294,6 +297,7 @@ describe("fs", function () {
     var eg = new Eyeglass({
       eyeglass: {
         root: rootDir,
+        fsSandbox: true,
         engines: {
           sass: sass
         }

@@ -1,5 +1,5 @@
 import * as packageUtils from "../util/package";
-import * as merge from "lodash.merge";
+import merge = require("lodash.merge");
 import * as includes from "lodash.includes";
 import * as path from "path";
 import * as fs from "fs";

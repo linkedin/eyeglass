@@ -1,6 +1,6 @@
 "use strict";
 
-import * as merge from "lodash.merge";
+import merge = require("lodash.merge");
 
 import assetURI from "./asset-uri";
 import normalizeURL from "./normalize-uri";

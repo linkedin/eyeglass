@@ -2,7 +2,7 @@
 
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";
-import * as merge from "lodash.merge"
+import merge = require("lodash.merge");
 
 export default class ImportUtilities {
   root: string;

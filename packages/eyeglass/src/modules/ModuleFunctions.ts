@@ -1,6 +1,6 @@
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
-import * as merge from "lodash.merge";
+import merge = require("lodash.merge");
 var ARGUMENTS_REGEX = /\s*\(.*\)$/;
 var DELIM = "\n\t\u2022 ";
 
