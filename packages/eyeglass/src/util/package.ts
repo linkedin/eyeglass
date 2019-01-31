@@ -1,8 +1,8 @@
 // TODO: Annotate Types
 var PACKAGE_JSON = "package.json";
 import * as path from "path";
+import { existsSync } from "fs";
 import { URI } from "./URI";
-import * as fileUtils from "./files";
 
 export function getPackageData(pkgPath) {
   try {
@@ -30,7 +30,7 @@ export function findNearestPackage(dir) {
   dir = URI.system(dir);
   var prevDir;
   while (dir !== prevDir) {
-    if (fileUtils.existsSync(getPackagePath(dir))) {
+    if (existsSync(getPackagePath(dir))) {
       return dir;
     }
     prevDir = dir;

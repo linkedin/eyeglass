@@ -6,7 +6,6 @@ var glob = require("glob");
 var path = require("path");
 var merge = require("lodash.merge");
 import { URI } from "../util/URI";
-import * as fileUtils from "../util/files";
 var stringify = require("json-stable-stringify");
 
 /* class AssetsSource
@@ -26,7 +25,7 @@ var stringify = require("json-stable-stringify");
 export default function AssetsSource(srcPath, options) {
   options = options || {};
 
-  if (fileUtils.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
+  if (fs.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
     throw new Error("Expected " + srcPath + " to be a directory.");
   }
 

@@ -5,7 +5,7 @@ import * as packageUtils from "../util/package";
 import ImportUtilities from "./ImportUtilities";
 import EyeglassModule from "../modules/EyeglassModule";
 import { URI } from "../util/URI";
-import * as fileUtils from "../util/files";
+import { existsSync } from "fs";
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
 var rAssetsImport = /^(?:([^/]+)\/)?assets$/;
@@ -15,7 +15,7 @@ export default function AssetImporter(eyeglass, sass, options, fallbackImporter)
   return ImportUtilities.createImporter(function(uri, prev, done) {
     var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
 
-    var isRealFile = fileUtils.existsSync(prev);
+    var isRealFile = existsSync(prev);
     var mod;
 
     function importAssetsFor(mod) {

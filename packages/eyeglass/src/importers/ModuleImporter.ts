@@ -1,52 +1,33 @@
 "use strict";
 // TODO: Annotate Types
-
+import {readFileSync, existsSync} from "fs";
 import * as path from "path";
 import { NameExpander } from "../util/NameExpander";
-import * as fileUtils from "../util/files";
 import ImportUtilities from "./ImportUtilities";
 
 /*
- * Asynchronously walks the file list until a match is found. If
+ * Walks the file list until a match is found. If
  * no matches are found, calls the callback with an error
  */
-function readFirstFile(uri, possibleFiles, callback) {
-  // we'll keep track of the files we've tried for error handling
-  var triedFiles = [];
-
-  // iterates through the possibleFiles until one is successfully read
-  // errors if none are readable
-  function tryNextFile() {
-    // get the next file
-    var nextFile = possibleFiles.next().value;
-    // if there is a next file...
-    if (nextFile) {
-      // keep track of it
-      triedFiles.push(nextFile);
-      // and try to read it
-      fileUtils.readFile(nextFile, "utf8", function(err, data) {
-        // if it failed, keep trying
-        if (err) {
-          tryNextFile();
-        } else {
-          // if it didn't fail, we found the first file so return it
-          callback(null, {
-            contents: data.toString(),
-            file: nextFile
-          });
-        }
-      });
-    } else {
-      // could not read any of the possible files, so raise an error
-      var errorMsg = [
-        "Could not import " + uri + " from any of the following locations:"
-      ].concat(triedFiles).join("\n  ");
-      callback(new Error(errorMsg));
-    }
+function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: Error | null, data?: {contents: string, file: string}) => any) {
+  for (let nextFile of possibleFiles) {
+      try {
+        let data = readFileSync(nextFile, "utf8");
+        // if it didn't fail, we found the first file so return it
+        callback(null, {
+          contents: data.toString(),
+          file: nextFile
+        });
+        return;
+      } catch {
+        // pass
+      }
   }
-
-  // try the next (first) file
-  tryNextFile();
+  var errorMsg = [
+    "Could not import " + uri + " from any of the following locations:"
+  ].concat(...possibleFiles).join("\n  ");
+  callback(new Error(errorMsg));
+  return;
 }
 
 // This is a bootstrap function for calling readFirstFile.
@@ -70,9 +51,8 @@ function readAbstractFile(originalUri, uri, location, includePaths, moduleName, 
     });
   }
 
-  var possibleFiles = nameExpander.files.values();
 
-  readFirstFile(originalUri, possibleFiles, callback);
+  readFirstFile(originalUri, nameExpander.files, callback);
 }
 
 /*
@@ -87,7 +67,7 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
     var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
-    var isRealFile = fileUtils.existsSync(prev);
+    var isRealFile = existsSync(prev);
     // pattern to match moduleName/relativePath
     // $1 = moduleName (foo or @scope/foo)
     // $2 = relativePath

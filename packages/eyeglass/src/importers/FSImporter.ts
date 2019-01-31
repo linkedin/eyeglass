@@ -2,8 +2,8 @@
 // TODO: Annotate Types
 
 import * as path from "path";
+import { existsSync } from "fs";
 import ImportUtilities from "./ImportUtilities";
-import * as fileUtils from "../util/files";
 
 export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
   var fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
@@ -16,7 +16,7 @@ export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
       var absolutePath = null;
       if (identifier === "root") {
         absolutePath = options.eyeglass.root;
-      } else if (!fileUtils.existsSync(prev)) {
+      } else if (!existsSync(prev)) {
         absolutePath = path.resolve(".");
       } else {
         absolutePath = path.resolve(path.dirname(prev));
