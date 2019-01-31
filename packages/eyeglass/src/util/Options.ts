@@ -9,8 +9,8 @@ import {
   Options as SassOptions,
   isSassImplementation
 } from "./SassImplementation";
+import { DeprecateFn } from "./deprecator";
 
-type DeprecateFn = Function;
 
 declare module "node-sass" {
   interface Options {
@@ -95,7 +95,7 @@ interface EyeglassSpecificOptions {
   /**
    * Ignore deprecations that started being issued at or below this version.
    */
-  ignoreDeprecations: string;
+  ignoreDeprecations?: string;
   /**
    * Whether to allow filesystem reads and if so, from which directories.
    * * `false` - allows reads from the entire filesystem (insecure).
@@ -106,6 +106,7 @@ interface EyeglassSpecificOptions {
    */
   fsSandbox?: true | false | string | Array<string>;
 }
+
 interface DeprecatedOptions {
   /** @deprecated Since 0.8. */
   root?: string;
@@ -123,11 +124,11 @@ interface DeprecatedOptions {
   assetsRelativeTo?: string;
 }
 
-type Options = SassOptions | DeprecatedOptions & SassOptions;
-type Config = SassOptions & { eyeglass: EyeglassConfig };
+export type Options = SassOptions | DeprecatedOptions & SassOptions;
+export type Config = SassOptions & { eyeglass: EyeglassConfig };
 
 /* eslint-disable-next-line no-unused-vars */
-export default function Options(...args: [Options, Function, SassImplementation]) {
+export default function Options(...args: [Options, DeprecateFn, SassImplementation]) {
   // get the normalized Sass options
   let options = getSassOptions(...args);
 

@@ -1,44 +1,47 @@
-// TODO: Annotate Types
 import * as semver from "semver";
+import {Options} from "./Options"
 const DEFAULT_VERSION = "0.0.0";
 
 export class Deprecator {
-  ignoreDeprecations: string;
+  ignoreDeprecations: string | undefined;
   enabled: boolean;
-  constructor(options) {
-  this.ignoreDeprecations = options && options.eyeglass && options.eyeglass.ignoreDeprecations;
-}
+  constructor(options: Options) {
+    this.ignoreDeprecations = options && options.eyeglass && options.eyeglass.ignoreDeprecations;
+  }
 
-isEnabled(sinceVersion) {
-  // if `enabled` is undefined, try to set it
-  if (this.enabled === undefined) {
-    // if `disableDeprecations`, we fallback to the env variable
-    if (this.ignoreDeprecations === undefined) {
-      // return early and don't set `enabled`, as we'll check the env everytime
-      return !semver.lte(sinceVersion, process.env.EYEGLASS_DEPRECATIONS || DEFAULT_VERSION);
+  isEnabled(sinceVersion: string) {
+    // if `enabled` is undefined, try to set it
+    if (this.enabled === undefined) {
+      // if `disableDeprecations`, we fallback to the env variable
+      if (this.ignoreDeprecations === undefined) {
+        // return early and don't set `enabled`, as we'll check the env every time
+        // TODO: Ask eugene why we need to worry about the env variable changing.
+        return !semver.lte(sinceVersion, process.env.EYEGLASS_DEPRECATIONS || DEFAULT_VERSION);
+      }
+      this.enabled = !semver.lte(sinceVersion, this.ignoreDeprecations || DEFAULT_VERSION);
     }
-    this.enabled = !semver.lte(sinceVersion, this.ignoreDeprecations || DEFAULT_VERSION);
+
+    return this.enabled;
   }
 
-  return this.enabled;
-}
-
-deprecate(sinceVersion, removeVersion, message) {
-  if (this.isEnabled(sinceVersion)) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "[eyeglass:deprecation]",
-       "(deprecated in " + sinceVersion + ", will be removed in " + removeVersion + ")",
-       message);
+  deprecate(sinceVersion: string, removeVersion: string, message: string) {
+    if (this.isEnabled(sinceVersion)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[eyeglass:deprecation]",
+        "(deprecated in " + sinceVersion + ", will be removed in " + removeVersion + ")",
+        message);
+    }
   }
 }
+
+export interface DeprecatorFactory {
+  (options: Options): Deprecator;
 }
 
-interface DeprecatorFactory {
-  (options): Deprecator;
-}
+export type DeprecateFn = Deprecator["deprecate"];
 
-const factory: DeprecatorFactory = (options) => {
+const factory: DeprecatorFactory = (options: Options) => {
   let deprecator = new Deprecator(options);
   return deprecator.deprecate.bind(deprecator);
 }
