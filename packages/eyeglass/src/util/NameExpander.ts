@@ -1,7 +1,12 @@
-// TODO: Annotate Types
-import * as path from "path";
-const VALID_EXTENSIONS = [".scss", ".sass", ".css"];
-const PARTIAL_PREFIX = "_";
+import {
+  format as formatPath,
+  join as joinPaths,
+  parse as parsePath,
+  ParsedPath,
+  sep as PATH_SEPARATOR,
+} from "path";
+
+const SASS_FILE_EXT = /^\.(s[ac]|c)ss$/
 
 /**
   * provides an interface for expanding a given URI to valid import locations
@@ -11,13 +16,22 @@ const PARTIAL_PREFIX = "_";
   */
 export class NameExpander {
   uri: string;
-  files: Set<string>;
+  _possibleFiles: Set<string>;
+  locations: string[];
 
   constructor(uri: string) {
     // normalize the uri
     this.uri = normalizeURI(uri);
+    this.locations = new Array<string>();
     // the collection of possible files
-    this.files = new Set();
+    this._possibleFiles = new Set();
+  }
+
+  get files(): Set<string> {
+    if (this._possibleFiles.size === 0) {
+      this.calculatePossibleFiles();
+    }
+    return this._possibleFiles;
   }
 
   /**
@@ -27,42 +41,88 @@ export class NameExpander {
     */
   addLocation(location: string) {
     /* istanbul ignore else - defensive conditional, don't care about else-case */
-    if (location && location !== "stdin") {
+    if (!location || location === "stdin") {
+      return;
+    }
+    this.locations.push(location);
+    if (this._possibleFiles.size > 0) {
+      this._possibleFiles = new Set<string>();
+    }
+  }
+  private calculatePossibleFiles() {
+    for (let location of this.locations) {
       // get the full path to the uri
-      var fullLocation = path.join(location, this.uri);
+      let fullLocation = joinPaths(location, this.uri);
 
-      // expand the possible variants for the file itself...
-      //  path/to/foo.scss:
-      //    - path/to/foo.scss
-      //    - path/to/_foo.scss
-      //  path/to/foo:
-      //    - path/to/foo.scss
-      //    - path/to/foo.sass
-      //    - path/to/foo.css
-      //    - path/to/_foo.scss
-      //    - path/to/_foo.sass
-      //    - path/to/_foo.css
-      withFileVariants(path.basename(fullLocation), function (name) {
-        var dir = path.dirname(fullLocation);
-        this.files.add(path.join(dir, name));
-      }.bind(this));
+      let path = parsePath(fullLocation);
+      let indexPath = getIndexPath(path)
+      this._possibleFiles.add(fileVariant(path, null, ".scss"));
+      this._possibleFiles.add(fileVariant(path, null, ".sass"));
+      this._possibleFiles.add(fileVariant(path, null, ".css"));
+      this._possibleFiles.add(fileVariant(path, "_", ".scss"));
+      this._possibleFiles.add(fileVariant(path, "_", ".sass"));
+      this._possibleFiles.add(fileVariant(path, "_", ".css"));
 
-      // if the full location does not contain a valid extension...
-      if (!hasValidImportExtension(fullLocation)) {
-        // then expand out the `index` variants in order...
-        //  path/to/foo:
-        //   - path/to/foo/index.scss
-        //   - path/to/foo/index.sass
-        //   - path/to/foo/index.css
-        //   - path/to/foo/_index.scss
-        //   - path/to/foo/_index.sass
-        //   - path/to/foo/_index.css
-        withFileVariants("index", function (name) {
-          this.files.add(path.join(fullLocation, name));
-        }.bind(this));
+      if (indexPath) {
+        this._possibleFiles.add(fileVariant(indexPath, null, ".scss"));
+        this._possibleFiles.add(fileVariant(indexPath, null, ".sass"));
+        this._possibleFiles.add(fileVariant(indexPath, null, ".css"));
+        this._possibleFiles.add(fileVariant(indexPath, "_", ".scss"));
+        this._possibleFiles.add(fileVariant(indexPath, "_", ".sass"));
+        this._possibleFiles.add(fileVariant(indexPath, "_", ".css"));
       }
     }
   }
+
+}
+
+function getIndexPath(
+  path: ParsedPath
+): ParsedPath | null {
+  path = Object.create(path);
+  if (path.name === "index" || path.name === "_index" || (path.ext && SASS_FILE_EXT.test(path.ext))) {
+    return null;
+  }
+  path.dir = joinPaths(path.dir, path.name);
+  path.name = "index"
+  path.base = "index"
+  return path;
+}
+
+/* This function returns a variant if it's allowed for the given path.
+ * otherwise it returns as much of the specified variant as is allowed.
+ * That means that for some paths, this returns the same output for different
+ * variant arguments. It is expected that the caller will deduplicate the
+ * returned values.
+ *
+ * It will:
+ * - treat non-sass extensions as belonging to the base name.
+ * 
+ * It will not:
+ * - change an explicit sass extension to a different sass extension
+ * - remove a partial prefix (underscore)
+ * - Add a partial prefix to a file that already has a partial prefix.
+ * 
+ */
+function fileVariant(
+  path: ParsedPath,
+  partial: "_" | null,
+  extension: ".scss" | ".sass" | ".css"
+): string {
+  path = Object.create(path);
+  if (path.ext && !SASS_FILE_EXT.test(path.ext)) {
+      path.base = path.base + path.ext;
+      path.name = path.name + path.ext;
+      path.ext = undefined;
+  }
+  if (!path.ext) {
+    path.ext = extension;
+  }
+  if (partial && !path.name.startsWith(partial)) {
+    path.name = partial + path.name;
+  }
+  path.base = path.name + path.ext;
+  return formatPath(path);
 }
 
 /**
@@ -72,46 +132,5 @@ export class NameExpander {
   */
 function normalizeURI(uri) {
   // update the separator to use the OS separator
-  return uri.replace(/\//g, path.sep);
-}
-
-/**
-  * iterates through the possible import names
-  * @param    {String} name - the import base name
-  * @param    {Function} callback - the callback to invoke with the given named variant
-  */
-function withFileVariants(name, callback) {
-  // decide whether or not we need to append an extension to the name
-  var hasExtension = hasValidImportExtension(name);
-
-  var names = [name];
-  // if it's not already a partial, add a partial name
-  if (name[0] !== PARTIAL_PREFIX) {
-    names.push(PARTIAL_PREFIX + name);
-  }
-
-  // with each possible name...
-  names.forEach(function(name) {
-    // if we need to append an extension...
-    if (!hasExtension) {
-      // and each possible extension...
-      VALID_EXTENSIONS.forEach(function(extension) {
-        // hand back the permutation
-        callback(name + extension);
-      });
-    } else {
-      // otherwise just hand back the name
-      callback(name);
-    }
-  });
-}
-
-/**
-  * whether or not a given file has a "valid" import extension (.css, .scss, or .sass)
-  * @param    {String} file - the file basename
-  * @returns  {Boolean} if the file extensions is a valid import
-  */
-function hasValidImportExtension(file) {
-  var extension = path.extname(file);
-  return (VALID_EXTENSIONS.indexOf(extension) !== -1);
+  return uri.replace(/\//g, PATH_SEPARATOR);
 }
