@@ -40,17 +40,70 @@ interface EyeglassConfig extends Required<EyeglassSpecificOptions> {
 }
 
 interface EyeglassSpecificOptions {
+  /**
+   * Where to find assets for the eyeglass project.
+   */
   assets?: AssetOptions;
+  /**
+   * Implementations provided to eyeglass that can be used by eyeglass itself
+   * or by custom functions in an eyeglass module.
+   */
   engines?: Engines;
+  /**
+   * Manually declare an eyeglass modules for sass libraries that do not
+   * declare themselves to be eyeglass modules.
+   */
   modules?: Array<any>;
+  /**
+   * Whether to only import a sass file once per css output file.
+   * Defaults to true.
+   */
   enableImportOnce?: boolean;
+  /**
+   * Whether to normalize paths on windows.
+   * Defaults to true or to the value of the environment variable
+   * `EYEGLASS_NORMALIZE_PATHS`.
+   */
   normalizePaths?: boolean;
+  /**
+   * Directory from which sass files are imported for this project.
+   */
   root?: string;
+  /**
+   * The directory in the URL from which css files are served for this project.
+   */
   httpRoot?: string;
+  /**
+   * Directory where eyeglass should store cache information during and across builds.
+   * This will be created if it does not exist.
+   */
   cacheDir?: string;
+  /**
+   * Directory where files are output once built.
+   */
   buildDir?: string;
+  /**
+   * Whether to raise an error if the same eyeglass module is a dependency
+   * more than once with incompatible semantic versions.
+   * 
+   */
   strictModuleVersions?: boolean;
+  /**
+   * Whether to cache eyeglass modules across the entire javascript process.
+   */
   useGlobalModuleCache?: boolean;
+  /**
+   * Ignore deprecations that started being issued at or below this version.
+   */
+  ignoreDeprecations: string;
+  /**
+   * Whether to allow filesystem reads and if so, from which directories.
+   * * `false` - allows reads from the entire filesystem (insecure).
+   * * `true` - only allows reads from the `root` directory.
+   * * `<string>` - a directory from which reads are allowed.
+   * * `Array<string>` - A list of directories from which to allow access.
+   * *   An empty list disables filesystem access (default).
+   */
   fsSandbox?: true | false | string | Array<string>;
 }
 interface DeprecatedOptions {
