@@ -1,8 +1,8 @@
 /**
   * A simple caching implementation
   */
-export class SimpleCache {
-  cache: {[key: string]: any};
+export class SimpleCache<T> {
+  cache: {[key: string]: T};
   constructor() {
     this.cache = {};
   }
@@ -13,7 +13,7 @@ export class SimpleCache {
     * @param   {String} key - they cache key to lookup
     * @returns {*} the cached value
     */
-  get(key) {
+  get(key: string): T {
     return this.cache[key];
   }
 
@@ -23,7 +23,7 @@ export class SimpleCache {
     * @param    {String} key - they cache key to update
     * @param    {*} value - they value to store
     */
-  set(key, value) {
+  set(key: string, value: T): void {
     this.cache[key] = value;
   }
 
@@ -33,7 +33,7 @@ export class SimpleCache {
     * @param    {String} key - they cache key to lookup
     * @returns  {Boolean} whether or not the key is set
     */
-  has(key) {
+  has(key: string): boolean {
     return this.cache.hasOwnProperty(key);
   }
 
@@ -44,10 +44,12 @@ export class SimpleCache {
     * @param    {Function} callback - the callback to be invoked when the key is not in the cache
     * @returns
     */
-  getOrElse(key, callback) {
+  getOrElse(key: string, callback: () => T): T {
     // if we do not yet have a result, generate it and store it in the cache
     if (!this.has(key)) {
-      this.set(key, callback());
+      let v = callback();
+      this.set(key, v);
+      return v;
     }
 
     // return the result from the cache
@@ -57,7 +59,7 @@ export class SimpleCache {
   /**
     * Purges the cache
     */
-  purge() {
+  purge(): void {
     this.cache = {};
   }
 }
