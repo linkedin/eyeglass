@@ -1,20 +1,86 @@
 import { render, renderSync, SassError } from "node-sass";
 import { types } from "util";
+import { unreachable } from "./assertions";
 export { Options } from "node-sass";
 
-type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
+export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
+export function isSassValue(sass: SassImplementation, value: any): value is SassValue {
+  if (value && typeof value === "object") {
+    return isSassNull(sass, value)
+        || isSassNumber(sass, value)
+        || isSassString(sass, value)
+        || isSassColor(sass, value)
+        || isSassBoolean(sass, value)
+        || isSassList(sass, value)
+        || isSassMap(sass, value);
+  } else {
+    return false;
+  }
+}
 
-interface SassNumber {
+export function toString(sass: SassImplementation, value: SassValue): string {
+  if (isSassNumber(sass, value)) {
+    return `${value.getValue()}${value.getUnit()}`
+  } else if (isSassString(sass, value)) {
+    return value.getValue();
+  } else if (isSassColor(sass, value)) {
+    return `rgba(${value.getR()}, ${value.getG()}, ${value.getB()}, ${value.getA()})`
+  } else if (isSassBoolean(sass, value)) {
+    if (value === sass.TRUE) {
+      return `true`;
+    } else {
+      return `false`;
+    }
+  } else if (isSassList(sass, value)) {
+    let s = "(";
+    for (let i = 0; i < value.getLength(); i++) {
+      if (i > 0) {
+        if (value.getSeparator()) {
+          s += ", ";
+        } else {
+          s += " ";
+        }
+      }
+      s += toString(sass, value.getValue(i));
+    }
+    s += ")";
+    return s;
+  } else if (isSassMap(sass, value)) {
+    let s = "(";
+    for (let i = 0; i < value.getLength(); i++) {
+      if (i > 0) {
+        s += ", ";
+      }
+      s += toString(sass, value.getKey(i));
+      s += ": ";
+      s += toString(sass, value.getValue(i));
+    }
+    s += ")";
+    return s;
+  } else if (isSassNull(sass, value)) {
+    return "";
+  } else {
+    unreachable();
+  }
+}
+
+export interface SassNumber {
   getValue(): number;
   setValue(n: number): void;
   getUnit(): string;
   setUnit(u: string): void;
 }
-interface SassString {
+export function isSassNumber(sass: SassImplementation, value: unknown): value is SassNumber {
+  return typeof value === "object" && value.constructor === sass.types.Number;
+}
+export interface SassString {
   getValue(): string;
   setValue(s: string): void;
 }
-interface SassColor {
+export function isSassString(sass: SassImplementation, value: unknown): value is SassString {
+  return typeof value === "object" && value.constructor === sass.types.String;
+}
+export interface SassColor {
   /**
    * Get the red component of the color.
    * @returns integer between 0 and 255 inclusive;
@@ -56,32 +122,47 @@ interface SassColor {
    */
   setA(a: number): void;
 }
-interface SassBoolean {
+export function isSassColor(sass: SassImplementation, value: unknown): value is SassColor {
+  return typeof value === "object" && value.constructor === sass.types.Color;
+}
+export interface SassBoolean {
   getValue(): boolean;
+}
+export function isSassBoolean(sass: SassImplementation, value: unknown): value is SassBoolean {
+  return typeof value === "object" && value.constructor === sass.types.Boolean;
 }
 interface SassBooleanFactory {
   (bool: boolean): SassBoolean;
   TRUE: SassBoolean;
   FALSE: SassBoolean;
 }
-interface SassNull {
+export interface SassNull {
+}
+export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
+  return value === sass.types.Null.NULL;
 }
 interface SassNullFactory {
   (): SassNull;
   NULL: SassNull;
 }
-interface SassEnumerable {
+export interface SassEnumerable {
   getValue(index): SassValue;
   setValue(index, value: SassValue): void;
   getLength(): number;
 }
-interface SassList extends SassEnumerable {
+export interface SassList extends SassEnumerable {
   getSeparator(): boolean
   setSeparator(isComma: boolean): void;
 }
-interface SassMap extends SassEnumerable {
+export function isSassList(sass: SassImplementation, value: unknown): value is SassList {
+  return typeof value === "object" && value.constructor === sass.types.List;
+}
+export interface SassMap extends SassEnumerable {
   getKey(index): string;
   setKey(index, key: string): void;
+}
+export function isSassMap(sass: SassImplementation, value: unknown): value is SassMap {
+  return typeof value === "object" && value.constructor === sass.types.Map;
 }
 interface SassTypes {
   /**
@@ -142,6 +223,7 @@ interface SassTypes {
 
   Error: SassError;
 }
+
 export interface SassImplementation {
   /** Async rendering of a Sass File. */
   render: typeof render;
