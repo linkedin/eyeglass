@@ -1,10 +1,10 @@
-// TODO: Annotate Types
-export default function(eyeglass, sass, options, version) {
-  var strictMode = options.strictModuleVersions;
-  var modules = eyeglass.modules;
-  var issues = modules.issues.engine;
-  var missing;
-  var incompatible;
+import { EyeglassConfig } from "./Options"
+import { SassImplementation } from "./SassImplementation";
+// TODO: Annotate Types for eyeglass
+export default function(eyeglass: any, _sass: SassImplementation, options: EyeglassConfig, version: string) {
+  let strictMode: boolean | "warn" = options.strictModuleVersions;
+  let modules = eyeglass.modules;
+  let issues = modules.issues.engine;
 
   // default to `warn`
   strictMode = (typeof strictMode === "undefined") ? "warn" : strictMode;
@@ -16,7 +16,7 @@ export default function(eyeglass, sass, options, version) {
 
   // if there are incompatible needs...
   if (issues.incompatible.length) {
-    incompatible = ["The following modules are incompatible with eyeglass " + version + ":"];
+    let incompatible = ["The following modules are incompatible with eyeglass " + version + ":"];
     incompatible.push.apply(incompatible, issues.incompatible.map(function(mod) {
       return "  " + mod.name + " needed eyeglass " + mod.eyeglass.needs;
     }));
@@ -27,7 +27,7 @@ export default function(eyeglass, sass, options, version) {
 
   // if there are missing needs...
   if (issues.missing.length) {
-    missing = ["The following modules did not declare an eyeglass version:"];
+    let missing = ["The following modules did not declare an eyeglass version:"];
     missing.push.apply(missing, issues.missing.map(function(mod) {
       return "  " + mod.name;
     }));
@@ -39,7 +39,7 @@ export default function(eyeglass, sass, options, version) {
   }
 
   // if have any issues and `strictMode === true`...
-  if ((incompatible || missing) && strictMode === true) {
+  if ((issues.incompatible.length > 0 || issues.missing.length > 0) && strictMode === true) {
     // throw an error
     throw new Error("Cannot proceed with errors/warning and options.strictModuleVersions");
   }

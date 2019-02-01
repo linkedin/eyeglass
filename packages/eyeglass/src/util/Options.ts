@@ -34,7 +34,7 @@ interface Engines {
   [engine: string]: any;
 }
 
-interface EyeglassConfig extends Required<EyeglassSpecificOptions> {
+export interface EyeglassConfig extends Required<EyeglassSpecificOptions> {
   engines: Required<Engines>;
   fsSandbox: false | Array<string>;
 }

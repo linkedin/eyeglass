@@ -14,7 +14,7 @@ const Module = require("module");
  * node.js code: https://sourcegraph.com/github.com/joyent/node/
  *   .CommonJSPackage/node/.def/commonjs/lib/module.js/-/_resolveFilename
  */
-export default function resolve(id, parent, parentDir) {
+export default function resolve(id: string, parent: string, parentDir: string): string {
   return Module._resolveFilename(id, {
     paths: Module._nodeModulePaths(parentDir),
     filename: parent,
