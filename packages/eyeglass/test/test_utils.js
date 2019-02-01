@@ -3,6 +3,7 @@
 var assert = require("assert");
 var stringUtils = require("../lib/util/strings");
 var unquote = stringUtils.unquote;
+var unquoteJS = stringUtils.unquoteJS;
 var sync = require("../lib/util/sync").default;
 var sass = require("node-sass");
 var testutils = require("./testutils");
@@ -11,21 +12,21 @@ var EyeglassModules = require("../lib/modules/EyeglassModules").default;
 describe("utilities", function () {
 
  it("unquote handles js strings", function(done) {
-   assert.equal("asdf", unquote('"asdf"'));
-   assert.equal("asdf", unquote("'asdf'"));
-   assert.equal("\"asdf'", unquote("\"asdf'"));
-   assert.equal("'asdf\"", unquote("'asdf\""));
-   assert.equal("asdf", unquote("asdf"));
+   assert.equal("asdf", unquoteJS(sass, '"asdf"'));
+   assert.equal("asdf", unquoteJS(sass, "'asdf'"));
+   assert.equal("\"asdf'", unquoteJS(sass, "\"asdf'"));
+   assert.equal("'asdf\"", unquoteJS(sass, "'asdf\""));
+   assert.equal("asdf", unquoteJS(sass, "asdf"));
    done();
  });
 
  it("unquote handles sass strings", function(done) {
    var s = sass.types.String;
-   assert.equal("asdf", unquote(s('"asdf"')).getValue());
-   assert.equal("asdf", unquote(s("'asdf'")).getValue());
-   assert.equal("\"asdf'", unquote(s("\"asdf'")).getValue());
-   assert.equal("'asdf\"", unquote(s("'asdf\"")).getValue());
-   assert.equal("asdf", unquote(s("asdf")).getValue());
+   assert.equal("asdf", unquote(sass, s('"asdf"')).getValue());
+   assert.equal("asdf", unquote(sass, s("'asdf'")).getValue());
+   assert.equal("\"asdf'", unquote(sass, s("\"asdf'")).getValue());
+   assert.equal("'asdf\"", unquote(sass, s("'asdf\"")).getValue());
+   assert.equal("asdf", unquote(sass, s("asdf")).getValue());
    done();
  });
 
@@ -82,13 +83,13 @@ describe("utilities", function () {
  });
 
  it("quote handles Sass strings", function(done) {
-   assert.equal('"asdf"', stringUtils.quote(sass.types.String("asdf")).getValue());
+   assert.equal('"asdf"', stringUtils.quoteSass(sass, sass.types.String("asdf")).getValue());
    done();
  });
 
  it("tmpl should preserve placeholders if not in data", function(done) {
    var tmpl = "${foo} ${bar}";
-   var result = stringUtils.tmpl(tmpl, {}); // no data
+   var result = stringUtils.tmpl(sass, tmpl, {}); // no data
    assert.equal(tmpl, result);
    done();
  });

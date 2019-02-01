@@ -15,7 +15,7 @@ export default function Assets(eyeglass, sass) {
   this.sassUtils = require("node-sass-utils")(sass);
   this.eyeglass = eyeglass;
   // create a master collection
-  this.collection = new AssetsCollection();
+  this.collection = new AssetsCollection(eyeglass.options);
   // and keep a list of module collections
   this.moduleCollections = [];
 
@@ -30,7 +30,7 @@ export default function Assets(eyeglass, sass) {
   }
   this.AssetCollection = function() {
     deprecate("AssetCollection");
-    return new AssetsCollection();
+    return new AssetsCollection(eyeglass.options);
   };
   this.AssetPathEntry = function(src, options) {
     deprecate("AssetPathEntry");
@@ -67,7 +67,7 @@ Assets.prototype.cacheKey = function(name) {
   * @returns  {AssetsCollection} the instance of the AssetsCollection
   */
 Assets.prototype.export = function(src, opts) {
-  var assets = new AssetsCollection();
+  var assets = new AssetsCollection(this.eyeglass.options);
   this.moduleCollections.push(assets);
   return assets.addSource(src, opts);
 };

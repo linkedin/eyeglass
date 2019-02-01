@@ -1,6 +1,7 @@
 // TODO: Annotate Types
 import * as path from "path";
-var stringUtils = require("./strings");
+import * as stringUtils from "./strings";
+import { SassImplementation } from "./SassImplementation";
 
 var stdSep = "/";
 var rAllPathSep = /[\/\\]+/g;
@@ -159,11 +160,11 @@ export class URI {
     * @param    {String} uri - the URI to normalize
     * @returns  {String} the normalized URI
     */
-  static sass(uri) {
+  static sass(sassImpl: SassImplementation, uri: string) {
     // escape all backslashes for Sass string and quote it
     //  "C:\foo\bar.png" -> "C:\\foo\\bar.png"
     // actual backslash, for real this time http://www.xkcd.com/1638/
-    return stringUtils.quote(uri.replace(/\\/g, "\\\\"));
+    return stringUtils.quoteJS(sassImpl, uri.replace(/\\/g, "\\\\"));
   };
 
   /**

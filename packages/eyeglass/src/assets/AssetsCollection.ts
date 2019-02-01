@@ -4,10 +4,13 @@
 import AssetsSource from "./AssetsSource";
 import * as stringUtils from "../util/strings";
 import { URI } from "../util/URI";
+import { Config } from "../util/Options";
 
 var assetRegisterTmpl = "@include asset-register(${namespace}, ${name}, ${sourcePath}, ${uri});\n";
 
-export default function AssetsCollection() {
+export default function AssetsCollection(options: Config) {
+  this.options = options;
+  this.sass = options.eyeglass.engines.sass;
   this.sources = [];
 }
 
@@ -37,17 +40,17 @@ AssetsCollection.prototype.asAssetImport = function (name) {
   //    "/absolute/namespace/path/to/foo.png",
   //    "namespace/path/to/foo.png"
   //  );
-  return this.sources.reduce(function(importStr, source) {
+  return this.sources.reduce((importStr, source) => {
     // get the assets for the entry
     var assets = source.getAssets(name);
-    var namespace = (stringUtils.quote(assets.namespace) || "null");
+    var namespace = (stringUtils.quoteJS(this.sass, assets.namespace) || "null");
     // reduce the assets into a `asset-register` calls
-    return importStr + assets.files.reduce(function(registerStr, asset) {
-      return registerStr + stringUtils.tmpl(assetRegisterTmpl, {
+    return importStr + assets.files.reduce((registerStr, asset) => {
+      return registerStr + stringUtils.tmpl(this.sass, assetRegisterTmpl, {
         namespace: namespace,
-        name: URI.sass(asset.name),
-        sourcePath: URI.sass(asset.sourcePath),
-        uri: URI.sass(asset.uri)
+        name: URI.sass(this.sass, asset.name),
+        sourcePath: URI.sass(this.sass, asset.sourcePath),
+        uri: URI.sass(this.sass, asset.uri)
       });
     }, "");
   }, '@import "eyeglass/assets";\n');

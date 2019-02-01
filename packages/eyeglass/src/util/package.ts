@@ -1,9 +1,11 @@
-var PACKAGE_JSON = "package.json";
-import { PackageJson } from "package-json";
-import * as path from "path";
-import { existsSync } from "fs";
-import { URI } from "./URI";
+import { existsSync } from 'fs';
+import { PackageJson } from 'package-json';
+import * as path from 'path';
 
+import { unreachable } from './assertions';
+import { URI } from './URI';
+
+var PACKAGE_JSON = "package.json";
 export function getPackageData(pkgPath: string): PackageJson {
   try {
     return require(pkgPath);
@@ -29,10 +31,6 @@ export function getPackage(dir: string): Package {
 export function getPackagePath(dir: string): string {
   dir = URI.system(dir);
   return (path.basename(dir) === PACKAGE_JSON) ? dir : path.join(dir, PACKAGE_JSON);
-}
-
-function unreachable(): never {
-  throw new Error("Unreachable code location was reached.")
 }
 
 export function findNearestPackage(dir: string): string {

@@ -1164,10 +1164,10 @@ describe("assets", function () {
         });
 
         it("AssetsCollection.cacheKey includes collection sources", function() {
-          var collection1 = new AssetsCollection();
-          var collection2 = new AssetsCollection();
-          var collection3 = new AssetsCollection();
-          var collection4 = new AssetsCollection();
+          var collection1 = new AssetsCollection({eyeglass: {engines: {sass}}});
+          var collection2 = new AssetsCollection({eyeglass: {engines: {sass}}});
+          var collection3 = new AssetsCollection({eyeglass: {engines: {sass}}});
+          var collection4 = new AssetsCollection({eyeglass: {engines: {sass}}});
 
           collection1.addSource(rootDir);
           collection2.addSource(rootDir);
@@ -1181,8 +1181,8 @@ describe("assets", function () {
         });
 
         it("AssetsCollection.cacheKey source order doesn't matter", function() {
-          var collection1 = new AssetsCollection();
-          var collection2 = new AssetsCollection();
+          var collection1 = new AssetsCollection({eyeglass: {engines: {sass}}});
+          var collection2 = new AssetsCollection({eyeglass: {engines: {sass}}});
 
           collection1.addSource(rootDir);
           collection1.addSource(rootDir2);
