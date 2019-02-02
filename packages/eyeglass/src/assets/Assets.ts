@@ -6,7 +6,7 @@ import * as path from "path";
 import { URI } from "../util/URI";
 import * as debug from "../util/debug";
 import AssetsCollection from "./AssetsCollection";
-import AssetsSource, {IAssetsSource} from "./AssetsSource";
+import AssetsSource from "./AssetsSource";
 
 const ensureSymlink = require("ensure-symlink");
 // TODO - remove when deprecated AssetPathEntry is removed
@@ -17,7 +17,7 @@ export default class Assets {
   collection: any;
   moduleCollections: any[];
   AssetCollection: () => any;
-  AssetPathEntry: (src: any, options: any) => IAssetsSource;
+  AssetPathEntry: (src: any, options: any) => AssetsSource;
   constructor(eyeglass, sass) {
     this.sassUtils = require("node-sass-utils")(sass);
     this.eyeglass = eyeglass;

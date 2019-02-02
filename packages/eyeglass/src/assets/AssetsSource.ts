@@ -9,14 +9,6 @@ import { URI } from "../util/URI";
 import { AssetSourceOptions } from "../util/Options";
 import * as stringify from "json-stable-stringify";
 
-export interface IAssetsSource {
-    name: string;
-    httpPrefix: string;
-    srcPath: string;
-    pattern: string;
-    globOpts: glob.IOptions;
-}
-
 /* class AssetsSource
  *
  * srcPath - directory where assets are sourced.
@@ -31,66 +23,88 @@ export interface IAssetsSource {
  * Option: globOpts [Optional] - Options to use for globbing.
  *   See: https://github.com/isaacs/node-glob#options
  */
-function AssetsSource(this: IAssetsSource, srcPath: string, options: AssetSourceOptions) {
-  options = options || { directory: srcPath };
+class AssetsSource {
+  name: string;
+  httpPrefix: string;
+  srcPath: string;
+  pattern: string;
+  globOpts: glob.IOptions;
+  constructor(srcPath: string, options: AssetSourceOptions) {
+    options = options || { directory: srcPath };
 
-  if (fs.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
-    throw new Error("Expected " + srcPath + " to be a directory.");
-  }
-
-  // TODO (test) - what is this for? needs a test
-  this.name = options.name || null;
-  this.httpPrefix = options.httpPrefix || this.name;
-  this.srcPath = URI.system(srcPath);
-  this.pattern = options.pattern || "**/*";
-  this.globOpts = merge(
-    // default glob options
-    {
-      follow: true,
-      nodir: true
-    },
-    // with the custom options
-    options.globOpts,
-    // but the following cannot be overridden by options.globOpts
-    {
-      cwd: this.srcPath,
-      root: this.srcPath
+    if (fs.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
+      throw new Error("Expected " + srcPath + " to be a directory.");
     }
-  );
-}
 
-/**
-  * returns any assets found in the given source
-  * @param    {String} namespace - the namespace
-  * @returns  {Object} the object containing the namespace and array of discovered files
-  */
-AssetsSource.prototype.getAssets = function(namespace) {
-  namespace = this.name || namespace;
-  var files = glob.sync(this.pattern, this.globOpts).map(function(file) {
-    file = URI.preserve(file);
+    // TODO (test) - what is this for? needs a test
+    this.name = options.name || null;
+    this.httpPrefix = options.httpPrefix || this.name;
+    this.srcPath = URI.system(srcPath);
+    this.pattern = options.pattern || "**/*";
+    this.globOpts = merge(
+      // default glob options
+      {
+        follow: true,
+        nodir: true
+      },
+      // with the custom options
+      options.globOpts,
+      // but the following cannot be overridden by options.globOpts
+      {
+        cwd: this.srcPath,
+        root: this.srcPath
+      }
+    );
+  }
+  /**
+    * returns any assets found in the given source
+    * @param    {String} namespace - the namespace
+    * @returns  {Object} the object containing the namespace and array of discovered files
+    */
+  getAssets(namespace) {
+    namespace = this.name || namespace;
+    let files = glob.sync(this.pattern, this.globOpts).map(function (file) {
+      file = URI.preserve(file);
 
-    var uri = URI.join(this.httpPrefix, namespace, file);
+      let uri = URI.join(this.httpPrefix, namespace, file);
+
+      return {
+        name: URI.web(file),
+        sourcePath: path.join(this.srcPath, file),
+        uri: URI.web(uri)
+      };
+    }.bind(this));
 
     return {
-      name: URI.web(file),
-      sourcePath: path.join(this.srcPath, file),
-      uri: URI.web(uri)
+      namespace: namespace,
+      files: files
     };
-  }.bind(this));
+  }
 
-  return {
-    namespace: namespace,
-    files: files
-  };
-};
 
-/**
-  * returns a string representation of the source pattern
-  * @returns  {String} the source pattern
-  */
-AssetsSource.prototype.toString = function() {
-  return this.srcPath + "/" + this.pattern;
-};
+  /**
+    * returns a string representation of the source pattern
+    * @returns  {String} the source pattern
+    */
+  toString() {
+    return this.srcPath + "/" + this.pattern;
+  }
+
+  /**
+    * Build a string suitable for caching an instance of this
+    * @returns {String} the cache key
+    */
+  cacheKey(namespace) {
+    return "[" +
+      "httpPrefix=" + (this.httpPrefix ? this.httpPrefix : "") +
+      ";name=" + (this.name ? this.name : (namespace ? namespace : "")) +
+      ";srcPath=" + this.srcPath +
+      ";pattern=" + this.pattern +
+      // json-stable-stringify orders keys when stringifying (JSON.stringify does not)
+      ";opts=" + stringify(this.globOpts, { replacer: skipSomeKeys }) +
+      "]";
+  }
+}
 
 // don't include these globOpts in the cacheKey
 function skipSomeKeys(key, value) {
@@ -106,20 +120,5 @@ function skipSomeKeys(key, value) {
   }
   return value;
 }
-
-/**
-  * Build a string suitable for caching an instance of this
-  * @returns {String} the cache key
-  */
-AssetsSource.prototype.cacheKey = function(namespace) {
-  return "[" +
-    "httpPrefix=" + (this.httpPrefix ? this.httpPrefix : "") +
-    ";name=" + (this.name ? this.name : (namespace ? namespace : "")) +
-    ";srcPath=" + this.srcPath +
-    ";pattern=" + this.pattern +
-    // json-stable-stringify orders keys when stringifying (JSON.stringify does not)
-    ";opts=" + stringify(this.globOpts, {replacer: skipSomeKeys}) +
-    "]";
-};
 
 export default AssetsSource;
