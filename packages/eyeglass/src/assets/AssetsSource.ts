@@ -1,13 +1,21 @@
 "use strict";
 // TODO: Annotate Types
 
-var fs = require("fs");
-var glob = require("glob");
-var path = require("path");
-var merge = require("lodash.merge");
+import * as fs from "fs";
+import * as glob from "glob";
+import * as path from "path";
+import merge = require("lodash.merge") ;
 import { URI } from "../util/URI";
-var stringify = require("json-stable-stringify");
+import { AssetSourceOptions } from "../util/Options";
+import * as stringify from "json-stable-stringify";
 
+export interface IAssetsSource {
+    name: string;
+    httpPrefix: string;
+    srcPath: string;
+    pattern: string;
+    globOpts: glob.IOptions;
+}
 /* class AssetsSource
  *
  * srcPath - directory where assets are sourced.
@@ -22,8 +30,8 @@ var stringify = require("json-stable-stringify");
  * Option: globOpts [Optional] - Options to use for globbing.
  *   See: https://github.com/isaacs/node-glob#options
  */
-export default function AssetsSource(srcPath, options) {
-  options = options || {};
+function AssetsSource(this: IAssetsSource, srcPath: string, options: AssetSourceOptions) {
+  options = options || { directory: srcPath };
 
   if (fs.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
     throw new Error("Expected " + srcPath + " to be a directory.");
@@ -112,3 +120,5 @@ AssetsSource.prototype.cacheKey = function(namespace) {
     ";opts=" + stringify(this.globOpts, {replacer: skipSomeKeys}) +
     "]";
 };
+
+export default AssetsSource;

@@ -35,11 +35,12 @@ export class Deprecator {
   }
 }
 
+export type DeprecateFn = Deprecator["deprecate"];
+
 export interface DeprecatorFactory {
-  (options: Options): Deprecator;
+  (options: Options): DeprecateFn;
 }
 
-export type DeprecateFn = Deprecator["deprecate"];
 
 const factory: DeprecatorFactory = (options: Options) => {
   let deprecator = new Deprecator(options);

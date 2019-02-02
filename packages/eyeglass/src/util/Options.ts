@@ -18,18 +18,21 @@ declare module "node-sass" {
   }
 }
 
-interface AssetSourceOptions {
+export interface AssetSourceOptions {
+  name?: string;
+  httpPrefix?: string;
   directory: string;
-  globOpts: GlobOptions;
+  globOpts?: GlobOptions;
+  pattern?: string;
 }
 
-interface AssetOptions {
+export interface AssetOptions {
   sources?: Array<AssetSourceOptions>;
   httpPrefix?: string;
   relativeTo?: string;
 }
 
-interface Engines {
+export interface Engines {
   sass?: SassImplementation;
   [engine: string]: any;
 }
@@ -39,7 +42,7 @@ export interface EyeglassConfig extends Required<EyeglassSpecificOptions> {
   fsSandbox: false | Array<string>;
 }
 
-interface EyeglassSpecificOptions {
+export interface EyeglassSpecificOptions {
   /**
    * Where to find assets for the eyeglass project.
    */
@@ -128,12 +131,8 @@ export type Options = SassOptions | DeprecatedOptions & SassOptions;
 export type Config = SassOptions & { eyeglass: EyeglassConfig };
 
 /* eslint-disable-next-line no-unused-vars */
-export default function Options(...args: [Options, DeprecateFn, SassImplementation]) {
-  // get the normalized Sass options
-  let options = getSassOptions(...args);
-
-  // merge the incoming options onto the instance
-  merge(this, options);
+export default function Options(this: Config, ...args: [Options, DeprecateFn, SassImplementation]) {
+  merge(this, getSassOptions(...args));
 }
 
 function eyeglassOptionsFromNodeSassArg(arg: SassImplementation | undefined, deprecate: DeprecateFn): Pick<EyeglassConfig, "engines"> | void {

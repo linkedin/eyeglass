@@ -4,29 +4,33 @@
 /* eslint-disable @typescript-eslint/no-var-requires,
                   @typescript-eslint/no-use-before-define,
                   @typescript-eslint/restrict-plus-operands */
-var EyeglassModules = require("./modules/EyeglassModules").default;
-var ModuleFunctions = require("./modules/ModuleFunctions").default;
-var ModuleImporter = require("./importers/ModuleImporter").default;
-var AssetImporter = require("./importers/AssetImporter").default;
-var FSImporter = require("./importers/FSImporter").default;
-var Options = require("./util/Options").default;
-var Assets = require("./assets/Assets").default;
-var deprecator = require("./util/deprecator");
-var semverChecker = require("./util/semverChecker").default;
-var fs = require("fs-extra");
-var pkg = require("../package.json");
+import EyeglassModules from "./modules/EyeglassModules";
+import ModuleFunctions from "./modules/ModuleFunctions";
+import ModuleImporter from "./importers/ModuleImporter";
+import AssetImporter from "./importers/AssetImporter";
+import FSImporter from "./importers/FSImporter";
+import Options, { Config } from "./util/Options";
+import Assets from "./assets/Assets";
+import deprecator, { DeprecateFn } from "./util/deprecator";
+import semverChecker from "./util/semverChecker";
+import * as fs from "fs-extra";
+const pkg = require("../package.json");
 
-function Eyeglass(options, deprecatedNodeSassArg) {
+interface Eyeglass {
+  modules: any;
+  deprecate: DeprecateFn;
+  options: Config;
+  assets: Assets;
+}
+
+function Eyeglass(this: Eyeglass, options, deprecatedNodeSassArg): void {
   // if it's not an instance, create one and return only the sass options
   if (!(this instanceof Eyeglass)) {
     return (new Eyeglass(options, deprecatedNodeSassArg)).options;
   }
 
   // an interface for deprecation warnings
-  var aDeprecator = new deprecator.Deprecator(options);
-  this.deprecate = function(sinceVersion, removeVersion, message) {
-    aDeprecator.deprecate(sinceVersion, removeVersion, message);
-  };
+  this.deprecate = deprecator(options);
 
   this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
   this.assets = new Assets(this, this.options.eyeglass.engines.sass);
@@ -54,10 +58,9 @@ function Eyeglass(options, deprecatedNodeSassArg) {
 
   // auto-add asset paths specified via options
   if (this.options.eyeglass.assets.sources) {
-    this.options.eyeglass.assets.sources.forEach(function(assetSource) {
-
+    for (let assetSource of this.options.eyeglass.assets.sources) {
       this.assets.addSource(assetSource.directory, assetSource);
-    }.bind(this));
+    }
   }
 }
 
@@ -78,19 +81,19 @@ function checkMissingDependencies() {
 }
 
 function addImporters() {
-  var fsImporter = new FSImporter(
+  var fsImporter = FSImporter(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
     this.options.importer
   );
-  var assetImporter = new AssetImporter(
+  var assetImporter = AssetImporter(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
     fsImporter
   );
-  this.options.importer = new ModuleImporter(
+  this.options.importer = ModuleImporter(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
@@ -99,7 +102,7 @@ function addImporters() {
 }
 
 function addFunctions() {
-  this.options.functions = new ModuleFunctions(
+  this.options.functions = ModuleFunctions(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
