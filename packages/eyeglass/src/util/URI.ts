@@ -1,4 +1,3 @@
-// TODO: Annotate Types
 import * as path from "path";
 import * as stringUtils from "./strings";
 import { SassImplementation } from "./SassImplementation";
@@ -9,11 +8,11 @@ var rIsRelative = /^\.{1,2}/;
 var rUriFragments =  /^([^\?#]+)(\?[^#]*)?(#.*)?/;
 var rSearchDelim = /^[\?\&]*/;
 
-function convertSeparator(uri, sep) {
+function convertSeparator(uri: string, sep: string): string {
   return shouldNormalizePathSep() ? uri.replace(rAllPathSep, sep) : uri;
 }
 
-function shouldNormalizePathSep() {
+function shouldNormalizePathSep(): boolean {
   // normalize if the path separator is a backslash or we haven't explicitly disabled normalization
   return path.sep === "\\" || process.env.EYEGLASS_NORMALIZE_PATHS !== "false";
 }
@@ -46,7 +45,7 @@ export class URI {
     * sets the new pathname for the URI
     * @param    {String} pathname - the new pathname to set
     */
-  setPath(pathname) {
+  setPath(pathname: string): void {
     // convert the path separator to standard system paths
     pathname = convertSeparator(pathname, path.sep);
     // then normalize the path
@@ -60,7 +59,7 @@ export class URI {
     * @param sep - the separator to use to represent the pathname
     * @param relativeTo - if set, returns the pathname relative to this base path
     */
-  getPath(sep?: string, relativeTo?: string) {
+  getPath(sep?: string, relativeTo?: string): string {
     var pathname = this.path;
     if (relativeTo) {
       pathname = convertSeparator(pathname, path.sep);
@@ -76,7 +75,7 @@ export class URI {
     * adds a query string to the URI
     * @param    {String} search - the query string to append
     */
-  addQuery(search) {
+  addQuery(search: string): void {
     if (!search) {
       return;
     }
@@ -89,7 +88,7 @@ export class URI {
     * replaces the query string on the URI
     * @param    {String} search - the query string to set
     */
-  setQuery(search) {
+  setQuery(search: string): void {
     // reset the search
     this.search = "";
     // then add the new one
@@ -100,7 +99,7 @@ export class URI {
     * replaces the hash string on the URI
     * @param    {String} hash - the hash string to set
     */
-  setHash(hash) {
+  setHash(hash: string) {
     this.hash = hash === undefined ? "" : hash;
   };
 
@@ -108,7 +107,7 @@ export class URI {
     * returns the URI as a string
     * @returns  {String} the full URI
     */
-  toString() {
+  toString(): string {
     return this.path + this.search + this.hash;
   };
 
@@ -116,9 +115,9 @@ export class URI {
     * given any number of path fragments, joins the non-empty fragments
     * @returns  {String} the joined fragments
     */
-  static join(...fragments: string[]) {
+  static join(...fragments: string[]): string {
     // join all the non-empty paths
-    var uri = new URI(fragments.filter(function (fragment) {
+    var uri = new URI(fragments.filter((fragment) => {
       if (fragment) {
         return fragment;
       }
@@ -131,7 +130,7 @@ export class URI {
     * @param    {String} uri - the URI to check
     * @returns  {Boolean} whether or not the URI is relative like
     */
-  static isRelative(uri) {
+  static isRelative(uri: string): boolean {
     return rIsRelative.test(uri);
   };
 
@@ -140,9 +139,8 @@ export class URI {
     * @param    {String} uri - the URI to normalize
     * @returns  {String} the normalized URI
     */
-  static web(uri) {
-    uri = new URI(uri);
-    return uri.toString();
+  static web(uri: string): string {
+    return (new URI(uri)).toString();
   };
 
   /**
@@ -150,9 +148,8 @@ export class URI {
     * @param    {String} uri - the URI to normalize
     * @returns  {String} the normalized URI
     */
-  static system(uri) {
-    uri = new URI(uri);
-    return uri.getPath(path.sep);
+  static system(uri: string): string {
+    return (new URI(uri)).getPath(path.sep);
   };
 
   /**
@@ -172,7 +169,7 @@ export class URI {
     * @param    {String} uri - the URI to decorate
     * @returns  {String} the decorated URI
     */
-  static preserve(uri) {
+  static preserve(uri: string): string {
     return uri.replace(/\\/g, "<BACKSLASH>");
   };
 
@@ -181,7 +178,7 @@ export class URI {
     * @param    {String} uri - the URI to restore
     * @returns  {String} the restored URI
     */
-  static restore(uri) {
+  static restore(uri: string): string {
     return uri.replace(/<BACKSLASH>/g, "\\");
   };
 }
