@@ -1,13 +1,17 @@
 import * as fs from "fs-extra";
 import * as path from "path";
-import { URI } from "../util/URI";
+
+import { IEyeglass } from "../IEyeglass";
 import * as debug from "../util/debug";
+import { AssetSourceOptions } from "../util/Options";
+import { isType, SassImplementation, SassMap, SassTypeError, SassValue } from "../util/SassImplementation";
+import { URI } from "../util/URI";
+
 import AssetsCollection from "./AssetsCollection";
 import AssetsSource from "./AssetsSource";
-import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassMap, SassValue, isType, SassTypeError } from "../util/SassImplementation";
 
-const ensureSymlink = require("ensure-symlink");
+type EnsureSymlinkSync = (srcFile: string, destLink: string) => void;
+const ensureSymlink: EnsureSymlinkSync = require("ensure-symlink");
 
 interface Resolution {
   path: string;
@@ -20,7 +24,15 @@ type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver,
 interface Resolves {
   resolve: Resolver;
 }
-export default class Assets implements Resolves {
+
+type InstallerCallback = (error: Error | null, dest?: string) => void;
+type Installer = (file: string, uri: string, cb: InstallerCallback) => void;
+type WrappedInstaller = (file: string, uri: string, fallback: Installer, cb: InstallerCallback) => void;
+interface Installs {
+  install: Installer;
+}
+
+export default class Assets implements Resolves, Installs {
   sassUtils: any;
   eyeglass: IEyeglass;
   /**
@@ -31,8 +43,8 @@ export default class Assets implements Resolves {
    * Assets declared by eyeglass modules.
    */
   moduleCollections: Array<AssetsCollection>;
-  AssetCollection: () => any;
-  AssetPathEntry: (src: any, options: any) => AssetsSource;
+  AssetCollection: () => AssetsCollection;
+  AssetPathEntry: (src: string, options: AssetSourceOptions) => AssetsSource;
   constructor(eyeglass: IEyeglass, sass: SassImplementation) {
     this.sassUtils = require("node-sass-utils")(sass);
     this.eyeglass = eyeglass;
@@ -54,7 +66,7 @@ export default class Assets implements Resolves {
       deprecate("AssetCollection");
       return new AssetsCollection(eyeglass.options);
     };
-    this.AssetPathEntry = function (src, options) {
+    this.AssetPathEntry = function (src: string, options: AssetSourceOptions) {
       deprecate("AssetPathEntry");
       return new AssetsSource(src, options);
     };
@@ -191,14 +203,13 @@ export default class Assets implements Resolves {
     * @param    {String} uri - the resolved uri path
     * @param    {Function} cb - the callback invoked after the installation is successful
     */
-  install(file, uri, cb) {
+  install(file: string, uri: string, cb: InstallerCallback) {
     let options = this.eyeglass.options.eyeglass;
     let httpRoot = options.httpRoot;
     if (options.buildDir) {
       // normalize the uri using the system OS path separator
       // and make it relative to the httpRoot
-      uri = new URI(uri);
-      uri = uri.getPath(path.sep, httpRoot);
+      uri = (new URI(uri)).getPath(path.sep, httpRoot);
 
       let dest = path.join(options.buildDir, uri);
 
@@ -226,8 +237,8 @@ export default class Assets implements Resolves {
     * wraps the current installer with a custom installer
     * @param    {Function} installer - the new installer function
     */
-  installer(installer) {
-    let oldInstaller = this.install.bind(this);
+  installer(installer: WrappedInstaller) {
+    let oldInstaller: Installer = this.install.bind(this);
     this.install = function(assetFile, assetUri, cb) {
       installer(assetFile, assetUri, oldInstaller, cb);
     };

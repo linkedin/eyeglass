@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
+    "@types/fs-extra": "^5.0.4",
     "@types/glob": "^7.1.1",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.merge": "^4.6.4",
