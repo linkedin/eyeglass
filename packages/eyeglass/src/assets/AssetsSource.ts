@@ -1,5 +1,4 @@
 "use strict";
-// TODO: Annotate Types
 
 import * as fs from "fs";
 import * as glob from "glob";
@@ -8,6 +7,15 @@ import merge = require("lodash.merge") ;
 import { URI } from "../util/URI";
 import { AssetSourceOptions } from "../util/Options";
 import * as stringify from "json-stable-stringify";
+
+export interface DiscoveredAssets {
+  namespace: string;
+  files: Array<{
+    name: string;
+    sourcePath: string;
+    uri: string;
+  }>;
+}
 
 /* class AssetsSource
  *
@@ -61,32 +69,26 @@ class AssetsSource {
     * @param    {String} namespace - the namespace
     * @returns  {Object} the object containing the namespace and array of discovered files
     */
-  getAssets(namespace) {
+  getAssets(namespace): DiscoveredAssets {
     namespace = this.name || namespace;
-    let files = glob.sync(this.pattern, this.globOpts).map(function (file) {
+    let files = glob.sync(this.pattern, this.globOpts).map((file) => {
       file = URI.preserve(file);
-
       let uri = URI.join(this.httpPrefix, namespace, file);
-
       return {
         name: URI.web(file),
         sourcePath: path.join(this.srcPath, file),
         uri: URI.web(uri)
       };
-    }.bind(this));
-
-    return {
-      namespace: namespace,
-      files: files
-    };
+    });
+    return { namespace, files };
   }
 
 
   /**
     * returns a string representation of the source pattern
-    * @returns  {String} the source pattern
+    * @returns {string} the source pattern
     */
-  toString() {
+  toString(): string {
     return this.srcPath + "/" + this.pattern;
   }
 
@@ -94,7 +96,7 @@ class AssetsSource {
     * Build a string suitable for caching an instance of this
     * @returns {String} the cache key
     */
-  cacheKey(namespace) {
+  cacheKey(namespace: string): string {
     return "[" +
       "httpPrefix=" + (this.httpPrefix ? this.httpPrefix : "") +
       ";name=" + (this.name ? this.name : (namespace ? namespace : "")) +
@@ -107,7 +109,7 @@ class AssetsSource {
 }
 
 // don't include these globOpts in the cacheKey
-function skipSomeKeys(key, value) {
+function skipSomeKeys<ValueType>(key: string, value: ValueType): ValueType | undefined {
   // these are set to this.srcPath, which is already included in the cacheKey
   if (key === "cwd" || key === "root") {
     return undefined;

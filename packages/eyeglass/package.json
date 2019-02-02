@@ -48,6 +48,7 @@
   "devDependencies": {
     "@types/debug": "0.0.31",
     "@types/glob": "^7.1.1",
+    "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.merge": "^4.6.4",
     "@types/node": "^10.7.1",
     "@types/node-sass": "^3.10.32",
