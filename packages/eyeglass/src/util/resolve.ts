@@ -1,4 +1,3 @@
-// TODO: Annotate Types
 /*eslint no-underscore-dangle:0*/
 // underscores allowed in this file for calling privately into node.js
 
