@@ -16,6 +16,7 @@ export interface IAssetsSource {
     pattern: string;
     globOpts: glob.IOptions;
 }
+
 /* class AssetsSource
  *
  * srcPath - directory where assets are sourced.

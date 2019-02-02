@@ -19,20 +19,53 @@ declare module "node-sass" {
 }
 
 export interface AssetSourceOptions {
+  /**
+   * The namespace of this asset source.
+   */
   name?: string;
+  /**
+   * The httpPrefix of this source relative to the httpPrefix of all assets.
+   * If not provided, the namespace of this source is used.
+   */
   httpPrefix?: string;
+  /**
+   * The directory of this asset source.
+   */
   directory: string;
+  /**
+   * Options for globbing files within the directory.
+   */
   globOpts?: GlobOptions;
+  /**
+   * Pattern for globbing files within the directory.
+   * Defaults to "**\/*"
+   */
   pattern?: string;
 }
 
 export interface AssetOptions {
+  /**
+   * A list of asset sources.
+   */
   sources?: Array<AssetSourceOptions>;
+  /**
+   * The httpPrefix for all assets relative to the project's httpRoot.
+   */
   httpPrefix?: string;
+  /**
+   * A http prefix directory that assets urls will be relative to.
+   * This would usually be set to the directory from which the CSS file being
+   * rendered is served.
+   *
+   */
   relativeTo?: string;
 }
 
 export interface Engines {
+  /**
+   * If not provided, eyeglass will require `node-sass` at the version it
+   * currently depends.
+   */
   sass?: SassImplementation;
   [engine: string]: any;
 }
@@ -88,7 +121,6 @@ export interface EyeglassSpecificOptions {
   /**
    * Whether to raise an error if the same eyeglass module is a dependency
    * more than once with incompatible semantic versions.
-   * 
    */
   strictModuleVersions?: boolean;
   /**
