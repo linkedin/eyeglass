@@ -96,6 +96,12 @@ export interface EyeglassSpecificOptions {
    */
   enableImportOnce?: boolean;
   /**
+   * Whether to install assets using symlinks or file copies.
+   * Setting this to true is good for performance.
+   * Defaults to false.
+   */
+  installWithSymlinks?: boolean;
+  /**
    * Whether to normalize paths on windows.
    * Defaults to true or to the value of the environment variable
    * `EYEGLASS_NORMALIZE_PATHS`.

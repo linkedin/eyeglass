@@ -139,7 +139,7 @@ interface SassBooleanFactory {
 export interface SassNull {
 }
 export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
-  return value === sass.types.Null.NULL;
+  return typeof value === "object" && value.constructor === sass.types.Null;
 }
 interface SassNullFactory {
   (): SassNull;
@@ -249,4 +249,51 @@ export function isSassImplementation(impl: any): impl is SassImplementation {
     && typeof impl.types === "object"
     && typeof impl.info === "string"
   );
+}
+
+const typeGuards = {
+  null: isSassNull,
+  string: isSassString,
+  number: isSassNumber,
+  map: isSassMap,
+  list: isSassList,
+  color: isSassColor,
+  boolean: isSassBoolean,
+};
+
+interface SassType {
+  null: SassNull,
+  string: SassString,
+  number: SassNumber,
+  map: SassMap,
+  list: SassList,
+  color: SassColor,
+  boolean: SassBoolean,
+}
+
+type SassTypeName = keyof typeof typeGuards;
+
+function typeName(sass: SassImplementation, value: SassValue): SassTypeName {
+  if (isSassString(sass, value)) return "string";
+  if (isSassNumber(sass, value)) return "number";
+  if (isSassMap(sass, value)) return "map";
+  if (isSassList(sass, value)) return "list";
+  if (isSassColor(sass, value)) return "color";
+  if (isSassBoolean(sass, value)) return "boolean";
+  if (isSassNull(sass, value)) return "null";
+}
+
+export function isType<Name extends SassTypeName>(sass: SassImplementation, value: SassValue, name: Name): value is SassType[Name] {
+  let guard = typeGuards[name];
+  if (guard(sass, value)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export class SassTypeError extends Error {
+  constructor(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue) {
+    super(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
+  }
 }

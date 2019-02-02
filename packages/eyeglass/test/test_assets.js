@@ -1050,7 +1050,7 @@ describe("assets", function () {
                 "The assets." + method + " interface will be removed from the public API.",
                 "If you currently use this method, please open an issue at",
                 "https://github.com/sass-eyeglass/eyeglass/issues/ so we can",
-                "understand and accomodate your use case\n"
+                "understand and accommodate your use case\n"
               ].join(" "));
               done();
             });

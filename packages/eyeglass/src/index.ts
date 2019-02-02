@@ -9,21 +9,15 @@ import ModuleFunctions from "./modules/ModuleFunctions";
 import ModuleImporter from "./importers/ModuleImporter";
 import AssetImporter from "./importers/AssetImporter";
 import FSImporter from "./importers/FSImporter";
-import Options, { Config } from "./util/Options";
+import Options from "./util/Options";
 import Assets from "./assets/Assets";
-import deprecator, { DeprecateFn } from "./util/deprecator";
+import deprecator from "./util/deprecator";
 import semverChecker from "./util/semverChecker";
 import * as fs from "fs-extra";
+import { IEyeglass } from "./IEyeglass";
 const pkg = require("../package.json");
 
-interface Eyeglass {
-  modules: any;
-  deprecate: DeprecateFn;
-  options: Config;
-  assets: Assets;
-}
-
-function Eyeglass(this: Eyeglass, options, deprecatedNodeSassArg): void {
+function Eyeglass(this: IEyeglass, options, deprecatedNodeSassArg): void {
   // if it's not an instance, create one and return only the sass options
   if (!(this instanceof Eyeglass)) {
     return (new Eyeglass(options, deprecatedNodeSassArg)).options;

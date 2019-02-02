@@ -1,24 +1,39 @@
-"use strict";
-// TODO: Annotate Types
-
 import * as fs from "fs-extra";
 import * as path from "path";
 import { URI } from "../util/URI";
 import * as debug from "../util/debug";
 import AssetsCollection from "./AssetsCollection";
 import AssetsSource from "./AssetsSource";
+import { IEyeglass } from "../IEyeglass";
+import { SassImplementation, SassMap, SassValue, isType, SassTypeError } from "../util/SassImplementation";
 
 const ensureSymlink = require("ensure-symlink");
-// TODO - remove when deprecated AssetPathEntry is removed
 
-export default class Assets {
+interface Resolution {
+  path: string;
+  query?: string;
+}
+type ResolverCallback = (error: Error | null, result?: Resolution) => any;
+type Resolver = (assetFile: string, assetUri: string, cb: ResolverCallback) => void;
+type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver, cb: ResolverCallback) => void;
+
+interface Resolves {
+  resolve: Resolver;
+}
+export default class Assets implements Resolves {
   sassUtils: any;
-  eyeglass: any;
-  collection: any;
-  moduleCollections: any[];
+  eyeglass: IEyeglass;
+  /**
+   * Assets declared by the application.
+   */
+  collection: AssetsCollection;
+  /**
+   * Assets declared by eyeglass modules.
+   */
+  moduleCollections: Array<AssetsCollection>;
   AssetCollection: () => any;
   AssetPathEntry: (src: any, options: any) => AssetsSource;
-  constructor(eyeglass, sass) {
+  constructor(eyeglass: IEyeglass, sass: SassImplementation) {
     this.sassUtils = require("node-sass-utils")(sass);
     this.eyeglass = eyeglass;
     // create a master collection
@@ -32,7 +47,7 @@ export default class Assets {
         "The assets." + method + " interface will be removed from the public API.",
         "If you currently use this method, please open an issue at",
         "https://github.com/sass-eyeglass/eyeglass/issues/ so we can",
-        "understand and accomodate your use case"
+        "understand and accommodate your use case"
       ].join(" "));
     }
     this.AssetCollection = function () {
@@ -48,21 +63,21 @@ export default class Assets {
   /**
     * @see AssetsCollection#asAssetImport
     */
-  asAssetImport(name) {
+  asAssetImport(name): string {
     return this.collection.asAssetImport(name);
   }
 
   /**
     * @see AssetsCollection#addSource
     */
-  addSource(src, opts) {
+  addSource(src, opts): AssetsCollection {
     return this.collection.addSource(src, opts);
   }
 
   /**
     * @see AssetsCollection#cacheKey
     */
-  cacheKey(name) {
+  cacheKey(name): string {
     return this.collection.cacheKey(name);
   }
   /**
@@ -72,8 +87,8 @@ export default class Assets {
     * @param    {Object} opts - the options
     * @returns  {AssetsCollection} the instance of the AssetsCollection
     */
-  export(src, opts) {
-    var assets = new AssetsCollection(this.eyeglass.options);
+  export(src, opts): AssetsCollection {
+    let assets = new AssetsCollection(this.eyeglass.options);
     this.moduleCollections.push(assets);
     return assets.addSource(src, opts);
   }
@@ -83,24 +98,27 @@ export default class Assets {
     * @param    {SassString} $uri - the uri of the asset
     * @param    {Function} cb - the callback that is invoked when the asset resolves
     */
-  resolveAsset($assetsMap, $uri, cb) {
-    var options = this.eyeglass.options.eyeglass;
-    var assets = this.eyeglass.assets;
-
-    this.sassUtils.assertType($uri, "string");
+  resolveAsset($assetsMap: SassMap, $uri: SassValue, cb: (error: Error | null, uri?: string, file?: string) => any) {
+    let sass = this.eyeglass.options.eyeglass.engines.sass;
+    let options = this.eyeglass.options.eyeglass;
+    let assets = this.eyeglass.assets;
+    if (!isType(sass, $uri, "string")) {
+      cb(new SassTypeError(sass, "string", $uri))
+      return;
+    };
 
     // get a URI instance
-    var originalUri = $uri.getValue();
-    var uri = new URI(originalUri);
+    let originalUri = $uri.getValue();
+    let uri = new URI(originalUri);
 
     // normalize the uri and resolve it
 
-    var data = this.resolveAssetDefaults($assetsMap, uri.getPath());
+    let data = this.resolveAssetDefaults($assetsMap, uri.getPath());
     if (data) {
-      var filepath = URI.restore(data.coerce.get("filepath"));
+      let filepath = URI.restore(data.coerce.get("filepath"));
 
       // create the URI
-      var fullUri = URI.join(
+      let fullUri = URI.join(
         options.httpRoot,
         options.assets.httpPrefix,
         data.coerce.get("uri")
@@ -154,18 +172,16 @@ export default class Assets {
     * @param    {String} assetUri - the resolved uri path
     * @param    {Function} cb - the callback to pass the resolved uri to
     */
-  resolve(assetFile, assetUri, cb) {
-    cb(null, {
-      path: assetUri
-    });
+  resolve(assetFile: string, assetUri: string, cb: ResolverCallback) {
+    cb(null, { path: assetUri });
   }
   /**
     * wraps the current resolver with a custom resolver
     * @param    {Function} resolver - the new resolver function
     */
-  resolver(resolver) {
-    var oldResolver = this.resolve.bind(this);
-    this.resolve = function(assetFile, assetUri, cb) {
+  resolver(resolver: WrappedResolver) {
+    let oldResolver: Resolver = this.resolve.bind(this);
+    this.resolve = function(assetFile: string, assetUri: string, cb: ResolverCallback) {
       resolver(assetFile, assetUri, oldResolver, cb);
     };
   }
@@ -176,15 +192,15 @@ export default class Assets {
     * @param    {Function} cb - the callback invoked after the installation is successful
     */
   install(file, uri, cb) {
-    var options = this.eyeglass.options.eyeglass;
-    var httpRoot = options.httpRoot;
+    let options = this.eyeglass.options.eyeglass;
+    let httpRoot = options.httpRoot;
     if (options.buildDir) {
       // normalize the uri using the system OS path separator
       // and make it relative to the httpRoot
       uri = new URI(uri);
       uri = uri.getPath(path.sep, httpRoot);
 
-      var dest = path.join(options.buildDir, uri);
+      let dest = path.join(options.buildDir, uri);
 
       try {
         if (options.installWithSymlinks) {
@@ -211,31 +227,31 @@ export default class Assets {
     * @param    {Function} installer - the new installer function
     */
   installer(installer) {
-    var oldInstaller = this.install.bind(this);
+    let oldInstaller = this.install.bind(this);
     this.install = function(assetFile, assetUri, cb) {
       installer(assetFile, assetUri, oldInstaller, cb);
     };
   }
-  private resolveAssetDefaults(registeredAssetsMap, relativePath) {
+  private resolveAssetDefaults(registeredAssetsMap: SassMap, relativePath: string): any {
     registeredAssetsMap = this.sassUtils.handleEmptyMap(registeredAssetsMap);
     this.sassUtils.assertType(registeredAssetsMap, "map");
 
-    var registeredAssets = this.sassUtils.castToJs(registeredAssetsMap);
+    let registeredAssets = this.sassUtils.castToJs(registeredAssetsMap);
 
-    var appAssets = registeredAssets.coerce.get(null);
+    let appAssets = registeredAssets.coerce.get(null);
 
     if (appAssets) {
       // XXX sassUtils.assertType(appAssets, "map");
-      var appAsset = appAssets.coerce.get(relativePath);
+      let appAsset = appAssets.coerce.get(relativePath);
       if (appAsset) {
         return appAsset;
       }
     }
 
-    var segments = relativePath.split("/");
-    var moduleName = segments.shift();
-    var moduleRelativePath = segments.join("/");
-    var moduleAssets = registeredAssets.coerce.get(moduleName);
+    let segments = relativePath.split("/");
+    let moduleName = segments.shift();
+    let moduleRelativePath = segments.join("/");
+    let moduleAssets = registeredAssets.coerce.get(moduleName);
     if (moduleAssets) {
       // XXX sassUtils.assertType(moduleAssets, "map");
       return moduleAssets.coerce.get(moduleRelativePath);
