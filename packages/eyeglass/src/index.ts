@@ -1,9 +1,3 @@
-// TODO: Convert to TS
-// TODO: Annotate Types
-"use strict";
-/* eslint-disable @typescript-eslint/no-var-requires,
-                  @typescript-eslint/no-use-before-define,
-                  @typescript-eslint/restrict-plus-operands */
 import EyeglassModules from "./modules/EyeglassModules";
 import ModuleFunctions from "./modules/ModuleFunctions";
 import ModuleImporter from "./importers/ModuleImporter";
@@ -15,7 +9,8 @@ import deprecator from "./util/deprecator";
 import semverChecker from "./util/semverChecker";
 import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
-const pkg = require("../package.json");
+import {PackageJson} from "package-json";
+const pkg: PackageJson = require("../package.json");
 
 function Eyeglass(this: IEyeglass, options, deprecatedNodeSassArg): void {
   // if it's not an instance, create one and return only the sass options
@@ -60,7 +55,7 @@ function Eyeglass(this: IEyeglass, options, deprecatedNodeSassArg): void {
 
 Eyeglass.VERSION = pkg.version;
 
-function checkMissingDependencies() {
+function checkMissingDependencies(this: IEyeglass) {
   var missing = this.modules.issues.dependencies.missing;
   if (missing.length) {
     var warning = ["The following dependencies were not found:"];
@@ -74,7 +69,7 @@ function checkMissingDependencies() {
   }
 }
 
-function addImporters() {
+function addImporters(this: IEyeglass) {
   var fsImporter = FSImporter(
     this,
     this.options.eyeglass.engines.sass,
@@ -95,7 +90,7 @@ function addImporters() {
   );
 }
 
-function addFunctions() {
+function addFunctions(this: IEyeglass) {
   this.options.functions = ModuleFunctions(
     this,
     this.options.eyeglass.engines.sass,
@@ -106,17 +101,17 @@ function addFunctions() {
 
 module.exports = Eyeglass;
 
-function deprecateProperties(properties) {
-  properties.forEach(function(prop) {
+function deprecateProperties(this: IEyeglass, properties: string[]): void {
+  for (let prop of properties) {
     Object.defineProperty(this, prop, {
-      get: function() {
+      get: function(this: IEyeglass) {
         this.deprecate("0.8.0", "0.9.0",
           "The property `" + prop + "` should no longer be accessed directly on eyeglass. " +
           "Instead, you'll find the value on `eyeglass.options.eyeglass." + prop + "`"
         );
         return this.options.eyeglass[prop];
       },
-      set: function(value) {
+      set: function(this: IEyeglass, value: any) {
         this.deprecate("0.8.0", "0.9.0",
           "The property `" + prop + "` should no longer be set directly on eyeglass. " +
           "Instead, you should pass this as an option to eyeglass:" +
@@ -131,11 +126,11 @@ function deprecateProperties(properties) {
         this.options.eyeglass[prop] = value;
       }
     });
-  }.bind(this));
+  }
 }
 
 // export deprecated interfaces for back-compat
-Eyeglass.prototype.sassOptions = function() {
+Eyeglass.prototype.sassOptions = function(this: IEyeglass) {
   this.deprecate("0.8.0", "0.9.0",
     "#sassOptions() is deprecated. Instead, you should access the sass options on #options"
   );
@@ -154,13 +149,9 @@ module.exports.decorate = function(options, deprecatedNodeSassArg) {
   return eyeglass.options;
 };
 
-function deprecateMethodWarning(method) {
+function deprecateMethodWarning(this: IEyeglass, method: string) {
   this.deprecate("0.8.0", "0.9.0",
     "`require('eyeglass')." + method + "` is deprecated. " +
     "Instead, use `require('eyeglass')`"
   );
 }
-
-/* eslint-enable @typescript-eslint/no-var-requires,
-                 @typescript-eslint/no-use-before-define,
-                 @typescript-eslint/restrict-plus-operands */
