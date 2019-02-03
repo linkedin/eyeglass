@@ -11,13 +11,6 @@ import {
 } from "./SassImplementation";
 import { DeprecateFn } from "./deprecator";
 
-
-declare module "node-sass" {
-  interface Options {
-    eyeglass?: EyeglassSpecificOptions;
-  }
-}
-
 export interface AssetSourceOptions {
   /**
    * The namespace of this asset source.
@@ -70,12 +63,11 @@ export interface Engines {
   [engine: string]: any;
 }
 
-export interface EyeglassConfig extends Required<EyeglassSpecificOptions> {
+export interface EyeglassConfig extends Required<EyeglassSpecificOptions<never>> {
   engines: Required<Engines>;
-  fsSandbox: false | Array<string>;
 }
 
-export interface EyeglassSpecificOptions {
+export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
   /**
    * Where to find assets for the eyeglass project.
    */
@@ -145,7 +137,7 @@ export interface EyeglassSpecificOptions {
    * * `Array<string>` - A list of directories from which to allow access.
    * *   An empty list disables filesystem access (default).
    */
-  fsSandbox?: true | false | string | Array<string>;
+  fsSandbox?: ExtraSandboxTypes | false | Array<string>;
 }
 
 interface DeprecatedOptions {
@@ -165,7 +157,8 @@ interface DeprecatedOptions {
   assetsRelativeTo?: string;
 }
 
-export type Options = SassOptions | DeprecatedOptions & SassOptions;
+export type NestedEyeglassOptions = { eyeglass?: EyeglassSpecificOptions };
+export type Options = (SassOptions & NestedEyeglassOptions) | (DeprecatedOptions & SassOptions & NestedEyeglassOptions) ;
 export type Config = SassOptions & { eyeglass: EyeglassConfig };
 
 /* eslint-disable-next-line no-unused-vars */

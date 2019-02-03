@@ -1,17 +1,14 @@
-"use strict";
-// TODO: Annotate Types
-
-import merge = require("lodash.merge");
-
 import assetURI from "./asset-uri";
 import normalizeURL from "./normalize-uri";
 import version from "./version";
 import fs from "./fs";
+import { EyeglassFunctions } from "./EyeglassFunctions";
 
-export default function(eyeglass, sass) {
-  let all = assetURI(eyeglass, sass);
-  all = merge(all, normalizeURL(eyeglass, sass));
-  all = merge(all, version(eyeglass, sass));
-  all = merge(all, fs(eyeglass, sass));
-  return all;
+export default function(eyeglass, sass): EyeglassFunctions {
+  return Object.assign({},
+    assetURI(eyeglass, sass),
+    normalizeURL(eyeglass, sass),
+    version(eyeglass, sass),
+    fs(eyeglass, sass)
+  );
 };

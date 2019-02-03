@@ -653,7 +653,7 @@ describe("fs", function () {
                 "}";
 
     var expectedError = {
-      message: "unknown value for sandbox"
+      message: "Unexpected value for sandbox: {}"
     };
 
     var eg = new Eyeglass({

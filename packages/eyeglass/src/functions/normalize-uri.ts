@@ -1,19 +1,24 @@
-"use strict";
-// TODO: Annotate Types
-
 import { URI } from  "../util/URI";
+import { IEyeglass } from "../IEyeglass";
+import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError } from "../util/SassImplementation";
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
-export default function(eyeglass, sass) {
-  var methods = {
-    "eyeglass-uri-preserve($uri)": function($uri, done) {
-      var uri = $uri.getValue();
+const $normalizeURI = function(eyeglass: IEyeglass, sass: SassImplementation) {
+  let methods = {
+    "eyeglass-uri-preserve($uri)": function($uri: SassValue, done: SassFunctionCallback) {
+      if (!isSassString(sass, $uri)) {
+        return done(typeError(sass, "string", $uri));
+      }
+      let uri = $uri.getValue();
       // decorate the uri
       uri = URI.preserve(uri);
       done(sass.types.String(uri));
     },
-    "eyeglass-uri-restore($uri)": function($uri, done) {
-      var uri = $uri.getValue();
+    "eyeglass-uri-restore($uri)": function($uri: SassValue, done: SassFunctionCallback) {
+      if (!isSassString(sass, $uri)) {
+        return done(typeError(sass, "string", $uri));
+      }
+      let uri = $uri.getValue();
       // restore the uri
       uri = URI.restore(uri);
       done(sass.types.String(uri));
@@ -21,9 +26,15 @@ export default function(eyeglass, sass) {
   };
 
   if (IS_WINDOWS || process.env.EYEGLASS_NORMALIZE_PATHS) {
-    methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri, $type, done) {
-      var type = $type.getValue();
-      var uri = $uri.getValue();
+    methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri: SassValue, $type: SassValue, done: SassFunctionCallback) {
+      if (!isSassString(sass, $type)) {
+        return done(typeError(sass, "string", $type));
+      }
+      if (!isSassString(sass, $uri)) {
+        return done(typeError(sass, "string", $uri));
+      }
+      let type = $type.getValue();
+      let uri = $uri.getValue();
       // normalize the uri for the given type
       uri = URI[type](uri);
       done(sass.types.String(uri));
@@ -32,3 +43,5 @@ export default function(eyeglass, sass) {
 
   return methods;
 };
+
+export default $normalizeURI;

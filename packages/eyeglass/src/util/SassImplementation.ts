@@ -3,6 +3,17 @@ import { types } from "util";
 import { unreachable } from "./assertions";
 export { Options } from "node-sass";
 
+export type SyncSassFunction = (...$args: Array<SassValue>) => SassValue | SassError;
+export type SassFunctionCallback = ($result: SassValue | SassError) => void;
+export type SassFunction0 = (cb: SassFunctionCallback) => void;
+export type SassFunction1 = ($arg1: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction2 = ($arg1: SassValue, $arg2: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction3 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction4 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction5 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction6 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction = SyncSassFunction | SassFunction0 | SassFunction1 | SassFunction2 | SassFunction3 | SassFunction4 | SassFunction5 | SassFunction6;
+
 export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
 export function isSassValue(sass: SassImplementation, value: any): value is SassValue {
   if (value && typeof value === "object") {
@@ -164,6 +175,13 @@ export interface SassMap extends SassEnumerable {
 export function isSassMap(sass: SassImplementation, value: unknown): value is SassMap {
   return typeof value === "object" && value.constructor === sass.types.Map;
 }
+
+export function isSassMapOrEmptyList(sass: SassImplementation, value: unknown): value is SassMap | SassList {
+  return typeof value === "object"
+         && (
+           value.constructor === sass.types.Map 
+           || (isSassList(sass, value) && value.getLength() === 0));
+}
 interface SassTypes {
   /**
    * Constructs a new Sass number. Do not invoke with the `new` keyword.
@@ -221,7 +239,11 @@ interface SassTypes {
 
   Map(length): SassMap;
 
-  Error: SassError;
+  Error(message): SassError;
+}
+
+export function isSassError(sass: SassImplementation, value: unknown): value is SassError {
+  return typeof value === "object" && value instanceof sass.types.Number;
 }
 
 export interface SassImplementation {
@@ -255,31 +277,34 @@ const typeGuards = {
   null: isSassNull,
   string: isSassString,
   number: isSassNumber,
-  map: isSassMap,
+  map: isSassMapOrEmptyList,
   list: isSassList,
   color: isSassColor,
   boolean: isSassBoolean,
+  error: isSassError,
 };
 
 interface SassType {
   null: SassNull,
   string: SassString,
   number: SassNumber,
-  map: SassMap,
+  map: SassMap | SassList,
   list: SassList,
   color: SassColor,
   boolean: SassBoolean,
+  error: SassError,
 }
 
 type SassTypeName = keyof typeof typeGuards;
 
-function typeName(sass: SassImplementation, value: SassValue): SassTypeName {
+function typeName(sass: SassImplementation, value: SassValue | SassError): SassTypeName {
   if (isSassString(sass, value)) return "string";
   if (isSassNumber(sass, value)) return "number";
   if (isSassMap(sass, value)) return "map";
   if (isSassList(sass, value)) return "list";
   if (isSassColor(sass, value)) return "color";
   if (isSassBoolean(sass, value)) return "boolean";
+  if (isSassError(sass, value)) return "error";
   if (isSassNull(sass, value)) return "null";
 }
 
@@ -290,6 +315,10 @@ export function isType<Name extends SassTypeName>(sass: SassImplementation, valu
   } else {
     return false;
   }
+}
+
+export function typeError(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue): SassError {
+  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
 }
 
 export class SassTypeError extends Error {

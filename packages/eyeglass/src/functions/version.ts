@@ -1,13 +1,15 @@
-"use strict";
-// TODO: Annotate Types
-
 import * as stringUtils from "../util/strings";
-import { SassValue } from "../util/SassImplementation";
+import { SassValue, SassImplementation, isSassString, typeError } from "../util/SassImplementation";
+import { EyeglassFunctions } from "./EyeglassFunctions";
+import { IEyeglass } from "../IEyeglass";
 
-export default function(eyeglass, sass) {
+const $version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation) {
   return {
-    "eyeglass-version($module: eyeglass)": function(moduleName: SassValue) {
-      var name = stringUtils.unquoteJS(sass, moduleName);
+    "eyeglass-version($module: eyeglass)": function($module: SassValue): SassValue {
+      if (!isSassString(sass, $module)) {
+        return typeError(sass, "string", $module);
+      }
+      var name = stringUtils.unquoteJS(sass, $module);
       var mod = eyeglass.modules.find(name);
 
       if (mod) {
@@ -18,3 +20,5 @@ export default function(eyeglass, sass) {
     }
   };
 };
+
+export default $version;
