@@ -1,7 +1,8 @@
 import { EyeglassConfig } from "./Options"
 import { SassImplementation } from "./SassImplementation";
-// TODO: Annotate Types for eyeglass
-export default function(eyeglass: any, _sass: SassImplementation, options: EyeglassConfig, version: string) {
+import { IEyeglass } from "../IEyeglass";
+
+export default function(eyeglass: IEyeglass, _sass: SassImplementation, options: EyeglassConfig, version: string) {
   let strictMode: boolean | "warn" = options.strictModuleVersions;
   let modules = eyeglass.modules;
   let issues = modules.issues.engine;
