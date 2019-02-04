@@ -18,7 +18,7 @@ export interface EyeglassModuleExports {
   sassDir?: string;
   eyeglass?: {
     needs?: string;
-  }
+  };
 }
 
 interface EyeglassModuleOptionsFromPackageJSON {
@@ -221,7 +221,7 @@ export default class EyeglassModule implements IEyeglassModule {
     */
   init(eyeglass: IEyeglass, sass: SassImplementation) {
     merge(this, this.main && this.main(eyeglass, sass));
-  };
+  }
 
   /**
     * whether or not the given package is an eyeglass module
@@ -231,7 +231,7 @@ export default class EyeglassModule implements IEyeglassModule {
     */
   static isEyeglassModule(pkg: PackageJson | undefined): boolean {
     return !!(pkg && includes(pkg.keywords, EYEGLASS_KEYWORD));
-  };
+  }
 }
 
 

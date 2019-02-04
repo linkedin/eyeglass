@@ -9,19 +9,19 @@ import ImportUtilities from "./ImportUtilities";
  * Walks the file list until a match is found. If
  * no matches are found, calls the callback with an error
  */
-function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: Error | null, data?: {contents: string, file: string}) => any) {
+function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: Error | null, data?: {contents: string; file: string}) => any) {
   for (let nextFile of possibleFiles) {
-      try {
-        let data = readFileSync(nextFile, "utf8");
-        // if it didn't fail, we found the first file so return it
-        callback(null, {
-          contents: data.toString(),
-          file: nextFile
-        });
-        return;
-      } catch {
-        // pass
-      }
+    try {
+      let data = readFileSync(nextFile, "utf8");
+      // if it didn't fail, we found the first file so return it
+      callback(null, {
+        contents: data.toString(),
+        file: nextFile
+      });
+      return;
+    } catch {
+      // pass
+    }
   }
   let errorMsg = [
     "Could not import " + uri + " from any of the following locations:"

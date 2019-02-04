@@ -17,7 +17,7 @@ const SASS_FILE_EXT = /^\.(s[ac]|c)ss$/
 export class NameExpander {
   uri: string;
   _possibleFiles: Set<string>;
-  locations: string[];
+  locations: Array<string>;
 
   constructor(uri: string) {
     // normalize the uri
@@ -111,9 +111,9 @@ function fileVariant(
 ): string {
   path = Object.create(path);
   if (path.ext && !SASS_FILE_EXT.test(path.ext)) {
-      path.base = path.base + path.ext;
-      path.name = path.name + path.ext;
-      path.ext = undefined;
+    path.base = path.base + path.ext;
+    path.name = path.name + path.ext;
+    path.ext = undefined;
   }
   if (!path.ext) {
     path.ext = extension;

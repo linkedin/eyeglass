@@ -165,7 +165,7 @@ export interface SassEnumerable {
   getLength(): number;
 }
 export interface SassList extends SassEnumerable {
-  getSeparator(): boolean
+  getSeparator(): boolean;
   setSeparator(isComma: boolean): void;
 }
 export function isSassList(sass: SassImplementation, value: unknown): value is SassList {
@@ -253,7 +253,7 @@ export interface SassImplementation {
   /** Async rendering of a Sass File. */
   render: typeof render;
   /** Synchronous rendering of a Sass File. */
-  renderSync: typeof renderSync
+  renderSync: typeof renderSync;
   /** Constructors for Sass values. */
   types: SassTypes;
   /** Metadata about the Sass Implementation. */
@@ -288,14 +288,14 @@ const typeGuards = {
 };
 
 interface SassType {
-  null: SassNull,
-  string: SassString,
-  number: SassNumber,
-  map: SassMap | SassList,
-  list: SassList,
-  color: SassColor,
-  boolean: SassBoolean,
-  error: SassError,
+  null: SassNull;
+  string: SassString;
+  number: SassNumber;
+  map: SassMap | SassList;
+  list: SassList;
+  color: SassColor;
+  boolean: SassBoolean;
+  error: SassError;
 }
 
 type SassTypeName = keyof typeof typeGuards;

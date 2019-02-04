@@ -157,7 +157,7 @@ interface DeprecatedOptions {
   assetsRelativeTo?: string;
 }
 
-export type NestedEyeglassOptions = { eyeglass?: EyeglassSpecificOptions };
+export interface NestedEyeglassOptions { eyeglass?: EyeglassSpecificOptions }
 export type Options = (SassOptions & NestedEyeglassOptions) | (DeprecatedOptions & SassOptions & NestedEyeglassOptions) ;
 export type Config = SassOptions & { eyeglass: EyeglassConfig };
 

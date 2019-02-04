@@ -52,7 +52,7 @@ export class URI {
     pathname = path.normalize(pathname);
     // then set it using the specified path
     this.path = convertSeparator(pathname, this.sep);
-  };
+  }
 
   /**
     * gets the pathname of the URI
@@ -69,7 +69,7 @@ export class URI {
       }
     }
     return convertSeparator(pathname, sep || this.sep);
-  };
+  }
 
   /**
     * adds a query string to the URI
@@ -82,7 +82,7 @@ export class URI {
     // append the new search string
     // ensuring the leading character is the appropriate delimiter
     this.search += search.replace(rSearchDelim, this.search ? "&" : "?");
-  };
+  }
 
   /**
     * replaces the query string on the URI
@@ -93,7 +93,7 @@ export class URI {
     this.search = "";
     // then add the new one
     this.addQuery(search);
-  };
+  }
 
   /**
     * replaces the hash string on the URI
@@ -101,7 +101,7 @@ export class URI {
     */
   setHash(hash: string) {
     this.hash = hash === undefined ? "" : hash;
-  };
+  }
 
   /**
     * returns the URI as a string
@@ -109,13 +109,13 @@ export class URI {
     */
   toString(): string {
     return this.path + this.search + this.hash;
-  };
+  }
 
   /**
     * given any number of path fragments, joins the non-empty fragments
     * @returns  {String} the joined fragments
     */
-  static join(...fragments: string[]): string {
+  static join(...fragments: Array<string>): string {
     // join all the non-empty paths
     let uri = new URI(fragments.filter((fragment) => {
       if (fragment) {
@@ -123,7 +123,7 @@ export class URI {
       }
     }).join(stdSep));
     return uri.getPath();
-  };
+  }
 
   /**
     * whether or not a given URI is relative
@@ -132,7 +132,7 @@ export class URI {
     */
   static isRelative(uri: string): boolean {
     return rIsRelative.test(uri);
-  };
+  }
 
   /**
     * normalizes the URI for use as a web URI
@@ -141,7 +141,7 @@ export class URI {
     */
   static web(uri: string): string {
     return (new URI(uri)).toString();
-  };
+  }
 
   /**
     * normalizes the URI for use as a system path
@@ -150,7 +150,7 @@ export class URI {
     */
   static system(uri: string): string {
     return (new URI(uri)).getPath(path.sep);
-  };
+  }
 
   /**
     * ensures that the URI is able to be cleanly exported to a SassString
@@ -162,7 +162,7 @@ export class URI {
     //  "C:\foo\bar.png" -> "C:\\foo\\bar.png"
     // actual backslash, for real this time http://www.xkcd.com/1638/
     return stringUtils.quoteJS(sassImpl, uri.replace(/\\/g, "\\\\"));
-  };
+  }
 
   /**
     * decorates a URI to preserve special characters
@@ -171,7 +171,7 @@ export class URI {
     */
   static preserve(uri: string): string {
     return uri.replace(/\\/g, "<BACKSLASH>");
-  };
+  }
 
   /**
     * restores a URI to restore special characters (oposite of URI.preserve)
@@ -180,5 +180,5 @@ export class URI {
     */
   static restore(uri: string): string {
     return uri.replace(/<BACKSLASH>/g, "\\");
-  };
+  }
 }

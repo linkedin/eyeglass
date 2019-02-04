@@ -117,7 +117,7 @@ export default class Assets implements Resolves, Installs {
     if (!isType(sass, $uri, "string")) {
       cb(new SassTypeError(sass, "string", $uri))
       return;
-    };
+    }
 
     // get a URI instance
     let originalUri = $uri.getValue();

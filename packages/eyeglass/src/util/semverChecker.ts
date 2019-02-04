@@ -44,4 +44,4 @@ export default function(eyeglass: IEyeglass, _sass: SassImplementation, options:
     // throw an error
     throw new Error("Cannot proceed with errors/warning and options.strictModuleVersions");
   }
-};
+}

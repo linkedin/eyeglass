@@ -101,7 +101,7 @@ function addFunctions(this: IEyeglass) {
 
 module.exports = Eyeglass;
 
-function deprecateProperties(this: IEyeglass, properties: string[]): void {
+function deprecateProperties(this: IEyeglass, properties: Array<string>): void {
   for (let prop of properties) {
     Object.defineProperty(this, prop, {
       get: function(this: IEyeglass) {

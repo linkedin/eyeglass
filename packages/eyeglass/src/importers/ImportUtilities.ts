@@ -30,7 +30,7 @@ export default class ImportUtilities {
       prev = URI.system(prev);
       importer.call(this, uri, prev, done);
     };
-  };
+  }
   importOnce(data, done) {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
@@ -41,7 +41,7 @@ export default class ImportUtilities {
       this.context.eyeglass.imported[data.file] = true;
       done(data);
     }
-  };
+  }
   fallback(uri, prev, done, noFallback) {
     if (this.fallbackImporter && Array.isArray(this.fallbackImporter)) {
       this.fallbackNth(uri, prev, 0, done, noFallback);
@@ -56,7 +56,7 @@ export default class ImportUtilities {
     } else {
       noFallback.call(this.context);
     }
-  };
+  }
   fallbackNth(uri, prev, index, done, noFallback) {
     let fallbackImporter = this.fallbackImporter[index];
 

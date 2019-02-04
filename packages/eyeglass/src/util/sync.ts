@@ -23,7 +23,7 @@ export interface SyncFn {
   (fn: any): any;
 }
 export interface Sync extends SyncFn {
-  all: (obj: {[key: string]: SyncFn}) => {[key: string]: any}
+  all: (obj: {[key: string]: SyncFn}) => {[key: string]: any};
 }
 
 const syncFn: SyncFn = (fn) => {

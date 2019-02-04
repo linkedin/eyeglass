@@ -19,4 +19,4 @@ export default function resolve(id: string, parent: string, parentDir: string): 
     filename: parent,
     id: parent
   });
-};
+}
