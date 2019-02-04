@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import * as path from "path";
 import * as glob from "glob";
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError } from "../util/SassImplementation";
+import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError, FunctionDeclarations } from "../util/SassImplementation";
 import { unreachable } from "../util/assertions";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 
@@ -15,7 +15,7 @@ function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
   }
 }
 
-const $fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation) {
+const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let sassUtils = require("node-sass-utils")(sass);
 
   function accessViolation(location) {
@@ -206,4 +206,4 @@ const $fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: Sass
   };
 };
 
-export default $fsFunctions;
+export default fsFunctions;

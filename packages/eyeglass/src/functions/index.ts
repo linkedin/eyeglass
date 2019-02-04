@@ -4,7 +4,8 @@ import version from "./version";
 import fs from "./fs";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 
-export default function(eyeglass, sass): EyeglassFunctions {
+const allFunctions: EyeglassFunctions =
+function(eyeglass, sass) {
   return Object.assign({},
     assetURI(eyeglass, sass),
     normalizeURL(eyeglass, sass),
@@ -12,3 +13,4 @@ export default function(eyeglass, sass): EyeglassFunctions {
     fs(eyeglass, sass)
   );
 };
+export default allFunctions;

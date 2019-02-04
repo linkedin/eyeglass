@@ -1,9 +1,9 @@
 import * as stringUtils from "../util/strings";
-import { SassValue, SassImplementation, isSassString, typeError } from "../util/SassImplementation";
+import { SassValue, SassImplementation, isSassString, typeError, FunctionDeclarations } from "../util/SassImplementation";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { IEyeglass } from "../IEyeglass";
 
-const $version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation) {
+const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   return {
     "eyeglass-version($module: eyeglass)": function($module: SassValue): SassValue {
       if (!isSassString(sass, $module)) {
@@ -21,4 +21,4 @@ const $version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImpl
   };
 };
 
-export default $version;
+export default version;

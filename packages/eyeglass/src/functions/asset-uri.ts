@@ -1,9 +1,9 @@
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassFunctionCallback, SassValue, isSassMap, typeError, isType, isSassList, SassMap } from "../util/SassImplementation";
+import { SassImplementation, SassFunctionCallback, SassValue, isSassMap, typeError, isType, isSassList, SassMap, FunctionDeclarations } from "../util/SassImplementation";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 
-const $assetFunctions: EyeglassFunctions =
-function(eyeglass: IEyeglass, sass: SassImplementation) {
+const assetFunctions: EyeglassFunctions =
+function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   return {
     "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets: SassValue, $uri: SassValue, done: SassFunctionCallback) {
       let $assetMap: SassMap;
@@ -29,4 +29,4 @@ function(eyeglass: IEyeglass, sass: SassImplementation) {
     }
   };
 };
-export default $assetFunctions;
+export default assetFunctions;

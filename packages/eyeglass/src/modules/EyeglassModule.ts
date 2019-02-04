@@ -1,4 +1,3 @@
-// TODO: Annotate Types
 import * as packageUtils from "../util/package";
 import merge = require("lodash.merge");
 import includes = require("lodash.includes");
@@ -9,10 +8,10 @@ import { FunctionDeclarations, SassImplementation } from "../util/SassImplementa
 import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
 
-let rInvalidName = /\.(?:sass|s?css)$/;
-let EYEGLASS_KEYWORD = "eyeglass-module";
+const rInvalidName = /\.(?:sass|s?css)$/;
+const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
 
-interface EyeglassModuleExports {
+export interface EyeglassModuleExports {
   name?: string;
   functions?: FunctionDeclarations;
   assets?: AssetsCollection;
