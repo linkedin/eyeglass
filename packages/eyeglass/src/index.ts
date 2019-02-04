@@ -56,9 +56,9 @@ function Eyeglass(this: IEyeglass, options, deprecatedNodeSassArg): void {
 Eyeglass.VERSION = pkg.version;
 
 function checkMissingDependencies(this: IEyeglass) {
-  var missing = this.modules.issues.dependencies.missing;
+  let missing = this.modules.issues.dependencies.missing;
   if (missing.length) {
-    var warning = ["The following dependencies were not found:"];
+    let warning = ["The following dependencies were not found:"];
     warning.push.apply(warning, missing.map(function(dep) {
       return "  " + dep;
     }));
@@ -70,13 +70,13 @@ function checkMissingDependencies(this: IEyeglass) {
 }
 
 function addImporters(this: IEyeglass) {
-  var fsImporter = FSImporter(
+  let fsImporter = FSImporter(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
     this.options.importer
   );
-  var assetImporter = AssetImporter(
+  let assetImporter = AssetImporter(
     this,
     this.options.eyeglass.engines.sass,
     this.options,
@@ -138,13 +138,13 @@ Eyeglass.prototype.sassOptions = function(this: IEyeglass) {
 };
 
 module.exports.Eyeglass = function(options, deprecatedNodeSassArg) {
-  var eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
+  let eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
   deprecateMethodWarning.call(eyeglass, "Eyeglass");
   return eyeglass;
 };
 
 module.exports.decorate = function(options, deprecatedNodeSassArg) {
-  var eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
+  let eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
   deprecateMethodWarning.call(eyeglass, "decorate");
   return eyeglass.options;
 };

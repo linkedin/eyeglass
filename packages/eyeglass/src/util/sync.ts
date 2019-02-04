@@ -28,9 +28,9 @@ export interface Sync extends SyncFn {
 
 const syncFn: SyncFn = (fn) => {
   return function() {
-    var result;
-    var args = [].slice.call(arguments, 0);
-    var last = args[args.length - 1];
+    let result;
+    let args = [].slice.call(arguments, 0);
+    let last = args[args.length - 1];
 
     // last arg is a function (async capture)
     if (typeof last === "function") {
@@ -65,7 +65,7 @@ const syncFn: SyncFn = (fn) => {
 
 const sync: Sync = Object.assign(syncFn, {
   all(obj) {
-    for (var name in obj) {
+    for (let name in obj) {
       obj[name] = sync(obj[name]);
     }
     return obj;

@@ -23,7 +23,7 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: 
         // pass
       }
   }
-  var errorMsg = [
+  let errorMsg = [
     "Could not import " + uri + " from any of the following locations:"
   ].concat(...possibleFiles).join("\n  ");
   callback(new Error(errorMsg));
@@ -33,7 +33,7 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: 
 // This is a bootstrap function for calling readFirstFile.
 function readAbstractFile(originalUri, uri, location, includePaths, moduleName, callback) {
   // start a name expander to get the names of possible file locations
-  var nameExpander = new NameExpander(uri);
+  let nameExpander = new NameExpander(uri);
 
   // add the current location to the name expander
   nameExpander.addLocation(location);
@@ -62,33 +62,35 @@ function readAbstractFile(originalUri, uri, location, includePaths, moduleName, 
  * in the node-sass options if one was there.
  */
 export default function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
-  var includePaths = options.includePaths;
-  var root = options.eyeglass.root;
+  let includePaths = options.includePaths;
+  let root = options.eyeglass.root;
+
+  const MODULE_PARSER = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/;
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
-    var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
-    var isRealFile = existsSync(prev);
+    let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
+    let isRealFile = existsSync(prev);
     // pattern to match moduleName/relativePath
     // $1 = moduleName (foo or @scope/foo)
     // $2 = relativePath
-    var match = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/.exec(uri);
-    var moduleName = match && match[1];
-    var relativePath = match && match[2];
-    var mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
+    let match = MODULE_PARSER.exec(uri);
+    let moduleName = match && match[1];
+    let relativePath = match && match[2];
+    let mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
 
     // for back-compat with previous suggestion @see
     // https://github.com/sass-eyeglass/eyeglass/issues/131#issuecomment-210728946
     // if the module was not found and the name starts with `@`...
     if (!mod && moduleName[0] === "@") {
       // reconstruct the moduleName and relativePath the way we would have previously
-      var pieces = moduleName.split("/");
+      let pieces = moduleName.split("/");
       relativePath = pieces[1] + "/" + relativePath;
       moduleName = pieces[0];
       // and try to find it again
       mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
     }
 
-    var sassDir;
+    let sassDir;
 
     if (mod) {
       sassDir = mod.sassDir;
@@ -96,7 +98,7 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
       if (!sassDir && !isRealFile) {
         // No sass directory, give an error
         importUtils.fallback(uri, prev, done, function() {
-          var missingMessage = "sassDir is not specified in " + mod.name + "'s package.json";
+          let missingMessage = "sassDir is not specified in " + mod.name + "'s package.json";
           if (mod.mainPath) {
             missingMessage += " or " + mod.mainPath;
           }

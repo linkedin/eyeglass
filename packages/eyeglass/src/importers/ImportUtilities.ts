@@ -58,7 +58,7 @@ export default class ImportUtilities {
     }
   };
   fallbackNth(uri, prev, index, done, noFallback) {
-    var fallbackImporter = this.fallbackImporter[index];
+    let fallbackImporter = this.fallbackImporter[index];
 
     // TODO (test) - how do we get into this condition? needs a test case
     if (!fallbackImporter) {

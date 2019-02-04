@@ -2,8 +2,8 @@
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");
-var ARGUMENTS_REGEX = /\s*\(.*\)$/;
-var DELIM = "\n\t\u2022 ";
+const ARGUMENTS_REGEX = /\s*\(.*\)$/;
+const DELIM = "\n\t\u2022 ";
 
 function getFunctionName(fnSignature) {
   return fnSignature.replace(ARGUMENTS_REGEX, "");
@@ -15,17 +15,17 @@ function checkConflicts(obj1, obj2) {
     return;
   }
 
-  var functions = {};
+  let functions = {};
   // collect all the function names and signatures from the first collection
   Object.keys(obj1).forEach(function(fn) {
-    var fnName = getFunctionName(fn);
+    let fnName = getFunctionName(fn);
     functions[fnName] = fn;
   });
 
   // check all the function names and signatures from the second collection
   Object.keys(obj2).forEach(function(fn) {
-    var fnName = getFunctionName(fn);
-    var currentFunction = functions[fnName];
+    let fnName = getFunctionName(fn);
+    let currentFunction = functions[fnName];
     // if the current signature does not match the new signature...
     if (currentFunction && currentFunction !== fn) {
       // throw a warning
@@ -39,7 +39,7 @@ function checkConflicts(obj1, obj2) {
 }
 
 export default function ModuleFunctions(eyeglass, sass, options, existingFunctions) {
-  var functions = eyeglass.modules.list.reduce(function(fns, mod) {
+  let functions = eyeglass.modules.list.reduce(function(fns, mod) {
     if (!mod.functions) {
       return fns;
     }

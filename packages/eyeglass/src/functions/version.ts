@@ -9,8 +9,8 @@ const $version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImpl
       if (!isSassString(sass, $module)) {
         return typeError(sass, "string", $module);
       }
-      var name = stringUtils.unquoteJS(sass, $module);
-      var mod = eyeglass.modules.find(name);
+      let name = stringUtils.unquoteJS(sass, $module);
+      let mod = eyeglass.modules.find(name);
 
       if (mod) {
         return sass.types.String(mod.version || "unversioned");

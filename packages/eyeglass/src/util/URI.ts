@@ -2,11 +2,11 @@ import * as path from "path";
 import * as stringUtils from "./strings";
 import { SassImplementation } from "./SassImplementation";
 
-var stdSep = "/";
-var rAllPathSep = /[\/\\]+/g;
-var rIsRelative = /^\.{1,2}/;
-var rUriFragments =  /^([^\?#]+)(\?[^#]*)?(#.*)?/;
-var rSearchDelim = /^[\?\&]*/;
+const stdSep = "/";
+const rAllPathSep = /[\/\\]+/g;
+const rIsRelative = /^\.{1,2}/;
+const rUriFragments =  /^([^\?#]+)(\?[^#]*)?(#.*)?/;
+const rSearchDelim = /^[\?\&]*/;
 
 function convertSeparator(uri: string, sep: string): string {
   return shouldNormalizePathSep() ? uri.replace(rAllPathSep, sep) : uri;
@@ -35,7 +35,7 @@ export class URI {
     this.search = "";
     this.hash = ""
 
-    var uriFragments = rUriFragments.exec(uri);
+    let uriFragments = rUriFragments.exec(uri);
     this.setPath(uriFragments[1]);
     this.setQuery(uriFragments[2]);
     this.setHash(uriFragments[3]);
@@ -60,7 +60,7 @@ export class URI {
     * @param relativeTo - if set, returns the pathname relative to this base path
     */
   getPath(sep?: string, relativeTo?: string): string {
-    var pathname = this.path;
+    let pathname = this.path;
     if (relativeTo) {
       pathname = convertSeparator(pathname, path.sep);
       relativeTo = convertSeparator(relativeTo, path.sep);
@@ -117,7 +117,7 @@ export class URI {
     */
   static join(...fragments: string[]): string {
     // join all the non-empty paths
-    var uri = new URI(fragments.filter((fragment) => {
+    let uri = new URI(fragments.filter((fragment) => {
       if (fragment) {
         return fragment;
       }

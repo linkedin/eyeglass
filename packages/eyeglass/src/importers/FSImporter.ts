@@ -6,14 +6,14 @@ import { existsSync } from "fs";
 import ImportUtilities from "./ImportUtilities";
 
 export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
-  var fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
+  let fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
-    var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
-    var match = uri.match(fsURI);
+    let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
+    let match = uri.match(fsURI);
     if (match) {
-      var identifier = match[1];
-      var absolutePath = null;
+      let identifier = match[1];
+      let absolutePath = null;
       if (identifier === "root") {
         absolutePath = options.eyeglass.root;
       } else if (!existsSync(prev)) {
@@ -23,9 +23,9 @@ export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
       }
       /* istanbul ignore else - TODO: revisit this */
       if (absolutePath) {
-        var sassContents = '@import "eyeglass/fs"; @include fs-register-path('
+        let sassContents = '@import "eyeglass/fs"; @include fs-register-path('
                          + identifier + ', "' + absolutePath + '");';
-        var data = {
+        let data = {
           contents: sassContents,
           file: "fs:" + identifier + ":" + absolutePath
         };

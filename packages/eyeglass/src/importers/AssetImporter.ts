@@ -8,18 +8,18 @@ import { URI } from "../util/URI";
 import { existsSync } from "fs";
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
-var rAssetsImport = /^(?:([^/]+)\/)?assets$/;
+const rAssetsImport = /^(?:([^/]+)\/)?assets$/;
 
 export default function AssetImporter(eyeglass, sass, options, fallbackImporter) {
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
-    var importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
+    let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
 
-    var isRealFile = existsSync(prev);
-    var mod;
+    let isRealFile = existsSync(prev);
+    let mod;
 
     function importAssetsFor(mod) {
-      var contents;
+      let contents;
       // allow build tools to specify a function to cache the imports
       if (typeof options.assetsCache === "function") {
         contents = options.assetsCache(
@@ -37,10 +37,10 @@ export default function AssetImporter(eyeglass, sass, options, fallbackImporter)
       }, done);
     }
 
-    var isRelativeImport = URI.isRelative(uri);
-    var assetsImport = !isRelativeImport && rAssetsImport.exec(uri);
+    let isRelativeImport = URI.isRelative(uri);
+    let assetsImport = !isRelativeImport && rAssetsImport.exec(uri);
     // the first fragment of the match is the module name
-    var moduleName = assetsImport && assetsImport[1];
+    let moduleName = assetsImport && assetsImport[1];
 
     // if it's not an assets import, or it's `eyeglass/assets`,
     //  just use the fallback importer
@@ -52,7 +52,7 @@ export default function AssetImporter(eyeglass, sass, options, fallbackImporter)
       // if the module name wasn't specified in the import,
       //  infer it from the origin
       if (!moduleName && isRealFile) {
-        var pkg = packageUtils.findNearestPackage(prev);
+        let pkg = packageUtils.findNearestPackage(prev);
         mod = new EyeglassModule({
           path: pkg
         });

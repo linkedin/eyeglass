@@ -1,8 +1,8 @@
 import { SassImplementation, isSassString, SassString, SassValue, toString } from "./SassImplementation";
 import { inspect } from "util";
 
-var rUnquote = /^("|')(.*)\1$/;
-var rPlaceholders = /\${([^}]+)}/g;
+let rUnquote = /^("|')(.*)\1$/;
+let rPlaceholders = /\${([^}]+)}/g;
 
 export function unquote(sass: SassImplementation, string: string | SassValue): SassString {
   if (typeof string === "string") {
