@@ -5,8 +5,8 @@ import * as path from 'path';
 import { unreachable } from './assertions';
 import { URI } from './URI';
 
-var PACKAGE_JSON = "package.json";
-export function getPackageData(pkgPath: string): PackageJson {
+let PACKAGE_JSON = "package.json";
+export function getPackageData<ExtraPackageData = never>(pkgPath: string): PackageJson & ExtraPackageData {
   try {
     return require(pkgPath);
   } catch (e) {
@@ -15,13 +15,13 @@ export function getPackageData(pkgPath: string): PackageJson {
   }
 }
 
-interface Package {
+export interface Package<ExtraPackageData = never> {
   path: string;
-  data: PackageJson;
+  data: PackageJson & ExtraPackageData;
 }
 
-export function getPackage(dir: string): Package {
-  var pkgPath = getPackagePath(dir);
+export function getPackage<ExtraPackageData = never>(dir: string): Package<ExtraPackageData> {
+  let pkgPath = getPackagePath(dir);
   return {
     path: pkgPath,
     data: getPackageData(pkgPath)
@@ -35,7 +35,7 @@ export function getPackagePath(dir: string): string {
 
 export function findNearestPackage(dir: string): string {
   dir = URI.system(dir);
-  var prevDir;
+  let prevDir;
   while (dir !== prevDir) {
     if (existsSync(getPackagePath(dir))) {
       return dir;
@@ -45,5 +45,5 @@ export function findNearestPackage(dir: string): string {
   }
 
   /* istanbul ignore next - should never happen and not possible to test */
-  unreachable();
+  return unreachable();
 }

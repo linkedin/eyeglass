@@ -1,6 +1,5 @@
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassFunction } from "../util/SassImplementation";
+import { SassImplementation, FunctionDeclarations } from "../util/SassImplementation";
 
-export type EyeglassFunctions = (eyeglass: IEyeglass, sass: SassImplementation) => {
-  [functionDeclaration: string]: SassFunction;
-}
+export type EyeglassFunctions =
+  (eyeglass: IEyeglass, sass: SassImplementation) => FunctionDeclarations;

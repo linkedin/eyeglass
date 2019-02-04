@@ -13,6 +13,9 @@ export type SassFunction4 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValu
 export type SassFunction5 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, cb: SassFunctionCallback) => void;
 export type SassFunction6 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: SassValue, cb: SassFunctionCallback) => void;
 export type SassFunction = SyncSassFunction | SassFunction0 | SassFunction1 | SassFunction2 | SassFunction3 | SassFunction4 | SassFunction5 | SassFunction6;
+export interface FunctionDeclarations {
+  [functionDeclaration: string]: SassFunction;
+}
 
 export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
 export function isSassValue(sass: SassImplementation, value: any): value is SassValue {
