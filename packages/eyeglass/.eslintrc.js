@@ -1,4 +1,5 @@
 module.exports = {
+  
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2017,
@@ -12,6 +13,7 @@ module.exports = {
   ],
   rules: {
     "indent": "off",
+    "@typescript-eslint/array-type": ["error", "generic"],
     "@typescript-eslint/indent": ["error", 2],
     "@typescript-eslint/restrict-plus-operands": "error",
   },

@@ -15,7 +15,8 @@
   "scripts": {
     "prepare": "tsc",
     "pretest": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint --ext ts .",
+    "lintfix": "eslint --ext ts --fix .",
     "test": "mocha test/**/test_*.js",
     "coverage": "tsc && nyc --reporter=text --check-coverage --lines statements --lines 95 --functions 95 --branches 95 mocha test/**/test_*.js"
   },
@@ -56,8 +57,8 @@
     "@types/node-sass": "^3.10.32",
     "@types/package-json": "^5.0.0",
     "@types/semver": "^5.5.0",
-    "@typescript-eslint/eslint-plugin": "^1.1.0",
-    "@typescript-eslint/parser": "^1.1.0",
+    "@typescript-eslint/eslint-plugin": "^1.2.0",
+    "@typescript-eslint/parser": "^1.2.0",
     "eslint": "^5.12.1",
     "eyeglass-dev-site-builder": "0.0.5",
     "grunt": "^1.0.3",
