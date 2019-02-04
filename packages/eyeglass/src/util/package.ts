@@ -15,12 +15,12 @@ export function getPackageData<ExtraPackageData = never>(pkgPath: string): Packa
   }
 }
 
-export interface Package<ExtraPackageData = never> {
+export interface Package<ExtraPackageData = {}> {
   path: string;
   data: PackageJson & ExtraPackageData;
 }
 
-export function getPackage<ExtraPackageData = never>(dir: string): Package<ExtraPackageData> {
+export function getPackage<ExtraPackageData = {}>(dir: string): Package<ExtraPackageData> {
   let pkgPath = getPackagePath(dir);
   return {
     path: pkgPath,

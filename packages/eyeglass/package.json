@@ -17,7 +17,7 @@
     "pretest": "tsc",
     "lint": "eslint --ext ts .",
     "lintfix": "eslint --ext ts --fix .",
-    "test": "mocha test/**/test_*.js",
+    "test": "mocha --require source-map-support/register test/**/test_*.js",
     "coverage": "tsc && nyc --reporter=text --check-coverage --lines statements --lines 95 --functions 95 --branches 95 mocha test/**/test_*.js"
   },
   "repository": {
@@ -47,6 +47,7 @@
     "semver": "^5.6.0"
   },
   "devDependencies": {
+    "@types/archy": "0.0.31",
     "@types/debug": "0.0.31",
     "@types/fs-extra": "^5.0.4",
     "@types/glob": "^7.1.1",
@@ -70,7 +71,7 @@
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "should": "^13.2.3",
-    "source-map-support": "^0.5.9",
+    "source-map-support": "^0.5.10",
     "ts-node": "^7.0.1",
     "typescript": "~3.2.4"
   },

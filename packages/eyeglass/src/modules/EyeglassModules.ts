@@ -1,22 +1,43 @@
-// TODO: Annotate Types
-import resolve from "../util/resolve";
-import * as packageUtils from "../util/package";
-import EyeglassModule from "./EyeglassModule";
-import * as debug from "../util/debug";
-import * as path from "path";
-import merge = require("lodash.merge");
-import * as semver from "semver";
 import * as archy from "archy";
 import * as fs from "fs";
-import { URI } from "../util/URI";
+import * as path from "path";
+import * as semver from "semver";
+import * as debug from "../util/debug";
+import * as packageUtils from "../util/package";
+import resolve from "../util/resolve";
 import { SimpleCache } from "../util/SimpleCache";
+import { URI } from "../util/URI";
+import EyeglassModule, { ModuleSpecifier } from "./EyeglassModule";
+import merge = require("lodash.merge");
+import { PackageJson } from "package-json";
 
-interface Dependencies {
-  [dep: string]: string;
+interface ModuleCollection {
+  [moduleName: string]: Array<EyeglassModule>;
 }
 
-let globalModuleCache = new SimpleCache();
+interface ModuleMap {
+  [moduleName: string]: EyeglassModule;
+}
 
+type Dependencies = PackageJson["dependencies"];
+
+const globalModuleCache = new SimpleCache<EyeglassModule>();
+const globalModulePackageCache = new SimpleCache<string>();
+
+interface DependencyVersionIssue {
+  name: string;
+  left: string;
+  right: string;
+}
+
+interface ModuleBranch {
+  name: string;
+  version: string;
+  path: string;
+  dependencies: {
+    [moduleName: string]: ModuleBranch;
+  } | undefined;
+}
 /**
   * Discovers all of the modules for a given directory
   *
@@ -25,146 +46,400 @@ let globalModuleCache = new SimpleCache();
   * @param   {Array} modules - the explicit modules to include
   * @param   {Boolean} useGlobalModuleCache - whether or not to use the global module cache
   */
-export default function EyeglassModules(dir, modules, useGlobalModuleCache) {
-  this.issues = {
+export default class EyeglassModules {
+  issues: {
     dependencies: {
-      versions: [],
-      missing: []
-    },
+      versions: Array<DependencyVersionIssue>;
+      missing: Array<string>;
+    };
     engine: {
-      missing: [],
-      incompatible: []
+      missing: Array<string>;
+      incompatible: Array<EyeglassModule>;
     }
   };
+  cache: {
+    access: SimpleCache<boolean>;
+    modules: SimpleCache<EyeglassModule>;
+    modulePackage: SimpleCache<string>;
+  };
+  collection: ModuleMap;
+  list: EyeglassModule[];
+  tree: ModuleBranch;
+  projectName: string;
+  eyeglass: EyeglassModule;
+  constructor(dir: string, modules?: Array<ModuleSpecifier>, useGlobalModuleCache?: boolean) {
+    this.issues = {
+      dependencies: {
+        versions: [],
+        missing: []
+      },
+      engine: {
+        missing: [],
+        incompatible: []
+      }
+    };
 
-  this.cache = {
-    access: new SimpleCache(),
-    modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache()
+    this.cache = {
+      access: new SimpleCache(),
+      modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache<EyeglassModule>(),
+      modulePackage: useGlobalModuleCache ? globalModulePackageCache : new SimpleCache<string>(),
+    };
+
+    // find the nearest package.json for the given directory
+    dir = packageUtils.findNearestPackage(path.resolve(dir));
+
+    // resolve the current location into a module tree
+    let moduleTree = this.resolveModule(dir, true);
+
+    // if any modules were passed in, add them to the module tree
+    if (modules && modules.length) {
+      moduleTree.dependencies = modules.reduce(function (dependencies, mod) {
+        mod = new EyeglassModule(merge(mod, {
+          isEyeglassModule: true
+        }), this.discoverModules.bind(this));
+        dependencies[mod.name] = mod;
+        return dependencies;
+      }.bind(this), moduleTree.dependencies);
+    }
+
+    // convert the tree into a flat collection of deduped modules
+    let collection = this.dedupeModules(flattenModules(moduleTree));
+
+    // expose the collection
+    this.collection = collection;
+    // convert the collection object into a simple array for easy iteration
+    this.list = Object.keys(collection).map((name) => collection[name]);
+    // prune and expose the tree
+    this.tree = this.pruneModuleTree(moduleTree);
+    // set the current projects name
+    this.projectName = moduleTree.name;
+    // expose a convenience reference to the eyeglass module itself
+    this.eyeglass = this.find("eyeglass");
+
+    // check for any issues we may have encountered
+    this.checkForIssues();
+
+    /* istanbul ignore next - don't test debug */
+    debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
+  }
+
+  /**
+    * initializes all of the modules with the given engines
+    *
+    * @param   {Eyeglass} eyeglass - the eyeglass instance
+    * @param   {Function} sass - the sass engine
+    */
+  init(eyeglass, sass) {
+    this.list.forEach((mod) => mod.init(eyeglass, sass));
   };
 
-  // find the nearest package.json for the given directory
-  dir = packageUtils.findNearestPackage(path.resolve(dir));
+  /**
+    * Checks whether or not a given location has access to a given module
+    *
+    * @param   {String} name - the module name to find
+    * @param   {String} origin - the location of the originating request
+    * @returns {Object} the module reference if access is granted, null if access is prohibited
+    */
+  access(name, origin) {
+    let mod = this.find(name);
 
-  // resolve the current location into a module tree
-  let moduleTree = resolveModule.call(this, dir, true);
-
-  // if any modules were passed in, add them to the module tree
-  if (modules && modules.length) {
-    moduleTree.dependencies = modules.reduce(function(dependencies, mod) {
-      mod = new EyeglassModule(merge(mod, {
-        isEyeglassModule: true
-      }), discoverModules.bind(this));
-      dependencies[mod.name] = mod;
-      return dependencies;
-    }.bind(this), moduleTree.dependencies);
-  }
-
-  // convert the tree into a flat collection of deduped modules
-  let collection = dedupeModules.call(this, flattenModules(moduleTree));
-
-  // expose the collection
-  this.collection = collection;
-  // convert the collection object into a simple array for easy iteration
-  this.list = Object.keys(collection).map(function(name) {
-    return collection[name];
-  });
-  // prune and expose the tree
-  this.tree = pruneModuleTree.call(this, moduleTree);
-  // set the current projects name
-  this.projectName = moduleTree.name;
-  // expose a convenience reference to the eyeglass module itself
-  this.eyeglass = this.find("eyeglass");
-
-  // check for any issues we may have encountered
-  checkForIssues.call(this);
-
-  /* istanbul ignore next - don't test debug */
-  debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
-}
-
-/**
-  * initializes all of the modules with the given engines
-  *
-  * @param   {Eyeglass} eyeglass - the eyeglass instance
-  * @param   {Function} sass - the sass engine
-  */
-EyeglassModules.prototype.init = function(eyeglass, sass) {
-  this.list.forEach(function(mod) {
-    mod.init(eyeglass, sass);
-  });
-};
-
-/**
-  * Checks whether or not a given location has access to a given module
-  *
-  * @param   {String} name - the module name to find
-  * @param   {String} origin - the location of the originating request
-  * @returns {Object} the module reference if access is granted, null if access is prohibited
-  */
-EyeglassModules.prototype.access = function(name, origin) {
-  let mod = this.find(name);
-
-  // if we have a module, ensure that we can access it from the origin
-  if (mod && !canAccessModule.call(this, name, origin)) {
-    // if not, return null
-    return null;
-  }
-
-  // otherwise, return the module reference
-  return mod;
-};
-
-/**
-  * Finds a module reference by the module name
-  *
-  * @param   {String} name - the module name to find
-  * @returns {Object} the module reference
-  */
-EyeglassModules.prototype.find = function(name) {
-  return getFinalModule.call(this, name);
-};
-
-/**
-  * Returns a formatted string of the module hierarchy
-  *
-  * @returns {String} the module hierarchy
-  */
-EyeglassModules.prototype.getGraph = function() {
-  let hierarchy = getHierarchy(this.tree);
-  hierarchy.label = getDecoratedRootName.call(this);
-  return archy(hierarchy);
-};
-
-/**
-  * checks for any issues in the modules we've discovered
-  *
-  * @this {EyeglassModules}
-  *
-  */
-function checkForIssues() {
-  this.list.forEach(function(mod) {
-    // check engine compatibility
-    if (!mod.eyeglass || !mod.eyeglass.needs) {
-      // if `eyeglass.needs` is not present...
-      // add the module to the missing engines list
-      this.issues.engine.missing.push(mod);
-    } else if (!semver.satisfies(this.eyeglass.version, mod.eyeglass.needs)) {
-      // if the current version of eyeglass does not satify the need...
-      // add the module to the incompatible engines list
-      this.issues.engine.incompatible.push(mod);
+    // if we have a module, ensure that we can access it from the origin
+    if (mod && !this.canAccessModule(name, origin)) {
+      // if not, return null
+      return null;
     }
-  }.bind(this));
-}
 
-/**
-  * gets the root name and decorates it
-  *
-  * @this {EyeglassModules}
-  *
-  * @returns {String} the decorated name
-  */
-function getDecoratedRootName() {
-  return ":root" + ((this.projectName) ? "(" + this.projectName + ")" : "");
+    // otherwise, return the module reference
+    return mod;
+  };
+
+  /**
+    * Finds a module reference by the module name
+    *
+    * @param   {String} name - the module name to find
+    * @returns {Object} the module reference
+    */
+  find(name) {
+    return this.getFinalModule(name);
+  }
+
+  /**
+    * Returns a formatted string of the module hierarchy
+    *
+    * @returns {String} the module hierarchy
+    */
+  getGraph() {
+    let hierarchy = getHierarchy(this.tree);
+    hierarchy.label = this.getDecoratedRootName();
+    return archy(hierarchy);
+  };
+  /**
+    * resolves the module and it's dependencies
+    *
+    * @param   {String} pkgPath - the path to the modules package.json location
+    * @param   {Boolean} isRoot - whether or not it's the root of the project
+    * @returns {Object} the resolved module definition
+    */
+  private resolveModule(pkgPath: string, isRoot: boolean = false): EyeglassModule | undefined {
+    let cacheKey = "resolveModule~" + pkgPath + "!" + !!isRoot;
+    return this.cache.modules.getOrElse(cacheKey, () => {
+      let pkg = packageUtils.getPackage(pkgPath);
+      let isEyeglassMod = EyeglassModule.isEyeglassModule(pkg.data);
+      // if the module is an eyeglass module OR it's the root project
+      if (isEyeglassMod || (pkg.data && isRoot)) {
+        // return a module reference
+        return new EyeglassModule({
+          isEyeglassModule: isEyeglassMod,
+          path: path.dirname(pkg.path)
+        }, this.discoverModules.bind(this), isRoot);
+      }
+    });
+  }
+
+  /**
+    * dedupes a collection of modules to a single version
+    *
+    * @this {EyeglassModules}
+    *
+    * @param   {Object} module - the collection of modules
+    * @returns {Object} the deduped module collection
+    */
+  private dedupeModules(modules: ModuleCollection): ModuleMap {
+    let deduped: ModuleMap = {};
+    for (let name of Object.keys(modules)) {
+      // first sort our modules by version
+      let versions = modules[name].sort((a, b) => semver.rcompare(a.version, b.version));
+      // then take the highest version we found
+      deduped[name] = versions.shift();
+      // check for any version issues
+      this.issues.dependencies.versions.push.apply(
+        this.issues.dependencies.versions,
+        getDependencyVersionIssues(versions, deduped[name])
+      );
+    }
+    return deduped;
+  }
+
+  /**
+    * checks for any issues in the modules we've discovered
+    *
+    * @this {EyeglassModules}
+    *
+    */
+  private checkForIssues() {
+    this.list.forEach(function (mod) {
+      // check engine compatibility
+      if (!mod.eyeglass || !mod.eyeglass.needs) {
+        // if `eyeglass.needs` is not present...
+        // add the module to the missing engines list
+        this.issues.engine.missing.push(mod);
+      } else if (!semver.satisfies(this.eyeglass.version, mod.eyeglass.needs)) {
+        // if the current version of eyeglass does not satify the need...
+        // add the module to the incompatible engines list
+        this.issues.engine.incompatible.push(mod);
+      }
+    }.bind(this));
+  }
+
+  /**
+    * rewrites the module tree to reflect the deduped modules
+    *
+    * @this {EyeglassModules}
+    *
+    * @param  {Object} moduleTree - the tree to prune
+    * @returns {Object} the pruned tree
+    */
+  private pruneModuleTree(moduleTree: EyeglassModule): ModuleBranch {
+    let finalModule = moduleTree.isEyeglassModule && this.find(moduleTree.name);
+    // normalize the branch
+    let branch = {
+      name: finalModule && finalModule.name || moduleTree.name,
+      version: finalModule && finalModule.version || moduleTree.version,
+      path: finalModule && finalModule.path || moduleTree.path,
+      dependencies: undefined
+    };
+    // if the tree has dependencies
+    let dependencies = moduleTree.dependencies;
+    if (dependencies) {
+      // copy them into the branch after recursively pruning
+      branch.dependencies = {};
+      for (let name of Object.keys(dependencies)) {
+        branch.dependencies[name] = this.pruneModuleTree(dependencies[name]);
+      }
+    }
+    return branch;
+  }
+
+  /**
+    * resolves the eyeglass module itself
+    *
+    * @returns {Object} the resolved eyeglass module definition
+    */
+  private getEyeglassSelf(): EyeglassModule {
+    let eyeglassDir = path.resolve(__dirname, "..", "..");
+    let eyeglassPkg = packageUtils.getPackage(eyeglassDir);
+
+    let resolvedPkg = resolve(eyeglassPkg.path, eyeglassPkg.path, eyeglassDir);
+    return this.resolveModule(resolvedPkg, false)!;
+  }
+
+  /**
+    * discovers all the modules for a given set of options
+    *
+    * @param    {Object} options - the options to use
+    * @returns  {Object} the discovered modules
+    */
+  private discoverModules(options: { isRoot: boolean; dir: string; pkg: packageUtils.Package }) {
+    let pkg = options.pkg || packageUtils.getPackage(options.dir);
+
+    let dependencies: { [dep: string]: string } = {};
+
+    // if there's package.json contents...
+    /* istanbul ignore else - defensive conditional, don't care about else-case */
+    if (pkg.data) {
+      merge(
+        dependencies,
+        // always include the `dependencies` and `peerDependencies`
+        pkg.data.dependencies,
+        pkg.data.peerDependencies,
+        // only include the `devDependencies` if isRoot
+        options.isRoot && pkg.data.devDependencies
+      );
+    }
+
+    // for each dependency...
+    let dependentModules = Object.keys(dependencies).reduce((modules, dependency) => {
+      // resolve the package.json
+      let resolvedPkg = this.resolveModulePackage(
+        packageUtils.getPackagePath(dependency),
+        pkg.path,
+        URI.system(options.dir)
+      );
+      if (!resolvedPkg) {
+        // if it didn't resolve, they likely didn't `npm install` it correctly
+        this.issues.dependencies.missing.push(dependency);
+      } else {
+        // otherwise, set it onto our collection
+        let resolvedModule = this.resolveModule(resolvedPkg);
+        if (resolvedModule) {
+          modules[resolvedModule.name] = resolvedModule;
+        }
+      }
+      return modules;
+    }, {});
+
+    // if it's the root...
+    if (options.isRoot) {
+      // ensure eyeglass itself is a direct dependency
+      dependentModules["eyeglass"] = dependentModules["eyeglass"] || this.getEyeglassSelf();
+    }
+
+    return Object.keys(dependentModules).length ? dependentModules : null;
+  }
+
+  /**
+    * resolves the package for a given module
+    *
+    * @see resolve()
+    */
+  private resolveModulePackage(id: string, parent: string, parentDir: string): string {
+    let cacheKey = "resolveModulePackage~" + id + "!" + parent + "!" + parentDir;
+    return this.cache.modulePackage.getOrElse(cacheKey, function () {
+      try {
+        return resolve(id, parent, parentDir);
+      } catch (e) {
+        /* istanbul ignore next - don't test debug */
+        debug.modules && debug.modules(
+          'failed to resolve module package %s',
+          e
+        )
+      }
+    });
+  }
+
+  /**
+    * gets the final module from the collection
+    *
+    * @this {EyeglassModules}
+    *
+    * @param   {String} name - the module name to find
+    * @returns {Object} the module reference
+    */
+  private getFinalModule(name): EyeglassModule {
+    return this.collection[name];
+  }
+
+  /**
+    * gets the root name and decorates it
+    *
+    * @this {EyeglassModules}
+    *
+    * @returns {String} the decorated name
+    */
+  private getDecoratedRootName() {
+    return ":root" + ((this.projectName) ? "(" + this.projectName + ")" : "");
+  }
+
+  /**
+    * whether or not a module can be accessed by the origin request
+    *
+    * @this {EyeglassModules}
+    *
+    * @param   {String} name - the module name to find
+    * @param   {String} origin - the location of the originating request
+    * @returns {Boolean} whether or not access is permitted
+    */
+  private canAccessModule(name, origin) {
+    // eyeglass can be imported by anyone, regardless of the dependency tree
+    if (name === "eyeglass") {
+      return true;
+    }
+
+    let canAccessFrom = (origin) => {
+      // find the nearest package for the origin
+      let pkg = packageUtils.findNearestPackage(origin);
+      let cacheKey = pkg + "!" + origin;
+      return this.cache.access.getOrElse(cacheKey, () => {
+        // find all the branches that match the origin
+        let branches = findBranchesByPath({
+          dependencies: this.tree
+        }, pkg);
+
+        let canAccess = branches.some(function(branch) {
+          // if the reference is to itself (branch.name)
+          // OR it's an immediate dependency (branch.dependencies[name])
+          if (branch.name === name || branch.dependencies && branch.dependencies[name]) {
+            return true;
+          }
+        });
+
+        /* istanbul ignore next - don't test debug */
+        debug.importer(
+          "%s can%s be imported from %s",
+          name,
+          (canAccess ? "" : "not"),
+          origin
+        );
+        return canAccess;
+      });
+    };
+
+    // check if we can access from the origin...
+    let canAccess = canAccessFrom(origin);
+
+    // if not...
+    if (!canAccess) {
+      // check for a symlink...
+      let realOrigin = fs.realpathSync(origin);
+      /* istanbul ignore if */
+      if (realOrigin !== origin) {
+        /* istanbul ignore next */
+        canAccess = canAccessFrom(realOrigin);
+      }
+    }
+
+    return canAccess;
+  }
 }
 
 /**
@@ -173,12 +448,10 @@ function getDecoratedRootName() {
   * @param  {Object} dependencies - the dependencies
   * @returns {Object} the corresponding hierarchy nodes (for use in archy)
   */
-function getHierarchyNodes(dependencies) {
+function getHierarchyNodes(dependencies: ModuleBranch["dependencies"]) {
   if (dependencies) {
     // for each dependency, recurse and get it's hierarchy
-    return Object.keys(dependencies).map(function(name) {
-      return getHierarchy(dependencies[name]);
-    });
+    return Object.keys(dependencies).map((name) => getHierarchy(dependencies[name]));
   }
 }
 
@@ -188,42 +461,13 @@ function getHierarchyNodes(dependencies) {
   * @param  {Object} branch - the branch to traverse
   * @returns {Object} the corresponding archy hierarchy
   */
-function getHierarchy(branch) {
+function getHierarchy(branch: ModuleBranch): archy.Data {
   // return an object the confirms to the archy expectations
   return {
     // if the branch has a version on it, append it to the label
     label: branch.name + (branch.version ? "@" + branch.version : ""),
     nodes: getHierarchyNodes(branch.dependencies)
   };
-}
-
-/**
-  * rewrites the module tree to reflect the deduped modules
-  *
-  * @this {EyeglassModules}
-  *
-  * @param  {Object} moduleTree - the tree to prune
-  * @returns {Object} the pruned tree
-  */
-function pruneModuleTree(moduleTree) {
-  let finalModule = moduleTree.isEyeglassModule && this.find(moduleTree.name);
-  // normalize the branch
-  let branch = {
-    name: finalModule && finalModule.name || moduleTree.name,
-    version: finalModule && finalModule.version || moduleTree.version,
-    path: finalModule && finalModule.path || moduleTree.path,
-    dependencies: undefined
-  };
-  // if the tree has dependencies
-  let dependencies = moduleTree.dependencies;
-  if (dependencies) {
-    // copy them into the branch after recursively pruning
-    branch.dependencies = Object.keys(dependencies).reduce(function(tree, name) {
-      tree[name] = pruneModuleTree.call(this, dependencies[name]);
-      return tree;
-    }.bind(this), {});
-  }
-  return branch;
 }
 
 /**
@@ -250,77 +494,15 @@ function findBranchesByPath(tree, dir) {
 }
 
 /**
-  * whether or not a module can be accessed by the origin request
-  *
-  * @this {EyeglassModules}
-  *
-  * @param   {String} name - the module name to find
-  * @param   {String} origin - the location of the originating request
-  * @returns {Boolean} whether or not access is permitted
-  */
-function canAccessModule(name, origin) {
-  // eyeglass can be imported by anyone, regardless of the dependency tree
-  if (name === "eyeglass") {
-    return true;
-  }
-
-  let canAccessFrom = function canAccessFrom(origin) {
-    // find the nearest package for the origin
-    let pkg = packageUtils.findNearestPackage(origin);
-    let cacheKey = pkg + "!" + origin;
-    return this.cache.access.getOrElse(cacheKey, function() {
-      // find all the branches that match the origin
-      let branches = findBranchesByPath({
-        dependencies: this.tree
-      }, pkg);
-
-      let canAccess = branches.some(function(branch) {
-        // if the reference is to itself (branch.name)
-        // OR it's an immediate dependency (branch.dependencies[name])
-        if (branch.name === name || branch.dependencies && branch.dependencies[name]) {
-          return true;
-        }
-      });
-
-      /* istanbul ignore next - don't test debug */
-      debug.importer(
-        "%s can%s be imported from %s",
-        name,
-        (canAccess ? "" : "not"),
-        origin
-      );
-      return canAccess;
-    }.bind(this));
-  }.bind(this);
-
-  // check if we can access from the origin...
-  let canAccess = canAccessFrom(origin);
-
-  // if not...
-  if (!canAccess) {
-    // check for a symlink...
-    let realOrigin = fs.realpathSync(origin);
-    /* istanbul ignore if */
-    if (realOrigin !== origin) {
-      /* istanbul ignore next */
-      canAccess = canAccessFrom(realOrigin);
-    }
-  }
-
-  return canAccess;
-}
-
-/**
   * given a branch of modules, flattens them into a collection
   *
   * @param   {Object} branch - the module branch
   * @param   {Object} collection - the incoming collection
   * @returns {Object} the resulting collection
   */
-function flattenModules(branch, collection?) {
+function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {}): ModuleCollection {
   // if the branch itself is a module, add it...
   if (branch.isEyeglassModule) {
-    collection = collection || {};
     collection[branch.name] = collection[branch.name] || [];
     collection[branch.name].push(branch);
   }
@@ -328,9 +510,9 @@ function flattenModules(branch, collection?) {
   let dependencies = branch.dependencies;
 
   if (dependencies) {
-    return Object.keys(dependencies).reduce(function(registry, name) {
-      return flattenModules(dependencies[name], registry);
-    }, collection || {});
+    for (let name of Object.keys(dependencies)) {
+      flattenModules(dependencies[name], collection);
+    }
   }
 
   return collection;
@@ -365,154 +547,4 @@ function getDependencyVersionIssues(modules, finalModule) {
       };
     }
   });
-}
-
-/**
-  * dedupes a collection of modules to a single version
-  *
-  * @this {EyeglassModules}
-  *
-  * @param   {Object} module - the collection of modules
-  * @returns {Object} the deduped module collection
-  */
-function dedupeModules(modules) {
-  return Object.keys(modules).reduce(function(deduped, name) {
-    // first sort our modules by version
-    let versions = modules[name].sort(function(a, b) {
-      return semver.lt(a.version, b.version);
-    });
-    // then take the highest version we found
-    deduped[name] = versions.shift();
-    // check for any version issues
-    this.issues.dependencies.versions.push.apply(
-      this.issues.dependencies.versions,
-      getDependencyVersionIssues(versions, deduped[name])
-    );
-    // and return the deduped collection
-    return deduped;
-  }.bind(this), {});
-}
-
-/**
-  * gets the final module from the collection
-  *
-  * @this {EyeglassModules}
-  *
-  * @param   {String} name - the module name to find
-  * @returns {Object} the module reference
-  */
-function getFinalModule(name) {
-  return this.collection[name];
-}
-
-/**
-  * resolves the module and it's dependencies
-  *
-  * @param   {String} pkgPath - the path to the modules package.json location
-  * @param   {Boolean} isRoot - whether or not it's the root of the project
-  * @returns {Object} the resolved module definition
-  */
-function resolveModule(pkgPath, isRoot) {
-  let cacheKey = "resolveModule~" + pkgPath + "!" + !!isRoot;
-  return this.cache.modules.getOrElse(cacheKey, function() {
-    let pkg = packageUtils.getPackage(pkgPath);
-    let isEyeglassMod = EyeglassModule.isEyeglassModule(pkg.data);
-    // if the module is an eyeglass module OR it's the root project
-    if (isEyeglassMod || (pkg.data && isRoot)) {
-      // return a module reference
-      return new EyeglassModule({
-        isEyeglassModule: isEyeglassMod,
-        path: path.dirname(pkg.path)
-      }, discoverModules.bind(this), isRoot);
-    }
-  }.bind(this));
-}
-
-/**
-  * resolves the eyeglass module itself
-  *
-  * @returns {Object} the resolved eyeglass module definition
-  */
-function getEyeglassSelf() {
-  let eyeglassDir = path.resolve(__dirname, "..", "..");
-  let eyeglassPkg = packageUtils.getPackage(eyeglassDir);
-
-  let resolvedPkg = resolve(eyeglassPkg.path, eyeglassPkg.path, eyeglassDir);
-
-  return resolveModule.call(this, resolvedPkg);
-}
-
-/**
-  * resolves the package for a given module
-  *
-  * @see resolve()
-  */
-function resolveModulePackage(id, parent, parentDir) {
-  let cacheKey = "resolveModulePackage~" + id + "!" + parent + "!" + parentDir;
-  return this.cache.modules.getOrElse(cacheKey, function() {
-    try {
-      return resolve(id, parent, parentDir);
-    } catch (e) {
-      /* istanbul ignore next - don't test debug */
-      debug.modules && debug.modules(
-        'failed to resolve module package %s',
-        e
-      )
-    }
-  });
-}
-
-/**
-  * discovers all the modules for a given set of options
-  *
-  * @param    {Object} options - the options to use
-  * @returns  {Object} the discovered modules
-  */
-function discoverModules(options) {
-  let pkg = options.pkg || packageUtils.getPackage(options.dir);
-
-  let dependencies: {[dep: string]: string} = {};
-
-  // if there's package.json contents...
-  /* istanbul ignore else - defensive conditional, don't care about else-case */
-  if (pkg.data) {
-    merge(
-      dependencies,
-      // always include the `dependencies` and `peerDependencies`
-      pkg.data.dependencies,
-      pkg.data.peerDependencies,
-      // only include the `devDependencies` if isRoot
-      options.isRoot && pkg.data.devDependencies
-    );
-  }
-
-  // for each dependency...
-  dependencies = Object.keys(dependencies).reduce(function(modules, dependency) {
-    // resolve the package.json
-    let resolvedPkg = resolveModulePackage.call(
-      this,
-      packageUtils.getPackagePath(dependency),
-      pkg.path,
-      URI.system(options.dir)
-    );
-    if (!resolvedPkg) {
-      // if it didn't resolve, they likely didn't `npm install` it correctly
-      this.issues.dependencies.missing.push(dependency);
-    } else {
-      // otherwise, set it onto our collection
-      let resolvedModule = resolveModule.call(this, resolvedPkg);
-      if (resolvedModule) {
-        modules[resolvedModule.name] = resolvedModule;
-      }
-    }
-    return modules;
-  }.bind(this), {});
-
-  // if it's the root...
-  if (options.isRoot) {
-    // ensure eyeglass itself is a direct dependency
-    dependencies.eyeglass = dependencies.eyeglass || getEyeglassSelf.call(this, options);
-  }
-
-  return Object.keys(dependencies).length ? dependencies : null;
 }

@@ -3,9 +3,9 @@ import normalizeURL from "./normalize-uri";
 import version from "./version";
 import fs from "./fs";
 import { EyeglassFunctions } from "./EyeglassFunctions";
+import { FunctionDeclarations } from "../util/SassImplementation";
 
-const allFunctions: EyeglassFunctions =
-function(eyeglass, sass) {
+const allEyeglassFunctions: EyeglassFunctions = function(eyeglass, sass): FunctionDeclarations {
   return Object.assign({},
     assetURI(eyeglass, sass),
     normalizeURL(eyeglass, sass),
@@ -13,4 +13,4 @@ function(eyeglass, sass) {
     fs(eyeglass, sass)
   );
 };
-export default allFunctions;
+export default allEyeglassFunctions;

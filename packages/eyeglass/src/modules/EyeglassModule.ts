@@ -38,7 +38,9 @@ type EyeglassOptionInPackageJSON = PackageJsonWithEyeglassOptions["eyeglass"];
 export type EyeglassModuleMain =
   (eyeglass: IEyeglass, sass: SassImplementation) => EyeglassModuleExports;
 
-interface ModuleReference {
+export type ModuleSpecifier = ModuleReference | ManualModuleOptions;
+
+export interface ModuleReference {
   path: string;
   /**
    * XXX I don't think dependencies are ever actually
@@ -47,7 +49,7 @@ interface ModuleReference {
   dependencies?: Array<EyeglassModule>;
   isEyeglassModule?: boolean;
 }
-interface ManualModuleOptions {
+export interface ManualModuleOptions {
   /**
    * The name of the module.
    */

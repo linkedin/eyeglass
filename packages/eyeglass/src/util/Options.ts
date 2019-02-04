@@ -1,15 +1,12 @@
 "use strict";
 
+import { IOptions as GlobOptions } from "glob";
 import * as path from "path";
-import merge = require("lodash.merge");
-import { URI } from "./URI";
-import  { IOptions as GlobOptions } from "glob";
-import {
-  SassImplementation,
-  Options as SassOptions,
-  isSassImplementation
-} from "./SassImplementation";
+import { ModuleSpecifier } from "../modules/EyeglassModule";
 import { DeprecateFn } from "./deprecator";
+import { isSassImplementation, Options as SassOptions, SassImplementation } from "./SassImplementation";
+import { URI } from "./URI";
+import merge = require("lodash.merge");
 
 export interface AssetSourceOptions {
   /**
@@ -81,7 +78,7 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
    * Manually declare an eyeglass modules for sass libraries that do not
    * declare themselves to be eyeglass modules.
    */
-  modules?: Array<any>;
+  modules?: Array<ModuleSpecifier>;
   /**
    * Whether to only import a sass file once per css output file.
    * Defaults to true.
