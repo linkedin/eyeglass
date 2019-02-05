@@ -19,16 +19,16 @@
 
 import * as deasync from "deasync";
 
-export interface SyncFn {
-  (fn: any): any;
-}
-export interface Sync extends SyncFn {
-  all: (obj: {[key: string]: SyncFn}) => {[key: string]: any};
+type ASynchronousFunction = (...args: any[]) => void;
+type SynchronousFunction = (...args: any[]) => any;
+export interface Sync {
+  (fn: ASynchronousFunction): SynchronousFunction;
+  all: (obj: {[key: string]: ASynchronousFunction}) => {[key: string]: SynchronousFunction};
 }
 
-const syncFn: SyncFn = (fn) => {
+const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
   return function() {
-    let result;
+    let result: any;
     let args = [].slice.call(arguments, 0);
     let last = args[args.length - 1];
 
@@ -63,14 +63,14 @@ const syncFn: SyncFn = (fn) => {
   };
 };
 
-const sync: Sync = Object.assign(syncFn, {
-  all(obj) {
-    for (let name in obj) {
-      obj[name] = sync(obj[name]);
-    }
-    return obj;
+function all(obj) {
+  for (let name in obj) {
+    obj[name] = sync(obj[name]);
   }
-});
+  return obj;
+}
+
+const sync: Sync = Object.assign(makeSync, { all });
 
 export default sync;
 

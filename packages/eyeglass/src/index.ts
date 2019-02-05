@@ -95,7 +95,7 @@ function addFunctions(this: IEyeglass) {
     this,
     this.options.eyeglass.engines.sass,
     this.options,
-    this.options.functions
+    (this.options.functions as any) // The type of @types/node-sass/Options["functions"] is bad.
   );
 }
 

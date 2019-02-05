@@ -1,21 +1,22 @@
-// TODO: Annotate Types
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");
+import { FunctionDeclarations, SassImplementation } from "../util/SassImplementation";
+import { IEyeglass } from "../IEyeglass";
 const ARGUMENTS_REGEX = /\s*\(.*\)$/;
 const DELIM = "\n\t\u2022 ";
 
-function getFunctionName(fnSignature) {
+function getFunctionName(fnSignature: string): string {
   return fnSignature.replace(ARGUMENTS_REGEX, "");
 }
 
-function checkConflicts(obj1, obj2) {
+function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations) {
   // return early if either collection is empty
   if (!obj1 || !obj2) {
     return;
   }
 
-  let functions = {};
+  let functions: {[funcitonName: string]: string} = {};
   // collect all the function names and signatures from the first collection
   Object.keys(obj1).forEach(function(fn) {
     let fnName = getFunctionName(fn);
@@ -38,8 +39,8 @@ function checkConflicts(obj1, obj2) {
   });
 }
 
-export default function ModuleFunctions(eyeglass, sass, options, existingFunctions) {
-  let functions = eyeglass.modules.list.reduce(function(fns, mod) {
+export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplementation, _options, existingFunctions: FunctionDeclarations): FunctionDeclarations {
+  let functions: FunctionDeclarations = eyeglass.modules.list.reduce(function(fns, mod) {
     if (!mod.functions) {
       return fns;
     }

@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@types/archy": "0.0.31",
+    "@types/deasync": "^0.1.0",
     "@types/debug": "0.0.31",
     "@types/fs-extra": "^5.0.4",
     "@types/glob": "^7.1.1",
