@@ -1,18 +1,19 @@
-"use strict";
-// TODO: Annotate Types
-
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";
 import merge = require("lodash.merge");
+import { Importer, ImporterReturnType } from "node-sass";
+import { IEyeglass } from "../IEyeglass";
+import { SassImplementation } from "../util/SassImplementation";
+import { Config } from "../util/Options";
 
 export default class ImportUtilities {
   root: string;
-  eyeglass: any;
-  sass: any;
-  fallbackImporter: any;
-  options: any;
+  eyeglass: IEyeglass;
+  sass: SassImplementation;
+  fallbackImporter: Importer | Array<Importer>;
+  options: Config;
   context: any;
-  constructor(eyeglass, sass, options, fallbackImporter, context) {
+  constructor(eyeglass: IEyeglass, sass: SassImplementation, options: Config, fallbackImporter: Importer | Array<Importer> | undefined, context: any) {
     this.root = options.eyeglass.root;
     this.eyeglass = eyeglass;
     this.sass = sass;
@@ -24,14 +25,14 @@ export default class ImportUtilities {
       }
     });
   }
-  static createImporter(importer) {
+  static createImporter(importer: Importer): Importer {
     return function (uri, prev, done) {
       uri = URI.web(uri);
       prev = URI.system(prev);
       importer.call(this, uri, prev, done);
     };
   }
-  importOnce(data, done) {
+  importOnce(data: {file: string; contents: string;}, done) {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
       /* istanbul ignore next - don't test debug */
@@ -42,9 +43,13 @@ export default class ImportUtilities {
       done(data);
     }
   }
-  fallback(uri, prev, done, noFallback) {
-    if (this.fallbackImporter && Array.isArray(this.fallbackImporter)) {
-      this.fallbackNth(uri, prev, 0, done, noFallback);
+  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: any) => void) {
+    if (Array.isArray(this.fallbackImporter)) {
+      if (this.fallbackImporter.length > 0) {
+        this.fallbackNth(uri, prev, 0, done, noFallback);
+      } else {
+        noFallback.call(this.context);
+      }
     } else if (this.fallbackImporter) {
       this.fallbackImporter.call(this.context, uri, prev, function (result) {
         if (result === this.sass.NULL || !result) {
@@ -57,7 +62,7 @@ export default class ImportUtilities {
       noFallback.call(this.context);
     }
   }
-  fallbackNth(uri, prev, index, done, noFallback) {
+  fallbackNth(uri: string, prev: string, index: number, done: (result: ImporterReturnType) => void, noFallback:  (context: any) => void) {
     let fallbackImporter = this.fallbackImporter[index];
 
     // TODO (test) - how do we get into this condition? needs a test case

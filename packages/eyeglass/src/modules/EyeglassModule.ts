@@ -144,7 +144,7 @@ function isModuleReference(mod: unknown): mod is ModuleReference {
   return typeof mod === "object" && !!mod["path"];
 }
 
-export default class EyeglassModule implements IEyeglassModule {
+export default class EyeglassModule implements IEyeglassModule, EyeglassModuleExports {
   dependencies: Array<EyeglassModule>;
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
@@ -155,6 +155,10 @@ export default class EyeglassModule implements IEyeglassModule {
   rawName: string;
   sassDir?: string;
   version: string;
+  /** only present after calling `init()` */
+  functions?: FunctionDeclarations;
+  /** only present after calling `init()` */
+  assets?: AssetsCollection;
 
   constructor(modArg: ModuleReference | ManualModuleOptions, discoverModules?, isRoot?: boolean) {
     // some defaults

@@ -1,11 +1,9 @@
-"use strict";
-// TODO: Annotate Types
-
 import * as path from "path";
 import { existsSync } from "fs";
 import ImportUtilities from "./ImportUtilities";
+import { ImporterFactory } from "./ImporterFactory";
 
-export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
+const FSImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter) {
   let fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
@@ -36,8 +34,10 @@ export default function FSImporter(eyeglass, sass, options, fallbackImporter) {
       }
     } else {
       importUtils.fallback(uri, prev, done, function() {
-        done(sass.NULL);
+        done(null);
       });
     }
   });
 }
+
+export default FSImporter;

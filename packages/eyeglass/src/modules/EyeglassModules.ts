@@ -11,6 +11,8 @@ import EyeglassModule, { ModuleSpecifier } from "./EyeglassModule";
 import merge = require("lodash.merge");
 import { PackageJson } from "package-json";
 
+export const ROOT_NAME = ":root";
+
 interface ModuleCollection {
   [moduleName: string]: Array<EyeglassModule>;
 }
@@ -53,7 +55,7 @@ export default class EyeglassModules {
       missing: Array<string>;
     };
     engine: {
-      missing: Array<string>;
+      missing: Array<EyeglassModule>;
       incompatible: Array<EyeglassModule>;
     }
   };
@@ -93,13 +95,13 @@ export default class EyeglassModules {
 
     // if any modules were passed in, add them to the module tree
     if (modules && modules.length) {
-      moduleTree.dependencies = modules.reduce(function (dependencies, mod) {
-        mod = new EyeglassModule(merge(mod, {
+      moduleTree.dependencies = modules.reduce((dependencies, mod) => {
+        let resolvedMod = new EyeglassModule(merge(mod, {
           isEyeglassModule: true
         }), this.discoverModules.bind(this));
-        dependencies[mod.name] = mod;
+        dependencies[resolvedMod.name] = resolvedMod;
         return dependencies;
-      }.bind(this), moduleTree.dependencies);
+      }, moduleTree.dependencies);
     }
 
     // convert the tree into a flat collection of deduped modules
@@ -227,7 +229,7 @@ export default class EyeglassModules {
     *
     */
   private checkForIssues() {
-    this.list.forEach(function (mod) {
+    this.list.forEach((mod: EyeglassModule) => {
       // check engine compatibility
       if (!mod.eyeglass || !mod.eyeglass.needs) {
         // if `eyeglass.needs` is not present...
@@ -238,7 +240,7 @@ export default class EyeglassModules {
         // add the module to the incompatible engines list
         this.issues.engine.incompatible.push(mod);
       }
-    }.bind(this));
+    });
   }
 
   /**
@@ -377,7 +379,7 @@ export default class EyeglassModules {
     * @returns {String} the decorated name
     */
   private getDecoratedRootName() {
-    return ":root" + ((this.projectName) ? "(" + this.projectName + ")" : "");
+    return ROOT_NAME + ((this.projectName) ? "(" + this.projectName + ")" : "");
   }
 
   /**

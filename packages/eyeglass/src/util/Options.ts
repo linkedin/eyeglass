@@ -154,9 +154,15 @@ interface DeprecatedOptions {
   assetsRelativeTo?: string;
 }
 
-export interface NestedEyeglassOptions { eyeglass?: EyeglassSpecificOptions }
-export type Options = (SassOptions & NestedEyeglassOptions) | (DeprecatedOptions & SassOptions & NestedEyeglassOptions) ;
-export type Config = SassOptions & { eyeglass: EyeglassConfig };
+export interface EyeglassOptions {
+  eyeglass?: EyeglassSpecificOptions
+  assetsCache?: (cacheKey: string, lazyValue: () => string) => void;
+}
+export type Options = (SassOptions & EyeglassOptions) | (DeprecatedOptions & SassOptions & EyeglassOptions) ;
+export type Config = SassOptions & {
+  eyeglass: EyeglassConfig;
+  assetsCache?: (cacheKey: string, lazyValue: () => string) => void;
+};
 
 /* eslint-disable-next-line no-unused-vars */
 export default function Options(this: Config, ...args: [Options, DeprecateFn, SassImplementation]) {

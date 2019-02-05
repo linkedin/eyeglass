@@ -1,15 +1,22 @@
-"use strict";
-// TODO: Annotate Types
 import {readFileSync, existsSync} from "fs";
 import * as path from "path";
 import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";
+import { ImporterFactory } from "./ImporterFactory";
+
+interface ImportedFile {
+  contents: string;
+  file: string;
+}
+
+type ImportResultCallback =
+  (err: Error | null, data?: ImportedFile) => void;
 
 /*
  * Walks the file list until a match is found. If
  * no matches are found, calls the callback with an error
  */
-function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: Error | null, data?: {contents: string; file: string}) => any) {
+function readFirstFile(uri: string, possibleFiles: Set<string>, callback: ImportResultCallback) {
   for (let nextFile of possibleFiles) {
     try {
       let data = readFileSync(nextFile, "utf8");
@@ -31,7 +38,7 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: (err: 
 }
 
 // This is a bootstrap function for calling readFirstFile.
-function readAbstractFile(originalUri, uri, location, includePaths, moduleName, callback) {
+function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string>, moduleName: string, callback: ImportResultCallback) {
   // start a name expander to get the names of possible file locations
   let nameExpander = new NameExpander(uri);
 
@@ -61,7 +68,7 @@ function readAbstractFile(originalUri, uri, location, includePaths, moduleName, 
  * fallback importer is the importer that was specified
  * in the node-sass options if one was there.
  */
-export default function ModuleImporter(eyeglass, sass, options, fallbackImporter) {
+const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter) {
   let includePaths = options.includePaths;
   let root = options.eyeglass.root;
 
@@ -90,7 +97,7 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
       mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
     }
 
-    let sassDir;
+    let sassDir: string;
 
     if (mod) {
       sassDir = mod.sassDir;
@@ -108,9 +115,12 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
       }
     }
 
-    function createHandler(errorHandler?) {
+    function createHandler(errorHandler?: (err: Error | string) => void): ImportResultCallback {
       errorHandler = errorHandler || function(err) {
-        done(new Error(err.toString()));
+        if (!(err instanceof Error)) {
+          err = new Error(err.toString());
+        }
+        done(err);
       };
       return function(err, data) {
         if (err) {
@@ -123,7 +133,7 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
       };
     }
 
-    function handleRelativeImports(includePaths) {
+    function handleRelativeImports(includePaths: Array<string>) {
       if (isRealFile) {
         // relative file import, potentially relative to the previous import
         readAbstractFile(uri, uri, path.dirname(prev), includePaths, null, createHandler());
@@ -147,3 +157,4 @@ export default function ModuleImporter(eyeglass, sass, options, fallbackImporter
     }
   });
 }
+export default ModuleImporter;

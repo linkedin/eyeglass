@@ -480,7 +480,7 @@ describe("eyeglass importer", function () {
       "sass/this-does-not-exist/_index.css"
     ].reduce(function(msg, location) {
       return msg + "\n  " + path.resolve(rootDir, location);
-    }, "Error: Could not import this-does-not-exist from any of the following locations:");
+    }, "Could not import this-does-not-exist from any of the following locations:");
 
     testutils.assertCompilationError(options, expectedError, done);
   });

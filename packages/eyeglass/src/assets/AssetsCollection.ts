@@ -1,7 +1,7 @@
 import AssetsSource from "./AssetsSource";
 import * as stringUtils from "../util/strings";
 import { URI } from "../util/URI";
-import { Config } from "../util/Options";
+import { Config, AssetSourceOptions } from "../util/Options";
 import { SassImplementation } from "../util/SassImplementation";
 
 let assetRegisterTmpl = "@include asset-register(${namespace}, ${name}, ${sourcePath}, ${uri});\n";
@@ -23,7 +23,7 @@ export default class AssetsCollection {
     * @param    {Object} opts - the options to pass @see AssetsSource
     * @returns  {AssetsCollection} returns the instance of AssetsCollection for chaining
     */
-  addSource(src, opts): AssetsCollection {
+  addSource(src: string, opts: AssetSourceOptions): AssetsCollection {
     this.sources.push(new AssetsSource(src, opts));
     return this;
   }
@@ -33,7 +33,7 @@ export default class AssetsCollection {
     * @param    {String} name - the namespace to use
     * @returns  {String} the scss representation of the asset registration
     */
-  asAssetImport(name): string {
+  asAssetImport(name: string): string {
     // builds the scss to register all the assets
     // this will look something like...
     //  @import "eyeglass/assets";
@@ -63,7 +63,7 @@ export default class AssetsCollection {
     * Build a string suitable for caching an instance of this
     * @returns {String} the cache key
     */
-  cacheKey(name): string {
+  cacheKey(name: string): string {
     return this.sources.map(function (source) {
       return source.cacheKey(name);
     }).sort().join(":");
