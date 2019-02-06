@@ -6,6 +6,7 @@
         "outDir": "./lib",
         "allowJs": true,
         "noImplicitAny": true,
+        "noImplicitReturns": true,
         "noImplicitThis": true,
         "alwaysStrict": true,
         "strictBindCallApply": true,

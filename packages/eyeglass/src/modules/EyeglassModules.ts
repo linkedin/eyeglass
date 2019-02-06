@@ -195,6 +195,8 @@ export default class EyeglassModules {
           isEyeglassModule: isEyeglassMod,
           path: path.dirname(pkg.path)
         }, this.discoverModules.bind(this), isRoot);
+      } else {
+        return;
       }
     });
   }
@@ -356,6 +358,7 @@ export default class EyeglassModules {
           'failed to resolve module package %s',
           e
         )
+        return;
       }
     });
   }
@@ -457,6 +460,8 @@ function getHierarchyNodes(dependencies: ModuleBranch["dependencies"]) {
   if (dependencies) {
     // for each dependency, recurse and get it's hierarchy
     return Object.keys(dependencies).map((name) => getHierarchy(dependencies[name]));
+  } else {
+    return;
   }
 }
 
@@ -550,6 +555,8 @@ function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule:
         left: mod,
         right: finalModule
       };
+    } else {
+      return;
     }
   }).filter<DependencyVersionIssue>(isPresent);
 }

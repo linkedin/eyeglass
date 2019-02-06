@@ -111,7 +111,7 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
           if (mod.mainPath) {
             missingMessage += " or " + mod.mainPath;
           }
-          done(new Error(missingMessage));
+          return done(new Error(missingMessage));
         });
         return;
       }

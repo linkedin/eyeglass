@@ -37,7 +37,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         }
       });
     } else {
-      unreachable(sandbox, "sandbox");
+      return unreachable(sandbox, "sandbox");
     }
   }
 
