@@ -29,7 +29,7 @@ export class URI {
   path: string;
   search: string;
   hash: string;
-  constructor(uri, sep = null) {
+  constructor(uri: string, sep: "/" | "\\" | null = null) {
     this.sep = sep || stdSep;
     this.path = "";
     this.search = "";

@@ -130,7 +130,7 @@ function fileVariant(
   * @param    {String} uri - the URI to normalize
   * @returns  {String} the normalized URI
   */
-function normalizeURI(uri) {
+function normalizeURI(uri: string) {
   // update the separator to use the OS separator
   return uri.replace(/\//g, PATH_SEPARATOR);
 }

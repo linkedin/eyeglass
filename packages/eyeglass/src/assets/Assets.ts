@@ -54,7 +54,7 @@ export default class Assets implements Resolves, Installs {
     this.moduleCollections = [];
 
     // Expose these temporarily for back-compat reasons
-    function deprecate(method) {
+    function deprecate(method: string) {
       eyeglass.deprecate("0.8.3", "0.9.0", [
         "The assets." + method + " interface will be removed from the public API.",
         "If you currently use this method, please open an issue at",
@@ -75,21 +75,21 @@ export default class Assets implements Resolves, Installs {
   /**
     * @see AssetsCollection#asAssetImport
     */
-  asAssetImport(name): string {
+  asAssetImport(name: string): string {
     return this.collection.asAssetImport(name);
   }
 
   /**
     * @see AssetsCollection#addSource
     */
-  addSource(src, opts): AssetsCollection {
+  addSource(src: string, opts: AssetSourceOptions): AssetsCollection {
     return this.collection.addSource(src, opts);
   }
 
   /**
     * @see AssetsCollection#cacheKey
     */
-  cacheKey(name): string {
+  cacheKey(name: string): string {
     return this.collection.cacheKey(name);
   }
   /**
@@ -99,7 +99,7 @@ export default class Assets implements Resolves, Installs {
     * @param    {Object} opts - the options
     * @returns  {AssetsCollection} the instance of the AssetsCollection
     */
-  export(src, opts): AssetsCollection {
+  export(src: string, opts: AssetSourceOptions): AssetsCollection {
     let assets = new AssetsCollection(this.eyeglass.options);
     this.moduleCollections.push(assets);
     return assets.addSource(src, opts);

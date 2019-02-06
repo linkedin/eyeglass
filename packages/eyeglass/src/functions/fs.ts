@@ -18,7 +18,7 @@ function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
 const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let sassUtils = require("node-sass-utils")(sass);
 
-  function accessViolation(location) {
+  function accessViolation(location: string) {
     return sass.types.Error("Security violation: Cannot access " + location);
   }
 

@@ -7,9 +7,16 @@ import { IEyeglass } from "../IEyeglass";
 import { FunctionDeclarations, SassImplementation } from "../util/SassImplementation";
 import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
+import { Dict } from "../util/typescriptUtils";
 
 const rInvalidName = /\.(?:sass|s?css)$/;
 const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
+
+export interface DiscoverOptions {
+  isRoot: boolean;
+  dir: string;
+  pkg?: packageUtils.Package
+}
 
 export interface EyeglassModuleExports {
   name?: string;
@@ -131,7 +138,7 @@ interface IEyeglassModule {
    * eventually flattened with a semver resolution to select a single instance
    * of shared transitive dependencies.
    */
-  dependencies: Array<EyeglassModule>;
+  dependencies: {[key: string]: EyeglassModule};
   /**
    * Where the sass files are. `@import "<module name>"` would import the index
    * sass file from that directory. Imports of paths relative to the module
@@ -140,12 +147,12 @@ interface IEyeglassModule {
   sassDir?: string;
 }
 
-function isModuleReference(mod: unknown): mod is ModuleReference {
-  return typeof mod === "object" && !!mod["path"];
+function isModuleReference(mod: {path?: string}): mod is ModuleReference {
+  return typeof mod === "object" && !! mod["path"];
 }
 
 export default class EyeglassModule implements IEyeglassModule, EyeglassModuleExports {
-  dependencies: Array<EyeglassModule>;
+  dependencies: {[key: string]: EyeglassModule};
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
   main?: EyeglassModuleMain | undefined;
@@ -160,7 +167,11 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   /** only present after calling `init()` */
   assets?: AssetsCollection;
 
-  constructor(modArg: ModuleReference | ManualModuleOptions, discoverModules?, isRoot?: boolean) {
+  constructor(
+    modArg: ModuleReference | ManualModuleOptions,
+    discoverModules?:(opts: DiscoverOptions) => Dict<EyeglassModule>,
+    isRoot?: boolean
+  ) {
     // some defaults
     let mod = merge({
       eyeglass: {}
@@ -297,7 +308,7 @@ function getExportsFileFromOptions(options: EyeglassOptionInPackageJSON): string
   * @param   {String} modulePath - the path to the module
   * @returns {String} the export file to use
   */
-function getModuleExports(pkg: PackageJsonWithEyeglassOptions, modulePath): string | null {
+function getModuleExports(pkg: PackageJsonWithEyeglassOptions, modulePath: string): string | null {
   let exportsFile = getExportsFileFromOptions(pkg.eyeglass);
 
   if (exportsFile === false) {

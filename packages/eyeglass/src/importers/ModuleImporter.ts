@@ -2,12 +2,7 @@ import {readFileSync, existsSync} from "fs";
 import * as path from "path";
 import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";
-import { ImporterFactory } from "./ImporterFactory";
-
-interface ImportedFile {
-  contents: string;
-  file: string;
-}
+import { ImporterFactory, ImportedFile } from "./ImporterFactory";
 
 type ImportResultCallback =
   (err: Error | null, data?: ImportedFile) => void;

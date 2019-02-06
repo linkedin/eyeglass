@@ -160,8 +160,8 @@ interface SassNullFactory {
   NULL: SassNull;
 }
 export interface SassEnumerable {
-  getValue(index): SassValue;
-  setValue(index, value: SassValue): void;
+  getValue(index: number): SassValue;
+  setValue(index: number, value: SassValue): void;
   getLength(): number;
 }
 export interface SassList extends SassEnumerable {
@@ -172,8 +172,8 @@ export function isSassList(sass: SassImplementation, value: unknown): value is S
   return typeof value === "object" && value.constructor === sass.types.List;
 }
 export interface SassMap extends SassEnumerable {
-  getKey(index): string;
-  setKey(index, key: string): void;
+  getKey(index: number): string;
+  setKey(index: number, key: string): void;
 }
 export function isSassMap(sass: SassImplementation, value: unknown): value is SassMap {
   return typeof value === "object" && value.constructor === sass.types.Map;
@@ -238,11 +238,11 @@ interface SassTypes {
    */
   Null: SassNullFactory;
 
-  List(length, commaSeparator: boolean): SassList;
+  List(length: number, commaSeparator?: boolean): SassList;
 
-  Map(length): SassMap;
+  Map(length: number): SassMap;
 
-  Error(message): SassError;
+  Error(message: string): SassError;
 }
 
 export function isSassError(sass: SassImplementation, value: unknown): value is SassError {

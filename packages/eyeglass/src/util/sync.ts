@@ -18,17 +18,18 @@
 "use strict";
 
 import * as deasync from "deasync";
+import { Dict } from "./typescriptUtils";
 
 type ASynchronousFunction = (...args: any[]) => void;
 type SynchronousFunction = (...args: any[]) => any;
 export interface Sync {
   (fn: ASynchronousFunction): SynchronousFunction;
-  all: (obj: {[key: string]: ASynchronousFunction}) => {[key: string]: SynchronousFunction};
+  all: (obj: Dict<ASynchronousFunction>) => Dict<SynchronousFunction>;
 }
 
 const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
   return function() {
-    let result: any;
+    let result: unknown;
     let args = [].slice.call(arguments, 0);
     let last = args[args.length - 1];
 
@@ -41,7 +42,7 @@ const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
     // for some reason, there is a bridge object that shouldn't be on the args
     // replace it with our custom callback
     // turn the loop once, and then begin blocking until we resolve
-    function cb(res) {
+    function cb(res: unknown) {
       setTimeout(function() {
         result = res;
       }, 0);
@@ -63,11 +64,12 @@ const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
   };
 };
 
-function all(obj) {
+function all(obj: Dict<ASynchronousFunction>): Dict<SynchronousFunction> {
+  let syncAll: Dict<SynchronousFunction> = {};
   for (let name in obj) {
-    obj[name] = sync(obj[name]);
+    syncAll[name] = sync(obj[name]);
   }
-  return obj;
+  return syncAll;
 }
 
 const sync: Sync = Object.assign(makeSync, { all });

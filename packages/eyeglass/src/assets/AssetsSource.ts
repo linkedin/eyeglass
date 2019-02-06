@@ -67,7 +67,7 @@ class AssetsSource {
     * @param    {String} namespace - the namespace
     * @returns  {Object} the object containing the namespace and array of discovered files
     */
-  getAssets(namespace): DiscoveredAssets {
+  getAssets(namespace: string): DiscoveredAssets {
     namespace = this.name || namespace;
     let files = glob.sync(this.pattern, this.globOpts).map((file) => {
       file = URI.preserve(file);

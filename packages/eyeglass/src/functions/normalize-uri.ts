@@ -4,7 +4,7 @@ import { SassImplementation, SassValue, SassFunctionCallback, isSassString, type
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
 const normalizeURI = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
-  let methods = {
+  let methods: FunctionDeclarations = {
     "eyeglass-uri-preserve($uri)": function($uri: SassValue, done: SassFunctionCallback) {
       if (!isSassString(sass, $uri)) {
         return done(typeError(sass, "string", $uri));
@@ -33,7 +33,7 @@ const normalizeURI = function(eyeglass: IEyeglass, sass: SassImplementation): Fu
       if (!isSassString(sass, $uri)) {
         return done(typeError(sass, "string", $uri));
       }
-      let type = $type.getValue();
+      let type = $type.getValue() as "web" | "system" | "preserve" | "restore";
       let uri = $uri.getValue();
       // normalize the uri for the given type
       uri = URI[type](uri);

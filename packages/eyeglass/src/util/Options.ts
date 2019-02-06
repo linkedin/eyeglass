@@ -7,6 +7,7 @@ import { DeprecateFn } from "./deprecator";
 import { isSassImplementation, Options as SassOptions, SassImplementation } from "./SassImplementation";
 import { URI } from "./URI";
 import merge = require("lodash.merge");
+import { Importer } from "node-sass";
 
 export interface AssetSourceOptions {
   /**
@@ -137,7 +138,7 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
   fsSandbox?: ExtraSandboxTypes | false | Array<string>;
 }
 
-interface DeprecatedOptions {
+export interface SimpleDeprecatedOptions {
   /** @deprecated Since 0.8. */
   root?: string;
   /** @deprecated Since 0.8 */
@@ -148,6 +149,9 @@ interface DeprecatedOptions {
   buildDir?: string;
   /** @deprecated Since 0.8 */
   strictModuleVersions?: boolean;
+}
+
+export interface DeprecatedOptions extends SimpleDeprecatedOptions {
   /** @deprecated Since 0.8 */
   assetsHttpPrefix?: string;
   /** @deprecated Since 0.8 */
@@ -161,12 +165,35 @@ export interface EyeglassOptions {
 export type Options = (SassOptions & EyeglassOptions) | (DeprecatedOptions & SassOptions & EyeglassOptions) ;
 export type Config = SassOptions & {
   eyeglass: EyeglassConfig;
-  assetsCache?: (cacheKey: string, lazyValue: () => string) => void;
+  assetsCache?: (cacheKey: string, lazyValue: () => string) => string;
 };
 
 /* eslint-disable-next-line no-unused-vars */
-export default function Options(this: Config, ...args: [Options, DeprecateFn, SassImplementation]) {
-  merge(this, getSassOptions(...args));
+export default class implements Config {
+  file?: string;
+  data?: string;
+  importer?: Importer | Importer[];
+  functions?: { [key: string]: Function };
+  includePaths?: string[];
+  indentedSyntax?: boolean;
+  indentType?: string;
+  indentWidth?: number;
+  linefeed?: string;
+  omitSourceMapUrl?: boolean;
+  outFile?: string;
+  outputStyle?: "compact" | "compressed" | "expanded" | "nested";
+  precision?: number;
+  sourceComments?: boolean;
+  sourceMap?: boolean | string;
+  sourceMapContents?: boolean;
+  sourceMapEmbed?: boolean;
+  sourceMapRoot?: string;
+  eyeglass: EyeglassConfig;
+  assetsCache?: (cacheKey: string, lazyValue: () => string) => string;
+
+  constructor(...args: [Options, DeprecateFn, SassImplementation]) {
+    merge(this, getSassOptions(...args));
+  }
 }
 
 function eyeglassOptionsFromNodeSassArg(arg: SassImplementation | undefined, deprecate: DeprecateFn): Pick<EyeglassConfig, "engines"> | void {
@@ -206,7 +233,7 @@ function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & 
     "buildDir",
     "httpRoot",
     "strictModuleVersions"
-  ].forEach(function(option: keyof DeprecatedOptions) {
+  ].forEach(function(option: keyof SimpleDeprecatedOptions) {
     if (eyeglassOptions[option] === undefined && sassOptions[option] !== undefined) {
       deprecate("0.8.0", "0.9.0", [
         "`" + option + "` should be passed into the eyeglass options rather than the sass options:",

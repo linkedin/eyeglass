@@ -4,6 +4,7 @@
         "moduleResolution": "node",
         "outDir": "./lib",
         "allowJs": true,
+        "noImplicitAny": true,
         "lib": [
             "es6"
         ],

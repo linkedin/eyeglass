@@ -7,9 +7,12 @@ import * as packageUtils from "../util/package";
 import resolve from "../util/resolve";
 import { SimpleCache } from "../util/SimpleCache";
 import { URI } from "../util/URI";
-import EyeglassModule, { ModuleSpecifier } from "./EyeglassModule";
+import EyeglassModule, { ModuleSpecifier, DiscoverOptions } from "./EyeglassModule";
 import merge = require("lodash.merge");
 import { PackageJson } from "package-json";
+import { IEyeglass } from "../IEyeglass";
+import { SassImplementation } from "../util/SassImplementation";
+import { Dict } from "../util/typescriptUtils";
 
 export const ROOT_NAME = ":root";
 
@@ -17,9 +20,7 @@ interface ModuleCollection {
   [moduleName: string]: Array<EyeglassModule>;
 }
 
-interface ModuleMap {
-  [moduleName: string]: EyeglassModule;
-}
+type ModuleMap = Dict<EyeglassModule>;
 
 type Dependencies = PackageJson["dependencies"];
 
@@ -131,7 +132,7 @@ export default class EyeglassModules {
     * @param   {Eyeglass} eyeglass - the eyeglass instance
     * @param   {Function} sass - the sass engine
     */
-  init(eyeglass, sass) {
+  init(eyeglass: IEyeglass, sass: SassImplementation) {
     this.list.forEach((mod) => mod.init(eyeglass, sass));
   };
 
@@ -142,7 +143,7 @@ export default class EyeglassModules {
     * @param   {String} origin - the location of the originating request
     * @returns {Object} the module reference if access is granted, null if access is prohibited
     */
-  access(name, origin) {
+  access(name: string, origin: string) {
     let mod = this.find(name);
 
     // if we have a module, ensure that we can access it from the origin
@@ -161,7 +162,7 @@ export default class EyeglassModules {
     * @param   {String} name - the module name to find
     * @returns {Object} the module reference
     */
-  find(name) {
+  find(name: string) {
     return this.getFinalModule(name);
   }
 
@@ -254,7 +255,7 @@ export default class EyeglassModules {
   private pruneModuleTree(moduleTree: EyeglassModule): ModuleBranch {
     let finalModule = moduleTree.isEyeglassModule && this.find(moduleTree.name);
     // normalize the branch
-    let branch = {
+    let branch: ModuleBranch = {
       name: finalModule && finalModule.name || moduleTree.name,
       version: finalModule && finalModule.version || moduleTree.version,
       path: finalModule && finalModule.path || moduleTree.path,
@@ -291,7 +292,7 @@ export default class EyeglassModules {
     * @param    {Object} options - the options to use
     * @returns  {Object} the discovered modules
     */
-  private discoverModules(options: { isRoot: boolean; dir: string; pkg: packageUtils.Package }) {
+  private discoverModules(options: DiscoverOptions): Dict<EyeglassModule> {
     let pkg = options.pkg || packageUtils.getPackage(options.dir);
 
     let dependencies: { [dep: string]: string } = {};
@@ -310,7 +311,7 @@ export default class EyeglassModules {
     }
 
     // for each dependency...
-    let dependentModules = Object.keys(dependencies).reduce((modules, dependency) => {
+    let dependentModules: Dict<EyeglassModule> = Object.keys(dependencies).reduce((modules: Dict<EyeglassModule>, dependency) => {
       // resolve the package.json
       let resolvedPkg = this.resolveModulePackage(
         packageUtils.getPackagePath(dependency),
@@ -367,7 +368,7 @@ export default class EyeglassModules {
     * @param   {String} name - the module name to find
     * @returns {Object} the module reference
     */
-  private getFinalModule(name): EyeglassModule {
+  private getFinalModule(name: string): EyeglassModule {
     return this.collection[name];
   }
 
@@ -391,13 +392,13 @@ export default class EyeglassModules {
     * @param   {String} origin - the location of the originating request
     * @returns {Boolean} whether or not access is permitted
     */
-  private canAccessModule(name, origin) {
+  private canAccessModule(name: string, origin: string) {
     // eyeglass can be imported by anyone, regardless of the dependency tree
     if (name === "eyeglass") {
       return true;
     }
 
-    let canAccessFrom = (origin) => {
+    let canAccessFrom = (origin: string) => {
       // find the nearest package for the origin
       let pkg = packageUtils.findNearestPackage(origin);
       let cacheKey = pkg + "!" + origin;
@@ -479,9 +480,9 @@ function getHierarchy(branch: ModuleBranch): archy.Data {
   * @param  {String} dir - the path to search for
   * @returns {Object} the branches of the tree that contain the path
   */
-function findBranchesByPath(tree, dir) {
+function findBranchesByPath(tree: Dict<ModuleBranch>, dir: string) {
   // iterate over the tree
-  return Object.keys(tree).reduce(function(branches, name) {
+  return Object.keys(tree).reduce(function(branches, name: string) {
     let mod = tree[name];
     // if the module path matches the search path, push it onto our results
     if (mod.path === dir) {
@@ -492,7 +493,7 @@ function findBranchesByPath(tree, dir) {
       branches.push.apply(branches, findBranchesByPath(mod.dependencies, dir));
     }
     return branches;
-  }, []);
+  }, new Array<ModuleBranch>());
 }
 
 /**
@@ -527,7 +528,7 @@ function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {
   * @param   {String} finalModule - the final module to check against
   * @returns {Array<Object>} the array of any issues found
   */
-function getDependencyVersionIssues(modules, finalModule) {
+function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule: EyeglassModule) {
   return modules.map(function(mod) {
     // if the versions are not identical, log it
     if (mod.version !== finalModule.version) {

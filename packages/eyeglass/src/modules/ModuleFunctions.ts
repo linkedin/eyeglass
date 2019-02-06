@@ -39,7 +39,7 @@ function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations) 
   });
 }
 
-export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplementation, _options, existingFunctions: FunctionDeclarations): FunctionDeclarations {
+export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplementation, _options: any, existingFunctions: FunctionDeclarations): FunctionDeclarations {
   let functions: FunctionDeclarations = eyeglass.modules.list.reduce(function(fns, mod) {
     if (!mod.functions) {
       return fns;
