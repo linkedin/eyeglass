@@ -1,7 +1,7 @@
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";
 import merge = require("lodash.merge");
-import { Importer, ImporterReturnType } from "node-sass";
+import { Importer, ImporterReturnType, AsyncImporter } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Config } from "../util/Options";
@@ -27,7 +27,7 @@ export default class ImportUtilities {
       }
     });
   }
-  static createImporter(importer: Importer): Importer {
+  static createImporter(importer: AsyncImporter): AsyncImporter {
     return function (uri, prev, done) {
       uri = URI.web(uri);
       prev = URI.system(prev);

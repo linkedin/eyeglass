@@ -227,13 +227,8 @@ function includePathsFromEnv(): Array<string> {
 
 function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & SassOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn) {
   // migrates the following properties from sassOptions to eyeglassOptions
-  [
-    "root",
-    "cacheDir",
-    "buildDir",
-    "httpRoot",
-    "strictModuleVersions"
-  ].forEach(function(option: keyof SimpleDeprecatedOptions) {
+  const toMigrate: Array<keyof SimpleDeprecatedOptions> = [ "root", "cacheDir", "buildDir", "httpRoot", "strictModuleVersions" ];
+  toMigrate.forEach(function(option) {
     if (eyeglassOptions[option] === undefined && sassOptions[option] !== undefined) {
       deprecate("0.8.0", "0.9.0", [
         "`" + option + "` should be passed into the eyeglass options rather than the sass options:",

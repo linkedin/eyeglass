@@ -1,4 +1,4 @@
-import { Importer } from "node-sass";
+import { Importer, AsyncImporter } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { Config } from "../util/Options";
 import { SassImplementation } from "../util/SassImplementation";
@@ -13,4 +13,4 @@ export type ImporterFactory = (
   sass: SassImplementation,
   options: Config,
   fallbackImporter?: Importer | Array<Importer> | undefined
-) => Importer;
+) => AsyncImporter;

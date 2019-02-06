@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { Importer } from "node-sass";
+import { Importer, AsyncImporter } from "node-sass";
 import EyeglassModule from "../modules/EyeglassModule";
 import * as packageUtils from "../util/package";
 import { URI } from "../util/URI";
@@ -17,7 +17,7 @@ interface HasAssets {
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
 const rAssetsImport = /^(?:([^/]+)\/)?assets$/;
-const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter: Importer) {
+const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter: Importer | Array<Importer>): AsyncImporter {
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);

@@ -9,6 +9,7 @@
         "noImplicitThis": true,
         "alwaysStrict": true,
         "strictBindCallApply": true,
+        "strictFunctionTypes": true,
         "lib": [
             "es6"
         ],
