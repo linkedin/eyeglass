@@ -13,10 +13,12 @@ type Importer = AsyncImporter | SyncImporter;
 interface SyncContext {
     options: Options;
     callback: undefined;
+    [data: string]: any;
 }
 interface AsyncContext {
     options: Options;
     callback: (data: ImporterReturnType) => void;
+    [data: string]: any;
 }
 interface Options {
     file?: string;

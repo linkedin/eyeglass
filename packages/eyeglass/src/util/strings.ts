@@ -32,6 +32,8 @@ export function unquoteJS(sass: SassImplementation, string: string | SassValue):
   }
 }
 
+export function quoteSass(sass: SassImplementation, string: string | SassValue): SassString;
+export function quoteSass(sass: SassImplementation, string: undefined): undefined;
 export function quoteSass(sass: SassImplementation, string: string | SassValue | undefined): SassString | undefined {
   if (typeof string === "string") {
     if (rUnquote.test(string)) {
@@ -53,6 +55,9 @@ export function quoteSass(sass: SassImplementation, string: string | SassValue |
   }
 }
 
+export function quoteJS(sass: SassImplementation, string: string | SassValue): string;
+export function quoteJS(sass: SassImplementation, string: undefined): undefined;
+export function quoteJS(sass: SassImplementation, string: string | undefined): string | undefined;
 export function quoteJS(sass: SassImplementation, string: string | SassValue | undefined): string | undefined {
   if (typeof string === "string") {
     if (rUnquote.test(string)) {

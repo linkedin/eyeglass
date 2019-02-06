@@ -7,7 +7,7 @@ import { IEyeglass } from "../IEyeglass";
 import { FunctionDeclarations, SassImplementation } from "../util/SassImplementation";
 import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
-import { Dict } from "../util/typescriptUtils";
+import { Dict, isPresent } from "../util/typescriptUtils";
 
 const rInvalidName = /\.(?:sass|s?css)$/;
 const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
@@ -155,13 +155,13 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   dependencies: {[key: string]: EyeglassModule};
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
-  main?: EyeglassModuleMain | undefined;
-  mainPath?: string | undefined;
   name: string;
   path: string;
   rawName: string;
+  version: string | undefined;
   sassDir?: string;
-  version: string;
+  main?: EyeglassModuleMain | undefined;
+  mainPath?: string | undefined;
   /** only present after calling `init()` */
   functions?: FunctionDeclarations;
   /** only present after calling `init()` */
@@ -169,8 +169,8 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
 
   constructor(
     modArg: ModuleReference | ManualModuleOptions,
-    discoverModules?:(opts: DiscoverOptions) => Dict<EyeglassModule>,
-    isRoot?: boolean
+    discoverModules?:(opts: DiscoverOptions) => Dict<EyeglassModule> | null,
+    isRoot: boolean = false
   ) {
     // some defaults
     let mod = merge({
@@ -195,7 +195,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
         mod,
         {
           path: modulePath,
-          name: getModuleName(pkg),
+          name: getModuleName(pkg.data),
           rawName: pkg.data.name,
           version: pkg.data.version,
           // only resolve dependencies if we were given a discoverModules function
@@ -226,6 +226,16 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     // set the rawName if it's not already set
     mod.rawName = mod.rawName || mod.name;
 
+    // these are handled by merge but are here to make the compiler happy
+    // TODO: Rewrite this to not use the intermediate object.
+    this.dependencies = mod.dependencies;
+    this.eyeglass = mod.eyeglass;
+    this.isEyeglassModule = mod.isEyeglassModule;
+    this.name = mod.name;
+    this.path = mod.path;
+    this.rawName = mod.rawName;
+    this.version = mod.version;
+
     // merge the module properties into the instance
     merge(this, mod);
   }
@@ -246,8 +256,8 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     * @param   {Object} pkg - the package.json
     * @returns {Boolean} whether or not it is an eyeglass module
     */
-  static isEyeglassModule(pkg: PackageJson | undefined): boolean {
-    return !!(pkg && includes(pkg.keywords, EYEGLASS_KEYWORD));
+  static isEyeglassModule(pkg: PackageJson | undefined | null): boolean {
+    return !!(isPresent(pkg) && includes(pkg.keywords, EYEGLASS_KEYWORD));
   }
 }
 
@@ -259,9 +269,9 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   * @param   {Object} pkg - the package.json reference
   * @returns {String} the name of the module
   */
-function getModuleName(pkg: packageUtils.Package<PackageEyeglassOption>) {
+function getModuleName(pkg: PackageJson & PackageEyeglassOption) {
   // check for `eyeglass.name` first, otherwise use `name`
-  return normalizeEyeglassOptions(pkg.data.eyeglass).name || pkg.data.name;
+  return normalizeEyeglassOptions(pkg.eyeglass).name || pkg.name;
 }
 
 /**

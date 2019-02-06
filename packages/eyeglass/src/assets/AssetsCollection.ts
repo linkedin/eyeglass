@@ -33,7 +33,7 @@ export default class AssetsCollection {
     * @param    {String} name - the namespace to use
     * @returns  {String} the scss representation of the asset registration
     */
-  asAssetImport(name: string): string {
+  asAssetImport(name: string | undefined): string {
     // builds the scss to register all the assets
     // this will look something like...
     //  @import "eyeglass/assets";

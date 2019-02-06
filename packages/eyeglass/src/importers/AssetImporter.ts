@@ -6,32 +6,34 @@ import { URI } from "../util/URI";
 import { ImporterFactory } from "./ImporterFactory";
 import ImportUtilities from "./ImportUtilities";
 import { ROOT_NAME } from "../modules/EyeglassModules";
+import { isPresent } from "../util/typescriptUtils";
 
 interface HasAssets {
   name?: string;
   assets?: {
-    asAssetImport: (name: string) => string;
+    asAssetImport: (name: string | undefined) => string;
     cacheKey: (name: string) => string;
   }
 }
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`
 const rAssetsImport = /^(?:([^/]+)\/)?assets$/;
-const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter: Importer | Array<Importer>): AsyncImporter {
+const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter?: AsyncImporter | Array<AsyncImporter>): AsyncImporter {
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
 
     let isRealFile = existsSync(prev);
-    let mod: EyeglassModule;
+    let mod: EyeglassModule | null;
 
     function importAssetsFor(mod: HasAssets) {
       let contents;
       function getAssetImport() {
+        // XXX what is the correct behavior for when mod.name isn't found?
         return mod.assets ? mod.assets.asAssetImport(mod.name) : "";
       }
       // allow build tools to specify a function to cache the imports
-      if (typeof options.assetsCache === "function") {
+      if (isPresent(mod.assets) && isPresent(options.assetsCache)) {
         contents = options.assetsCache(
           mod.assets.cacheKey(mod.name || ROOT_NAME),
           getAssetImport

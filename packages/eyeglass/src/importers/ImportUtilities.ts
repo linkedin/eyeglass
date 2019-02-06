@@ -1,21 +1,23 @@
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";
 import merge = require("lodash.merge");
-import { Importer, ImporterReturnType, AsyncImporter } from "node-sass";
+import { Importer, ImporterReturnType, AsyncImporter, AsyncContext, SyncContext } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Config } from "../util/Options";
-import { unreachable } from "../util/assertions";
+import { isPresent, Dict } from "../util/typescriptUtils";
 import { ImportedFile } from "./ImporterFactory";
+
+type ImportContext = AsyncContext & {eyeglass: {imported: Dict<boolean>}};
 
 export default class ImportUtilities {
   root: string;
   eyeglass: IEyeglass;
   sass: SassImplementation;
-  fallbackImporter: Importer | Array<Importer>;
+  fallbackImporter: AsyncImporter | Array<AsyncImporter> | undefined;
   options: Config;
-  context: any;
-  constructor(eyeglass: IEyeglass, sass: SassImplementation, options: Config, fallbackImporter: Importer | Array<Importer> | undefined, context: any) {
+  context: ImportContext;
+  constructor(eyeglass: IEyeglass, sass: SassImplementation, options: Config, fallbackImporter: AsyncImporter | Array<AsyncImporter> | undefined, context: AsyncContext) {
     this.root = options.eyeglass.root;
     this.eyeglass = eyeglass;
     this.sass = sass;
@@ -45,14 +47,14 @@ export default class ImportUtilities {
       done(data);
     }
   }
-  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportUtilities) => void) {
+  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportContext) => void) {
     if (Array.isArray(this.fallbackImporter)) {
       if (this.fallbackImporter.length > 0) {
         this.fallbackNth(uri, prev, 0, done, noFallback);
       } else {
         noFallback.call(this.context);
       }
-    } else if (this.fallbackImporter) {
+    } else if (isPresent(this.fallbackImporter)) {
       this.fallbackImporter.call(this.context, uri, prev, (result: ImporterReturnType) => {
         if (result === this.sass.NULL || !result) {
           noFallback.call(this.context);

@@ -113,7 +113,7 @@ function fileVariant(
   if (path.ext && !SASS_FILE_EXT.test(path.ext)) {
     path.base = path.base + path.ext;
     path.name = path.name + path.ext;
-    path.ext = undefined;
+    path.ext = "";
   }
   if (!path.ext) {
     path.ext = extension;

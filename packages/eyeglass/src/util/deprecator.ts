@@ -4,7 +4,7 @@ const DEFAULT_VERSION = "0.0.0";
 
 export class Deprecator {
   ignoreDeprecations: string | undefined;
-  enabled: boolean;
+  enabled: boolean | undefined;
   constructor(options: Options) {
     this.ignoreDeprecations = options && options.eyeglass && options.eyeglass.ignoreDeprecations;
   }

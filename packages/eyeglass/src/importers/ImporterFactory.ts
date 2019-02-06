@@ -12,5 +12,5 @@ export type ImporterFactory = (
   eyeglass: IEyeglass,
   sass: SassImplementation,
   options: Config,
-  fallbackImporter?: Importer | Array<Importer> | undefined
+  fallbackImporter?: AsyncImporter | Array<AsyncImporter> | undefined
 ) => AsyncImporter;

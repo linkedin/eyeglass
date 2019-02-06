@@ -12,7 +12,7 @@ import merge = require("lodash.merge");
 import { PackageJson } from "package-json";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
-import { Dict } from "../util/typescriptUtils";
+import { Dict, isPresent } from "../util/typescriptUtils";
 
 export const ROOT_NAME = ":root";
 
@@ -35,7 +35,7 @@ interface DependencyVersionIssue {
 
 interface ModuleBranch {
   name: string;
-  version: string;
+  version: string | undefined;
   path: string;
   dependencies: {
     [moduleName: string]: ModuleBranch;
@@ -62,8 +62,8 @@ export default class EyeglassModules {
   };
   cache: {
     access: SimpleCache<boolean>;
-    modules: SimpleCache<EyeglassModule>;
-    modulePackage: SimpleCache<string>;
+    modules: SimpleCache<EyeglassModule | undefined>;
+    modulePackage: SimpleCache<string | undefined>;
   };
   collection: ModuleMap;
   list: EyeglassModule[];
@@ -92,7 +92,7 @@ export default class EyeglassModules {
     dir = packageUtils.findNearestPackage(path.resolve(dir));
 
     // resolve the current location into a module tree
-    let moduleTree = this.resolveModule(dir, true);
+    let moduleTree = this.resolveModule(dir, true)!;
 
     // if any modules were passed in, add them to the module tree
     if (modules && modules.length) {
@@ -211,9 +211,9 @@ export default class EyeglassModules {
     let deduped: ModuleMap = {};
     for (let name of Object.keys(modules)) {
       // first sort our modules by version
-      let versions = modules[name].sort((a, b) => semver.rcompare(a.version, b.version));
+      let versions = modules[name].sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
       // then take the highest version we found
-      deduped[name] = versions.shift();
+      deduped[name] = versions.shift()!;
       // check for any version issues
       this.issues.dependencies.versions.push.apply(
         this.issues.dependencies.versions,
@@ -236,7 +236,7 @@ export default class EyeglassModules {
         // if `eyeglass.needs` is not present...
         // add the module to the missing engines list
         this.issues.engine.missing.push(mod);
-      } else if (!semver.satisfies(this.eyeglass.version, mod.eyeglass.needs)) {
+      } else if (!semver.satisfies(this.eyeglass.version!, mod.eyeglass.needs)) {
         // if the current version of eyeglass does not satify the need...
         // add the module to the incompatible engines list
         this.issues.engine.incompatible.push(mod);
@@ -257,7 +257,7 @@ export default class EyeglassModules {
     // normalize the branch
     let branch: ModuleBranch = {
       name: finalModule && finalModule.name || moduleTree.name,
-      version: finalModule && finalModule.version || moduleTree.version,
+      version: (finalModule && finalModule.version || moduleTree.version),
       path: finalModule && finalModule.path || moduleTree.path,
       dependencies: undefined
     };
@@ -292,7 +292,7 @@ export default class EyeglassModules {
     * @param    {Object} options - the options to use
     * @returns  {Object} the discovered modules
     */
-  private discoverModules(options: DiscoverOptions): Dict<EyeglassModule> {
+  private discoverModules(options: DiscoverOptions): Dict<EyeglassModule> | null {
     let pkg = options.pkg || packageUtils.getPackage(options.dir);
 
     let dependencies: { [dep: string]: string } = {};
@@ -345,7 +345,7 @@ export default class EyeglassModules {
     *
     * @see resolve()
     */
-  private resolveModulePackage(id: string, parent: string, parentDir: string): string {
+  private resolveModulePackage(id: string, parent: string, parentDir: string): string | undefined {
     let cacheKey = "resolveModulePackage~" + id + "!" + parent + "!" + parentDir;
     return this.cache.modulePackage.getOrElse(cacheKey, function () {
       try {
@@ -413,6 +413,8 @@ export default class EyeglassModules {
           // OR it's an immediate dependency (branch.dependencies[name])
           if (branch.name === name || branch.dependencies && branch.dependencies[name]) {
             return true;
+          } else {
+            return false;
           }
         });
 
@@ -542,12 +544,13 @@ function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule:
     }
     // check that the current module version is satisfied by the finalModule version
     // if not, push an error object onto the results
-    if (!semver.satisfies(mod.version, "^" + finalModule.version)) {
+    if (!semver.satisfies(mod.version || "0", "^" + (finalModule.version || "0"))) {
       return {
         name: mod.name,
         left: mod,
         right: finalModule
       };
     }
-  });
+  }).filter<DependencyVersionIssue>(isPresent);
 }
+

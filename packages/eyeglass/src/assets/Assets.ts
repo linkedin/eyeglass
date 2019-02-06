@@ -9,6 +9,7 @@ import { URI } from "../util/URI";
 
 import AssetsCollection from "./AssetsCollection";
 import AssetsSource from "./AssetsSource";
+import { isPresent } from "../util/typescriptUtils";
 
 type EnsureSymlinkSync = (srcFile: string, destLink: string) => void;
 const ensureSymlink: EnsureSymlinkSync = require("ensure-symlink");
@@ -17,7 +18,8 @@ interface Resolution {
   path: string;
   query?: string;
 }
-type ResolverCallback = (error: Error | null, result?: Resolution) => any;
+
+type ResolverCallback = (error: Error | null, result: Resolution | undefined) => any;
 type Resolver = (assetFile: string, assetUri: string, cb: ResolverCallback) => void;
 type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver, cb: ResolverCallback) => void;
 
@@ -75,7 +77,7 @@ export default class Assets implements Resolves, Installs {
   /**
     * @see AssetsCollection#asAssetImport
     */
-  asAssetImport(name: string): string {
+  asAssetImport(name: string | undefined): string {
     return this.collection.asAssetImport(name);
   }
 
@@ -137,7 +139,7 @@ export default class Assets implements Resolves, Installs {
       );
 
       assets.resolve(filepath, fullUri, function(error, assetInfo) {
-        if (error) {
+        if (error || !isPresent(assetInfo)) {
           cb(error);
         } else {
           // if relativeTo is set

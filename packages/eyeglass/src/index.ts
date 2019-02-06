@@ -11,11 +11,11 @@ import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
 import {PackageJson} from "package-json";
 import { SassImplementation } from "./util/SassImplementation";
-import {Options as SassOptions} from "node-sass";
+import {Options as SassOptions, AsyncImporter} from "node-sass";
 const pkg: PackageJson = require("../package.json");
 
 class Eyeglass implements IEyeglass {
-  static VERSION = pkg.version;
+  static VERSION = pkg.version!;
 
   deprecate: DeprecateFn;
   options: Config;
@@ -89,7 +89,7 @@ function addImporters(this: IEyeglass) {
     this,
     this.options.eyeglass.engines.sass,
     this.options,
-    this.options.importer
+    this.options.importer as AsyncImporter
   );
   let assetImporter = AssetImporter(
     this,
@@ -153,7 +153,7 @@ module.exports = function(options: Opts, deprecatedNodeSassArg?: SassImplementat
   }
 }
 
-module.exports.VERSION = pkg.version;
+module.exports.VERSION = pkg.version!;
 
 module.exports.Eyeglass = function(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
   let eyeglass = new Eyeglass(options, deprecatedNodeSassArg);

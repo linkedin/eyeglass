@@ -191,8 +191,10 @@ export default class implements Config {
   eyeglass: EyeglassConfig;
   assetsCache?: (cacheKey: string, lazyValue: () => string) => string;
 
-  constructor(...args: [Options, DeprecateFn, SassImplementation]) {
-    merge(this, getSassOptions(...args));
+  constructor(...args: [Options, DeprecateFn, SassImplementation | undefined]) {
+    let config = getSassOptions(...args)
+    this.eyeglass = config.eyeglass; // this makes the compiler happy.
+    merge(this, config);
   }
 }
 
@@ -291,11 +293,11 @@ function defaultSassOptions(options: SassOptions): SassOptions {
   return options;
 }
 
-function defaultEyeglassOptions(options: Partial<EyeglassSpecificOptions>): EyeglassSpecificOptions {
+export function resolveConfig(options: Partial<EyeglassSpecificOptions>): EyeglassConfig {
   // default root dir
   defaultValue(options, "root", () => process.cwd());
   // default cache dir
-  defaultValue(options, "cacheDir", () => path.join(options.root, ".eyeglass_cache"));
+  defaultValue(options, "cacheDir", () => path.join(options.root!, ".eyeglass_cache"));
   // default engines
   defaultValue(options, "engines", () => {return {};});
   defaultValue(options.engines!, "sass", () => require("node-sass"))
@@ -307,11 +309,28 @@ function defaultEyeglassOptions(options: Partial<EyeglassSpecificOptions>): Eyeg
   defaultValue(options, "enableImportOnce", () => true);
   // use global module caching by default
   defaultValue(options, "useGlobalModuleCache", () => true);
-  // default to no fs access
-  defaultValue(options, "fsSandbox", () => []);
 
-  return <EyeglassSpecificOptions>options;
+  options.fsSandbox = normalizeFsSandbox(options.fsSandbox, options.root!);
+  return <EyeglassConfig>options;
 }
+
+function normalizeFsSandbox(sandboxOption: Partial<EyeglassSpecificOptions>["fsSandbox"], root: string): EyeglassConfig["fsSandbox"] {
+  let fsSandbox: false | Array<string>;
+  if (typeof sandboxOption === "undefined") {
+    // default to no fs access
+    fsSandbox = [];
+  } else if (sandboxOption === true) {
+    // support simple enabling of the sandbox.
+    fsSandbox = [root];
+  } else if (typeof sandboxOption === "string") {
+    // support simple strings instead of requiring a list for even a single dir.
+    fsSandbox = [sandboxOption];
+  } else {
+    fsSandbox = sandboxOption;
+  }
+  return fsSandbox;
+}
+
 
 function normalizeIncludePaths(
   includePaths: string | Array<string> | undefined,
@@ -331,20 +350,6 @@ function normalizeIncludePaths(
 
   // make all relative include paths absolute
   return includePaths.map((dir) => path.resolve(baseDir, URI.system(dir)));
-}
-
-function normalizeEyeglassOptions(eyeglassOptions: EyeglassSpecificOptions): EyeglassConfig {
-  let fsSandbox: false | Array<string>;
-  if (eyeglassOptions.fsSandbox === true) {
-    // support simple enabling of the sandbox.
-    fsSandbox = [eyeglassOptions.root];
-  } else if (typeof eyeglassOptions.fsSandbox === "string") {
-    // support simple strings instead of requiring a list for even a single dir.
-    fsSandbox = [eyeglassOptions.fsSandbox];
-  } else {
-    fsSandbox = eyeglassOptions.fsSandbox;
-  }
-  return Object.assign(<EyeglassConfig>eyeglassOptions, { fsSandbox });
 }
 
 function normalizeSassOptions(sassOptions: SassOptions, eyeglassOptions: EyeglassConfig): Config {
@@ -398,9 +403,9 @@ function getSassOptions(
   }
 
   defaultSassOptions(sassOptions);
-  defaultEyeglassOptions(eyeglassOptions);
+  resolveConfig(eyeglassOptions);
 
-  return normalizeSassOptions(sassOptions, normalizeEyeglassOptions(eyeglassOptions));
+  return normalizeSassOptions(sassOptions, resolveConfig(eyeglassOptions));
 }
 
 function defaultValue<

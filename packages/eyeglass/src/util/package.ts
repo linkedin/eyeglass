@@ -6,7 +6,7 @@ import { unreachable } from './assertions';
 import { URI } from './URI';
 
 let PACKAGE_JSON = "package.json";
-export function getPackageData<ExtraPackageData = never>(pkgPath: string): PackageJson & ExtraPackageData {
+export function getPackageData<ExtraPackageData = never>(pkgPath: string): null | (PackageJson & ExtraPackageData) {
   try {
     return require(pkgPath);
   } catch (e) {
@@ -17,7 +17,7 @@ export function getPackageData<ExtraPackageData = never>(pkgPath: string): Packa
 
 export interface Package<ExtraPackageData = {}> {
   path: string;
-  data: PackageJson & ExtraPackageData;
+  data: null | (PackageJson & ExtraPackageData);
 }
 
 export function getPackage<ExtraPackageData = {}>(dir: string): Package<ExtraPackageData> {

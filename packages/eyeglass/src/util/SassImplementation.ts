@@ -35,7 +35,10 @@ export interface FunctionDeclarations {
 }
 
 export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
-export function isSassValue(sass: SassImplementation, value: any): value is SassValue {
+export function isSassValue(
+  sass: SassImplementation,
+  value: any
+): value is SassValue {
   if (value && typeof value === "object") {
     return isSassNull(sass, value)
         || isSassNumber(sass, value)
@@ -91,7 +94,7 @@ export function toString(sass: SassImplementation, value: SassValue): string {
   } else if (isSassNull(sass, value)) {
     return "";
   } else {
-    unreachable();
+    return unreachable();
   }
 }
 
@@ -102,14 +105,14 @@ export interface SassNumber {
   setUnit(u: string): void;
 }
 export function isSassNumber(sass: SassImplementation, value: unknown): value is SassNumber {
-  return typeof value === "object" && value.constructor === sass.types.Number;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.Number;
 }
 export interface SassString {
   getValue(): string;
   setValue(s: string): void;
 }
 export function isSassString(sass: SassImplementation, value: unknown): value is SassString {
-  return typeof value === "object" && value.constructor === sass.types.String;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.String;
 }
 export interface SassColor {
   /**
@@ -154,13 +157,13 @@ export interface SassColor {
   setA(a: number): void;
 }
 export function isSassColor(sass: SassImplementation, value: unknown): value is SassColor {
-  return typeof value === "object" && value.constructor === sass.types.Color;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.Color;
 }
 export interface SassBoolean {
   getValue(): boolean;
 }
 export function isSassBoolean(sass: SassImplementation, value: unknown): value is SassBoolean {
-  return typeof value === "object" && value.constructor === sass.types.Boolean;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.Boolean;
 }
 interface SassBooleanFactory {
   (bool: boolean): SassBoolean;
@@ -170,7 +173,7 @@ interface SassBooleanFactory {
 export interface SassNull {
 }
 export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
-  return typeof value === "object" && value.constructor === sass.types.Null;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.Null;
 }
 interface SassNullFactory {
   (): SassNull;
@@ -186,21 +189,23 @@ export interface SassList extends SassEnumerable {
   setSeparator(isComma: boolean): void;
 }
 export function isSassList(sass: SassImplementation, value: unknown): value is SassList {
-  return typeof value === "object" && value.constructor === sass.types.List;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.List;
 }
 export interface SassMap extends SassEnumerable {
   getKey(index: number): string;
   setKey(index: number, key: string): void;
 }
 export function isSassMap(sass: SassImplementation, value: unknown): value is SassMap {
-  return typeof value === "object" && value.constructor === sass.types.Map;
+  return typeof value === "object" && value !== null && value.constructor === sass.types.Map;
 }
 
 export function isSassMapOrEmptyList(sass: SassImplementation, value: unknown): value is SassMap | SassList {
   return typeof value === "object"
+         && value !== null
          && (
            value.constructor === sass.types.Map 
-           || (isSassList(sass, value) && value.getLength() === 0));
+           || (isSassList(sass, value) && value.getLength() === 0)
+         );
 }
 interface SassTypes {
   /**
@@ -326,6 +331,7 @@ function typeName(sass: SassImplementation, value: SassValue | SassError): SassT
   if (isSassBoolean(sass, value)) return "boolean";
   if (isSassError(sass, value)) return "error";
   if (isSassNull(sass, value)) return "null";
+  return unreachable(value);
 }
 
 export function isType<Name extends SassTypeName>(sass: SassImplementation, value: SassValue, name: Name): value is SassType[Name] {

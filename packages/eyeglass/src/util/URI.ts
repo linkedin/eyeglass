@@ -36,6 +36,9 @@ export class URI {
     this.hash = ""
 
     let uriFragments = rUriFragments.exec(uri);
+    if (!uriFragments) {
+      throw new Error(`Malformed URI: ${uri}`);
+    }
     this.setPath(uriFragments[1]);
     this.setQuery(uriFragments[2]);
     this.setHash(uriFragments[3]);
@@ -115,12 +118,10 @@ export class URI {
     * given any number of path fragments, joins the non-empty fragments
     * @returns  {String} the joined fragments
     */
-  static join(...fragments: Array<string>): string {
+  static join(...fragments: Array<string | undefined | null>): string {
     // join all the non-empty paths
     let uri = new URI(fragments.filter((fragment) => {
-      if (fragment) {
-        return fragment;
-      }
+      return !!fragment;
     }).join(stdSep));
     return uri.getPath();
   }

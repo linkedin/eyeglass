@@ -32,6 +32,8 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       return sandbox.some(function(sb) {
         if (pathInSandboxDir(fsPath, sb)) {
           return true;
+        } else {
+          return false;
         }
       });
     } else {

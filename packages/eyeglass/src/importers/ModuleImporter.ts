@@ -3,6 +3,9 @@ import * as path from "path";
 import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";
 import { ImporterFactory, ImportedFile } from "./ImporterFactory";
+import { unreachable } from "../util/assertions";
+import { ImporterReturnType } from "node-sass";
+import { isPresent } from "../util/typescriptUtils";
 
 type ImportResultCallback =
   (err: Error | null, data?: ImportedFile) => void;
@@ -33,7 +36,7 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: Import
 }
 
 // This is a bootstrap function for calling readFirstFile.
-function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string>, moduleName: string, callback: ImportResultCallback) {
+function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string> | null, moduleName: string | null, callback: ImportResultCallback) {
   // start a name expander to get the names of possible file locations
   let nameExpander = new NameExpander(uri);
 
@@ -76,8 +79,11 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
     // $1 = moduleName (foo or @scope/foo)
     // $2 = relativePath
     let match = MODULE_PARSER.exec(uri);
-    let moduleName = match && match[1];
-    let relativePath = match && match[2];
+    if (!match) {
+      throw new Error("invalid uri: " + uri);
+    }
+    let moduleName = match[1];
+    let relativePath = match[2];
     let mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
 
     // for back-compat with previous suggestion @see
@@ -92,14 +98,15 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
       mod = eyeglass.modules.access(moduleName, isRealFile ? prev : root);
     }
 
-    let sassDir: string;
+    let sassDir: string | undefined;
 
     if (mod) {
       sassDir = mod.sassDir;
 
       if (!sassDir && !isRealFile) {
         // No sass directory, give an error
-        importUtils.fallback(uri, prev, done, function() {
+        importUtils.fallback(uri, prev, done, () => {
+          if (!mod) { return unreachable(); }
           let missingMessage = "sassDir is not specified in " + mod.name + "'s package.json";
           if (mod.mainPath) {
             missingMessage += " or " + mod.mainPath;
@@ -111,16 +118,12 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
     }
 
     function createHandler(errorHandler?: (err: Error | string) => void): ImportResultCallback {
-      errorHandler = errorHandler || function(err) {
-        if (!(err instanceof Error)) {
-          err = new Error(err.toString());
-        }
-        done(err);
-      };
+      let errHandler: (err: Error | string) => void = errorHandler || defaultErrorHandler(done);
+
       return function(err, data) {
-        if (err) {
+        if (err || !isPresent(data)) {
           importUtils.fallback(uri, prev, done, function() {
-            errorHandler(err);
+            errHandler(err || "[internal error] No data returned.");
           });
         } else {
           importUtils.importOnce(data, done);
@@ -128,7 +131,7 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
       };
     }
 
-    function handleRelativeImports(includePaths: Array<string>) {
+    function handleRelativeImports(includePaths: Array<string> | null = null) {
       if (isRealFile) {
         // relative file import, potentially relative to the previous import
         readAbstractFile(uri, uri, path.dirname(prev), includePaths, null, createHandler());
@@ -151,5 +154,14 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
       handleRelativeImports(includePaths);
     }
   });
+}
+
+function defaultErrorHandler(done: (data: ImporterReturnType) => void) {
+  return function (err: Error | string) {
+    if (!(err instanceof Error)) {
+      err = new Error(err.toString());
+    }
+    done(err);
+  };
 }
 export default ModuleImporter;

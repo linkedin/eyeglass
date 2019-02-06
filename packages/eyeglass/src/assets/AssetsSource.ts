@@ -7,7 +7,7 @@ import { AssetSourceOptions } from "../util/Options";
 import * as stringify from "json-stable-stringify";
 
 export interface DiscoveredAssets {
-  namespace: string;
+  namespace: string | undefined;
   files: Array<{
     name: string;
     sourcePath: string;
@@ -30,8 +30,8 @@ export interface DiscoveredAssets {
  *   See: https://github.com/isaacs/node-glob#options
  */
 class AssetsSource {
-  name: string;
-  httpPrefix: string;
+  name: string | null;
+  httpPrefix: string | null;
   srcPath: string;
   pattern: string;
   globOpts: glob.IOptions;
@@ -67,7 +67,7 @@ class AssetsSource {
     * @param    {String} namespace - the namespace
     * @returns  {Object} the object containing the namespace and array of discovered files
     */
-  getAssets(namespace: string): DiscoveredAssets {
+  getAssets(namespace: string | undefined): DiscoveredAssets {
     namespace = this.name || namespace;
     let files = glob.sync(this.pattern, this.globOpts).map((file) => {
       file = URI.preserve(file);

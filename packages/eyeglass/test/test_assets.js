@@ -657,31 +657,6 @@ describe("assets", function () {
         });
       });
 
-      it("should handle a sass error in a resolver", function (done) {
-        var rootDir = testutils.fixtureDirectory("app_assets");
-        var eg = new Eyeglass({
-          data: '@import "assets"; .bg { background: asset-url("images/foo.png"); }',
-          eyeglass: {
-            root: rootDir,
-            installWithSymlinks: installWithSymlinks
-          }
-        });
-
-        eg.assets.addSource(rootDir, {pattern: "images/**/*"});
-
-        eg.assets.resolver(function(assetFile, assetUri, oldResolver, finished) {
-          finished(sass.types.Error("oops I did it again."));
-        });
-
-        testutils.assertStderr(function(checkStderr) {
-          var expectedError = {message: "oops I did it again."};
-          testutils.assertCompilationError(eg, expectedError, function() {
-            checkStderr("");
-            done();
-          });
-        });
-      });
-
       it("should give an error when a module does not have assets", function (done) {
         testutils.assertStderr(function(checkStderr) {
           var options = {
