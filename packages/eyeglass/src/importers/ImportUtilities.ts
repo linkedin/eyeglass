@@ -64,7 +64,7 @@ export default class ImportUtilities {
       noFallback.call(this.context);
     }
   }
-  fallbackNth(uri: string, prev: string, index: number, done: (result: ImporterReturnType) => void, noFallback:  (context: any) => void) {
+  fallbackNth(uri: string, prev: string, index: number, done: (result: ImporterReturnType) => void, noFallback:  (this: any) => void) {
     if (!Array.isArray(this.fallbackImporter)) {
       return done(new Error("[internal error] fallbackNth can only be called for a list of fallbacks."));
     }

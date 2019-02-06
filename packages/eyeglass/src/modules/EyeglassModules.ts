@@ -29,8 +29,8 @@ const globalModulePackageCache = new SimpleCache<string>();
 
 interface DependencyVersionIssue {
   name: string;
-  left: string;
-  right: string;
+  left: EyeglassModule;
+  right: EyeglassModule;
 }
 
 interface ModuleBranch {
@@ -528,7 +528,7 @@ function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {
   * @param   {String} finalModule - the final module to check against
   * @returns {Array<Object>} the array of any issues found
   */
-function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule: EyeglassModule) {
+function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule: EyeglassModule): Array<DependencyVersionIssue> {
   return modules.map(function(mod) {
     // if the versions are not identical, log it
     if (mod.version !== finalModule.version) {

@@ -116,7 +116,7 @@ function addFunctions(this: IEyeglass) {
 
 module.exports = Eyeglass;
 
-function deprecateProperties(this: IEyeglass, properties: keyof SimpleDeprecatedOptions): void {
+function deprecateProperties(this: IEyeglass, properties: Array<keyof SimpleDeprecatedOptions | "enableImportOnce">): void {
   for (let prop of properties) {
     Object.defineProperty(this, prop, {
       get: function(this: IEyeglass) {
@@ -138,7 +138,7 @@ function deprecateProperties(this: IEyeglass, properties: keyof SimpleDeprecated
           "\n    }" +
           "\n  });"
         );
-        this.options.eyeglass[prop as keyof SimpleDeprecatedOptions] = value;
+        this.options.eyeglass[prop as keyof SimpleDeprecatedOptions | "enableImportOnce"] = value;
       }
     });
   }
