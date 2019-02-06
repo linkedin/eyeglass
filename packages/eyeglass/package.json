@@ -56,7 +56,6 @@
     "@types/lodash.includes": "^4.3.4",
     "@types/lodash.merge": "^4.6.4",
     "@types/node": "^10.7.1",
-    "@types/node-sass": "^3.10.32",
     "@types/package-json": "^5.0.0",
     "@types/semver": "^5.5.0",
     "@typescript-eslint/eslint-plugin": "^1.2.0",

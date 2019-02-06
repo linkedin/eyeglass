@@ -28,7 +28,7 @@ export interface Sync {
 }
 
 const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
-  return function() {
+  return function(this: any) {
     let result: unknown;
     let args = [].slice.call(arguments, 0);
     let last = args[args.length - 1];

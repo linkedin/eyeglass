@@ -1,15 +1,20 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "downlevelIteration": true,
         "moduleResolution": "node",
         "outDir": "./lib",
         "allowJs": true,
         "noImplicitAny": true,
+        "noImplicitThis": true,
         "lib": [
             "es6"
         ],
         "target": "es5",
-        "sourceMap": true
+        "sourceMap": true,
+        "paths": {
+            "node-sass": ["@types/node-sass"]
+        }
     },
     "include": [
         "./src/**/*"

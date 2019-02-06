@@ -1,0 +1,1 @@
+Temporary type definition file until I can submit it to DefinitelyTyped

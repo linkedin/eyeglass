@@ -1,17 +1,21 @@
-import { render, renderSync, SassError } from "node-sass";
+import { render, renderSync, SassError, Options } from "node-sass";
 import { types } from "util";
 import { unreachable } from "./assertions";
 export { Options } from "node-sass";
 
-export type SyncSassFunction = (...$args: Array<SassValue>) => SassValue | SassError;
+type SassRenderCallback = Parameters<typeof render>[1];
+type SyncContext<T extends object = {}> = {options: Options & T, callback: undefined};
+type AsyncContext = {options: Options, callback: SassRenderCallback};
+
+export type SyncSassFunction = (this: SyncContext, ...$args: Array<SassValue>) => SassValue | SassError;
 export type SassFunctionCallback = ($result: SassValue | SassError) => void;
-export type SassFunction0 = (cb: SassFunctionCallback) => void;
-export type SassFunction1 = ($arg1: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction2 = ($arg1: SassValue, $arg2: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction3 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction4 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction5 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction6 = ($arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction0 = (this: AsyncContext, cb: SassFunctionCallback) => void;
+export type SassFunction1 = (this: AsyncContext, $arg1: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction2 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction3 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction4 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction5 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, cb: SassFunctionCallback) => void;
+export type SassFunction6 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: SassValue, cb: SassFunctionCallback) => void;
 export type SassFunction = SyncSassFunction | SassFunction0 | SassFunction1 | SassFunction2 | SassFunction3 | SassFunction4 | SassFunction5 | SassFunction6;
 export interface FunctionDeclarations {
   [functionDeclaration: string]: SassFunction;

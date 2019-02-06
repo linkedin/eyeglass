@@ -45,7 +45,7 @@ export default class ImportUtilities {
       done(data);
     }
   }
-  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: any) => void) {
+  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportUtilities) => void) {
     if (Array.isArray(this.fallbackImporter)) {
       if (this.fallbackImporter.length > 0) {
         this.fallbackNth(uri, prev, 0, done, noFallback);
@@ -53,13 +53,13 @@ export default class ImportUtilities {
         noFallback.call(this.context);
       }
     } else if (this.fallbackImporter) {
-      this.fallbackImporter.call(this.context, uri, prev, function (result: ImporterReturnType) {
+      this.fallbackImporter.call(this.context, uri, prev, (result: ImporterReturnType) => {
         if (result === this.sass.NULL || !result) {
           noFallback.call(this.context);
         } else {
           done(result);
         }
-      }.bind(this));
+      });
     } else {
       noFallback.call(this.context);
     }
@@ -74,13 +74,13 @@ export default class ImportUtilities {
     if (!fallbackImporter) {
       noFallback.call(this.context);
     } else {
-      fallbackImporter.call(this.context, uri, prev, function (result: ImporterReturnType) {
+      fallbackImporter.call(this.context, uri, prev, (result: ImporterReturnType) => {
         if (result === this.sass.NULL || !result) {
           this.fallbackNth(uri, prev, index + 1, done, noFallback);
         } else {
           done(result);
         }
-      }.bind(this));
+      });
     }
   }
 }
