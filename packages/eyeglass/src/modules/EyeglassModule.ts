@@ -123,7 +123,7 @@ interface IEyeglassModule {
   /**
    * The path to main/exports function. Used for debugging.
    */
-  mainPath?: string | undefined;
+  mainPath?: string | null;
   /**
    * Whether this is an eyeglass module. Manual modules
    * and the application itself are modules where this is false.
@@ -160,8 +160,8 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   rawName: string;
   version: string | undefined;
   sassDir?: string;
-  main?: EyeglassModuleMain | undefined;
-  mainPath?: string | undefined;
+  main?: EyeglassModuleMain | null;
+  mainPath?: string | null;
   /** only present after calling `init()` */
   functions?: FunctionDeclarations;
   /** only present after calling `init()` */
@@ -209,10 +209,11 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
 
       if (mod.isEyeglassModule) {
         let moduleMain = getModuleExports(pkg.data, modulePath);
-        merge(mod, {
-          main: moduleMain && require(moduleMain),
+        let mainInfo: Pick<EyeglassModule, "main" | "mainPath"> = {
+          main: moduleMain && (require(moduleMain) as EyeglassModuleMain) || null,
           mainPath: moduleMain
-        });
+        };
+        merge(mod, mainInfo);
 
         if (rInvalidName.test(mod.name)) {
           throw new Error("An eyeglass module cannot contain an extension in it's name: " + mod.name);
