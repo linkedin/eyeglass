@@ -16,13 +16,11 @@ import { Dict, isPresent } from "../util/typescriptUtils";
 
 export const ROOT_NAME = ":root";
 
-interface ModuleCollection {
-  [moduleName: string]: Array<EyeglassModule>;
-}
+type ModuleCollection = Dict<Array<EyeglassModule>>;
 
 type ModuleMap = Dict<EyeglassModule>;
 
-type Dependencies = PackageJson["dependencies"];
+type Dependencies = Exclude<PackageJson["dependencies"], undefined>;
 
 const globalModuleCache = new SimpleCache<EyeglassModule>();
 const globalModulePackageCache = new SimpleCache<string>();
@@ -37,9 +35,7 @@ interface ModuleBranch {
   name: string;
   version: string | undefined;
   path: string;
-  dependencies: {
-    [moduleName: string]: ModuleBranch;
-  } | undefined;
+  dependencies: Dict<ModuleBranch> | undefined;
 }
 /**
   * Discovers all of the modules for a given directory
@@ -111,13 +107,13 @@ export default class EyeglassModules {
     // expose the collection
     this.collection = collection;
     // convert the collection object into a simple array for easy iteration
-    this.list = Object.keys(collection).map((name) => collection[name]);
+    this.list = Object.keys(collection).map((name) => collection[name]!);
     // prune and expose the tree
     this.tree = this.pruneModuleTree(moduleTree);
     // set the current projects name
     this.projectName = moduleTree.name;
     // expose a convenience reference to the eyeglass module itself
-    this.eyeglass = this.find("eyeglass");
+    this.eyeglass = this.find("eyeglass")!;
 
     // check for any issues we may have encountered
     this.checkForIssues();
@@ -153,7 +149,7 @@ export default class EyeglassModules {
     }
 
     // otherwise, return the module reference
-    return mod;
+    return mod!;
   };
 
   /**
@@ -213,13 +209,13 @@ export default class EyeglassModules {
     let deduped: ModuleMap = {};
     for (let name of Object.keys(modules)) {
       // first sort our modules by version
-      let versions = modules[name].sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
+      let versions = modules[name]!.sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
       // then take the highest version we found
       deduped[name] = versions.shift()!;
       // check for any version issues
       this.issues.dependencies.versions.push.apply(
         this.issues.dependencies.versions,
-        getDependencyVersionIssues(versions, deduped[name])
+        getDependencyVersionIssues(versions, deduped[name]!)
       );
     }
     return deduped;
@@ -269,7 +265,7 @@ export default class EyeglassModules {
       // copy them into the branch after recursively pruning
       branch.dependencies = {};
       for (let name of Object.keys(dependencies)) {
-        branch.dependencies[name] = this.pruneModuleTree(dependencies[name]);
+        branch.dependencies[name] = this.pruneModuleTree(dependencies[name]!);
       }
     }
     return branch;
@@ -297,7 +293,7 @@ export default class EyeglassModules {
   private discoverModules(options: DiscoverOptions): Dict<EyeglassModule> | null {
     let pkg = options.pkg || packageUtils.getPackage(options.dir);
 
-    let dependencies: { [dep: string]: string } = {};
+    let dependencies: Dependencies = {};
 
     // if there's package.json contents...
     /* istanbul ignore else - defensive conditional, don't care about else-case */
@@ -371,7 +367,7 @@ export default class EyeglassModules {
     * @param   {String} name - the module name to find
     * @returns {Object} the module reference
     */
-  private getFinalModule(name: string): EyeglassModule {
+  private getFinalModule(name: string): EyeglassModule | undefined {
     return this.collection[name];
   }
 
@@ -459,7 +455,7 @@ export default class EyeglassModules {
 function getHierarchyNodes(dependencies: ModuleBranch["dependencies"]) {
   if (dependencies) {
     // for each dependency, recurse and get it's hierarchy
-    return Object.keys(dependencies).map((name) => getHierarchy(dependencies[name]));
+    return Object.keys(dependencies).map((name) => getHierarchy(dependencies[name]!));
   } else {
     return;
   }
@@ -490,7 +486,7 @@ function getHierarchy(branch: ModuleBranch): archy.Data {
 function findBranchesByPath(tree: Dict<ModuleBranch>, dir: string) {
   // iterate over the tree
   return Object.keys(tree).reduce(function(branches, name: string) {
-    let mod = tree[name];
+    let mod = tree[name]!;
     // if the module path matches the search path, push it onto our results
     if (mod.path === dir) {
       branches.push(mod);
@@ -514,14 +510,14 @@ function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {
   // if the branch itself is a module, add it...
   if (branch.isEyeglassModule) {
     collection[branch.name] = collection[branch.name] || [];
-    collection[branch.name].push(branch);
+    collection[branch.name]!.push(branch);
   }
 
   let dependencies = branch.dependencies;
 
   if (dependencies) {
     for (let name of Object.keys(dependencies)) {
-      flattenModules(dependencies[name], collection);
+      flattenModules(dependencies[name]!, collection);
     }
   }
 

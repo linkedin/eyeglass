@@ -1,8 +1,9 @@
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");
-import { FunctionDeclarations, SassImplementation } from "../util/SassImplementation";
+import { FunctionDeclarations, SassImplementation, SassFunction } from "../util/SassImplementation";
 import { IEyeglass } from "../IEyeglass";
+import { Dict, UnsafeDict } from "../util/typescriptUtils";
 const ARGUMENTS_REGEX = /\s*\(.*\)$/;
 const DELIM = "\n\t\u2022 ";
 
@@ -16,7 +17,7 @@ function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations) 
     return;
   }
 
-  let functions: {[funcitonName: string]: string} = {};
+  let functions: Dict<string> = {};
   // collect all the function names and signatures from the first collection
   Object.keys(obj1).forEach(function(fn) {
     let fnName = getFunctionName(fn);
@@ -60,7 +61,7 @@ export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplemen
   checkConflicts(functions, existingFunctions);
   functions = merge(functions, existingFunctions);
 
-  functions = syncFn.all(functions);
+  functions = syncFn.all(functions) as UnsafeDict<SassFunction>;
 
   // log all the functions we discovered
   /* istanbul ignore next - don't test debug */

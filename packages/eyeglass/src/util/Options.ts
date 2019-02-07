@@ -58,7 +58,7 @@ export interface Engines {
    * currently depends.
    */
   sass?: SassImplementation;
-  [engine: string]: any;
+  [engine: string]: unknown;
 }
 
 export interface EyeglassConfig extends Required<EyeglassSpecificOptions<never>> {

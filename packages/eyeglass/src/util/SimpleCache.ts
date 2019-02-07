@@ -1,8 +1,10 @@
+import { Dict } from "./typescriptUtils";
+
 /**
   * A simple caching implementation
   */
 export class SimpleCache<T> {
-  cache: {[key: string]: T};
+  cache: Dict<T>;
   constructor() {
     this.cache = {};
   }
@@ -13,7 +15,7 @@ export class SimpleCache<T> {
     * @param   {String} key - they cache key to lookup
     * @returns {*} the cached value
     */
-  get(key: string): T {
+  get(key: string): T | undefined {
     return this.cache[key];
   }
 
@@ -53,7 +55,7 @@ export class SimpleCache<T> {
     }
 
     // return the result from the cache
-    return this.get(key);
+    return this.get(key)!;
   }
 
   /**

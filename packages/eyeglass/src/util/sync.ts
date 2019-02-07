@@ -67,7 +67,7 @@ const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
 function all(obj: Dict<ASynchronousFunction>): Dict<SynchronousFunction> {
   let syncAll: Dict<SynchronousFunction> = {};
   for (let name in obj) {
-    syncAll[name] = sync(obj[name]);
+    syncAll[name] = sync(obj[name]!);
   }
   return syncAll;
 }

@@ -1,5 +1,6 @@
 import { SassImplementation, isSassString, SassString, SassValue, toString } from "./SassImplementation";
 import { inspect } from "util";
+import { Dict } from "./typescriptUtils";
 
 let rUnquote = /^("|')(.*)\1$/;
 let rPlaceholders = /\${([^}]+)}/g;
@@ -79,14 +80,14 @@ export function quoteJS(sass: SassImplementation, string: string | SassValue | u
   }
 }
 
-export function tmpl(sass: SassImplementation, templateString: string, data: {[key: string]: string | SassValue}): string {
+export function tmpl(sass: SassImplementation, templateString: string, data: Dict<string | SassValue>): string {
   return templateString.replace(rPlaceholders, (match, key: string) => {
     if (data.hasOwnProperty(key)) {
       let v = data[key];
       if (typeof v === "string") {
         return v;
       } else {
-        return toString(sass, v);
+        return toString(sass, v!);
       }
     } else {
       return match;
