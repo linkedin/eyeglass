@@ -7,6 +7,8 @@ import { unreachable } from "../util/assertions";
 import { ImporterReturnType } from "node-sass";
 import { isPresent } from "../util/typescriptUtils";
 
+const MODULE_PARSER = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/;
+
 type ImportResultCallback =
   (err: Error | null, data?: ImportedFile) => void;
 
@@ -69,8 +71,6 @@ function readAbstractFile(originalUri: string, uri: string, location: string, in
 const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter) {
   let includePaths = options.includePaths;
   let root = options.eyeglass.root;
-
-  const MODULE_PARSER = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/;
 
   return ImportUtilities.createImporter(function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
