@@ -1,6 +1,7 @@
 import { render, renderSync, SassError, Options } from "node-sass";
 import { types } from "util";
 import { unreachable } from "./assertions";
+import { Dict } from "./typescriptUtils";
 export { Options } from "node-sass";
 
 type SassRenderCallback = Parameters<typeof render>[1];
@@ -30,9 +31,7 @@ export type SassFunction =
   | SassFunction0 | SassFunction1 | SassFunction2 | SassFunction3 | SassFunction4 | SassFunction5 | SassFunction6
   | SassFunction1Var | SassFunction2Var | SassFunction3Var | SassFunction4Var | SassFunction5Var | SassFunction6Var;
 
-export interface FunctionDeclarations {
-  [functionDeclaration: string]: SassFunction;
-}
+export type FunctionDeclarations = Dict<SassFunction>;
 
 export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
 export function isSassValue(
