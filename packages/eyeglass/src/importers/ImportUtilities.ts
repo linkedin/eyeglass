@@ -1,7 +1,7 @@
 import * as debug from "../util/debug";
 import { URI } from "../util/URI";
 import merge = require("lodash.merge");
-import { Importer, ImporterReturnType, AsyncImporter, AsyncContext, SyncContext } from "node-sass";
+import { ImporterReturnType, AsyncImporter, AsyncContext } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Config } from "../util/Options";

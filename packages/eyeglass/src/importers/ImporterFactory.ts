@@ -1,4 +1,4 @@
-import { Importer, AsyncImporter } from "node-sass";
+import { AsyncImporter } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { Config } from "../util/Options";
 import { SassImplementation } from "../util/SassImplementation";

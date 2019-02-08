@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { Importer, AsyncImporter } from "node-sass";
+import { AsyncImporter } from "node-sass";
 import EyeglassModule from "../modules/EyeglassModule";
 import * as packageUtils from "../util/package";
 import { URI } from "../util/URI";

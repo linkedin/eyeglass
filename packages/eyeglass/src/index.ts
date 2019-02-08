@@ -11,7 +11,7 @@ import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
 import {PackageJson} from "package-json";
 import { SassImplementation } from "./util/SassImplementation";
-import {Options as SassOptions, AsyncImporter} from "node-sass";
+import { AsyncImporter } from "node-sass";
 const pkg: PackageJson = require("../package.json");
 
 class Eyeglass implements IEyeglass {

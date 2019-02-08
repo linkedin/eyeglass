@@ -1,5 +1,4 @@
 import { render, renderSync, SassError, Options } from "node-sass";
-import { types } from "util";
 import { unreachable } from "./assertions";
 import { UnsafeDict } from "./typescriptUtils";
 export { Options } from "node-sass";

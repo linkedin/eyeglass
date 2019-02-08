@@ -187,7 +187,7 @@ export default class Assets implements Resolves, Installs {
     * @param    {String} assetUri - the resolved uri path
     * @param    {Function} cb - the callback to pass the resolved uri to
     */
-  resolve(assetFile: string, assetUri: string, cb: ResolverCallback) {
+  resolve(_assetFile: string, assetUri: string, cb: ResolverCallback) {
     cb(null, { path: assetUri });
   }
   /**

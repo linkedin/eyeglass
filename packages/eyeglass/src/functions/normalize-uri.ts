@@ -3,7 +3,7 @@ import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError, FunctionDeclarations } from "../util/SassImplementation";
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
-const normalizeURI = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
+const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let methods: FunctionDeclarations = {
     "eyeglass-uri-preserve($uri)": function($uri: SassValue, done: SassFunctionCallback) {
       if (!isSassString(sass, $uri)) {

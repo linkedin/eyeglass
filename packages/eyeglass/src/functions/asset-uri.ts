@@ -1,5 +1,5 @@
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassFunctionCallback, SassValue, isSassMap, typeError, isType, isSassList, SassMap, FunctionDeclarations, SassString, isSassError } from "../util/SassImplementation";
+import { SassImplementation, SassFunctionCallback, SassValue, typeError, isType, isSassList, SassMap, FunctionDeclarations, SassString, isSassError } from "../util/SassImplementation";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { isPresent } from "../util/typescriptUtils";
 import { SassError } from "node-sass";
