@@ -10,6 +10,7 @@ import { URI } from "../util/URI";
 import AssetsCollection from "./AssetsCollection";
 import AssetsSource from "./AssetsSource";
 import { isPresent } from "../util/typescriptUtils";
+import errorFor from "../util/errorFor";
 
 type EnsureSymlinkSync = (srcFile: string, destLink: string) => void;
 const ensureSymlink: EnsureSymlinkSync = require("ensure-symlink");
@@ -19,7 +20,7 @@ interface Resolution {
   query?: string;
 }
 
-type ResolverCallback = (error: Error | null, result: Resolution | undefined) => any;
+type ResolverCallback = (error: unknown, result: Resolution | undefined) => any;
 type Resolver = (assetFile: string, assetUri: string, cb: ResolverCallback) => void;
 type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver, cb: ResolverCallback) => void;
 
@@ -27,7 +28,7 @@ interface Resolves {
   resolve: Resolver;
 }
 
-type InstallerCallback = (error: Error | null, dest?: string) => void;
+type InstallerCallback = (error: unknown, dest?: string) => void;
 type Installer = (file: string, uri: string, cb: InstallerCallback) => void;
 type WrappedInstaller = (file: string, uri: string, fallback: Installer, cb: InstallerCallback) => void;
 interface Installs {
@@ -140,7 +141,7 @@ export default class Assets implements Resolves, Installs {
 
       assets.resolve(filepath, fullUri, function(error, assetInfo) {
         if (error || !isPresent(assetInfo)) {
-          cb(error);
+          cb(errorFor(error, "Unable to resolve asset"));
         } else {
           // if relativeTo is set
           if (options.assets.relativeTo) {
@@ -160,7 +161,7 @@ export default class Assets implements Resolves, Installs {
 
           assets.install(filepath, assetInfo.path, function(error, file) {
             if (error) {
-              cb(error);
+              cb(errorFor(error, "Unable to install asset"));
             } else {
               if (file) {
                 /* istanbul ignore next - don't test debug */
