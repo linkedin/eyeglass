@@ -39,7 +39,7 @@ export class NameExpander {
     *
     * @param   {String} location - the location path the expand the URI against
     */
-  addLocation(location: string) {
+  addLocation(location: string): void {
     /* istanbul ignore else - defensive conditional, don't care about else-case */
     if (!location || location === "stdin") {
       return;
@@ -49,7 +49,7 @@ export class NameExpander {
       this._possibleFiles = new Set<string>();
     }
   }
-  private calculatePossibleFiles() {
+  private calculatePossibleFiles(): void {
     for (let location of this.locations) {
       // get the full path to the uri
       let fullLocation = joinPaths(location, this.uri);
@@ -130,7 +130,7 @@ function fileVariant(
   * @param    {String} uri - the URI to normalize
   * @returns  {String} the normalized URI
   */
-function normalizeURI(uri: string) {
+function normalizeURI(uri: string): string {
   // update the separator to use the OS separator
   return uri.replace(/\//g, PATH_SEPARATOR);
 }

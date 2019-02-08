@@ -1,7 +1,7 @@
 /*eslint no-underscore-dangle:0*/
 // underscores allowed in this file for calling privately into node.js
 
-const Module = require("module");
+import Module = require("module");
 
 /*
  * Resolves a node module into a path. This uses
@@ -14,9 +14,11 @@ const Module = require("module");
  *   .CommonJSPackage/node/.def/commonjs/lib/module.js/-/_resolveFilename
  */
 export default function resolve(id: string, parent: string, parentDir: string): string {
-  return Module._resolveFilename(id, {
-    paths: Module._nodeModulePaths(parentDir),
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  return (Module as any)._resolveFilename(id, {
+    paths: (Module as any)._nodeModulePaths(parentDir),
     filename: parent,
     id: parent
   });
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }

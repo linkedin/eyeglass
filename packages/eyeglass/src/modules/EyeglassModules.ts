@@ -128,7 +128,7 @@ export default class EyeglassModules {
     * @param   {Eyeglass} eyeglass - the eyeglass instance
     * @param   {Function} sass - the sass engine
     */
-  init(eyeglass: IEyeglass, sass: SassImplementation) {
+  init(eyeglass: IEyeglass, sass: SassImplementation): void {
     this.list.forEach((mod) => mod.init(eyeglass, sass));
   }
 
@@ -139,7 +139,7 @@ export default class EyeglassModules {
     * @param   {String} origin - the location of the originating request
     * @returns {Object} the module reference if access is granted, null if access is prohibited
     */
-  access(name: string, origin: string) {
+  access(name: string, origin: string): EyeglassModule | null {
     let mod = this.find(name);
 
     // if we have a module, ensure that we can access it from the origin
@@ -158,7 +158,7 @@ export default class EyeglassModules {
     * @param   {String} name - the module name to find
     * @returns {Object} the module reference
     */
-  find(name: string) {
+  find(name: string): EyeglassModule | undefined {
     return this.getFinalModule(name);
   }
 
@@ -167,7 +167,7 @@ export default class EyeglassModules {
     *
     * @returns {String} the module hierarchy
     */
-  getGraph() {
+  getGraph(): string {
     let hierarchy = getHierarchy(this.tree);
     hierarchy.label = this.getDecoratedRootName();
     return archy(hierarchy);
@@ -180,7 +180,7 @@ export default class EyeglassModules {
     * @returns {Object} the resolved module definition
     */
   private resolveModule(pkgPath: string, isRoot: boolean = false): EyeglassModule | undefined {
-    let cacheKey = "resolveModule~" + pkgPath + "!" + !!isRoot;
+    let cacheKey = `resolveModule~${pkgPath}!${!!isRoot}`;
     return this.cache.modules.getOrElse(cacheKey, () => {
       let pkg = packageUtils.getPackage(pkgPath);
       let isEyeglassMod = EyeglassModule.isEyeglassModule(pkg.data);
@@ -227,7 +227,7 @@ export default class EyeglassModules {
     * @this {EyeglassModules}
     *
     */
-  private checkForIssues() {
+  private checkForIssues(): void {
     this.list.forEach((mod: EyeglassModule) => {
       // check engine compatibility
       if (!mod.eyeglass || !mod.eyeglass.needs) {
@@ -235,7 +235,7 @@ export default class EyeglassModules {
         // add the module to the missing engines list
         this.issues.engine.missing.push(mod);
       } else if (!semver.satisfies(this.eyeglass.version!, mod.eyeglass.needs)) {
-        // if the current version of eyeglass does not satify the need...
+        // if the current version of eyeglass does not satisfy the need...
         // add the module to the incompatible engines list
         this.issues.engine.incompatible.push(mod);
       }
@@ -378,7 +378,7 @@ export default class EyeglassModules {
     *
     * @returns {String} the decorated name
     */
-  private getDecoratedRootName() {
+  private getDecoratedRootName(): string {
     return ROOT_NAME + ((this.projectName) ? "(" + this.projectName + ")" : "");
   }
 
@@ -391,13 +391,13 @@ export default class EyeglassModules {
     * @param   {String} origin - the location of the originating request
     * @returns {Boolean} whether or not access is permitted
     */
-  private canAccessModule(name: string, origin: string) {
+  private canAccessModule(name: string, origin: string): boolean {
     // eyeglass can be imported by anyone, regardless of the dependency tree
     if (name === "eyeglass") {
       return true;
     }
 
-    let canAccessFrom = (origin: string) => {
+    let canAccessFrom = (origin: string): boolean => {
       // find the nearest package for the origin
       let pkg = packageUtils.findNearestPackage(origin);
       let cacheKey = pkg + "!" + origin;
@@ -452,7 +452,7 @@ export default class EyeglassModules {
   * @param  {Object} dependencies - the dependencies
   * @returns {Object} the corresponding hierarchy nodes (for use in archy)
   */
-function getHierarchyNodes(dependencies: ModuleBranch["dependencies"]) {
+function getHierarchyNodes(dependencies: ModuleBranch["dependencies"]): Array<archy.Data> | undefined {
   if (dependencies) {
     // for each dependency, recurse and get it's hierarchy
     return Object.keys(dependencies).map((name) => getHierarchy(dependencies[name]!));
@@ -483,7 +483,7 @@ function getHierarchy(branch: ModuleBranch): archy.Data {
   * @param  {String} dir - the path to search for
   * @returns {Object} the branches of the tree that contain the path
   */
-function findBranchesByPath(tree: Dict<ModuleBranch>, dir: string) {
+function findBranchesByPath(tree: Dict<ModuleBranch>, dir: string): Array<ModuleBranch> {
   // iterate over the tree
   return Object.keys(tree).reduce(function(branches, name: string) {
     let mod = tree[name]!;

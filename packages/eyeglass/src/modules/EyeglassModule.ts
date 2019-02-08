@@ -138,7 +138,7 @@ interface IEyeglassModule {
    * eventually flattened with a semver resolution to select a single instance
    * of shared transitive dependencies.
    */
-  dependencies: {[key: string]: EyeglassModule};
+  dependencies: Dict<EyeglassModule>;
   /**
    * Where the sass files are. `@import "<module name>"` would import the index
    * sass file from that directory. Imports of paths relative to the module
@@ -152,7 +152,7 @@ function isModuleReference(mod: {path?: string}): mod is ModuleReference {
 }
 
 export default class EyeglassModule implements IEyeglassModule, EyeglassModuleExports {
-  dependencies: {[key: string]: EyeglassModule};
+  dependencies: Dict<EyeglassModule>;
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
   name: string;
@@ -173,9 +173,9 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     isRoot: boolean = false
   ) {
     // some defaults
-    let mod = merge({
+    let mod: IEyeglassModule = merge({
       eyeglass: {}
-    } as IEyeglassModule, modArg);
+    }, modArg as IEyeglassModule);
 
 
     // if we were given a path, resolve it to the package.json
@@ -247,7 +247,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     * @param   {Eyeglass} eyeglass - the eyeglass instance
     * @param   {Function} sass - the sass engine
     */
-  init(eyeglass: IEyeglass, sass: SassImplementation) {
+  init(eyeglass: IEyeglass, sass: SassImplementation): void {
     merge(this, this.main && this.main(eyeglass, sass));
   }
 
@@ -270,7 +270,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   * @param   {Object} pkg - the package.json reference
   * @returns {String} the name of the module
   */
-function getModuleName(pkg: PackageJson & PackageEyeglassOption) {
+function getModuleName(pkg: PackageJson & PackageEyeglassOption): string | undefined {
   // check for `eyeglass.name` first, otherwise use `name`
   return normalizeEyeglassOptions(pkg.eyeglass).name || pkg.name;
 }
@@ -282,7 +282,7 @@ function getModuleName(pkg: PackageJson & PackageEyeglassOption) {
   * @param   {String} pkgPath - The location of the package.json.
   * @returns {Object} the normalized options
   */
-function normalizeEyeglassOptions(options: EyeglassOptionInPackageJSON, pkgPath?: string) {
+function normalizeEyeglassOptions(options: EyeglassOptionInPackageJSON, pkgPath?: string): EyeglassModuleOptionsFromPackageJSON {
   let normalizedOpts: EyeglassModuleOptionsFromPackageJSON;
   if (typeof options === "object") {
     normalizedOpts = options;

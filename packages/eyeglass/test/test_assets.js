@@ -463,7 +463,7 @@ describe("assets", function () {
       it("handles asset installer errors", function (done) {
         var errorMessage = "throws installer error";
         var expectedError = {
-          message: errorMessage
+          message: "Unable to install asset: " + errorMessage
         };
 
         var rootDir = testutils.fixtureDirectory("app_assets");
@@ -649,7 +649,7 @@ describe("assets", function () {
         });
 
         testutils.assertStderr(function(checkStderr) {
-          var expectedError = {message: "oops I did it again."};
+          var expectedError = {message: "Unable to resolve asset: oops I did it again."};
           testutils.assertCompilationError(eg, expectedError, function() {
             checkStderr("");
             done();

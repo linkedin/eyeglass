@@ -35,16 +35,16 @@ export type FunctionDeclarations = UnsafeDict<SassFunction>;
 export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
 export function isSassValue(
   sass: SassImplementation,
-  value: any
+  value: unknown
 ): value is SassValue {
   if (value && typeof value === "object") {
-    return isSassNull(sass, value)
-        || isSassNumber(sass, value)
+    return isSassNumber(sass, value)
         || isSassString(sass, value)
         || isSassColor(sass, value)
         || isSassBoolean(sass, value)
         || isSassList(sass, value)
-        || isSassMap(sass, value);
+        || isSassMap(sass, value)
+        || isSassNull(sass, value);
   } else {
     return false;
   }
@@ -83,7 +83,7 @@ export function toString(sass: SassImplementation, value: SassValue): string {
       if (i > 0) {
         s += ", ";
       }
-      s += toString(sass, value.getKey(i));
+      s += value.getKey(i);
       s += ": ";
       s += toString(sass, value.getValue(i));
     }
@@ -168,10 +168,10 @@ interface SassBooleanFactory {
   TRUE: SassBoolean;
   FALSE: SassBoolean;
 }
-export interface SassNull {
-}
+export type SassNull = object;
+
 export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.Null;
+  return value === sass.NULL;
 }
 interface SassNullFactory {
   (): SassNull;
@@ -286,13 +286,14 @@ export interface SassImplementation {
   NULL: SassNull;
 }
 
-export function isSassImplementation(impl: any): impl is SassImplementation {
+export function isSassImplementation(impl: unknown): impl is SassImplementation {
   return (
     impl && typeof impl === "object"
-    && typeof impl.render === "function"
-    && typeof impl.renderSync === "function"
-    && typeof impl.types === "object"
-    && typeof impl.info === "string"
+    && impl !== null
+    && typeof (impl as SassImplementation).render === "function"
+    && typeof (impl as SassImplementation).renderSync === "function"
+    && typeof (impl as SassImplementation).types === "object"
+    && typeof (impl as SassImplementation).info === "string"
   );
 }
 

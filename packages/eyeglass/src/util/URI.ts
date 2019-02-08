@@ -3,18 +3,18 @@ import * as stringUtils from "./strings";
 import { SassImplementation } from "./SassImplementation";
 
 const stdSep = "/";
-const rAllPathSep = /[\/\\]+/g;
+const rAllPathSep = /[/\\]+/g;
 const rIsRelative = /^\.{1,2}/;
-const rUriFragments =  /^([^\?#]+)(\?[^#]*)?(#.*)?/;
-const rSearchDelim = /^[\?\&]*/;
-
-function convertSeparator(uri: string, sep: string): string {
-  return shouldNormalizePathSep() ? uri.replace(rAllPathSep, sep) : uri;
-}
+const rUriFragments =  /^([^?#]+)(\?[^#]*)?(#.*)?/;
+const rSearchDelim = /^[?&]*/;
 
 function shouldNormalizePathSep(): boolean {
   // normalize if the path separator is a backslash or we haven't explicitly disabled normalization
   return path.sep === "\\" || process.env.EYEGLASS_NORMALIZE_PATHS !== "false";
+}
+
+function convertSeparator(uri: string, sep: string): string {
+  return shouldNormalizePathSep() ? uri.replace(rAllPathSep, sep) : uri;
 }
 
 /**
@@ -102,7 +102,7 @@ export class URI {
     * replaces the hash string on the URI
     * @param    {String} hash - the hash string to set
     */
-  setHash(hash: string) {
+  setHash(hash: string): void {
     this.hash = hash === undefined ? "" : hash;
   }
 
@@ -158,7 +158,7 @@ export class URI {
     * @param    {String} uri - the URI to normalize
     * @returns  {String} the normalized URI
     */
-  static sass(sassImpl: SassImplementation, uri: string) {
+  static sass(sassImpl: SassImplementation, uri: string): string {
     // escape all backslashes for Sass string and quote it
     //  "C:\foo\bar.png" -> "C:\\foo\\bar.png"
     // actual backslash, for real this time http://www.xkcd.com/1638/
@@ -175,7 +175,7 @@ export class URI {
   }
 
   /**
-    * restores a URI to restore special characters (oposite of URI.preserve)
+    * restores a URI to restore special characters (opposite of URI.preserve)
     * @param    {String} uri - the URI to restore
     * @returns  {String} the restored URI
     */

@@ -13,6 +13,7 @@ import { isPresent } from "../util/typescriptUtils";
 import errorFor from "../util/errorFor";
 
 type EnsureSymlinkSync = (srcFile: string, destLink: string) => void;
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
 const ensureSymlink: EnsureSymlinkSync = require("ensure-symlink");
 
 interface Resolution {
@@ -20,7 +21,7 @@ interface Resolution {
   query?: string;
 }
 
-type ResolverCallback = (error: unknown, result: Resolution | undefined) => any;
+type ResolverCallback = (error: unknown, result: Resolution | undefined) => unknown;
 type Resolver = (assetFile: string, assetUri: string, cb: ResolverCallback) => void;
 type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver, cb: ResolverCallback) => void;
 
@@ -36,6 +37,8 @@ interface Installs {
 }
 
 export default class Assets implements Resolves, Installs {
+  // need types for sass utils
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sassUtils: any;
   eyeglass: IEyeglass;
   /**
@@ -57,7 +60,7 @@ export default class Assets implements Resolves, Installs {
     this.moduleCollections = [];
 
     // Expose these temporarily for back-compat reasons
-    function deprecate(method: string) {
+    function deprecate(method: string): void {
       eyeglass.deprecate("0.8.3", "0.9.0", [
         "The assets." + method + " interface will be removed from the public API.",
         "If you currently use this method, please open an issue at",
@@ -113,7 +116,7 @@ export default class Assets implements Resolves, Installs {
     * @param    {SassString} $uri - the uri of the asset
     * @param    {Function} cb - the callback that is invoked when the asset resolves
     */
-  resolveAsset($assetsMap: SassMap, $uri: SassValue, cb: (error: Error | null, uri?: string, file?: string) => any) {
+  resolveAsset($assetsMap: SassMap, $uri: SassValue, cb: (error: Error | null, uri?: string, file?: string) => unknown): void {
     let sass = this.eyeglass.options.eyeglass.engines.sass;
     let options = this.eyeglass.options.eyeglass;
     let assets = this.eyeglass.assets;
@@ -187,14 +190,14 @@ export default class Assets implements Resolves, Installs {
     * @param    {String} assetUri - the resolved uri path
     * @param    {Function} cb - the callback to pass the resolved uri to
     */
-  resolve(_assetFile: string, assetUri: string, cb: ResolverCallback) {
+  resolve(_assetFile: string, assetUri: string, cb: ResolverCallback): void {
     cb(null, { path: assetUri });
   }
   /**
     * wraps the current resolver with a custom resolver
     * @param    {Function} resolver - the new resolver function
     */
-  resolver(resolver: WrappedResolver) {
+  resolver(resolver: WrappedResolver): void {
     let oldResolver: Resolver = this.resolve.bind(this);
     this.resolve = function(assetFile: string, assetUri: string, cb: ResolverCallback) {
       resolver(assetFile, assetUri, oldResolver, cb);
@@ -206,7 +209,7 @@ export default class Assets implements Resolves, Installs {
     * @param    {String} uri - the resolved uri path
     * @param    {Function} cb - the callback invoked after the installation is successful
     */
-  install(file: string, uri: string, cb: InstallerCallback) {
+  install(file: string, uri: string, cb: InstallerCallback): void {
     let options = this.eyeglass.options.eyeglass;
     let httpRoot = options.httpRoot;
     if (options.buildDir) {
@@ -227,10 +230,7 @@ export default class Assets implements Resolves, Installs {
         }
         cb(null, dest);
       } catch (error) {
-        // eslint-disable-next-line no-ex-assign
-        error = new Error("Failed to install asset from " + file + "\n" + error.toString());
-
-        cb(error);
+        cb(errorFor(error, `Failed to install asset from ${file}:\n`));
       }
     } else {
       cb(null, file);
@@ -240,12 +240,14 @@ export default class Assets implements Resolves, Installs {
     * wraps the current installer with a custom installer
     * @param    {Function} installer - the new installer function
     */
-  installer(installer: WrappedInstaller) {
+  installer(installer: WrappedInstaller): void {
     let oldInstaller: Installer = this.install.bind(this);
     this.install = function(assetFile, assetUri, cb) {
       installer(assetFile, assetUri, oldInstaller, cb);
     };
   }
+  // need types for sass utils
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private resolveAssetDefaults(registeredAssetsMap: SassMap, relativePath: string): any {
     registeredAssetsMap = this.sassUtils.handleEmptyMap(registeredAssetsMap);
     this.sassUtils.assertType(registeredAssetsMap, "map");

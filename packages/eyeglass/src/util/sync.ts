@@ -20,15 +20,15 @@
 import * as deasync from "deasync";
 import { Dict } from "./typescriptUtils";
 
-type ASynchronousFunction = (...args: Array<any>) => void;
-type SynchronousFunction = (...args: Array<any>) => any;
+type ASynchronousFunction = (...args: Array<unknown>) => void;
+type SynchronousFunction = (...args: Array<unknown>) => unknown;
 export interface Sync {
   (fn: ASynchronousFunction): SynchronousFunction;
   all: (obj: Dict<ASynchronousFunction>) => Dict<SynchronousFunction>;
 }
 
 const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
-  return function(this: any) {
+  return function(this: unknown) {
     let result: unknown;
     let args = new Array(...arguments);
     let last = args[args.length - 1];
@@ -42,7 +42,7 @@ const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
     // for some reason, there is a bridge object that shouldn't be on the args
     // replace it with our custom callback
     // turn the loop once, and then begin blocking until we resolve
-    function cb(res: unknown) {
+    function cb(res: unknown): void {
       setTimeout(function() {
         result = res;
       }, 0);

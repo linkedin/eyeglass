@@ -11,7 +11,7 @@ function getFunctionName(fnSignature: string): string {
   return fnSignature.replace(ARGUMENTS_REGEX, "");
 }
 
-function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations) {
+function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations): void {
   // return early if either collection is empty
   if (!obj1 || !obj2) {
     return;
@@ -40,7 +40,7 @@ function checkConflicts(obj1: FunctionDeclarations, obj2: FunctionDeclarations) 
   });
 }
 
-export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplementation, _options: any, existingFunctions: FunctionDeclarations): FunctionDeclarations {
+export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplementation, _options: unknown, existingFunctions: FunctionDeclarations): FunctionDeclarations {
   let functions: FunctionDeclarations = eyeglass.modules.list.reduce(function(fns, mod) {
     if (!mod.functions) {
       return fns;
@@ -61,7 +61,8 @@ export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplemen
   checkConflicts(functions, existingFunctions);
   functions = merge(functions, existingFunctions);
 
-  functions = syncFn.all(functions) as UnsafeDict<SassFunction>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  functions = syncFn.all(functions as Dict<any>) as UnsafeDict<SassFunction>;
 
   // log all the functions we discovered
   /* istanbul ignore next - don't test debug */

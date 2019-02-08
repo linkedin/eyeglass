@@ -105,6 +105,9 @@ describe("EyeglassModules", function () {
         }]
       }
     };
-    testutils.assertCompilationError(options, expectedError, done);
+    testutils.assertStderr(function(checkStderr) {
+      checkStderr("");
+      testutils.assertCompilationError(options, expectedError, done);
+    });
   });
 });

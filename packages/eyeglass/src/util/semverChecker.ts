@@ -2,7 +2,7 @@ import { EyeglassConfig } from "./Options"
 import { SassImplementation } from "./SassImplementation";
 import { IEyeglass } from "../IEyeglass";
 
-export default function(eyeglass: IEyeglass, _sass: SassImplementation, options: EyeglassConfig, version: string) {
+export default function(eyeglass: IEyeglass, _sass: SassImplementation, options: EyeglassConfig, version: string): void {
   let strictMode: boolean | "warn" = options.strictModuleVersions;
   let modules = eyeglass.modules;
   let issues = modules.issues.engine;
@@ -19,7 +19,7 @@ export default function(eyeglass: IEyeglass, _sass: SassImplementation, options:
   if (issues.incompatible.length) {
     let incompatible = ["The following modules are incompatible with eyeglass " + version + ":"];
     incompatible.push.apply(incompatible, issues.incompatible.map(function(mod) {
-      return "  " + mod.name + " needed eyeglass " + mod.eyeglass.needs;
+      return `  ${mod.name} needed eyeglass ${mod.eyeglass.needs}`;
     }));
 
     // eslint-disable-next-line no-console

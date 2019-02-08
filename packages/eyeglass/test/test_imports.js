@@ -217,8 +217,22 @@ describe("eyeglass importer", function () {
       };
       // TODO This should not be a successful compile (libsass issue?)
       // TODO Shouldn't the file path be relative to `options.root`?
-      var expectedError = "Could not import transitive_module from " +
-                          path.resolve("wubwubwub.scss");
+      var basic_modules = testutils.fixtureDirectory("basic_modules");
+      var expectedError = `Could not import transitive_module from ${path.resolve("wubwubwub.scss")}: \`transitive_module\` was not found in any of the following locations:
+  ${basic_modules}/transitive_module.scss
+  ${basic_modules}/transitive_module.sass
+  ${basic_modules}/transitive_module.css
+  ${basic_modules}/_transitive_module.scss
+  ${basic_modules}/_transitive_module.sass
+  ${basic_modules}/_transitive_module.css
+  ${basic_modules}/transitive_module/index.scss
+  ${basic_modules}/transitive_module/index.sass
+  ${basic_modules}/transitive_module/index.css
+  ${basic_modules}/transitive_module/_index.scss
+  ${basic_modules}/transitive_module/_index.sass
+  ${basic_modules}/transitive_module/_index.css
+`;
+
       testutils.assertCompilationError(options, expectedError, done);
     });
   });
@@ -480,7 +494,7 @@ describe("eyeglass importer", function () {
       "sass/this-does-not-exist/_index.css"
     ].reduce(function(msg, location) {
       return msg + "\n  " + path.resolve(rootDir, location);
-    }, "Could not import this-does-not-exist from any of the following locations:");
+    }, "`this-does-not-exist` was not found in any of the following locations:");
 
     testutils.assertCompilationError(options, expectedError, done);
   });

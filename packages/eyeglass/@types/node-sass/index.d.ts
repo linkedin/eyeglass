@@ -13,19 +13,19 @@ type Importer = AsyncImporter | SyncImporter;
 interface SyncContext {
   options: Options;
   callback: undefined;
-  [data: string]: any;
+  [data: string]: unknown;
 }
 interface AsyncContext {
   options: Options;
   callback: (data: ImporterReturnType) => void;
-  [data: string]: any;
+  [data: string]: unknown;
 }
 interface Options {
   file?: string;
   data?: string;
-  importer?: Importer | Importer[];
+  importer?: Importer | Array<Importer>;
   functions?: { [key: string]: Function };
-  includePaths?: string[];
+  includePaths?: Array<string>;
   indentedSyntax?: boolean;
   indentType?: string;
   indentWidth?: number;
@@ -57,9 +57,9 @@ interface Result {
     start: number;
     end: number;
     duration: number;
-    includedFiles: string[];
-  }
+    includedFiles: Array<string>;
+  };
 }
 
-export declare function render(options: Options, callback: (err: SassError, result: Result) => any): void;
+export declare function render(options: Options, callback: (err: SassError, result: Result) => unknown): void;
 export declare function renderSync(options: Options): Result;

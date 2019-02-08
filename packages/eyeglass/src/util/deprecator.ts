@@ -9,7 +9,7 @@ export class Deprecator {
     this.ignoreDeprecations = options && options.eyeglass && options.eyeglass.ignoreDeprecations;
   }
 
-  isEnabled(sinceVersion: string) {
+  isEnabled(sinceVersion: string): boolean {
     // if `enabled` is undefined, try to set it
     if (this.enabled === undefined) {
       // if `disableDeprecations`, we fallback to the env variable
@@ -24,7 +24,7 @@ export class Deprecator {
     return this.enabled;
   }
 
-  deprecate(sinceVersion: string, removeVersion: string, message: string) {
+  deprecate(sinceVersion: string, removeVersion: string, message: string): void {
     if (this.isEnabled(sinceVersion)) {
       // eslint-disable-next-line no-console
       console.warn(
@@ -42,7 +42,7 @@ export interface DeprecatorFactory {
 }
 
 
-const factory: DeprecatorFactory = (options: Options) => {
+const factory: DeprecatorFactory = (options: Options): DeprecateFn => {
   let deprecator = new Deprecator(options);
   return deprecator.deprecate.bind(deprecator);
 }

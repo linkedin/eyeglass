@@ -4,7 +4,7 @@ import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";
 import { ImporterFactory, ImportedFile } from "./ImporterFactory";
 import { unreachable } from "../util/assertions";
-import { ImporterReturnType } from "node-sass";
+import { ImporterReturnType, AsyncImporter } from "node-sass";
 import { isPresent } from "../util/typescriptUtils";
 import errorFor from "../util/errorFor";
 
@@ -17,7 +17,7 @@ type ImportResultCallback =
  * Walks the file list until a match is found. If
  * no matches are found, calls the callback with an error
  */
-function readFirstFile(uri: string, possibleFiles: Set<string>, callback: ImportResultCallback) {
+function readFirstFile(uri: string, possibleFiles: Set<string>, callback: ImportResultCallback): void {
   for (let nextFile of possibleFiles) {
     try {
       let data = readFileSync(nextFile, "utf8");
@@ -32,14 +32,14 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: Import
     }
   }
   let errorMsg = [
-    "Could not import " + uri + " from any of the following locations:"
+    `\`${uri}\` was not found in any of the following locations:`
   ].concat(...possibleFiles).join("\n  ");
   callback(new Error(errorMsg));
   return;
 }
 
 // This is a bootstrap function for calling readFirstFile.
-function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string> | null, moduleName: string | null, callback: ImportResultCallback) {
+function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string> | null, moduleName: string | null, callback: ImportResultCallback): void {
   // start a name expander to get the names of possible file locations
   let nameExpander = new NameExpander(uri);
 
@@ -69,7 +69,7 @@ function readAbstractFile(originalUri: string, uri: string, location: string, in
  * fallback importer is the importer that was specified
  * in the node-sass options if one was there.
  */
-const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter) {
+const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter): AsyncImporter {
   let includePaths = options.includePaths;
   let root = options.eyeglass.root;
 
@@ -118,8 +118,8 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
       }
     }
 
-    function createHandler(errorHandler?: (err: Error | string) => void): ImportResultCallback {
-      let errHandler: (err: Error | string) => void = errorHandler || defaultErrorHandler(done);
+    function createHandler(errorHandler?: (err: unknown) => void): ImportResultCallback {
+      let errHandler: (err: unknown) => void = errorHandler || defaultErrorHandler(done);
 
       return function(err, data) {
         if (err || !isPresent(data)) {
@@ -132,13 +132,13 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
       };
     }
 
-    function handleRelativeImports(includePaths: Array<string> | null = null) {
+    function handleRelativeImports(includePaths: Array<string> | null = null): void {
       if (isRealFile) {
         // relative file import, potentially relative to the previous import
         readAbstractFile(uri, uri, path.dirname(prev), includePaths, null, createHandler());
       } else {
-        readAbstractFile(uri, uri, root, includePaths, null, createHandler(function() {
-          done(new Error("Could not import " + uri + " from " + prev));
+        readAbstractFile(uri, uri, root, includePaths, null, createHandler(function(err) {
+          done(errorFor(err, "Could not import " + uri + " from " + prev));
         }));
       }
     }
@@ -157,8 +157,8 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
   });
 }
 
-function defaultErrorHandler(done: (data: ImporterReturnType) => void) {
-  return function (err: Error | string) {
+function defaultErrorHandler(done: (data: ImporterReturnType) => void): (err: unknown) => void {
+  return function (err: unknown) {
     done(errorFor(err));
   };
 }

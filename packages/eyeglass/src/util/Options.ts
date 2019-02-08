@@ -227,7 +227,7 @@ function includePathsFromEnv(): Array<string> {
   return normalizeIncludePaths(process.env.SASS_PATH, process.cwd());
 }
 
-function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & SassOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn) {
+function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & SassOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn): void {
   // migrates the following properties from sassOptions to eyeglassOptions
   const toMigrate: Array<keyof SimpleDeprecatedOptions> = [ "root", "cacheDir", "buildDir", "httpRoot", "strictModuleVersions" ];
   toMigrate.forEach(function(option) {
@@ -255,20 +255,18 @@ function migrateAssetOption<FromOpt extends "assetsHttpPrefix" | "assetsRelative
   deprecate: DeprecateFn,
   fromOption: FromOpt,
   toOption: typeof fromOption extends "assetsHttpPrefix" ? "httpPrefix" : "relativeTo"
-) {
+): void {
   if ((eyeglassOptions.assets === undefined ||
     (eyeglassOptions.assets && eyeglassOptions.assets[toOption] === undefined)) &&
     sassOptions[fromOption] !== undefined) {
     deprecate("0.8.0", "0.9.0", [
-      "`" + fromOption +
-      "` has been renamed to `" + toOption +
-      "` and should be passed into the eyeglass asset options rather than the sass options:",
+      `\`${fromOption }\` has been renamed to \`${toOption}\` and should be passed into the eyeglass asset options rather than the sass options:`,
       "var options = eyeglass({",
       "  /* sassOptions */",
       "  ...",
       "  eyeglass: {",
       "    assets: {",
-      "      " + toOption + ": ...",
+      `      ${toOption}: ...`,
       "    }",
       "  }",
       "});"
@@ -282,7 +280,7 @@ function migrateAssetOption<FromOpt extends "assetsHttpPrefix" | "assetsRelative
   }
 }
 
-function migrateAssetOptionsFromSassOptions(sassOptions: DeprecatedOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn) {
+function migrateAssetOptionsFromSassOptions(sassOptions: DeprecatedOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn): void {
   // migrates the following properties from sassOptions to eyeglassOptions
   migrateAssetOption(sassOptions, eyeglassOptions, deprecate, "assetsHttpPrefix", "httpPrefix");
   migrateAssetOption(sassOptions, eyeglassOptions, deprecate, "assetsRelativeTo", "relativeTo");
@@ -311,7 +309,7 @@ export function resolveConfig(options: Partial<EyeglassSpecificOptions>): Eyegla
   defaultValue(options, "useGlobalModuleCache", () => true);
 
   options.fsSandbox = normalizeFsSandbox(options.fsSandbox, options.root!);
-  return <EyeglassConfig>options;
+  return options as EyeglassConfig;
 }
 
 function normalizeFsSandbox(sandboxOption: Partial<EyeglassSpecificOptions>["fsSandbox"], root: string): EyeglassConfig["fsSandbox"] {
@@ -393,7 +391,7 @@ function getSassOptions(
   // @see URI
   if (eyeglassOptions.normalizePaths !== undefined) {
     // TODO: make the code read the config from options which is defaulted from the env var
-    process.env.EYEGLASS_NORMALIZE_PATHS = "" + eyeglassOptions.normalizePaths;
+    process.env.EYEGLASS_NORMALIZE_PATHS = `${eyeglassOptions.normalizePaths}`;
   }
 
   if (hasDeprecatedOptions(sassOptions)) {

@@ -36,7 +36,7 @@ export default class ImportUtilities {
       importer.call(this, uri, prev, done);
     };
   }
-  importOnce(data: {file: string; contents: string}, done: (data: ImportedFile) => void) {
+  importOnce(data: {file: string; contents: string}, done: (data: ImportedFile) => void): void {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
       /* istanbul ignore next - don't test debug */
@@ -47,7 +47,7 @@ export default class ImportUtilities {
       done(data);
     }
   }
-  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportContext) => void) {
+  fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportContext) => void): void {
     if (Array.isArray(this.fallbackImporter)) {
       if (this.fallbackImporter.length > 0) {
         this.fallbackNth(uri, prev, 0, done, noFallback);
@@ -66,7 +66,7 @@ export default class ImportUtilities {
       noFallback.call(this.context);
     }
   }
-  fallbackNth(uri: string, prev: string, index: number, done: (result: ImporterReturnType) => void, noFallback:  (this: any) => void) {
+  fallbackNth(uri: string, prev: string, index: number, done: (result: ImporterReturnType) => void, noFallback:  (this: ImportContext) => void): void {
     if (!Array.isArray(this.fallbackImporter)) {
       return done(new Error("[internal error] fallbackNth can only be called for a list of fallbacks."));
     }

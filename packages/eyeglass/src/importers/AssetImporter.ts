@@ -26,9 +26,9 @@ const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallba
     let isRealFile = existsSync(prev);
     let mod: EyeglassModule | null;
 
-    function importAssetsFor(mod: HasAssets) {
+    function importAssetsFor(mod: HasAssets): void {
       let contents;
-      function getAssetImport() {
+      function getAssetImport(): string {
         // XXX what is the correct behavior for when mod.name isn't found?
         return mod.assets ? mod.assets.asAssetImport(mod.name) : "";
       }

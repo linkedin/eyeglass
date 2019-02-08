@@ -11,8 +11,11 @@ function hasMessage(o: unknown): o is HasMessage {
 function errorMessageFor(err: unknown): string {
   switch(typeof err) {
     case "bigint":
+      return err.toString();
     case "boolean":
+      return err.toString();
     case "number":
+      return err.toString();
     case "string":
       return err.toString();
     case "function":
@@ -27,7 +30,7 @@ function errorMessageFor(err: unknown): string {
         return "The cause is unknown.";
       }
     case "symbol":
-      Symbol.keyFor(err) || "The cause is unknown.";
+      return Symbol.keyFor(err) || "The cause is unknown.";
     case "undefined":
       return "The cause is unknown.";
     default:
@@ -45,6 +48,9 @@ export default function errorFor(err: unknown, messagePrefix?: string): Error | 
     }
   }
   if (err instanceof Error) {
+    if (messagePrefix) {
+      err.message = `${messagePrefix}: ${err.message}`;
+    }
     return err;
   }
   let message = errorMessageFor(err);

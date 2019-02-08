@@ -6,6 +6,7 @@ import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError, FunctionDeclarations } from "../util/SassImplementation";
 import { unreachable } from "../util/assertions";
 import { EyeglassFunctions } from "./EyeglassFunctions";
+import { SassError } from "node-sass";
 
 function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
   if (path.relative(sandboxDir, fsPath).match(/^\.\./)) {
@@ -18,11 +19,11 @@ function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
 const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let sassUtils = require("node-sass-utils")(sass);
 
-  function accessViolation(location: string) {
+  function accessViolation(location: string): SassError {
     return sass.types.Error("Security violation: Cannot access " + location);
   }
 
-  function inSandbox(fsPath: string) {
+  function inSandbox(fsPath: string): boolean {
     let sandbox = eyeglass.options.eyeglass.fsSandbox;
     // if there are no sandbox restrictions, return true
     if (!sandbox) {
@@ -41,7 +42,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
     }
   }
 
-  function globFiles(directory: string, globPattern: string, includeFiles: boolean, includeDirectories: boolean, done: SassFunctionCallback) {
+  function globFiles(directory: string, globPattern: string, includeFiles: boolean, includeDirectories: boolean, done: SassFunctionCallback): void {
     if (inSandbox(directory)) {
       let globOpts = {
         root: directory,
@@ -92,7 +93,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
           let resolved = path.resolve.apply(null, segments);
           done(sass.types.String(resolved));
         } else {
-          done(sass.types.Error("No path is registered for " + pathId));
+          done(sass.types.Error(`No path is registered for ${pathId}`));
         }
       },
     "eyeglass-fs-join($segments...)": function(segments: SassValue, done: SassFunctionCallback) {
