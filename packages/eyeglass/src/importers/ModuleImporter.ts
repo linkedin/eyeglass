@@ -6,6 +6,7 @@ import { ImporterFactory, ImportedFile } from "./ImporterFactory";
 import { unreachable } from "../util/assertions";
 import { ImporterReturnType } from "node-sass";
 import { isPresent } from "../util/typescriptUtils";
+import errorFor from "../util/errorFor";
 
 const MODULE_PARSER = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/;
 
@@ -158,10 +159,7 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
 
 function defaultErrorHandler(done: (data: ImporterReturnType) => void) {
   return function (err: Error | string) {
-    if (!(err instanceof Error)) {
-      err = new Error(err.toString());
-    }
-    done(err);
+    done(errorFor(err));
   };
 }
 export default ModuleImporter;
