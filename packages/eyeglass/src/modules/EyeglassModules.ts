@@ -54,7 +54,7 @@ export default class EyeglassModules {
     engine: {
       missing: Array<EyeglassModule>;
       incompatible: Array<EyeglassModule>;
-    }
+    };
   };
   cache: {
     access: SimpleCache<boolean>;
@@ -62,7 +62,7 @@ export default class EyeglassModules {
     modulePackage: SimpleCache<string | undefined>;
   };
   collection: ModuleMap;
-  list: EyeglassModule[];
+  list: Array<EyeglassModule>;
   tree: ModuleBranch;
   projectName: string;
   eyeglass: EyeglassModule;
@@ -130,7 +130,7 @@ export default class EyeglassModules {
     */
   init(eyeglass: IEyeglass, sass: SassImplementation) {
     this.list.forEach((mod) => mod.init(eyeglass, sass));
-  };
+  }
 
   /**
     * Checks whether or not a given location has access to a given module
@@ -150,7 +150,7 @@ export default class EyeglassModules {
 
     // otherwise, return the module reference
     return mod!;
-  };
+  }
 
   /**
     * Finds a module reference by the module name
@@ -171,7 +171,7 @@ export default class EyeglassModules {
     let hierarchy = getHierarchy(this.tree);
     hierarchy.label = this.getDecoratedRootName();
     return archy(hierarchy);
-  };
+  }
   /**
     * resolves the module and it's dependencies
     *

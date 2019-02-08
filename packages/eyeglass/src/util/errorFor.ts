@@ -27,7 +27,7 @@ function errorMessageFor(err: unknown): string {
         return "The cause is unknown.";
       }
     case "symbol":
-       Symbol.keyFor(err) || "The cause is unknown.";
+      Symbol.keyFor(err) || "The cause is unknown.";
     case "undefined":
       return "The cause is unknown.";
     default:

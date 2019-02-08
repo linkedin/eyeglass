@@ -65,7 +65,7 @@ class Eyeglass implements IEyeglass {
       "#sassOptions() is deprecated. Instead, you should access the sass options on #options"
     );
     return this.options;
-  };
+  }
 
 }
 

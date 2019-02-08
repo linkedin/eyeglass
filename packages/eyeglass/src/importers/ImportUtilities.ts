@@ -36,7 +36,7 @@ export default class ImportUtilities {
       importer.call(this, uri, prev, done);
     };
   }
-  importOnce(data: {file: string; contents: string;}, done: (data: ImportedFile) => void) {
+  importOnce(data: {file: string; contents: string}, done: (data: ImportedFile) => void) {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
       /* istanbul ignore next - don't test debug */

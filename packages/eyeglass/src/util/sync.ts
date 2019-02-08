@@ -20,8 +20,8 @@
 import * as deasync from "deasync";
 import { Dict } from "./typescriptUtils";
 
-type ASynchronousFunction = (...args: any[]) => void;
-type SynchronousFunction = (...args: any[]) => any;
+type ASynchronousFunction = (...args: Array<any>) => void;
+type SynchronousFunction = (...args: Array<any>) => any;
 export interface Sync {
   (fn: ASynchronousFunction): SynchronousFunction;
   all: (obj: Dict<ASynchronousFunction>) => Dict<SynchronousFunction>;

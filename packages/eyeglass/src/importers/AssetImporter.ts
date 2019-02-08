@@ -13,7 +13,7 @@ interface HasAssets {
   assets?: {
     asAssetImport: (name: string | undefined) => string;
     cacheKey: (name: string) => string;
-  }
+  };
 }
 
 // import pattern matches `assets` and `foo/assets`, but not `foo/bar/assets`

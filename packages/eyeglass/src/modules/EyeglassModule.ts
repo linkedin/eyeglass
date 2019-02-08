@@ -15,7 +15,7 @@ const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
 export interface DiscoverOptions {
   isRoot: boolean;
   dir: string;
-  pkg?: packageUtils.Package
+  pkg?: packageUtils.Package;
 }
 
 export interface EyeglassModuleExports {
@@ -169,7 +169,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
 
   constructor(
     modArg: ModuleReference | ManualModuleOptions,
-    discoverModules?:(opts: DiscoverOptions) => Dict<EyeglassModule> | null,
+    discoverModules?: (opts: DiscoverOptions) => Dict<EyeglassModule> | null,
     isRoot: boolean = false
   ) {
     // some defaults

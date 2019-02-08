@@ -11,54 +11,54 @@ type AsyncImporter = (this: AsyncContext, url: string, prev: string, done: (data
 type SyncImporter = (this: SyncContext, url: string, prev: string) => ImporterReturnType;
 type Importer = AsyncImporter | SyncImporter;
 interface SyncContext {
-    options: Options;
-    callback: undefined;
-    [data: string]: any;
+  options: Options;
+  callback: undefined;
+  [data: string]: any;
 }
 interface AsyncContext {
-    options: Options;
-    callback: (data: ImporterReturnType) => void;
-    [data: string]: any;
+  options: Options;
+  callback: (data: ImporterReturnType) => void;
+  [data: string]: any;
 }
 interface Options {
-    file?: string;
-    data?: string;
-    importer?: Importer | Importer[];
-    functions?: { [key: string]: Function };
-    includePaths?: string[];
-    indentedSyntax?: boolean;
-    indentType?: string;
-    indentWidth?: number;
-    linefeed?: string;
-    omitSourceMapUrl?: boolean;
-    outFile?: string;
-    outputStyle?: "compact" | "compressed" | "expanded" | "nested";
-    precision?: number;
-    sourceComments?: boolean;
-    sourceMap?: boolean | string;
-    sourceMapContents?: boolean;
-    sourceMapEmbed?: boolean;
-    sourceMapRoot?: string;
+  file?: string;
+  data?: string;
+  importer?: Importer | Importer[];
+  functions?: { [key: string]: Function };
+  includePaths?: string[];
+  indentedSyntax?: boolean;
+  indentType?: string;
+  indentWidth?: number;
+  linefeed?: string;
+  omitSourceMapUrl?: boolean;
+  outFile?: string;
+  outputStyle?: "compact" | "compressed" | "expanded" | "nested";
+  precision?: number;
+  sourceComments?: boolean;
+  sourceMap?: boolean | string;
+  sourceMapContents?: boolean;
+  sourceMapEmbed?: boolean;
+  sourceMapRoot?: string;
 }
 
 interface SassError extends Error {
-    message: string;
-    line: number;
-    column: number;
-    status: number;
-    file: string;
+  message: string;
+  line: number;
+  column: number;
+  status: number;
+  file: string;
 }
 
 interface Result {
-    css: Buffer;
-    map: Buffer;
-    stats: {
-        entry: string;
-        start: number;
-        end: number;
-        duration: number;
-        includedFiles: string[];
-    }
+  css: Buffer;
+  map: Buffer;
+  stats: {
+    entry: string;
+    start: number;
+    end: number;
+    duration: number;
+    includedFiles: string[];
+  }
 }
 
 export declare function render(options: Options, callback: (err: SassError, result: Result) => any): void;

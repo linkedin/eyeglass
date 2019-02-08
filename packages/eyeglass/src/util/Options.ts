@@ -159,7 +159,7 @@ export interface DeprecatedOptions extends SimpleDeprecatedOptions {
 }
 
 export interface EyeglassOptions {
-  eyeglass?: EyeglassSpecificOptions
+  eyeglass?: EyeglassSpecificOptions;
   assetsCache?: (cacheKey: string, lazyValue: () => string) => void;
 }
 export type Options = (SassOptions & EyeglassOptions) | (DeprecatedOptions & SassOptions & EyeglassOptions) ;
@@ -172,9 +172,9 @@ export type Config = SassOptions & {
 export default class implements Config {
   file?: string;
   data?: string;
-  importer?: Importer | Importer[];
+  importer?: Importer | Array<Importer>;
   functions?: { [key: string]: Function };
-  includePaths?: string[];
+  includePaths?: Array<string>;
   indentedSyntax?: boolean;
   indentType?: string;
   indentWidth?: number;
