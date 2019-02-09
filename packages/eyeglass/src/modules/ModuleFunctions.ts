@@ -1,7 +1,8 @@
 import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");
-import { FunctionDeclarations, SassImplementation, SassFunction } from "../util/SassImplementation";
+import { SassImplementation } from "../util/SassImplementation";
+import { FunctionDeclarations, SassFunction } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { Dict, UnsafeDict } from "../util/typescriptUtils";
 const ARGUMENTS_REGEX = /\s*\(.*\)$/;

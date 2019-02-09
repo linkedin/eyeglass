@@ -1,11 +1,13 @@
 import { URI } from  "../util/URI";
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassValue, SassFunctionCallback, isSassString, typeError, FunctionDeclarations } from "../util/SassImplementation";
+import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
+import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import * as sass from "node-sass";
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
 const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let methods: FunctionDeclarations = {
-    "eyeglass-uri-preserve($uri)": function($uri: SassValue, done: SassFunctionCallback) {
+    "eyeglass-uri-preserve($uri)": function($uri: sass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $uri)) {
         return done(typeError(sass, "string", $uri));
       }
@@ -14,7 +16,7 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
       uri = URI.preserve(uri);
       done(sass.types.String(uri));
     },
-    "eyeglass-uri-restore($uri)": function($uri: SassValue, done: SassFunctionCallback) {
+    "eyeglass-uri-restore($uri)": function($uri: sass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $uri)) {
         return done(typeError(sass, "string", $uri));
       }
@@ -26,7 +28,7 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
   };
 
   if (IS_WINDOWS || process.env.EYEGLASS_NORMALIZE_PATHS) {
-    methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri: SassValue, $type: SassValue, done: SassFunctionCallback) {
+    methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri: sass.types.Value, $type: sass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $type)) {
         return done(typeError(sass, "string", $type));
       }

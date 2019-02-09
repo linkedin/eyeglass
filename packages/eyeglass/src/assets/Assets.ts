@@ -4,7 +4,8 @@ import * as path from "path";
 import { IEyeglass } from "../IEyeglass";
 import * as debug from "../util/debug";
 import { AssetSourceOptions } from "../util/Options";
-import { isType, SassImplementation, SassMap, SassTypeError, SassValue } from "../util/SassImplementation";
+import { isType, SassImplementation, SassTypeError } from "../util/SassImplementation";
+import * as sass from "node-sass";
 import { URI } from "../util/URI";
 
 import AssetsCollection from "./AssetsCollection";
@@ -116,7 +117,7 @@ export default class Assets implements Resolves, Installs {
     * @param    {SassString} $uri - the uri of the asset
     * @param    {Function} cb - the callback that is invoked when the asset resolves
     */
-  resolveAsset($assetsMap: SassMap, $uri: SassValue, cb: (error: Error | null, uri?: string, file?: string) => unknown): void {
+  resolveAsset($assetsMap: sass.types.Map, $uri: sass.types.Value, cb: (error: Error | null, uri?: string, file?: string) => unknown): void {
     let sass = this.eyeglass.options.eyeglass.engines.sass;
     let options = this.eyeglass.options.eyeglass;
     let assets = this.eyeglass.assets;
@@ -248,7 +249,7 @@ export default class Assets implements Resolves, Installs {
   }
   // need types for sass utils
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private resolveAssetDefaults(registeredAssetsMap: SassMap, relativePath: string): any {
+  private resolveAssetDefaults(registeredAssetsMap: sass.types.Map, relativePath: string): any {
     registeredAssetsMap = this.sassUtils.handleEmptyMap(registeredAssetsMap);
     this.sassUtils.assertType(registeredAssetsMap, "map");
 

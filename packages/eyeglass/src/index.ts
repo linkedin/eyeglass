@@ -10,7 +10,8 @@ import semverChecker from "./util/semverChecker";
 import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
 import {PackageJson} from "package-json";
-import { SassImplementation, SassFunction } from "./util/SassImplementation";
+import { SassFunction } from "node-sass";
+import { SassImplementation } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
 import { UnsafeDict } from "./util/typescriptUtils";
 // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -1,14 +1,16 @@
 import { IEyeglass } from "../IEyeglass";
-import { SassImplementation, SassFunctionCallback, SassValue, typeError, isType, isSassList, SassMap, FunctionDeclarations, SassString, isSassError } from "../util/SassImplementation";
+import { SassImplementation, typeError, isType, isSassList, isSassError } from "../util/SassImplementation";
+import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import * as sass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { isPresent } from "../util/typescriptUtils";
-import { SassError } from "node-sass";
+import { errorMessageFor } from "../util/errorFor";
 
 const assetFunctions: EyeglassFunctions =
 function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   return {
-    "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets: SassValue, $uri: SassValue, done: SassFunctionCallback) {
-      let $assetMap: SassMap;
+    "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets: sass.types.Value, $uri: sass.types.Value, done: SassFunctionCallback) {
+      let $assetMap: sass.types.Map;
       if (!isType(sass, $assets, "map")) {
         return done(typeError(sass, "map", $assets));
       }
@@ -18,12 +20,12 @@ function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
         $assetMap = $assets;
       }
       eyeglass.assets.resolveAsset($assetMap, $uri, function(error, assetUri) {
-        let result: SassError | SassString;
+        let result: sass.types.Error | sass.types.String;
         if (error || !isPresent(assetUri)) {
           if (isSassError(sass, error)) {
             result = error;
           } else if (isPresent(error)) {
-            result = sass.types.Error(error.message || error.toString());
+            result = sass.types.Error(errorMessageFor(error));
           } else {
             result = sass.types.Error("[internal error] A uri was not returned");
           }

@@ -1,11 +1,12 @@
-import { SassImplementation, isSassString, SassString, SassValue, toString } from "./SassImplementation";
+import { SassImplementation, isSassString, toString } from "./SassImplementation";
+import * as sass from "node-sass";
 import { inspect } from "util";
 import { Dict } from "./typescriptUtils";
 
 let rUnquote = /^("|')(.*)\1$/;
 let rPlaceholders = /\${([^}]+)}/g;
 
-export function unquote(sass: SassImplementation, string: string | SassValue): SassString {
+export function unquote(sass: SassImplementation, string: string | sass.types.Value): sass.types.String {
   if (typeof string === "string") {
     return sass.types.String(string.replace(rUnquote, "$2"));
   }
@@ -19,7 +20,7 @@ export function unquote(sass: SassImplementation, string: string | SassValue): S
   }
 }
 
-export function unquoteJS(sass: SassImplementation, string: string | SassValue): string {
+export function unquoteJS(sass: SassImplementation, string: string | sass.types.Value): string {
   if (typeof string === "string") {
     return string.replace(rUnquote, "$2");
   }
@@ -33,9 +34,9 @@ export function unquoteJS(sass: SassImplementation, string: string | SassValue):
   }
 }
 
-export function quoteSass(sass: SassImplementation, string: string | SassValue): SassString;
+export function quoteSass(sass: SassImplementation, string: string | sass.types.Value): sass.types.String;
 export function quoteSass(sass: SassImplementation, string: undefined): undefined;
-export function quoteSass(sass: SassImplementation, string: string | SassValue | undefined): SassString | undefined {
+export function quoteSass(sass: SassImplementation, string: string | sass.types.Value | undefined): sass.types.String | undefined {
   if (typeof string === "string") {
     if (rUnquote.test(string)) {
       return sass.types.String(string);
@@ -56,10 +57,10 @@ export function quoteSass(sass: SassImplementation, string: string | SassValue |
   }
 }
 
-export function quoteJS(sass: SassImplementation, string: string | SassValue): string;
+export function quoteJS(sass: SassImplementation, string: string | sass.types.Value): string;
 export function quoteJS(sass: SassImplementation, string: undefined): undefined;
 export function quoteJS(sass: SassImplementation, string: string | undefined): string | undefined;
-export function quoteJS(sass: SassImplementation, string: string | SassValue | undefined): string | undefined {
+export function quoteJS(sass: SassImplementation, string: string | sass.types.Value | undefined): string | undefined {
   if (typeof string === "string") {
     if (rUnquote.test(string)) {
       return string;
@@ -80,7 +81,7 @@ export function quoteJS(sass: SassImplementation, string: string | SassValue | u
   }
 }
 
-export function tmpl(sass: SassImplementation, templateString: string, data: Dict<string | SassValue>): string {
+export function tmpl(sass: SassImplementation, templateString: string, data: Dict<string | sass.types.Value>): string {
   return templateString.replace(rPlaceholders, (match, key: string) => {
     if (data.hasOwnProperty(key)) {
       let v = data[key];
