@@ -53,7 +53,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       glob(globPattern, globOpts, function(error, files) {
         /* istanbul ignore if - we do not need to simulate a glob error here */
         if (error) {
-          done(sass.types.Error(error.message));
+          done(new sass.types.Error(error.message));
           return;
         }
 
