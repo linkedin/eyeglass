@@ -66,6 +66,6 @@ export default class AssetsCollection {
   cacheKey(name: string): string {
     return this.sources.map(function (source) {
       return source.cacheKey(name);
-    }).sort().join(":");
+    }).sort().join("\x00");
   }
 }
