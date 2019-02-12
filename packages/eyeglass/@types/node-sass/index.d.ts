@@ -68,19 +68,23 @@ export namespace types {
    * Values that are received from Sass as an argument to a javascript function.
    */
   export type Value = Null | Number | String | Color | Boolean | List | Map;
+
   /**
    * Values that are legal to return to Sass from a javascript function.
    */
   export type ReturnValue = Value | Error;
 
+  // *** Sass Null ***
+
   export interface Null {}
 
   interface NullConstructor {
-    new (): Null;
     (): Null;
     NULL: Null;
   }
   export const Null: NullConstructor;
+
+  // *** Sass Number ***
 
   export interface Number {
     getValue(): number;
@@ -88,20 +92,40 @@ export namespace types {
     getUnit(): string;
     setUnit(u: string): void;
   }
-  /**
-   * Constructs a new Sass number. Does not require use of the `new` keyword.
-   */
-  export function Number(value: number, unit?: string): Number;
+  interface NumberConstructor {
+    /**
+     * Constructs a new Sass number. Does not require use of the `new` keyword.
+     */
+    new(value: number, unit?: string): Number;
+    /**
+     * Constructs a new Sass number. Can also be used with the `new` keyword.
+     */
+    (value: number, unit?: string): Number;
+  }
+
+  export const Number: NumberConstructor;
+
+  // *** Sass String ***
 
   export interface String {
     getValue(): string;
     setValue(s: string): void;
   }
 
-  /**
-   * Constructs a new Sass string. Does not require use of the `new` keyword.
-   */
-  export function String(value: string): String;
+  interface StringConstructor {
+    /**
+     * Constructs a new Sass string. Does not require use of the `new` keyword.
+     */
+    new (value: string): String;
+    /**
+     * Constructs a new Sass string. Can also be used with the `new` keyword.
+     */
+    (value: string): String;
+  }
+
+  export const String: StringConstructor;
+
+  // *** Sass Color ***
 
   export interface Color {
     /**
@@ -146,45 +170,83 @@ export namespace types {
     setA(a: number): void;
   }
 
-  /**
-   * Constructs a new Sass color given a 4 byte number. Do not invoke with the `new` keyword.
-   *
-   * If a single number is passed it is assumed to be a number that contains
-   * all the components which are extracted using bitmasks and bitshifting.
-   * 
-   * @param hexN A number that is usually written in hexadecimal form. E.g. 0xff0088cc.
-   * @returns a Sass Color instance.
-   * @example
-   *   // Comparison with byte array manipulation
-   *   let a = new ArrayBuffer(4);
-   *   let hexN = 0xCCFF0088; // 0xAARRGGBB
-   *   let a32 = new Uint32Array(a); // Uint32Array [ 0 ]
-   *   a32[0] = hexN;
-   *   let a8 = new Uint8Array(a); // Uint8Array [ 136, 0, 255, 204 ]
-   *   let componentBytes = [a8[2], a8[1], a8[0], a8[3] / 255] // [ 136, 0, 255, 0.8 ]
-   *   let c = sass.types.Color(hexN);
-   *   let components = [c.getR(), c.getG(), c.getR(), c.getA()] // [ 136, 0, 255, 0.8 ]
-   *   assert.deepEqual(componentBytes, components); // does not raise.
-   */
-  export function Color(hexN: number): Color;
+  interface ColorConstructor {
+    /**
+     * Constructs a new Sass color given the RGBA component values. Do not invoke with the `new` keyword.
+     * 
+     * @param r integer 0-255 inclusive
+     * @param g integer 0-255 inclusive
+     * @param b integer 0-255 inclusive
+     * @param [a] float 0 - 1 inclusive
+     * @returns a SassColor instance.
+     */
+    new (r: number, g: number, b: number, a?: number): Color;
 
-  /**
-   * Constructs a new Sass color given the RGBA component values. Do not invoke with the `new` keyword.
-   * 
-   * @param r integer 0-255 inclusive
-   * @param g integer 0-255 inclusive
-   * @param b integer 0-255 inclusive
-   * @param [a] float 0 - 1 inclusive
-   * @returns a SassColor instance.
-   */
-  export function Color(r: number, g: number, b: number, a?: number): Color;
+    /**
+     * Constructs a new Sass color given a 4 byte number. Do not invoke with the `new` keyword.
+     *
+     * If a single number is passed it is assumed to be a number that contains
+     * all the components which are extracted using bitmasks and bitshifting.
+     * 
+     * @param hexN A number that is usually written in hexadecimal form. E.g. 0xff0088cc.
+     * @returns a Sass Color instance.
+     * @example
+     *   // Comparison with byte array manipulation
+     *   let a = new ArrayBuffer(4);
+     *   let hexN = 0xCCFF0088; // 0xAARRGGBB
+     *   let a32 = new Uint32Array(a); // Uint32Array [ 0 ]
+     *   a32[0] = hexN;
+     *   let a8 = new Uint8Array(a); // Uint8Array [ 136, 0, 255, 204 ]
+     *   let componentBytes = [a8[2], a8[1], a8[0], a8[3] / 255] // [ 136, 0, 255, 0.8 ]
+     *   let c = sass.types.Color(hexN);
+     *   let components = [c.getR(), c.getG(), c.getR(), c.getA()] // [ 136, 0, 255, 0.8 ]
+     *   assert.deepEqual(componentBytes, components); // does not raise.
+     */
+    new (hexN: number): Color;
+
+    /**
+     * Constructs a new Sass color given the RGBA component values. Do not invoke with the `new` keyword.
+     * 
+     * @param r integer 0-255 inclusive
+     * @param g integer 0-255 inclusive
+     * @param b integer 0-255 inclusive
+     * @param [a] float 0 - 1 inclusive
+     * @returns a SassColor instance.
+     */
+    (r: number, g: number, b: number, a?: number): Color;
+
+    /**
+     * Constructs a new Sass color given a 4 byte number. Do not invoke with the `new` keyword.
+     *
+     * If a single number is passed it is assumed to be a number that contains
+     * all the components which are extracted using bitmasks and bitshifting.
+     * 
+     * @param hexN A number that is usually written in hexadecimal form. E.g. 0xff0088cc.
+     * @returns a Sass Color instance.
+     * @example
+     *   // Comparison with byte array manipulation
+     *   let a = new ArrayBuffer(4);
+     *   let hexN = 0xCCFF0088; // 0xAARRGGBB
+     *   let a32 = new Uint32Array(a); // Uint32Array [ 0 ]
+     *   a32[0] = hexN;
+     *   let a8 = new Uint8Array(a); // Uint8Array [ 136, 0, 255, 204 ]
+     *   let componentBytes = [a8[2], a8[1], a8[0], a8[3] / 255] // [ 136, 0, 255, 0.8 ]
+     *   let c = sass.types.Color(hexN);
+     *   let components = [c.getR(), c.getG(), c.getR(), c.getA()] // [ 136, 0, 255, 0.8 ]
+     *   assert.deepEqual(componentBytes, components); // does not raise.
+     */
+    (hexN: number): Color;
+  }
+
+  export const Color: ColorConstructor;
+
+  // *** Sass Boolean ***
 
   export interface Boolean {
     getValue(): boolean;
   }
 
   interface BooleanConstructor {
-    new (bool: boolean): Boolean;
     (bool: boolean): Boolean;
     TRUE: Boolean;
     FALSE: Boolean;
@@ -192,27 +254,52 @@ export namespace types {
 
   export const Boolean: BooleanConstructor;
 
+  // *** Sass List ***
+
   export interface Enumerable {
     getValue(index: number): Value;
     setValue(index: number, value: Value): void;
     getLength(): number;
   }
+
   export interface List extends Enumerable {
     getSeparator(): boolean;
     setSeparator(isComma: boolean): void;
   }
-  export function List(length: number, commaSeparator?: boolean): List;
+  interface ListConstructor {
+    new (length: number, commaSeparator?: boolean): List;
+    (length: number, commaSeparator?: boolean): List;
+  }
+  export const List: ListConstructor;
+
+  // *** Sass Map ***
 
   export interface Map extends Enumerable {
     getKey(index: number): string;
     setKey(index: number, key: string): void;
   }
-  export function Map(length: number): Map;
+  interface MapConstructor {
+    new (length: number): Map;
+    (length: number): Map;
+  }
+  export const Map: MapConstructor;
+
+  // *** Sass Map ***
 
   export interface Error {
     // why isn't there a getMessage() method?
   }
-  export function Error(message: string): Error;
+  interface ErrorConstructor {
+    /** An error return value for async functions.
+     * For synchronous functions, this can be returned or a standard error object can be thrown.
+     */
+    new (message: string): Error;
+    /** An error return value for async functions.
+     * For synchronous functions, this can be returned or a standard error object can be thrown.
+     */
+    (message: string): Error;
+  }
+  export const Error: ErrorConstructor
 
   /* eslint-enable @typescript-eslint/ban-types, @typescript-eslint/no-empty-interface */
 }
