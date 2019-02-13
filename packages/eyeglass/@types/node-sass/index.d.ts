@@ -5,7 +5,7 @@
 
 /// <reference types="node" />
 
-export type ImporterReturnType = { file: string } | { file?: string; contents: string } | Error | null;
+export type ImporterReturnType = { file: string } | { file?: string; contents: string } | Error | null | types.Null | types.Error;
 
 /**
  * The context value is a value that is shared for the duration of a single render.
@@ -64,13 +64,14 @@ export type AsyncSassVarArgFn4 = (this: AsyncContext, $arg1: types.Value, $arg2:
 export type AsyncSassVarArgFn5 = (this: AsyncContext, $arg1: types.Value, $arg2: types.Value, $arg3: types.Value, $arg4: types.Value, $arg5: Array<types.Value>, cb: SassFunctionCallback) => void;
 export type AsyncSassVarArgFn6 = (this: AsyncContext, $arg1: types.Value, $arg2: types.Value, $arg3: types.Value, $arg4: types.Value, $arg5: types.Value, $arg6: Array<types.Value>, cb: SassFunctionCallback) => void;
 
-export type SassFunction =
-  SyncSassFn
-  | SyncSassVarArgFn1 | SyncSassVarArgFn2 | SyncSassVarArgFn3 | SyncSassVarArgFn4 | SyncSassVarArgFn5 | SyncSassVarArgFn6
-  | AsyncSassFn0 | AsyncSassFn1 | AsyncSassFn2 | AsyncSassFn3 | AsyncSassFn4 | AsyncSassFn5 | AsyncSassFn6
-  | AsyncSassVarArgFn1 | AsyncSassVarArgFn2 | AsyncSassVarArgFn3 | AsyncSassVarArgFn4 | AsyncSassVarArgFn5 | AsyncSassVarArgFn6;
+export type SyncSassFunction = SyncSassFn | SyncSassVarArgFn1 | SyncSassVarArgFn2 | SyncSassVarArgFn3 | SyncSassVarArgFn4 | SyncSassVarArgFn5 | SyncSassVarArgFn6;
 
-export type FunctionDeclarations = Record<string, SassFunction>;
+export type AsyncSassFunction = AsyncSassFn0 | AsyncSassFn1 | AsyncSassFn2 | AsyncSassFn3 | AsyncSassFn4 | AsyncSassFn5 | AsyncSassFn6
+                              | AsyncSassVarArgFn1 | AsyncSassVarArgFn2 | AsyncSassVarArgFn3 | AsyncSassVarArgFn4 | AsyncSassVarArgFn5 | AsyncSassVarArgFn6;
+
+export type SassFunction = SyncSassFunction | AsyncSassFunction;
+
+export type FunctionDeclarations<FunctionType extends SassFunction = SassFunction> = Record<string, FunctionType>;
 
 export interface Options {
   file?: string;
@@ -92,6 +93,11 @@ export interface Options {
   sourceMapEmbed?: boolean;
   sourceMapRoot?: string;
   [key: string]: any;
+}
+
+export interface SyncOptions extends Options {
+  functions?: FunctionDeclarations<SyncSassFunction>;
+  importer?: SyncImporter | Array<SyncImporter>;
 }
 
 /**
@@ -137,7 +143,15 @@ export namespace types {
 
   // *** Sass Null ***
 
-  export interface Null {}
+  export interface Null {
+    /**
+     * This property doesn't exist, but its presence forces the typescript
+     * compiler to properly type check this type. Without it, it seems to
+     * allow things that aren't types.Null to match it in case statements and
+     * assignments.
+     */
+    readonly ___NULL___: unique symbol;
+  }
 
   interface NullConstructor {
     (): Null;
@@ -336,8 +350,8 @@ export namespace types {
   // *** Sass Map ***
 
   export interface Map extends Enumerable {
-    getKey(index: number): string;
-    setKey(index: number, key: string): void;
+    getKey(index: number): Value;
+    setKey(index: number, key: Value): void;
   }
   interface MapConstructor {
     new (length: number): Map;
@@ -348,8 +362,16 @@ export namespace types {
   // *** Sass Error ***
 
   export interface Error {
+    /**
+     * This property doesn't exist, but its presence forces the typescript
+     * compiler to properly type check this type. Without it, it seems to
+     * allow things that aren't types.Error to match it in case statements and
+     * assignments.
+     */
+    readonly ___SASS_ERROR___: unique symbol;
     // why isn't there a getMessage() method?
   }
+
   interface ErrorConstructor {
     /** An error return value for async functions.
      * For synchronous functions, this can be returned or a standard error object can be thrown.
@@ -372,5 +394,5 @@ export const TRUE: types.Boolean;
 export const FALSE: types.Boolean;
 export const info: string;
 export declare function render(options: Options, callback: SassRenderCallback): void;
-export declare function renderSync(options: Options): Result;
+export declare function renderSync(options: SyncOptions): Result;
 

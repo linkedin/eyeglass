@@ -143,6 +143,7 @@ interface SassType {
 type SassTypeName = keyof typeof typeGuards;
 
 function typeName(sass: SassImplementation, value: SassValue | SassError): SassTypeName {
+  if (isSassNull(sass, value)) return "null";
   if (isSassString(sass, value)) return "string";
   if (isSassNumber(sass, value)) return "number";
   if (isSassMap(sass, value)) return "map";
@@ -150,11 +151,12 @@ function typeName(sass: SassImplementation, value: SassValue | SassError): SassT
   if (isSassColor(sass, value)) return "color";
   if (isSassBoolean(sass, value)) return "boolean";
   if (isSassError(sass, value)) return "error";
-  if (isSassNull(sass, value)) return "null";
   return unreachable(value);
 }
 
-export function isType<Name extends SassTypeName>(sass: SassImplementation, value: SassValue, name: Name): value is SassType[Name] {
+export function isType<Name extends SassTypeName>(
+  sass: SassImplementation, value: SassValue | SassError, name: Name
+): value is SassType[Name] {
   let guard = typeGuards[name];
   if (guard(sass, value)) {
     return true;

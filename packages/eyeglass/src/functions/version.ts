@@ -6,7 +6,7 @@ import { IEyeglass } from "../IEyeglass";
 
 const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): sass.FunctionDeclarations {
   return {
-    "eyeglass-version($module: eyeglass)": function($module: sass.types.Value): sass.types.Value {
+    "eyeglass-version($module: eyeglass)": function($module: sass.types.Value): sass.types.ReturnValue {
       if (!isSassString(sass, $module)) {
         return typeError(sass, "string", $module);
       }
