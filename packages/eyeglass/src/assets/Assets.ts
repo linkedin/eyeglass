@@ -89,7 +89,7 @@ export default class Assets implements Resolves, Installs {
   /**
     * @see AssetsCollection#addSource
     */
-  addSource(src: string, opts: AssetSourceOptions): AssetsCollection {
+  addSource(src: string, opts: Partial<AssetSourceOptions>): AssetsCollection {
     return this.collection.addSource(src, opts);
   }
 
