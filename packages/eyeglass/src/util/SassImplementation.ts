@@ -166,11 +166,37 @@ export function isType<Name extends SassTypeName>(
 }
 
 export function typeError(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue): SassError {
-  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
+  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
 }
 
 export class SassTypeError extends Error {
   constructor(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue) {
-    super(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
+    super(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function helpers(sass: SassImplementation) {
+  return {
+    isSass:    (value: unknown): value is SassImplementation => isSassImplementation(value),
+    isNull:    (value: unknown): value is SassNull    => isSassNull(sass, value),
+    isString:  (value: unknown): value is SassString  => isSassString(sass, value),
+    isNumber:  (value: unknown): value is SassNumber  => isSassNumber(sass, value),
+    isMap:     (value: unknown): value is SassMap     => isSassMap(sass, value),
+    isList:    (value: unknown): value is SassList    => isSassList(sass, value),
+    isColor:   (value: unknown): value is SassColor   => isSassColor(sass, value),
+    isBoolean: (value: unknown): value is SassBoolean => isSassBoolean(sass, value),
+    isError:   (value: unknown): value is SassError   => isSassError(sass, value),
+    isValue:   (value: unknown): value is SassValue   => isSassValue(sass, value),
+    isMapOrEmptyList: (value: unknown): value is SassMap | SassList => isSassMapOrEmptyList(sass, value),
+    typeError: typeError.bind(null, sass),
+    isType:    isType.bind(null, sass),
+    typeName:  typeName.bind(null, sass),
+    inspect: inspect.bind(null, sass),
+    TypeError: class extends SassTypeError {
+      constructor(expected: SassTypeName, actual: SassTypeName | SassValue) {
+        super(sass, expected, actual);
+      }
+    }
+  };
 }
