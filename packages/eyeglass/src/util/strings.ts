@@ -1,4 +1,4 @@
-import { SassImplementation, isSassString, toString } from "./SassImplementation";
+import { SassImplementation, isSassString, inspect as inspectSass } from "./SassImplementation";
 import * as sass from "node-sass";
 import { inspect } from "util";
 import { Dict } from "./typescriptUtils";
@@ -88,7 +88,7 @@ export function tmpl(sass: SassImplementation, templateString: string, data: Dic
       if (typeof v === "string") {
         return v;
       } else {
-        return toString(sass, v!);
+        return inspectSass(sass, v!);
       }
     } else {
       return match;

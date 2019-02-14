@@ -29,7 +29,7 @@ export function isSassValue(
   }
 }
 
-export function toString(sass: SassImplementation, value: SassValue): string {
+export function inspect(sass: SassImplementation, value: SassValue): string {
   if (isSassNumber(sass, value)) {
     return `${value.getValue()}${value.getUnit()}`
   } else if (isSassString(sass, value)) {
@@ -52,7 +52,7 @@ export function toString(sass: SassImplementation, value: SassValue): string {
           s += " ";
         }
       }
-      s += toString(sass, value.getValue(i));
+      s += inspect(sass, value.getValue(i));
     }
     s += ")";
     return s;
@@ -64,12 +64,12 @@ export function toString(sass: SassImplementation, value: SassValue): string {
       }
       s += value.getKey(i);
       s += ": ";
-      s += toString(sass, value.getValue(i));
+      s += inspect(sass, value.getValue(i));
     }
     s += ")";
     return s;
   } else if (isSassNull(sass, value)) {
-    return "";
+    return "null";
   } else {
     return unreachable();
   }
