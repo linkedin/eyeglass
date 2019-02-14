@@ -28,6 +28,7 @@
     "sass",
     "eyeglass-module"
   ],
+  "types": "lib/index.d.ts",
   "eyeglass": {
     "exports": "lib/eyeglass-exports",
     "needs": "*"
