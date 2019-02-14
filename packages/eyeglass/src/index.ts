@@ -1,174 +1,8 @@
-import EyeglassModules from "./modules/EyeglassModules";
-import ModuleFunctions from "./modules/ModuleFunctions";
-import ModuleImporter from "./importers/ModuleImporter";
-import AssetImporter from "./importers/AssetImporter";
-import FSImporter from "./importers/FSImporter";
-import Options, {Options as Opts, Config, SimpleDeprecatedOptions, EyeglassConfig} from "./util/Options";
-import Assets from "./assets/Assets";
-import deprecator, { DeprecateFn } from "./util/deprecator";
-import semverChecker from "./util/semverChecker";
-import * as fs from "fs-extra";
+import { Options as Opts, Config } from "./util/Options";
 import { IEyeglass } from "./IEyeglass";
-import {PackageJson} from "package-json";
-import { SassFunction } from "node-sass";
 import { SassImplementation } from "./util/SassImplementation";
-import { AsyncImporter } from "node-sass";
-import { UnsafeDict } from "./util/typescriptUtils";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg: PackageJson = require("../package.json");
-
-class Eyeglass implements IEyeglass {
-  static VERSION = pkg.version!;
-
-  deprecate: DeprecateFn;
-  options: Config;
-  assets: Assets;
-  modules: EyeglassModules;
-
-  constructor(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
-
-    // an interface for deprecation warnings
-    this.deprecate = deprecator(options);
-
-    this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
-    this.assets = new Assets(this, this.options.eyeglass.engines.sass);
-    this.modules = new EyeglassModules(
-      this.options.eyeglass.root,
-      this.options.eyeglass.modules,
-      this.options.eyeglass.useGlobalModuleCache
-    );
-
-    fs.mkdirpSync(this.options.eyeglass.cacheDir);
-
-    semverChecker(this, this.options.eyeglass.engines.sass, this.options.eyeglass, Eyeglass.VERSION);
-
-    checkMissingDependencies.call(this);
-
-    // initialize all the modules
-    this.modules.init(this, this.options.eyeglass.engines.sass);
-
-    // add importers and functions
-    addImporters.call(this);
-    addFunctions.call(this);
-
-    // deprecated stuff
-    deprecateProperties.call(this, ["enableImportOnce"]);
-
-    // auto-add asset paths specified via options
-    if (this.options.eyeglass.assets.sources) {
-      for (let assetSource of this.options.eyeglass.assets.sources) {
-        this.assets.addSource(assetSource.directory, assetSource);
-      }
-    }
-  }
-
-  // export deprecated interfaces for back-compat
-  sassOptions(this: IEyeglass): Config {
-    this.deprecate("0.8.0", "0.9.0",
-      "#sassOptions() is deprecated. Instead, you should access the sass options on #options"
-    );
-    return this.options;
-  }
-
-}
-
-
-function checkMissingDependencies(this: IEyeglass): void {
-  let missing = this.modules.issues.dependencies.missing;
-  if (missing.length) {
-    let warning = ["The following dependencies were not found:"];
-    warning.push.apply(warning, missing.map(function(dep) {
-      return "  " + dep;
-    }));
-    warning.push("You might need to `npm install` the above.");
-
-    // eslint-disable-next-line no-console
-    console.warn(warning.join("\n"));
-  }
-}
-
-function addImporters(this: IEyeglass): void {
-  let fsImporter = FSImporter(
-    this,
-    this.options.eyeglass.engines.sass,
-    this.options,
-    this.options.importer as AsyncImporter
-  );
-  let assetImporter = AssetImporter(
-    this,
-    this.options.eyeglass.engines.sass,
-    this.options,
-    fsImporter
-  );
-  this.options.importer = ModuleImporter(
-    this,
-    this.options.eyeglass.engines.sass,
-    this.options,
-    assetImporter
-  );
-}
-
-function addFunctions(this: IEyeglass): void {
-  this.options.functions = ModuleFunctions(
-    this,
-    this.options.eyeglass.engines.sass,
-    this.options,
-    this.options.functions as UnsafeDict<SassFunction> // The type of @types/node-sass/Options["functions"] is bad.
-  );
-}
-
-module.exports = Eyeglass;
-
-function deprecateProperties(this: IEyeglass, properties: Array<keyof SimpleDeprecatedOptions | "enableImportOnce">): void {
-  for (let prop of properties) {
-    Object.defineProperty(this, prop, {
-      get: function(this: IEyeglass) {
-        this.deprecate("0.8.0", "0.9.0",
-          "The property `" + prop + "` should no longer be accessed directly on eyeglass. " +
-          "Instead, you'll find the value on `eyeglass.options.eyeglass." + prop + "`"
-        );
-        return this.options.eyeglass[prop as keyof SimpleDeprecatedOptions];
-      },
-      set: function(this: IEyeglass, value: EyeglassConfig[typeof prop]) {
-        this.deprecate("0.8.0", "0.9.0",
-          "The property `" + prop + "` should no longer be set directly on eyeglass. " +
-          "Instead, you should pass this as an option to eyeglass:" +
-          "\n  var options = eyeglass({" +
-          "\n    /* sassOptions */" +
-          "\n    ..." +
-          "\n    eyeglass: {" +
-          "\n      "  + prop + ": ..." +
-          "\n    }" +
-          "\n  });"
-        );
-        this.options.eyeglass[prop] = value;
-      }
-    });
-  }
-}
-
-module.exports = function(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
-  if (this instanceof module.exports) {
-    return new Eyeglass(options, deprecatedNodeSassArg);
-  } else {
-    // if it's not an instance, create one and return only the sass options
-    return (new Eyeglass(options, deprecatedNodeSassArg)).options;
-  }
-}
-
-module.exports.VERSION = pkg.version!;
-
-module.exports.Eyeglass = function(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
-  let eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
-  deprecateMethodWarning.call(eyeglass, "Eyeglass");
-  return eyeglass;
-};
-
-module.exports.decorate = function(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
-  let eyeglass = new Eyeglass(options, deprecatedNodeSassArg);
-  deprecateMethodWarning.call(eyeglass, "decorate");
-  return eyeglass.options;
-};
+import EyeglassImpl from "./Eyeglass";
+/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations, no-redeclare */
 
 function deprecateMethodWarning(this: IEyeglass, method: string): void {
   this.deprecate("0.8.0", "0.9.0",
@@ -176,3 +10,54 @@ function deprecateMethodWarning(this: IEyeglass, method: string): void {
     "Instead, use `require('eyeglass')`"
   );
 }
+
+interface DeprecatedFunctions {
+  Eyeglass(options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl;
+  decorate(options: Opts, deprecatedNodeSassArg?: SassImplementation): Config;
+}
+
+type PublicConstructor =
+  typeof EyeglassImpl
+  & DeprecatedFunctions
+  & ((options: Opts, deprecatedNodeSassArg?: SassImplementation) => Config);
+
+// This is how we convince typescript that there's an object that is
+// both a constructor and a function that returns options.
+function newOrOptions(): PublicConstructor {
+  const __Eyeglass = function (this: undefined | object, options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl | Config {
+    let instance = new EyeglassImpl(options, deprecatedNodeSassArg);
+    if (this) {
+      // the implicit this object is thrown away :engineer-shrugging:
+      return instance;
+    } else {
+      return instance.options;
+    }
+  }
+  __Eyeglass.prototype = EyeglassImpl.prototype;
+  __Eyeglass.VERSION = EyeglassImpl.VERSION;
+  __Eyeglass.helpers = EyeglassImpl.helpers;
+  Object.assign(__Eyeglass, {
+    Eyeglass(options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl {
+      let eyeglass = new EyeglassImpl(options, deprecatedNodeSassArg);
+      deprecateMethodWarning.call(eyeglass, "Eyeglass");
+      return eyeglass;
+    },
+    decorate(options: Opts, deprecatedNodeSassArg?: SassImplementation): Config {
+      let eyeglass = new EyeglassImpl(options, deprecatedNodeSassArg);
+      deprecateMethodWarning.call(eyeglass, "decorate");
+      return eyeglass.options;
+    }
+  });
+  return __Eyeglass as any; // we have to cast through any otherwise typescript thinks this function doesn't implement the full API of EyeglassImpl.
+}
+
+type Eyeglass = EyeglassImpl;
+const Eyeglass = newOrOptions();
+
+namespace Eyeglass {
+  export type EyeglassOptions = Opts;
+  export type EyeglassConfig = Config;
+}
+export = Eyeglass;
+
+/* eslint-enable @typescript-eslint/no-namespace */
