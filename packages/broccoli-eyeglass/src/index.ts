@@ -11,12 +11,13 @@ import stringify = require("json-stable-stringify");
 import debugGenerator = require("debug");
 import Eyeglass = require("eyeglass");
 import * as sass from "node-sass";
+import hashForDep = require("hash-for-dep");
 type SassImplementation = typeof sass;
 const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
-const CURRENT_VERSION = require(path.join(__dirname, "..", "package.json")).version;
+const CURRENT_VERSION: string = require(path.join(__dirname, "..", "package.json")).version;
 
-function httpJoin(...args: Array<string>) {
+function httpJoin(...args: Array<string>): string {
   let joined = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i]) {
@@ -32,40 +33,38 @@ function httpJoin(...args: Array<string>) {
   result = result.replace("//", "/");
   return result;
 }
-namespace EyeglassCompiler {
-  export interface BroccoliEyeglassOptions extends BroccoliSassOptions {
 
-    /**
-     * Optional. A string or array of strings indicating the subdirectories where
-     * assets for the project can be found. This calls `eyeglass.assets.addSource`
-     * for each directory specified. If the options passed for these are not
-     * sufficient, use the `configureEyeglass` callback to call `addSource` with the
-     * options you need.
-     */
-    assets?: string | Array<string>;
-    /**
-     * The subdirectory that assets are in relative to the `httpRoot` when
-     * generating urls to them.
-     */
-    assetsHttpPrefix?: string;
-    configureEyeglass?: (eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => any;
-    /**
-     * Whether to render relative links to assets. Defaults to false.
-     */
-    relativeAssets?: boolean;
-
-  }
+interface BroccoliEyeglassOptions extends BroccoliSassOptions {
+  /**
+   * Optional. A string or array of strings indicating the subdirectories where
+   * assets for the project can be found. This calls `eyeglass.assets.addSource`
+   * for each directory specified. If the options passed for these are not
+   * sufficient, use the `configureEyeglass` callback to call `addSource` with the
+   * options you need.
+   */
+  assets?: string | Array<string>;
+  /**
+   * The subdirectory that assets are in relative to the `httpRoot` when
+   * generating urls to them.
+   */
+  assetsHttpPrefix?: string;
+  configureEyeglass?: (eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => unknown;
+  /**
+   * Whether to render relative links to assets. Defaults to false.
+   */
+  relativeAssets?: boolean;
 }
 
 class EyeglassCompiler extends BroccoliSassCompiler {
-  private configureEyeglass: ((eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => any) | undefined;
+
+  private configureEyeglass: ((eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => unknown) | undefined;
   private relativeAssets: boolean | undefined;
   private assetDirectories: Array<string> | undefined;
   private assetsHttpPrefix: string | undefined;
-  private _assetImportCache: any;
+  private _assetImportCache: Record<string, string>;
   private _assetImportCacheStats: { hits: number; misses: number };
   private _dependenciesHash: string | undefined;
-  constructor(inputTrees: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: EyeglassCompiler.BroccoliEyeglassOptions) {
+  constructor(inputTrees: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: BroccoliEyeglassOptions) {
     options = merge({}, options);
     if (!Array.isArray(inputTrees)) {
       inputTrees = [inputTrees];
@@ -107,7 +106,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     };
   }
 
-  handleNewFile(details: CompilationDetails) {
+  handleNewFile(details: CompilationDetails): void {
     let options: Eyeglass.EyeglassOptions = details.options;
     if (!options.eyeglass) {
       options.eyeglass = {};
@@ -178,7 +177,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     details.options.eyeglass.engines.eyeglass = eyeglass;
   }
 
-  cachableOptions(rawOptions: Eyeglass.EyeglassOptions) {
+  cachableOptions(rawOptions: Eyeglass.EyeglassOptions): Eyeglass.EyeglassOptions {
     rawOptions = merge({}, rawOptions);
     delete rawOptions.file;
     if (rawOptions.eyeglass) {
@@ -188,13 +187,12 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     return rawOptions;
   }
 
-  static currentVersion() {
+  static currentVersion(): string {
     return CURRENT_VERSION;
   }
 
-  dependenciesHash(_srcDir: string, _relativeFilename: string, options: Eyeglass.EyeglassOptions) {
+  dependenciesHash(_srcDir: string, _relativeFilename: string, options: Eyeglass.EyeglassOptions): string {
     if (!this._dependenciesHash) {
-      let hashForDep = require("hash-for-dep");
       let eyeglass = new Eyeglass(options); // options
       // let eyeglass: Eyeglass = options.eyeglass!.engines!.eyeglass
       let hash = crypto.createHash("sha1");
@@ -207,10 +205,13 @@ class EyeglassCompiler extends BroccoliSassCompiler {
       let egModules = sortby(eyeglass.modules.list, m => m.name);
 
       egModules.forEach(mod => {
+        let name: string = mod.name;
         if (mod.inDevelopment || mod.eyeglass.inDevelopment) {
-          hash.update(mod.name + "@" + hashForDep(mod.path));
+          let depHash: string = hashForDep(mod.path);
+          hash.update(name + "@" + depHash);
         } else {
-          hash.update(mod.name + "@" + mod.version);
+          let version: string = mod.version || "<unversioned>";
+          hash.update(name + "@" + version);
         }
       });
 
@@ -220,7 +221,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     return this._dependenciesHash;
   }
 
-  keyForSourceFile(srcDir: string, relativeFilename: string, options: Eyeglass.EyeglassOptions) {
+  keyForSourceFile(srcDir: string, relativeFilename: string, options: Eyeglass.EyeglassOptions): string {
     let key = super.keyForSourceFile(srcDir, relativeFilename, options);
     let dependencies = this.dependenciesHash(srcDir, relativeFilename, options);
 
@@ -228,7 +229,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
   }
 
   // Cache the asset import code that is generated in eyeglass
-  cacheAssetImports(key: string, getValue: () => unknown) {
+  cacheAssetImports(key: string, getValue: () => string): string {
     // if this has already been generated, return it from cache
     if (this._assetImportCache[key] !== undefined) {
       assetImportCacheDebug("cache hit for key '%s'", key);
