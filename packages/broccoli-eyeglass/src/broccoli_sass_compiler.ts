@@ -38,7 +38,7 @@ function initSass() {
   }
 }
 
-function absolutizeEntries(entries: Entry[]) {
+function absolutizeEntries(entries: Array<Entry>) {
   // We make everything absolute because relative path comparisons don't work for us.
   entries.forEach(entry => {
     // TODO support windows paths
@@ -211,7 +211,7 @@ type OptionsGeneratorCallback = (cssFile: string, options: nodeSass.Options) => 
  *   invoked, the sass file will be compiled to the provided css file name
  *   (relative to the output directory) and the options provided.
  */
- // TODO: statically forbid file, data, and outFile
+// TODO: statically forbid file, data, and outFile
 type OptionsGenerator = (sassFile: string, cssFile: string, options: nodeSass.Options, cb: OptionsGeneratorCallback) => any;
 
 // sassFile: The sass file being compiled
@@ -330,11 +330,11 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   protected persistentCache: DiskCache | undefined;
   protected renderSync: boolean;
   protected sassDir: string | undefined;
-  protected sourceFiles: string[];
+  protected sourceFiles: Array<string>;
   protected treeName: string | undefined;
   protected verbose: boolean;
 
-  constructor(inputTree: BroccoliPlugin.BroccoliNode | BroccoliPlugin.BroccoliNode[], options: BroccoliSassOptions & nodeSass.Options) {
+  constructor(inputTree: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: BroccoliSassOptions & nodeSass.Options) {
     if (Array.isArray(inputTree)) {
       if (inputTree.length > 1) {
         console.warn(
@@ -563,7 +563,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       }
 
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
-      let value: [string[], Record<string, string>] = [depFiles, JSON.parse(cachedOutput.value)];
+      let value: [Array<string>, Record<string, string>] = [depFiles, JSON.parse(cachedOutput.value)];
       return Promise.resolve(this.handleCacheHit(details, value));
     } catch (error) {
       return this.handleCacheMiss(details, error, key);
@@ -669,7 +669,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     return removePathPrefix(this.inputPaths[0], [file])[0];
   }
 
-  relativizeAll(files: Array<string>): string[] {
+  relativizeAll(files: Array<string>): Array<string> {
     return removePathPrefix(this.inputPaths[0], files);
   }
 
@@ -752,7 +752,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   }
 
   /* When the cache misses, we need to compile the file and then populate the cache */
-  handleCacheMiss(details: CompilationDetails, reason: Error | {message: string, stack?: Array<string>}, key: string) {
+  handleCacheMiss(details: CompilationDetails, reason: Error | {message: string; stack?: Array<string>}, key: string) {
     persistentCacheDebug(
       "Persistent cache miss for %s. Reason: %s",
       details.sassFilename,
@@ -856,7 +856,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.outputs[sassFilename].add(outputFilename);
   }
 
-  clearOutputs(files: string[]) {
+  clearOutputs(files: Array<string>) {
     this.relativizeAll(files).forEach(f => {
       if (this.outputs[f]) {
         delete this.outputs[f];
@@ -872,7 +872,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    *
    * @return Set<String> The full paths output files.
    */
-  outputsFromOnly(inputs: string[]) {
+  outputsFromOnly(inputs: Array<string>) {
     inputs = this.relativizeAll(inputs);
 
     let otherOutputs = new Set();
@@ -901,7 +901,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.dependencies[sassFilename].add(dependencyFilename);
   }
 
-  clearDependencies(files: string[]) {
+  clearDependencies(files: Array<string>) {
     this.relativizeAll(files).forEach(f => {
       delete this.dependencies[f];
     });
@@ -1064,6 +1064,6 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       throw e;
     });
   }
-};
+}
 
 module.exports.shouldPersist = shouldPersist;

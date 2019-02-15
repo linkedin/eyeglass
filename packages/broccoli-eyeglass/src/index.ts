@@ -16,7 +16,7 @@ const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache"
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
 const CURRENT_VERSION = require(path.join(__dirname, "..", "package.json")).version;
 
-function httpJoin(...args: string[]) {
+function httpJoin(...args: Array<string>) {
   let joined = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i]) {
@@ -60,12 +60,12 @@ namespace EyeglassCompiler {
 class EyeglassCompiler extends BroccoliSassCompiler {
   private configureEyeglass: ((eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => any) | undefined;
   private relativeAssets: boolean | undefined;
-  private assetDirectories: string[] | undefined;
+  private assetDirectories: Array<string> | undefined;
   private assetsHttpPrefix: string | undefined;
   private _assetImportCache: any;
-  private _assetImportCacheStats: { hits: number; misses: number; };
+  private _assetImportCacheStats: { hits: number; misses: number };
   private _dependenciesHash: string | undefined;
-  constructor(inputTrees: BroccoliPlugin.BroccoliNode | BroccoliPlugin.BroccoliNode[], options: EyeglassCompiler.BroccoliEyeglassOptions) {
+  constructor(inputTrees: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: EyeglassCompiler.BroccoliEyeglassOptions) {
     options = merge({}, options);
     if (!Array.isArray(inputTrees)) {
       inputTrees = [inputTrees];
@@ -239,6 +239,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     this._assetImportCacheStats.misses += 1;
     return (this._assetImportCache[key] = getValue());
   }
-};
+}
 
 export = EyeglassCompiler;
