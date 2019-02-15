@@ -77,6 +77,6 @@
     "mocha": "^5.2.0",
     "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
-    "typescript": "^3.3.3"
+    "typescript": "~3.3.0"
   }
 }
