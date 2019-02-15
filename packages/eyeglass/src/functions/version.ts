@@ -1,12 +1,12 @@
 import * as stringUtils from "../util/strings";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
-import * as sass from "node-sass";
+import * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { IEyeglass } from "../IEyeglass";
 
-const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): sass.FunctionDeclarations {
+const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): nodeSass.FunctionDeclarations {
   return {
-    "eyeglass-version($module: eyeglass)": function($module: sass.types.Value): sass.types.ReturnValue {
+    "eyeglass-version($module: eyeglass)": function($module: nodeSass.types.Value): nodeSass.types.ReturnValue {
       if (!isSassString(sass, $module)) {
         return typeError(sass, "string", $module);
       }

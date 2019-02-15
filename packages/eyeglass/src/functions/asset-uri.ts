@@ -1,7 +1,7 @@
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, typeError, isType, isSassList, isSassError } from "../util/SassImplementation";
 import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as sass from "node-sass";
+import * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { isPresent } from "../util/typescriptUtils";
 import { errorMessageFor } from "../util/errorFor";
@@ -9,8 +9,8 @@ import { errorMessageFor } from "../util/errorFor";
 const assetFunctions: EyeglassFunctions =
 function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   return {
-    "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets: sass.types.Value, $uri: sass.types.Value, done: SassFunctionCallback) {
-      let $assetMap: sass.types.Map;
+    "eyeglass-asset-uri($registered-assets, $relative-path)": function($assets: nodeSass.types.Value, $uri: nodeSass.types.Value, done: SassFunctionCallback) {
+      let $assetMap: nodeSass.types.Map;
       if (!isType(sass, $assets, "map")) {
         return done(typeError(sass, "map", $assets));
       }
@@ -20,7 +20,7 @@ function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
         $assetMap = $assets;
       }
       eyeglass.assets.resolveAsset($assetMap, $uri, function(error, assetUri) {
-        let result: sass.types.Error | sass.types.String;
+        let result: nodeSass.types.Error | nodeSass.types.String;
         if (error || !isPresent(assetUri)) {
           if (isSassError(sass, error)) {
             result = error;

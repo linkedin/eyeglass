@@ -48,6 +48,7 @@ function newOrOptions(): PublicConstructor {
       return eyeglass.options;
     }
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return __Eyeglass as any; // we have to cast through any otherwise typescript thinks this function doesn't implement the full API of EyeglassImpl.
 }
 

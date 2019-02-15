@@ -5,7 +5,7 @@ import * as glob from "glob";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
 import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as sass from "node-sass";
+import * as nodeSass from "node-sass";
 import { unreachable } from "../util/assertions";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 
@@ -20,7 +20,7 @@ function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
 const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
   let sassUtils = require("node-sass-utils")(sass);
 
-  function accessViolation(location: string): sass.types.Error {
+  function accessViolation(location: string): nodeSass.types.Error {
     return sass.types.Error("Security violation: Cannot access " + location);
   }
 
@@ -84,7 +84,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
 
   return {
     "eyeglass-fs-absolute-path($fs-registered-pathnames, $path-id, $segments...)":
-      function(fsRegisteredPathnames: sass.types.Value, fsPathId: sass.types.Value, fsSegments: Array<sass.types.Value>, done: SassFunctionCallback) {
+      function(fsRegisteredPathnames: nodeSass.types.Value, fsPathId: nodeSass.types.Value, fsSegments: Array<nodeSass.types.Value>, done: SassFunctionCallback) {
         let pathId = sassUtils.castToJs(fsPathId);
         let segments = sassUtils.castToJs(fsSegments);
         let registeredPathnames = sassUtils.castToJs(fsRegisteredPathnames);
@@ -97,12 +97,12 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
           done(sass.types.Error(`No path is registered for ${pathId}`));
         }
       },
-    "eyeglass-fs-join($segments...)": function(segments: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-join($segments...)": function(segments: nodeSass.types.Value, done: SassFunctionCallback) {
       let jsSegments = sassUtils.castToJs(segments);
       let joined = path.join.apply(null, jsSegments);
       done(sass.types.String(joined));
     },
-    "eyeglass-fs-exists($absolute-path)": function(fsAbsolutePath: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-exists($absolute-path)": function(fsAbsolutePath: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, fsAbsolutePath)) {
         return done(typeError(sass, "string", fsAbsolutePath));
       }
@@ -120,7 +120,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
     "eyeglass-fs-path-separator()": function(done: SassFunctionCallback) {
       done(sass.types.String(path.sep));
     },
-    "eyeglass-fs-list-files($directory, $glob: '*')": function($directory: sass.types.Value, $globPattern: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-list-files($directory, $glob: '*')": function($directory: nodeSass.types.Value, $globPattern: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $directory)) {
         return done(typeError(sass, "string", $directory));
       }
@@ -129,7 +129,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       }
       globFiles($directory.getValue(), $globPattern.getValue(), true, false, done);
     },
-    "eyeglass-fs-list-directories($directory, $glob: '*')": function($directory: sass.types.Value, $globPattern: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-list-directories($directory, $glob: '*')": function($directory: nodeSass.types.Value, $globPattern: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $directory)) {
         return done(typeError(sass, "string", $directory));
       }
@@ -138,7 +138,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       }
       globFiles($directory.getValue(), $globPattern.getValue(), false, true, done);
     },
-    "eyeglass-fs-parse-filename($filename)": function($filename: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-parse-filename($filename)": function($filename: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $filename)) {
         return done(typeError(sass, "string", $filename));
       }
@@ -153,7 +153,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         })
       );
     },
-    "eyeglass-fs-info($filename)": function($filename: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-info($filename)": function($filename: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $filename)) {
         return done(typeError(sass, "string", $filename));
       }
@@ -188,7 +188,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         done(accessViolation(filename));
       }
     },
-    "eyeglass-fs-read-file($filename)": function($filename: sass.types.Value, done: SassFunctionCallback) {
+    "eyeglass-fs-read-file($filename)": function($filename: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $filename)) {
         return done(typeError(sass, "string", $filename));
       }

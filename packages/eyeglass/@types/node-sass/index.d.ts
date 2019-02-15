@@ -4,7 +4,7 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 /// <reference types="node" />
-
+/* eslint-disable */
 export type ImporterReturnType = { file: string } | { file?: string; contents: string } | Error | null | types.Null | types.Error;
 
 /**
