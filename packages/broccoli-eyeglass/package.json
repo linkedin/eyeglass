@@ -12,7 +12,8 @@
   "scripts": {
     "prepare": "tsc --build",
     "pretest": "tsc --build",
-    "lint:js": "eslint .",
+    "lint": "eslint --ext ts --format visualstudio .",
+    "lintfix": "eslint --ext ts --fix .",
     "test": "mocha test/test_*.js",
     "test:mocha": "mocha test/test_*.js",
     "test:debug": "mocha debug test/test_*.js"
