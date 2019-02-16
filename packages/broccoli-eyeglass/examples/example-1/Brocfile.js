@@ -1,9 +1,8 @@
 var BroccoliEyeglass = require("broccoli-eyeglass");
 
-var options = {
-  cssDir: "css" /* This is the only required option */,
-};
 
-var outputTree = new BroccoliEyeglass(["src"], options);
+var outputTree = new BroccoliEyeglass("src", {
+  cssDir: "css" /* This is the only required option */,
+});
 
 module.exports = outputTree;
