@@ -4,7 +4,8 @@
  * This allows us to easily look up the host app from a nested addon (an addon
  * running under another addon).
  */
-function findHost(addon) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function findHost(addon: any): any {
   // If the addon has the _findHost() method (in ember-cli >= 2.7.0), we'll just
   // use that.
   if (typeof addon._findHost === 'function') {
