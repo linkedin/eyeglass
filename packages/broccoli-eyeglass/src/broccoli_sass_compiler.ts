@@ -85,7 +85,7 @@ function unique(array: Array<string>): Array<string> {
 
 // This promise runs sass synchronously
 function renderSassSync(options: nodeSass.SyncOptions): Promise<nodeSass.Result> {
-  return Promise.resolve(sass.renderSync(options));
+  return RSVP.resolve(sass.renderSync(options));
 }
 
 function removePathPrefix(prefix: string, fileNames: Array<string>): Array<string> {
@@ -456,17 +456,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   compileTree(srcPath: string, files: Array<string>, destDir: string): Promise<void | Array<void | nodeSass.Result>> {
     switch (files.length) {
       case 0:
-        return Promise.resolve();
+        return RSVP.resolve();
       case 1:
-        return Promise.all(this.compileSassFile(srcPath, files[0], destDir));
+        return RSVP.all(this.compileSassFile(srcPath, files[0], destDir));
       default: {
         let numConcurrentCalls = Number(process.env.JOBS) || os.cpus().length;
 
         let worker = queue.async.asyncify((file: string) => {
-          return Promise.all(this.compileSassFile(srcPath, file, destDir));
+          return RSVP.all(this.compileSassFile(srcPath, file, destDir));
         });
 
-        return Promise.resolve(queue(worker, files, numConcurrentCalls));
+        return RSVP.resolve(queue(worker, files, numConcurrentCalls));
       }
     }
   }
@@ -568,7 +568,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
       let value: [Array<string>, Record<string, string>] = [depFiles, JSON.parse(cachedOutput.value)];
-      return Promise.resolve(this.handleCacheHit(details, value));
+      return RSVP.resolve(this.handleCacheHit(details, value));
     } catch (error) {
       return this.handleCacheMiss(details, error, key);
     }
@@ -806,7 +806,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       this.events.addListener("additional-output", additionalOutputListener);
       this.events.addListener("dependency", dependencyListener);
 
-      return Promise.resolve(sass(details.options as nodeSass.SyncOptions)) // XXX This cast sucks
+      return RSVP.resolve(sass(details.options as nodeSass.SyncOptions)) // XXX This cast sucks
         .finally(() => {
           this.events.removeListener("dependency", dependencyListener);
           this.events.removeListener("additional-output", additionalOutputListener);
