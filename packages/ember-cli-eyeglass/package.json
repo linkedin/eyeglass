@@ -8,8 +8,8 @@
   },
   "main": "index.js",
   "scripts": {
-    "prepare": "tsc",
-    "pretest": "tsc",
+    "prepare": "tsc --build",
+    "pretest": "tsc --build",
     "build": "ember build",
     "lint": "eslint --ext ts --format visualstudio .",
     "lintfix": "eslint --ext ts --fix .",
