@@ -19,7 +19,11 @@
     "test:debug": "mocha debug test/test_*.js"
   },
   "files": [
-    "lib"
+    "lib",
+    "LICENSE",
+    "NOTICE",
+    "*.md",
+    "src"
   ],
   "keywords": [
     "broccoli-plugin",

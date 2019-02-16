@@ -77,6 +77,10 @@
   },
   "files": [
     "lib",
-    "sass"
+    "src",
+    "sass",
+    "*.md",
+    "LICENSE",
+    "NOTICE"
   ]
 }

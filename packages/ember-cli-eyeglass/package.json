@@ -79,6 +79,13 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.defaultsdeep": "^4.6.0"
   },
+  "files": [
+    "lib",
+    "src",
+    "LICENSE",
+    "NOTICE",
+    "*.md"
+  ],
   "ember-addon": {
     "configPath": "tests/dummy/config"
   }
