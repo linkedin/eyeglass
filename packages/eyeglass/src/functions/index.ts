@@ -3,7 +3,7 @@ import normalizeURL from "./normalize-uri";
 import version from "./version";
 import fs from "./fs";
 import { EyeglassFunctions } from "./EyeglassFunctions";
-import { FunctionDeclarations } from "../util/SassImplementation";
+import { FunctionDeclarations } from "node-sass";
 
 const allEyeglassFunctions: EyeglassFunctions = function(eyeglass, sass): FunctionDeclarations {
   return Object.assign({},

@@ -7,10 +7,18 @@
       "downlevelIteration": true,
       "moduleResolution": "node",
       "outDir": "./lib",
+      "noImplicitAny": true,
+      "noImplicitReturns": true,
+      "noImplicitThis": true,
       "alwaysStrict": true,
       "strictBindCallApply": true,
+      "strictFunctionTypes": true,
+      "strictNullChecks": true,
+      "strictPropertyInitialization": true,
       "declaration": true,
       "declarationMap": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
       "lib": [
           "es6"
       ],
@@ -19,22 +27,11 @@
       "paths": {
         "node-sass": ["../../eyeglass/@types/node-sass"],
         "*": ["types/*"],
-      },
-      "noImplicitAny": false,
-      "noImplicitReturns": false,
-      "noImplicitThis": false,
-      "strictFunctionTypes": false,
-      "strictNullChecks": false,
-      "strictPropertyInitialization": false,
-      "noUnusedLocals": false,
-      "noUnusedParameters": false,
+      }
   },
   "include": [
       "./src/**/*"
   ],
-  "references": [
-    {"path": "../eyeglass"},
-    {"path": "../broccoli-eyeglass"}
-  ]
+  "references": [{"path": "../eyeglass"}]
 
 }

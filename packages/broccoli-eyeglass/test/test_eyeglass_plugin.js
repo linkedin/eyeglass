@@ -1343,6 +1343,7 @@ describe("EyeglassCompiler", function() {
         input.write({
           "file1.scss": '@import "assets";\n',
           "file2.scss": '@import "assets";\n',
+          "package.json": `{"name": "my-app", "private": true}`,
         });
 
         let expectedOutput = {

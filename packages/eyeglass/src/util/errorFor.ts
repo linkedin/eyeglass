@@ -8,7 +8,7 @@ function hasMessage(o: unknown): o is HasMessage {
       && o !== null
       && typeof (o as HasMessage).message === "string";
 }
-function errorMessageFor(err: unknown): string {
+export function errorMessageFor(err: unknown): string {
   switch(typeof err) {
     case "bigint":
       return err.toString();

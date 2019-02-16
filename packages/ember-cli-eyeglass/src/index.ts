@@ -1,12 +1,13 @@
-import * as EyeglassCompiler from 'broccoli-eyeglass';
+import EyeglassCompiler = require('broccoli-eyeglass');
 import findHost from "./findHost";
-import * as Funnel from 'broccoli-funnel';
-import * as merge from 'broccoli-merge-trees';
+import Funnel = require('broccoli-funnel');
+import MergeTrees = require('broccoli-merge-trees');
 import * as path from 'path';
-import * as cloneDeep from 'lodash.clonedeep';
-import * as defaultsDeep from 'lodash.defaultsdeep';
+import cloneDeep = require('lodash.clonedeep');
+import defaultsDeep = require('lodash.defaultsdeep');
 
-function isLazyEngine(addon) {
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isLazyEngine(addon: any): boolean {
   if (addon.lazyLoading === true) {
     // pre-ember-engines 0.5.6 lazyLoading flag
     return true;
@@ -17,7 +18,8 @@ function isLazyEngine(addon) {
   return false;
 }
 
-function getDefaultAssetHttpPrefix(parent) {
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getDefaultAssetHttpPrefix(parent: any): string {
   // the default http prefix differs between Ember app and lazy Ember engine
   // iterate over the parent's chain and look for a lazy engine or there are
   // no more parents, which means we've reached the Ember app project
@@ -26,7 +28,7 @@ function getDefaultAssetHttpPrefix(parent) {
   while (current.parent) {
     if (isLazyEngine(current)) {
       // only lazy engines will inline their assets in the engines-dist folder
-      return '/engines-dist/' + current.name + '/assets';
+      return `/engines-dist/${current.name}/assets`;
     }
     current = current.parent;
   }
@@ -45,8 +47,8 @@ function getDefaultAssetHttpPrefix(parent) {
  * addons came from a local addon declaration and which ones came from node
  * modules.
  **/
-function localEyeglassAddons(addon) {
-  let paths = [];
+function localEyeglassAddons(addon): Array<{path: string}> {
+  let paths = new Array<{path: string}>();
 
   if (typeof addon.addons !== 'object' ||
     typeof addon.addonPackages !== 'object') {
@@ -127,7 +129,7 @@ const EMBER_CLI_EYEGLASS = {
     // If we're processing an addon and stored some assets for it, add them
     // to the addon's public tree so they'll be available in the app's build
     if (this.addonAssetsTree) {
-      tree = tree ? merge([tree, this.addonAssetsTree]) : this.addonAssetsTree;
+      tree = tree ? new MergeTrees([tree, this.addonAssetsTree]) : this.addonAssetsTree;
       this.addonAssetsTree = null;
     }
 
@@ -148,7 +150,7 @@ const EMBER_CLI_EYEGLASS = {
 
     let parentName = typeof addon.parent.name === 'function' ? addon.parent.name() : addon.parent.name;
 
-    config.annotation = 'EyeglassCompiler: ' + parentName;
+    config.annotation = `EyeglassCompiler: ${parentName}`;
     if (!config.sourceFiles && !config.discover) {
       config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
     }
@@ -170,9 +172,9 @@ const EMBER_CLI_EYEGLASS = {
     let originalGenerator = config.optionsGenerator;
     config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
       if (inApp) {
-        cssFile = cssFile.replace(/app\.css$/, addon.app.name + '.css');
+        cssFile = cssFile.replace(/app\.css$/, `${addon.app.name}.css`);
       } else {
-        cssFile = cssFile.replace(/addon\.css$/, addon.parent.name + '.css');
+        cssFile = cssFile.replace(/addon\.css$/, `${addon.parent.name}.css`);
       }
 
       if (originalGenerator) {

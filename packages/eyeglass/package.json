@@ -28,6 +28,7 @@
     "sass",
     "eyeglass-module"
   ],
+  "types": "lib/index.d.ts",
   "eyeglass": {
     "exports": "lib/eyeglass-exports",
     "needs": "*"
@@ -61,22 +62,22 @@
     "@typescript-eslint/eslint-plugin": "^1.2.0",
     "@typescript-eslint/parser": "^1.2.0",
     "eslint": "^5.12.1",
-    "eyeglass-dev-site-builder": "0.0.5",
     "grunt": "^1.0.3",
     "grunt-release": "^0.14.0",
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^5.0.0",
-    "gulp-gh-pages": "^0.5.4",
     "handlebars": "^4.0.12",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "should": "^13.2.3",
     "source-map-support": "^0.5.10",
     "ts-node": "^7.0.1",
-    "typescript": "~3.2.4"
+    "typescript": "~3.3.0"
   },
   "files": [
     "lib",
-    "sass"
+    "src",
+    "sass",
+    "*.md",
+    "LICENSE",
+    "NOTICE"
   ]
 }

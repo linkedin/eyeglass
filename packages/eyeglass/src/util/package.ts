@@ -2,7 +2,6 @@ import { existsSync } from 'fs';
 import { PackageJson } from 'package-json';
 import * as path from 'path';
 
-import { unreachable } from './assertions';
 import { URI } from './URI';
 
 let PACKAGE_JSON = "package.json";
@@ -34,6 +33,7 @@ export function getPackagePath(dir: string): string {
 }
 
 export function findNearestPackage(dir: string): string {
+  let originalDir = dir;
   dir = URI.system(dir);
   let prevDir;
   while (dir !== prevDir) {
@@ -45,5 +45,5 @@ export function findNearestPackage(dir: string): string {
   }
 
   /* istanbul ignore next - should never happen and not possible to test */
-  return unreachable();
+  throw new Error(`No package.json file found in directory ${originalDir} or in any of the parent directories.`)
 }

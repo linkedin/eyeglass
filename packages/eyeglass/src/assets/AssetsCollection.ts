@@ -23,7 +23,7 @@ export default class AssetsCollection {
     * @param    {Object} opts - the options to pass @see AssetsSource
     * @returns  {AssetsCollection} returns the instance of AssetsCollection for chaining
     */
-  addSource(src: string, opts: AssetSourceOptions): AssetsCollection {
+  addSource(src: string, opts: Partial<AssetSourceOptions>): AssetsCollection {
     this.sources.push(new AssetsSource(src, opts));
     return this;
   }

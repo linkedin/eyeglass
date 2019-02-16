@@ -1,42 +1,21 @@
-import { render, renderSync, SassError, Options } from "node-sass";
+import * as sass from "node-sass";
 import { unreachable } from "./assertions";
-import { UnsafeDict } from "./typescriptUtils";
 export { Options } from "node-sass";
 
-type SassRenderCallback = Parameters<typeof render>[1];
-interface SyncContext<T extends object = {}> {options: Options & T; callback: undefined}
-interface AsyncContext {options: Options; callback: SassRenderCallback}
+type SassValue = sass.types.Value;
+type SassString = sass.types.String;
+type SassColor = sass.types.Color;
+type SassNumber = sass.types.Number;
+type SassBoolean = sass.types.Boolean;
+type SassNull = sass.types.Null;
+type SassError = sass.types.Error;
+type SassMap = sass.types.Map;
+type SassList = sass.types.List;
 
-export type SyncSassFunction = (this: SyncContext, ...$args: Array<SassValue>) => SassValue | SassError;
-
-export type SassFunctionCallback = ($result: SassValue | SassError) => void;
-export type SassFunction0 = (this: AsyncContext, cb: SassFunctionCallback) => void;
-export type SassFunction1 = (this: AsyncContext, $arg1: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction2 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction3 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction4 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction5 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, cb: SassFunctionCallback) => void;
-export type SassFunction6 = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: SassValue, cb: SassFunctionCallback) => void;
-
-export type SassFunction1Var = (this: AsyncContext, $arg1: Array<SassValue>, cb: SassFunctionCallback) => void;
-export type SassFunction2Var = (this: AsyncContext, $arg1: SassValue, $arg2: Array<SassValue>, cb: SassFunctionCallback) => void;
-export type SassFunction3Var = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: Array<SassValue>, cb: SassFunctionCallback) => void;
-export type SassFunction4Var = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: Array<SassValue>, cb: SassFunctionCallback) => void;
-export type SassFunction5Var = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: Array<SassValue>, cb: SassFunctionCallback) => void;
-export type SassFunction6Var = (this: AsyncContext, $arg1: SassValue, $arg2: SassValue, $arg3: SassValue, $arg4: SassValue, $arg5: SassValue, $arg6: Array<SassValue>, cb: SassFunctionCallback) => void;
-
-export type SassFunction =
-  SyncSassFunction
-  | SassFunction0 | SassFunction1 | SassFunction2 | SassFunction3 | SassFunction4 | SassFunction5 | SassFunction6
-  | SassFunction1Var | SassFunction2Var | SassFunction3Var | SassFunction4Var | SassFunction5Var | SassFunction6Var;
-
-export type FunctionDeclarations = UnsafeDict<SassFunction>;
-
-export type SassValue = SassNull | SassNumber | SassString | SassColor | SassBoolean | SassList | SassMap;
 export function isSassValue(
   sass: SassImplementation,
   value: unknown
-): value is SassValue {
+): value is sass.types.Value {
   if (value && typeof value === "object") {
     return isSassNumber(sass, value)
         || isSassString(sass, value)
@@ -50,7 +29,7 @@ export function isSassValue(
   }
 }
 
-export function toString(sass: SassImplementation, value: SassValue): string {
+export function inspect(sass: SassImplementation, value: SassValue): string {
   if (isSassNumber(sass, value)) {
     return `${value.getValue()}${value.getUnit()}`
   } else if (isSassString(sass, value)) {
@@ -73,7 +52,7 @@ export function toString(sass: SassImplementation, value: SassValue): string {
           s += " ";
         }
       }
-      s += toString(sass, value.getValue(i));
+      s += inspect(sass, value.getValue(i));
     }
     s += ")";
     return s;
@@ -85,206 +64,48 @@ export function toString(sass: SassImplementation, value: SassValue): string {
       }
       s += value.getKey(i);
       s += ": ";
-      s += toString(sass, value.getValue(i));
+      s += inspect(sass, value.getValue(i));
     }
     s += ")";
     return s;
   } else if (isSassNull(sass, value)) {
-    return "";
+    return "null";
   } else {
     return unreachable();
   }
 }
 
-export interface SassNumber {
-  getValue(): number;
-  setValue(n: number): void;
-  getUnit(): string;
-  setUnit(u: string): void;
-}
 export function isSassNumber(sass: SassImplementation, value: unknown): value is SassNumber {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.Number;
-}
-export interface SassString {
-  getValue(): string;
-  setValue(s: string): void;
+  return value instanceof sass.types.Number;
 }
 export function isSassString(sass: SassImplementation, value: unknown): value is SassString {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.String;
-}
-export interface SassColor {
-  /**
-   * Get the red component of the color.
-   * @returns integer between 0 and 255 inclusive;
-   */
-  getR(): number;
-  /**
-   * Set the red component of the color.
-   * @returns integer between 0 and 255 inclusive;
-   */
-  setR(r: number): void;
-  /**
-   * Get the green component of the color.
-   * @returns integer between 0 and 255 inclusive;
-   */
-  getG(): number;
-  /**
-   * Set the green component of the color.
-   * @param g integer between 0 and 255 inclusive;
-   */
-  setG(g: number): void;
-  /**
-   * Get the blue component of the color.
-   * @returns integer between 0 and 255 inclusive;
-   */
-  getB(): number;
-  /**
-   * Set the blue component of the color.
-   * @param b integer between 0 and 255 inclusive;
-   */
-  setB(b: number): void;
-  /**
-   * Get the alpha transparency component of the color.
-   * @returns number between 0 and 1 inclusive;
-   */
-  getA(): number;
-  /**
-   * Set the alpha component of the color.
-   * @param a number between 0 and 1 inclusive;
-   */
-  setA(a: number): void;
+  return value instanceof sass.types.String;
 }
 export function isSassColor(sass: SassImplementation, value: unknown): value is SassColor {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.Color;
-}
-export interface SassBoolean {
-  getValue(): boolean;
+  return value instanceof sass.types.Color;
 }
 export function isSassBoolean(sass: SassImplementation, value: unknown): value is SassBoolean {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.Boolean;
+  return value instanceof sass.types.Boolean;
 }
-interface SassBooleanFactory {
-  (bool: boolean): SassBoolean;
-  TRUE: SassBoolean;
-  FALSE: SassBoolean;
-}
-export type SassNull = object;
-
 export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
   return value === sass.NULL;
 }
-interface SassNullFactory {
-  (): SassNull;
-  NULL: SassNull;
-}
-export interface SassEnumerable {
-  getValue(index: number): SassValue;
-  setValue(index: number, value: SassValue): void;
-  getLength(): number;
-}
-export interface SassList extends SassEnumerable {
-  getSeparator(): boolean;
-  setSeparator(isComma: boolean): void;
-}
 export function isSassList(sass: SassImplementation, value: unknown): value is SassList {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.List;
-}
-export interface SassMap extends SassEnumerable {
-  getKey(index: number): string;
-  setKey(index: number, key: string): void;
+  return value instanceof sass.types.List;
 }
 export function isSassMap(sass: SassImplementation, value: unknown): value is SassMap {
-  return typeof value === "object" && value !== null && value.constructor === sass.types.Map;
+  return value instanceof sass.types.Map;
 }
 
 export function isSassMapOrEmptyList(sass: SassImplementation, value: unknown): value is SassMap | SassList {
-  return typeof value === "object"
-         && value !== null
-         && (
-           value.constructor === sass.types.Map 
-           || (isSassList(sass, value) && value.getLength() === 0)
-         );
-}
-interface SassTypes {
-  /**
-   * Constructs a new Sass number. Do not invoke with the `new` keyword.
-   */
-  Number(value: number, unit?: string): SassNumber;
-
-  /**
-   * Constructs a new Sass string. Do not invoke with the `new` keyword.
-   */
-  String(value: string): SassString;
-  /**
-   * Constructs a new Sass color given a 4 byte number. Do not invoke with the `new` keyword.
-   *
-   * If a single number is passed it is assumed to be a number that contains
-   * all the components which are extracted using bitmasks and bitshifting.
-   * 
-   * @param hexN A number that is usually written in hexadecimal form. E.g. 0xff0088cc.
-   * @returns a Sass Color instance.
-   * @example
-   *   // Comparison with byte array manipulation
-   *   let a = new ArrayBuffer(4);
-   *   let hexN = 0xCCFF0088; // 0xAARRGGBB
-   *   let a32 = new Uint32Array(a); // Uint32Array [ 0 ]
-   *   a32[0] = hexN;
-   *   let a8 = new Uint8Array(a); // Uint8Array [ 136, 0, 255, 204 ]
-   *   let componentBytes = [a8[2], a8[1], a8[0], a8[3] / 255] // [ 136, 0, 255, 0.8 ]
-   *   let c = sass.types.Color(hexN);
-   *   let components = [c.getR(), c.getG(), c.getR(), c.getA()] // [ 136, 0, 255, 0.8 ]
-   *   assert.deepEqual(componentBytes, components); // does not raise.
-   */
-  Color(hexN: number): SassColor;
-  /**
-   * Constructs a new Sass color given the RGBA component values. Do not invoke with the `new` keyword.
-   * 
-   * @param r integer 0-255 inclusive
-   * @param g integer 0-255 inclusive
-   * @param b integer 0-255 inclusive
-   * @param [a] float 0 - 1 inclusive
-   * @returns a SassColor instance.
-   */
-  Color(r: number, g: number, b: number, a?: number): SassColor;
-
-  /**
-   * Returns one of the Sass Boolean singletons Boolean.TRUE or Boolean.FALSE
-   * depending on the value of the argument.
-   */
-  Boolean: SassBooleanFactory;
-
-  /**
-   * Returns the Sass Null singleton Null.NULL.
-   */
-  Null: SassNullFactory;
-
-  List(length: number, commaSeparator?: boolean): SassList;
-
-  Map(length: number): SassMap;
-
-  Error(message: string): SassError;
+  return isSassMap(sass, value) || (isSassList(sass, value) && value.getLength() === 0);
 }
 
 export function isSassError(sass: SassImplementation, value: unknown): value is SassError {
-  return typeof value === "object" && value instanceof sass.types.Number;
+  return value instanceof sass.types.Error;
 }
 
-export interface SassImplementation {
-  /** Async rendering of a Sass File. */
-  render: typeof render;
-  /** Synchronous rendering of a Sass File. */
-  renderSync: typeof renderSync;
-  /** Constructors for Sass values. */
-  types: SassTypes;
-  /** Metadata about the Sass Implementation. */
-  info: string;
-  /** Singleton value. Also accessible as types.Boolean.TRUE */
-  TRUE: SassBoolean;
-  /** Singleton value. Also accessible as types.Boolean.FALSE */
-  FALSE: SassBoolean;
-  /** Singleton value. Also accessible as types.Null.NULL */
-  NULL: SassNull;
-}
+export type SassImplementation = typeof sass;
 
 export function isSassImplementation(impl: unknown): impl is SassImplementation {
   return (
@@ -322,6 +143,7 @@ interface SassType {
 type SassTypeName = keyof typeof typeGuards;
 
 function typeName(sass: SassImplementation, value: SassValue | SassError): SassTypeName {
+  if (isSassNull(sass, value)) return "null";
   if (isSassString(sass, value)) return "string";
   if (isSassNumber(sass, value)) return "number";
   if (isSassMap(sass, value)) return "map";
@@ -329,11 +151,12 @@ function typeName(sass: SassImplementation, value: SassValue | SassError): SassT
   if (isSassColor(sass, value)) return "color";
   if (isSassBoolean(sass, value)) return "boolean";
   if (isSassError(sass, value)) return "error";
-  if (isSassNull(sass, value)) return "null";
   return unreachable(value);
 }
 
-export function isType<Name extends SassTypeName>(sass: SassImplementation, value: SassValue, name: Name): value is SassType[Name] {
+export function isType<Name extends SassTypeName>(
+  sass: SassImplementation, value: SassValue | SassError, name: Name
+): value is SassType[Name] {
   let guard = typeGuards[name];
   if (guard(sass, value)) {
     return true;
@@ -343,11 +166,37 @@ export function isType<Name extends SassTypeName>(sass: SassImplementation, valu
 }
 
 export function typeError(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue): SassError {
-  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
+  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
 }
 
 export class SassTypeError extends Error {
   constructor(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue) {
-    super(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${toString(sass, actual)}`}`);
+    super(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function helpers(sass: SassImplementation) {
+  return {
+    isSass:    (value: unknown): value is SassImplementation => isSassImplementation(value),
+    isNull:    (value: unknown): value is SassNull    => isSassNull(sass, value),
+    isString:  (value: unknown): value is SassString  => isSassString(sass, value),
+    isNumber:  (value: unknown): value is SassNumber  => isSassNumber(sass, value),
+    isMap:     (value: unknown): value is SassMap     => isSassMap(sass, value),
+    isList:    (value: unknown): value is SassList    => isSassList(sass, value),
+    isColor:   (value: unknown): value is SassColor   => isSassColor(sass, value),
+    isBoolean: (value: unknown): value is SassBoolean => isSassBoolean(sass, value),
+    isError:   (value: unknown): value is SassError   => isSassError(sass, value),
+    isValue:   (value: unknown): value is SassValue   => isSassValue(sass, value),
+    isMapOrEmptyList: (value: unknown): value is SassMap | SassList => isSassMapOrEmptyList(sass, value),
+    typeError: typeError.bind(null, sass),
+    isType:    isType.bind(null, sass),
+    typeName:  typeName.bind(null, sass),
+    inspect: inspect.bind(null, sass),
+    TypeError: class extends SassTypeError {
+      constructor(expected: SassTypeName, actual: SassTypeName | SassValue) {
+        super(sass, expected, actual);
+      }
+    }
+  };
 }

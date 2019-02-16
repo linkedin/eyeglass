@@ -4,7 +4,8 @@ import includes = require("lodash.includes");
 import * as path from "path";
 import * as fs from "fs";
 import { IEyeglass } from "../IEyeglass";
-import { FunctionDeclarations, SassImplementation } from "../util/SassImplementation";
+import { SassImplementation } from "../util/SassImplementation";
+import { FunctionDeclarations } from "node-sass";
 import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
 import { Dict, isPresent } from "../util/typescriptUtils";
@@ -29,6 +30,7 @@ export interface EyeglassModuleExports {
 }
 
 interface EyeglassModuleOptionsFromPackageJSON {
+  inDevelopment?: boolean;
   name?: string;
   exports?: string | false;
   sassDir?: string;
@@ -99,6 +101,7 @@ export interface ManualModuleOptions {
 }
 
 interface IEyeglassModule {
+  inDevelopment: boolean;
   /**
    * The resolved name of the eyeglass module.
    */
@@ -152,6 +155,7 @@ function isModuleReference(mod: {path?: string}): mod is ModuleReference {
 }
 
 export default class EyeglassModule implements IEyeglassModule, EyeglassModuleExports {
+  inDevelopment: boolean;
   dependencies: Dict<EyeglassModule>;
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
@@ -190,7 +194,8 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
       let modulePath = fs.realpathSync(path.dirname(pkg.path));
       mod = merge(
         {
-          isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data)
+          isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data),
+          inDevelopment: false
         },
         mod,
         {
@@ -236,6 +241,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     this.path = mod.path;
     this.rawName = mod.rawName;
     this.version = mod.version;
+    this.inDevelopment = mod.inDevelopment;
 
     // merge the module properties into the instance
     merge(this, mod);

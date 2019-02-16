@@ -109,4 +109,4 @@ That's a lot for one little function! Remember:
 # Bringing eyeglass To Existing Projects
 If you already have a Sass project, adding eyeglass support is straightforward. First, create a `package.json` if you don't have one already. Second, create an `eyeglass-exports.js` and point **sassDir** to the root location of your `.sass` or `.scss` files. Third, point your `main` or `eyeglass.exports` property (in `package.json`) to the `eyeglass-exports.js` file. Finally, `npm publish` to make your module available.
 
-Take a look at [Susy](https://github.com/ericam/susy/) and [Susy's eyeglass-exports.js](https://github.com/ericam/susy/blob/master/eyeglass-exports.js) for an example of how you can easily add eyeglass to an established project.
+Take a look at [Susy](https://github.com/oddbird/susy/) and [Susy's package.json](https://github.com/oddbird/susy/blob/master/package.json#L28-L35) for an example of how you can easily add eyeglass to an established project.

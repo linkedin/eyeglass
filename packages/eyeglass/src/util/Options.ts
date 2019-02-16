@@ -7,7 +7,7 @@ import { DeprecateFn } from "./deprecator";
 import { isSassImplementation, Options as SassOptions, SassImplementation } from "./SassImplementation";
 import { URI } from "./URI";
 import merge = require("lodash.merge");
-import { Importer } from "node-sass";
+import { Importer, FunctionDeclarations } from "node-sass";
 
 export interface AssetSourceOptions {
   /**
@@ -173,7 +173,7 @@ export default class implements Config {
   file?: string;
   data?: string;
   importer?: Importer | Array<Importer>;
-  functions?: { [key: string]: Function };
+  functions?: FunctionDeclarations;
   includePaths?: Array<string>;
   indentedSyntax?: boolean;
   indentType?: string;

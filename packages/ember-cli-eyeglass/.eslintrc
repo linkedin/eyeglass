@@ -1,0 +1,6 @@
+{
+  "extends": "../eyeglass/.eslintrc",
+  "rules": {
+    "no-undef": "off"
+  }
+}

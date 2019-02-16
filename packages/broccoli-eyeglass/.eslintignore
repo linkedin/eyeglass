@@ -1,8 +1,4 @@
-# compiled output
-/dist/
-/tmp/
-
-# misc
-/coverage/
-!.*
-/examples/
+test
+lib
+src/types
+examples

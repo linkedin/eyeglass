@@ -1,10 +1,12 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
+        "forceConsistentCasingInFileNames": true,
+        "rootDir": "src",
+        "baseUrl": "src",
+        "composite": true,
         "downlevelIteration": true,
         "moduleResolution": "node",
         "outDir": "./lib",
-        "allowJs": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
@@ -13,6 +15,8 @@
         "strictFunctionTypes": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
+        "declaration": true,
+        "declarationMap": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "lib": [
@@ -21,7 +25,7 @@
         "target": "es5",
         "sourceMap": true,
         "paths": {
-            "node-sass": ["@types/node-sass"]
+            "node-sass": ["../@types/node-sass"]
         }
     },
     "include": [

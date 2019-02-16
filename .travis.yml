@@ -3,6 +3,4 @@ node_js:
 - '6'
 - '8'
 - '10'
-env:
-- COVERAGE=true
-- COVERAGE=false
+install: yarn

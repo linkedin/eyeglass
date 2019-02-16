@@ -35,7 +35,7 @@ class AssetsSource {
   srcPath: string;
   pattern: string;
   globOpts: glob.IOptions;
-  constructor(srcPath: string, options: AssetSourceOptions) {
+  constructor(srcPath: string, options?: Partial<AssetSourceOptions>) {
     options = options || { directory: srcPath };
 
     if (fs.existsSync(srcPath) && !fs.statSync(srcPath).isDirectory()) {
