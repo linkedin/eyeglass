@@ -14,7 +14,7 @@
     "postinstall": "lerna bootstrap"
   },
   "toolchain": {
-    "node": "10.15.1",
+    "node": "10.6.0",
     "yarn": "1.14.0"
   }
 }
