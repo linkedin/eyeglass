@@ -625,7 +625,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     let outputFiles = inputAndOutputFiles[1];
 
     persistentCacheDebug(
-      "%s is cached. Writing to %s.",
+      "Persistent cache hit for %s. Writing to: %s",
       details.sassFilename,
       details.fullCssFilename
     );
@@ -812,6 +812,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
           this.events.removeListener("additional-output", additionalOutputListener);
         })
         .then(result => {
+          debug(`render of ${result.stats.entry} took ${result.stats.duration}`)
           return success(result).then(() => result);
         }, failure);
     });
