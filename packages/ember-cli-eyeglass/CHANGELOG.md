@@ -1,4 +1,6 @@
-# master
+# 5.1.1
+
+* Bump dependency on `broccoli-eyeglass` to `^4.5.1`.
 
 # 5.1.0
 
