@@ -1,3 +1,7 @@
+# 4.5.1
+
+* Bump dependency on `eyeglass` to `2.1.0`
+
 # 4.5.0
 
 * Broccoli-eyeglass has been ported to TypeScript. Official type definitions are now available with each release for TypeScript users.
