@@ -12,6 +12,7 @@ import debugGenerator = require("debug");
 import Eyeglass = require("eyeglass");
 import * as sass from "node-sass";
 import hashForDep = require("hash-for-dep");
+import { EyeglassOptions } from "eyeglass/lib/util/Options";
 type SassImplementation = typeof sass;
 const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
@@ -34,7 +35,7 @@ function httpJoin(...args: Array<string>): string {
   return result;
 }
 
-interface BroccoliEyeglassOptions extends BroccoliSassOptions {
+type BroccoliEyeglassOptions = BroccoliSassOptions & EyeglassOptions & {
   /**
    * Optional. A string or array of strings indicating the subdirectories where
    * assets for the project can be found. This calls `eyeglass.assets.addSource`
@@ -53,7 +54,7 @@ interface BroccoliEyeglassOptions extends BroccoliSassOptions {
    * Whether to render relative links to assets. Defaults to false.
    */
   relativeAssets?: boolean;
-}
+};
 
 class EyeglassCompiler extends BroccoliSassCompiler {
 

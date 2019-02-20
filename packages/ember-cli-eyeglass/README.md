@@ -21,8 +21,12 @@ options documentation](https://github.com/sass-eyeglass/broccoli-eyeglass#option
 ```js
 // path/to/app/ember-cli-build.js
 const app = new EmberApp(defaults, {
-  options: {
-    eyeglass: { /* configuration */ }
+  eyeglass: {
+    /* broccoli-eyeglass options */
+    /* node-sass options */
+    eyeglass: {
+      /* eyeglass options */
+    }
   }
 });
 ```
@@ -32,8 +36,12 @@ const app = new EmberApp(defaults, {
 ```js
 // path/to/engine/index.js
 const app = new EmberEngine(defaults, {
-  options: {
-    eyeglass: { /* configuration */ }
+  eyeglass: {
+    /* broccoli-eyeglass options */
+    /* node-sass options */
+    eyeglass: {
+      /* eyeglass options */
+    }
   }
 });
 ```
