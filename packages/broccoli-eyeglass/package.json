@@ -5,9 +5,10 @@
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "main": "lib/index.js",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/linkedin/eyeglass/tree/master/packages/broccoli-eyeglass#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sass-eyeglass/broccoli-eyeglass"
+    "url": "https://github.com/linkedin/eyeglass.git"
   },
   "scripts": {
     "prepare": "tsc --build",

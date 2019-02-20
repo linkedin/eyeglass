@@ -18,8 +18,11 @@
     "test:node": "mocha node-tests/**/*-test.js",
     "test:all": "ember try:each"
   },
-  "repository": "sass-eyeglass/ember-cli-eyeglass",
-  "homepage": "https://github.com/sass-eyeglass/ember-cli-eyeglass",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linkedin/eyeglass.git"
+  },
+  "homepage": "https://github.com/linkedin/eyeglass/tree/master/packages/ember-cli-eyeglass#readme",
   "engines": {
     "node": "^6.* || 8.* || >= 10.*"
   },

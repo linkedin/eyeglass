@@ -4,13 +4,14 @@
   "version": "2.1.0",
   "author": {
     "name": "The eyeglass team and contributors",
-    "url": "https://github.com/sass-eyeglass/eyeglass/graphs/contributors"
+    "url": "https://github.com/linkedin/eyeglass/graphs/contributors"
   },
   "engines": {
     "node": ">=0.12"
   },
   "license": "Apache-2.0",
   "main": "lib/index.js",
+  "homepage": "https://github.com/linkedin/eyeglass/tree/master/packages/eyeglass#readme",
   "README": "README.md",
   "scripts": {
     "prepare": "tsc",
@@ -22,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sass-eyeglass/eyeglass.git"
+    "url": "https://github.com/linkedin/eyeglass.git"
   },
   "keywords": [
     "sass",
