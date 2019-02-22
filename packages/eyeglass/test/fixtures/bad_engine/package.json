@@ -5,5 +5,8 @@
   "private": true,
   "dependencies": {
     "module_a": "*"
+  },
+  "eyeglass": {
+    "needs": "^3.0.0"
   }
 }

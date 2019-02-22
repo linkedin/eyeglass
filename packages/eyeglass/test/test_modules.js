@@ -6,6 +6,7 @@ var path = require("path");
 var glob = require("glob");
 var assert = require("assert");
 var testutils = require("./testutils");
+const DEFAULT_EYEGLASS_COMPAT = require("../lib/util/Options").DEFAULT_EYEGLASS_COMPAT;
 
 var fixtureDir = path.join(__dirname, "fixtures/EyeglassModules");
 var fixtures = glob.sync(path.join(fixtureDir, "*"));
@@ -48,9 +49,15 @@ describe("EyeglassModules", function () {
     it(testName, function() {
       var modules;
       var err;
+      var config;
 
       try {
-        modules = new EyeglassModules(testDir);
+        config = {
+          eyeglass: {
+            assertEyeglassCompatibility: DEFAULT_EYEGLASS_COMPAT
+          }
+        }
+        modules = new EyeglassModules(testDir, config);
       } catch (e) {
         err = e;
       }

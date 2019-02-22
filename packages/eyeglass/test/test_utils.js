@@ -9,6 +9,7 @@ var sass = require("node-sass");
 var testutils = require("./testutils");
 var EyeglassModules = require("../lib/modules/EyeglassModules").default;
 var Eyeglass = require("../lib");
+var DEFAULT_EYEGLASS_COMPAT = require("../lib/util/Options").DEFAULT_EYEGLASS_COMPAT;
 
 describe("utilities", function () {
   it("unquote handles js strings", function (done) {
@@ -33,7 +34,8 @@ describe("utilities", function () {
   it("provides a collection of errors if it cannot find" +
     " shared semantic versions in modules", function () {
       var dir = testutils.fixtureDirectory("conflicting_modules");
-      var versionIssues = new EyeglassModules(dir).issues.dependencies.versions;
+      var config = {eyeglass: {assertEyeglassCompatibility: DEFAULT_EYEGLASS_COMPAT}};
+      var versionIssues = new EyeglassModules(dir, config).issues.dependencies.versions;
 
       assert(versionIssues.length, "discovery found errors");
       assert.equal(versionIssues[0].name, "conflict_module");
@@ -43,7 +45,8 @@ describe("utilities", function () {
   it("loads a package.json for an eyeglass module", function (done) {
     var dir = testutils.fixtureDirectory("is_a_module");
     var eyeglass = {};
-    var modules = new EyeglassModules(dir);
+    var config = {eyeglass: {assertEyeglassCompatibility: DEFAULT_EYEGLASS_COMPAT }};
+    var modules = new EyeglassModules(dir, config);
     var egModule = modules.find("is-a-module");
     egModule.init(eyeglass, sass);
     assert(egModule);
@@ -54,7 +57,8 @@ describe("utilities", function () {
 
   it("populates the eyeglass name for a module into the module definition", function (done) {
     var dir = testutils.fixtureDirectory("is_a_module");
-    var modules = new EyeglassModules(dir);
+    var config = {eyeglass: {assertEyeglassCompatibility: DEFAULT_EYEGLASS_COMPAT }};
+    var modules = new EyeglassModules(dir, config);
     var egModule = modules.find("is-a-module");
     assert(egModule);
     assert.equal(egModule.rawName, "is_a_module");

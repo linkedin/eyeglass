@@ -34,8 +34,8 @@ export default class Eyeglass implements IEyeglass {
     this.assets = new Assets(this, this.options.eyeglass.engines.sass);
     this.modules = new EyeglassModules(
       this.options.eyeglass.root,
+      this.options,
       this.options.eyeglass.modules,
-      this.options.eyeglass.useGlobalModuleCache
     );
 
     fs.mkdirpSync(this.options.eyeglass.cacheDir);

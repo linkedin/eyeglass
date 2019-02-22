@@ -13,8 +13,16 @@ import { PackageJson } from "package-json";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Dict, isPresent } from "../util/typescriptUtils";
+import { EyeglassConfig } from "index";
+import { Config } from "../util/Options";
+// XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
+// XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
+// eslint-disable-next-line
+const pkg: PackageJson = require("../../package.json");
+const EYEGLASS_VERSION = pkg.version!;
 
 export const ROOT_NAME = ":root";
+const BOUNDARY_VERSIONS = ["1.6.0", EYEGLASS_VERSION, "2.9.9", "3.0.0", "3.9.9", "4.0.0"];
 
 type ModuleCollection = Dict<Array<EyeglassModule>>;
 
@@ -66,7 +74,10 @@ export default class EyeglassModules {
   tree: ModuleBranch;
   projectName: string;
   eyeglass: EyeglassModule;
-  constructor(dir: string, modules?: Array<ModuleSpecifier>, useGlobalModuleCache?: boolean) {
+  config: Config;
+  constructor(dir: string, config: EyeglassConfig, modules?: Array<ModuleSpecifier>) {
+    this.config = config;
+    let useGlobalModuleCache = config.eyeglass.useGlobalModuleCache;
     this.issues = {
       dependencies: {
         versions: [],
@@ -234,12 +245,29 @@ export default class EyeglassModules {
         // if `eyeglass.needs` is not present...
         // add the module to the missing engines list
         this.issues.engine.missing.push(mod);
-      } else if (!semver.satisfies(this.eyeglass.version!, mod.eyeglass.needs)) {
+      } else if (!this.isCompatibleWithThisEyeglass(mod.eyeglass.needs)) {
         // if the current version of eyeglass does not satisfy the need...
         // add the module to the incompatible engines list
         this.issues.engine.incompatible.push(mod);
       }
     });
+  }
+  private isCompatibleWithThisEyeglass(needs: string): boolean {
+    let assertCompatSpec = this.config.eyeglass.assertEyeglassCompatibility;
+    // If we don't have a forced compat version just check against the module
+    if (!assertCompatSpec) {
+      return semver.satisfies(EYEGLASS_VERSION, needs);
+    }
+
+    // We only use the forced compat version if it is functionally higher than
+    // the module's needed version
+    let minModule = semver.minSatisfying(BOUNDARY_VERSIONS, needs);
+    let minCompat = semver.minSatisfying(BOUNDARY_VERSIONS, assertCompatSpec);
+    if (minModule === null || minCompat === null || semver.gt(minModule, minCompat)) {
+      return semver.satisfies(EYEGLASS_VERSION, needs)
+    } else {
+      return semver.satisfies(EYEGLASS_VERSION, `${assertCompatSpec} || ${needs}`)
+    }
   }
 
   /**

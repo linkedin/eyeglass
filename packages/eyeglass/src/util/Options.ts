@@ -9,6 +9,8 @@ import { URI } from "./URI";
 import merge = require("lodash.merge");
 import { Importer, FunctionDeclarations } from "node-sass";
 
+export const DEFAULT_EYEGLASS_COMPAT = "^2.0";
+
 export interface AssetSourceOptions {
   /**
    * The namespace of this asset source.
@@ -118,7 +120,21 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
    * Whether to raise an error if the same eyeglass module is a dependency
    * more than once with incompatible semantic versions.
    */
-  strictModuleVersions?: boolean;
+  strictModuleVersions?: boolean | "warn";
+  /**
+   * When strictModuleVersions checking is enabled,
+   * this asserts that the modules installed are compatible with the
+   * version of eyeglass specified, in contradiction to those module's
+   * own declaration of the version of eyeglass that they say they need.
+   * This is helpful when eyeglass major releases occur and eyeglass modules
+   * that you depend on haven't yet been updated, but appear to work regardless.
+   *
+   * The value can be any semver dependency specifier. For instance, if
+   * eyeglass 3.0 is released, you can set this to "^3.0.0" and any eyeglass
+   * 3.x release will be assumed ok but a 4.0 release will cause things to
+   * break again.
+   */
+  assertEyeglassCompatibility?: string;
   /**
    * Whether to cache eyeglass modules across the entire javascript process.
    */
@@ -307,6 +323,8 @@ export function resolveConfig(options: Partial<EyeglassSpecificOptions>): Eyegla
   defaultValue(options, "enableImportOnce", () => true);
   // use global module caching by default
   defaultValue(options, "useGlobalModuleCache", () => true);
+  // There's no eyeglass module API changes in eyeglass 2.x so we default to silencing these warnings.
+  defaultValue(options, "assertEyeglassCompatibility", () => DEFAULT_EYEGLASS_COMPAT);
 
   options.fsSandbox = normalizeFsSandbox(options.fsSandbox, options.root!);
   return options as EyeglassConfig;
