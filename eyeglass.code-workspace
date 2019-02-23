@@ -1,13 +1,13 @@
 {
 	"folders": [
 		{
+			"path": "packages/eyeglass"
+		},
+		{
 			"path": "packages/broccoli-eyeglass"
 		},
 		{
 			"path": "packages/ember-cli-eyeglass"
-		},
-		{
-			"path": "packages/eyeglass"
 		}
 	]
 }
