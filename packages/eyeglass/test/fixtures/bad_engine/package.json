@@ -7,6 +7,6 @@
     "module_a": "*"
   },
   "eyeglass": {
-    "needs": "^3.0.0"
+    "needs": "^0.6.0"
   }
 }

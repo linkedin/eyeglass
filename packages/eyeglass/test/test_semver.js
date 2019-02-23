@@ -77,4 +77,35 @@ describe("semver checking", function () {
 
     testutils.assertCompiles(options, "#hello {\n  greeting: hello(Chris); }\n", done);
   });
+  it("gives an error if a module needs eyeglass 3.x", function (done) {
+    var options = {
+      data: "#hello { greeting: hello(Chris); }",
+      eyeglass: {
+        modules: [
+          {path: testutils.fixtureDirectory("built_for_eyeglass_v3")}
+        ],
+      }
+    };
+    testutils.assertStderr(function(check) {
+      eyeglass(options);
+      check();
+    }, function(output) {
+      var errored = (output.indexOf("incompatible with eyeglass") >= 0);
+      assert.ok(errored, "Error was not logged to console");
+      done();
+    });
+
+  });
+  it("should be automatically compatible between eyeglass v2 and v1 addons", function (done) {
+    var options = {
+      data: '@import "older-module";',
+      eyeglass: {
+        modules: [
+          {path: testutils.fixtureDirectory("built_for_eyeglass_v1")}
+        ],
+      }
+    };
+
+    testutils.assertCompiles(options, ".hello {\n  content: \"World\" !important; }\n", done);
+  });
 });
