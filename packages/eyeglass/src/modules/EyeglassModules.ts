@@ -13,7 +13,7 @@ import { PackageJson } from "package-json";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Dict, isPresent } from "../util/typescriptUtils";
-import { EyeglassConfig } from "index";
+import { EyeglassConfig } from "..";
 import { Config } from "../util/Options";
 // XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
 // XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
