@@ -213,7 +213,6 @@ describe("EyeglassCompiler", function() {
     })
   );
 
-  // TODO: rwjblue -> debug resolution issue
   it(
     "supports manual modules",
     co.wrap(function*() {
@@ -503,7 +502,6 @@ describe("EyeglassCompiler", function() {
       })
     );
 
-    // TODO: rwjblue -> debug resolution issue
     it(
       "busts cache when an eyeglass module is upgraded",
       co.wrap(function*() {
@@ -572,7 +570,6 @@ describe("EyeglassCompiler", function() {
       })
     );
 
-    // TODO: rwjblue -> debug resolution issue
     it(
       "busts cache when an eyeglass asset changes",
       co.wrap(function*() {
@@ -756,7 +753,6 @@ describe("EyeglassCompiler", function() {
       })
     );
 
-    // TODO: rwjblue -> debug resolution issue
     it(
       "removes an asset file when the corresponding sass file is removed",
       co.wrap(function*() {
@@ -1379,7 +1375,6 @@ describe("EyeglassCompiler", function() {
       })
     );
 
-    // TODO: rwjblue -> debug resolution issue
     it(
       "caches module asset import scss",
       co.wrap(function*() {
