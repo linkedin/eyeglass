@@ -431,9 +431,7 @@ export default class EyeglassModules {
       let cacheKey = pkg + "!" + origin;
       return this.cache.access.getOrElse(cacheKey, () => {
         // find all the branches that match the origin
-        let branches = findBranchesByPath({
-          dependencies: this.tree
-        }, pkg);
+        let branches = findBranchesByPath(this.tree, pkg);
 
         let canAccess = branches.some(function(branch) {
           // if the reference is to itself (branch.name)
@@ -511,20 +509,24 @@ function getHierarchy(branch: ModuleBranch): archy.Data {
   * @param  {String} dir - the path to search for
   * @returns {Object} the branches of the tree that contain the path
   */
-function findBranchesByPath(tree: Dict<ModuleBranch>, dir: string): Array<ModuleBranch> {
+function findBranchesByPath(mod: ModuleBranch | undefined, dir: string, branches = new Array<ModuleBranch>()): Array<ModuleBranch> {
   // iterate over the tree
-  return Object.keys(tree).reduce(function(branches, name: string) {
-    let mod = tree[name]!;
-    // if the module path matches the search path, push it onto our results
-    if (mod.path === dir) {
-      branches.push(mod);
-    }
-    // if the module has dependencies, search those as well
-    if (mod.dependencies) {
-      branches.push.apply(branches, findBranchesByPath(mod.dependencies, dir));
-    }
+  if (!mod) {
     return branches;
-  }, new Array<ModuleBranch>());
+  }
+
+  if (mod.path === dir) {
+    branches.push(mod);
+  }
+
+  if (mod.dependencies) {
+    let subModNames = Object.keys(mod.dependencies);
+    for (let subModName of subModNames) {
+      findBranchesByPath(mod.dependencies[subModName], dir, branches);
+    }
+  }
+
+  return branches;
 }
 
 /**
