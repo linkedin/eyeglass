@@ -214,21 +214,22 @@ describe("EyeglassCompiler", function() {
   );
 
   // TODO: rwjblue -> debug resolution issue
-  it.skip(
+  it(
     "supports manual modules",
     co.wrap(function*() {
       let modules;
 
       try {
         modules = yield createTempDir();
-
+        let path = modules.path();
         modules.copy(FIXTURES.path("manualModule"));
         input.copy(FIXTURES.path("usesManualModule/input"));
-
+        
         let optimizer = new EyeglassCompiler(input.path(), {
           cssDir: ".",
           fullException: true,
           eyeglass: {
+            root: input.path(),
             modules: [{ path: modules.path() }],
           },
         });
@@ -503,11 +504,12 @@ describe("EyeglassCompiler", function() {
     );
 
     // TODO: rwjblue -> debug resolution issue
-    it.skip(
+    it(
       "busts cache when an eyeglass module is upgraded",
       co.wrap(function*() {
         input.write({
           "project.scss": '@import "eyeglass-module";',
+          "package.json": `{"name": "busts-cache-upgraded-project", "private": true}`,
         });
 
         eyeglassModule.write({
@@ -540,6 +542,7 @@ describe("EyeglassCompiler", function() {
             cb(cssFile, options);
           },
           eyeglass: {
+            root: input.path(),
             modules: [{ path: eyeglassModule.path() }],
           },
         });
@@ -570,13 +573,14 @@ describe("EyeglassCompiler", function() {
     );
 
     // TODO: rwjblue -> debug resolution issue
-    it.skip(
+    it(
       "busts cache when an eyeglass asset changes",
       co.wrap(function*() {
         input.write({
           "project.scss":
             '@import "eyeglass-module/assets";\n' +
             '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n',
+          "package.json": `{"name": "busts-cache-project", "private": true}`,
         });
 
         eyeglassModule.write({
@@ -622,6 +626,7 @@ describe("EyeglassCompiler", function() {
             cb(cssFile, options);
           },
           eyeglass: {
+            root: input.path(),
             modules: [{ path: eyeglassModule.path() }],
           },
         });
@@ -752,13 +757,14 @@ describe("EyeglassCompiler", function() {
     );
 
     // TODO: rwjblue -> debug resolution issue
-    it.skip(
+    it(
       "removes an asset file when the corresponding sass file is removed",
       co.wrap(function*() {
         input.write({
           "project.scss":
             '@import "eyeglass-module/assets";\n' +
             '.rectangle { background: asset-url("eyeglass-module/shape.svg"); }\n',
+          "package.json": `{"name": "removes-asset-file", "private": true}`,
         });
 
         eyeglassModule.write({
@@ -804,6 +810,7 @@ describe("EyeglassCompiler", function() {
             cb(cssFile, options);
           },
           eyeglass: {
+            root: input.path(),
             modules: [{ path: eyeglassModule.path() }],
           },
         });
@@ -1373,12 +1380,13 @@ describe("EyeglassCompiler", function() {
     );
 
     // TODO: rwjblue -> debug resolution issue
-    it.skip(
+    it(
       "caches module asset import scss",
       co.wrap(function*() {
         input.write({
           "file1.scss": '@import "eyeglass-module/assets";\n',
           "file2.scss": '@import "eyeglass-module/assets";\n',
+          "package.json": `{"name": "asset-cache-project", "private": true}`
         });
 
         eyeglassModule.write({
@@ -1411,6 +1419,7 @@ describe("EyeglassCompiler", function() {
         let compiler = new EyeglassCompiler(input.path(), {
           cssDir: ".",
           eyeglass: {
+            root: input.path(),
             modules: [{ path: eyeglassModule.path() }],
           },
         });
