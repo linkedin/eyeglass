@@ -1,3 +1,11 @@
+# 5.0.0
+
+* Depends on `eyeglass` version `2.2.0` or greater.
+
+# 4.5.2
+
+* Revert eyeglass dependency bump.
+
 # 4.5.1
 
 * Bump dependency on `eyeglass` to `2.1.0`
