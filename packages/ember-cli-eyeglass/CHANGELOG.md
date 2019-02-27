@@ -1,3 +1,7 @@
+# 6.0.0
+
+* Bump dependency on `broccoli-eyeglass` to `^5.0.0` which moves `eyeglass` to version `^2.2.0`.
+
 # 5.1.1
 
 * Bump dependency on `broccoli-eyeglass` to `^4.5.1`.
