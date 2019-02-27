@@ -14,7 +14,7 @@
     "lint": "eslint --ext ts --format visualstudio .",
     "lintfix": "eslint --ext ts --fix .",
     "start": "ember serve",
-    "test": "ember test",
+    "test": "EMBER_CLI_SYSTEM_TEMP=false ember test",
     "test:node": "mocha node-tests/**/*-test.js",
     "test:all": "ember try:each"
   },

@@ -4054,7 +4054,7 @@ dateformat@~1.0.12:
     get-stdin "^4.0.1"
     meow "^3.3.0"
 
-deasync@^0.1.13, deasync@^0.1.4:
+deasync@^0.1.13:
   version "0.1.14"
   resolved "https://registry.yarnpkg.com/deasync/-/deasync-0.1.14.tgz#232ea2252b443948cad033d792eb3b24b0a3d828"
   integrity sha512-wN8sIuEqIwyQh72AG7oY6YQODCxIp1eXzEZlZznBuwDF8Q03Tdy9QNp1BNZXeadXoklNrw+Ip1fch+KXo/+ASw==
@@ -4928,7 +4928,7 @@ ensure-posix-path@^1.0.0, ensure-posix-path@^1.0.1, ensure-posix-path@^1.0.2, en
   resolved "https://registry.yarnpkg.com/ensure-posix-path/-/ensure-posix-path-1.1.1.tgz#3c62bdb19fa4681544289edb2b382adc029179ce"
   integrity sha512-VWU0/zXzVbeJNXvME/5EmLuEj2TauvoaTz6aFYK1Z92JCBlDlZ3Gu0tuGR42kpW1754ywTs+QB0g5TP0oj9Zaw==
 
-ensure-symlink@^1.0.0, ensure-symlink@^1.0.2:
+ensure-symlink@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/ensure-symlink/-/ensure-symlink-1.0.2.tgz#58ebc26d15a9539b9e79d00aa9623f8fa65ff18d"
   integrity sha1-WOvCbRWpU5ueedAKqWI/j6Zf8Y0=
@@ -5406,24 +5406,6 @@ extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
-
-eyeglass@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/eyeglass/-/eyeglass-1.6.0.tgz#7e3f045614f12cbb32813b5413eca1c588d8a1c5"
-  integrity sha512-X7BOWRxX6C4jlOXCWxRXKfQ2PAKQiV80ChvGIS8vRF7O7puBz9IAcX9nJBz1/jqgEEgssaJjA2rfC3wtorD3vw==
-  dependencies:
-    archy "^1.0.0"
-    deasync "^0.1.4"
-    debug "^2.2.0"
-    ensure-symlink "^1.0.0"
-    fs-extra "^0.30.0"
-    glob "^7.1.0"
-    json-stable-stringify "^1.0.1"
-    lodash.includes "^4.3.0"
-    lodash.merge "^4.6.0"
-    node-sass "^4.0.0 || ^3.10.1"
-    node-sass-utils "^1.1.2"
-    semver "^5.0.3"
 
 fast-deep-equal@^2.0.1:
   version "2.0.1"
@@ -10398,7 +10380,7 @@ scss-tokenizer@^0.2.3:
     js-base64 "^2.1.8"
     source-map "^0.4.2"
 
-"semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0:
+"semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0:
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
   integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
