@@ -174,6 +174,10 @@ export default class EyeglassModules {
     return this.getFinalModule(name);
   }
 
+  /**
+   * Creates, caches and returns a mapping of filesystem locations to eyeglass
+   * modules.
+   */
   get modulePathMap(): Dict<EyeglassModule> {
     if (this._modulePathMap) {
       return this._modulePathMap;
@@ -189,8 +193,18 @@ export default class EyeglassModules {
     }
   }
 
+  /**
+   * Finds the most specific eyeglass module that contains the given filesystem
+   * location. It does this by walking up the directory structure and looking
+   * to see if it finds the main directory of an eyeglass module.
+   */
   findByPath(location: string): EyeglassModule | null {
     let pathMap = this.modulePathMap;
+    // This is the only filesystem operation: we have to make sure
+    // we're working with real path locations because the module directories
+    // are also only real paths. This means that sass files that are sym-linked
+    // into a subdirectory of an eyeglass module will not resolve against that
+    // module. (Sym-linking an eyeglass module itself is supported.)
     let parentLocation: string = fs.realpathSync(location);
     do {
       location = parentLocation;
@@ -251,6 +265,8 @@ export default class EyeglassModules {
     for (let name of Object.keys(modules)) {
       // first sort our modules by version
       let versions = modules[name]!.sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
+      // In case the app and a dependency have the same name, we discard the app
+      // Because they're not the same thing.
       if (versions.length > 1 && versions[0].isRoot) {
         versions.shift();
       }
@@ -273,7 +289,10 @@ export default class EyeglassModules {
     */
   private checkForIssues(): void {
     this.list.forEach((mod: EyeglassModule) => {
-      if (mod.isRoot) {
+      // We don't check the app root for issues unless it declares itself to be
+      // an eyeglass module. (because the app doesn't have to be a well-formed
+      // eyeglass module.)
+      if (mod.isRoot && !mod.isEyeglassModule) {
         return;
       }
       // check engine compatibility
@@ -577,6 +596,9 @@ function findBranchesByPath(mod: ModuleBranch | undefined, dir: string, branches
   * @returns {Object} the resulting collection
   */
 function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {}): ModuleCollection {
+  // We capture the app root to a special name so we can always find it easily
+  // and so it remains in the collection in case de-duplication against a
+  // dependency would trigger its removal.
   if (branch.isRoot) {
     collection[":root"] = [branch];
   }
