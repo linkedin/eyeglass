@@ -1,7 +1,6 @@
 import { existsSync } from "fs";
 import { AsyncImporter } from "node-sass";
 import EyeglassModule from "../modules/EyeglassModule";
-import * as packageUtils from "../util/package";
 import { URI } from "../util/URI";
 import { ImporterFactory } from "./ImporterFactory";
 import ImportUtilities from "./ImportUtilities";
@@ -60,15 +59,11 @@ const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallba
       });
     } else {
       // if the module name wasn't specified in the import,
-      //  infer it from the origin
+      // infer it from the origin
       if (!moduleName && isRealFile) {
-        let pkg = packageUtils.findNearestPackage(prev);
-        mod = new EyeglassModule({
-          path: pkg
-        });
-
+        mod = eyeglass.modules.findByPath(prev);
         // if it's an eyeglass module...
-        if (mod.isEyeglassModule) {
+        if (mod && mod.isEyeglassModule) {
           // use the module's name
           moduleName = mod.name;
         }

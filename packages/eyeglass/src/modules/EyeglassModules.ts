@@ -75,6 +75,7 @@ export default class EyeglassModules {
   projectName: string;
   eyeglass: EyeglassModule;
   config: Config;
+  private _modulePathMap: Dict<EyeglassModule> | undefined;
   constructor(dir: string, config: EyeglassConfig, modules?: Array<ModuleSpecifier>) {
     this.config = config;
     let useGlobalModuleCache = config.eyeglass.useGlobalModuleCache;
@@ -173,6 +174,35 @@ export default class EyeglassModules {
     return this.getFinalModule(name);
   }
 
+  get modulePathMap(): Dict<EyeglassModule> {
+    if (this._modulePathMap) {
+      return this._modulePathMap;
+    } else {
+      let names = Object.keys(this.collection);
+      let modulePathMap: Dict<EyeglassModule> = {};
+      for (let name of names) {
+        let mod = this.collection[name]!;
+        modulePathMap[mod.path] = mod;
+      }
+      this._modulePathMap = modulePathMap;
+      return this._modulePathMap;
+    }
+  }
+
+  findByPath(location: string): EyeglassModule | null {
+    let pathMap = this.modulePathMap;
+    let parentLocation: string = fs.realpathSync(location);
+    do {
+      location = parentLocation;
+      let mod = pathMap[location];
+      if (mod) {
+        return mod;
+      }
+      parentLocation = path.resolve(location, "..");
+    } while (parentLocation != location)
+    return null;
+  }
+
   /**
     * Returns a formatted string of the module hierarchy
     *
@@ -221,6 +251,9 @@ export default class EyeglassModules {
     for (let name of Object.keys(modules)) {
       // first sort our modules by version
       let versions = modules[name]!.sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
+      if (versions.length > 1 && versions[0].isRoot) {
+        versions.shift();
+      }
       // then take the highest version we found
       deduped[name] = versions.shift()!;
       // check for any version issues
@@ -240,6 +273,9 @@ export default class EyeglassModules {
     */
   private checkForIssues(): void {
     this.list.forEach((mod: EyeglassModule) => {
+      if (mod.isRoot) {
+        return;
+      }
       // check engine compatibility
       if (!mod.eyeglass || !mod.eyeglass.needs) {
         // if `eyeglass.needs` is not present...
@@ -427,11 +463,15 @@ export default class EyeglassModules {
 
     let canAccessFrom = (origin: string): boolean => {
       // find the nearest package for the origin
-      let pkg = packageUtils.findNearestPackage(origin);
-      let cacheKey = pkg + "!" + origin;
+      let mod = this.findByPath(origin);
+      if (!mod) {
+        throw new Error(`No module found containing '${origin}'.`)
+      }
+      let modulePath = mod.path;
+      let cacheKey = modulePath + "!" + origin;
       return this.cache.access.getOrElse(cacheKey, () => {
         // find all the branches that match the origin
-        let branches = findBranchesByPath(this.tree, pkg);
+        let branches = findBranchesByPath(this.tree, modulePath);
 
         let canAccess = branches.some(function(branch) {
           // if the reference is to itself (branch.name)
@@ -537,8 +577,11 @@ function findBranchesByPath(mod: ModuleBranch | undefined, dir: string, branches
   * @returns {Object} the resulting collection
   */
 function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {}): ModuleCollection {
+  if (branch.isRoot) {
+    collection[":root"] = [branch];
+  }
   // if the branch itself is a module, add it...
-  if (branch.isEyeglassModule) {
+  if (branch.isEyeglassModule || branch.isRoot) {
     collection[branch.name] = collection[branch.name] || [];
     collection[branch.name]!.push(branch);
   }
