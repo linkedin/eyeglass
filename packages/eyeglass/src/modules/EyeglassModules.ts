@@ -212,7 +212,7 @@ export default class EyeglassModules {
       if (mod) {
         return mod;
       }
-      parentLocation = path.resolve(location, "..");
+      parentLocation = path.dirname(location);
     } while (parentLocation != location)
     return null;
   }
