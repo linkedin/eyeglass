@@ -1,3 +1,7 @@
+# 2.2.1
+
+* The method for finding a module that contains a given file was changed to be more efficient by avoiding filesystem access. This also fixes a bug in ember-cli-eyeglass.
+
 # 2.2.0
 * Adds eyeglass option `assertEyeglassCompatibility` - A general option
   for making any older eyeglass addons work with the current version of

@@ -1,3 +1,7 @@
+# 5.0.1
+
+* Picks up a change in eyeglass that makes it work better in broccoli-based projects.
+
 # 5.0.0
 
 * Depends on `eyeglass` version `2.2.0` or greater.

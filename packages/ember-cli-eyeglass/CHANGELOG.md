@@ -1,3 +1,7 @@
+# 6.0.1
+
+* Depends on `broccoli-eyeglass@5.0.1` and `eyeglass@2.2.1`. Fixes an issue with using system tmp directories.
+
 # 6.0.0
 
 * Bump dependency on `broccoli-eyeglass` to `^5.0.0` which moves `eyeglass` to version `^2.2.0`.
