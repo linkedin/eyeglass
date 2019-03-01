@@ -133,6 +133,10 @@ interface IEyeglassModule {
    */
   isEyeglassModule: boolean;
   /**
+   * Whether this is the project root.
+   */
+  isRoot: boolean;
+  /**
    * The version of this module.
    */
   version: string | undefined;
@@ -159,6 +163,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   dependencies: Dict<EyeglassModule>;
   eyeglass: EyeglassModuleOptionsFromPackageJSON;
   isEyeglassModule: boolean;
+  isRoot: boolean;
   name: string;
   path: string;
   rawName: string;
@@ -195,7 +200,8 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
       mod = merge(
         {
           isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data),
-          inDevelopment: false
+          inDevelopment: false,
+          isRoot
         },
         mod,
         {
@@ -242,6 +248,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     this.rawName = mod.rawName;
     this.version = mod.version;
     this.inDevelopment = mod.inDevelopment;
+    this.isRoot = mod.isRoot;
 
     // merge the module properties into the instance
     merge(this, mod);
