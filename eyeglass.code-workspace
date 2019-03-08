@@ -9,5 +9,10 @@
 		{
 			"path": "packages/ember-cli-eyeglass"
 		}
-	]
+	],
+	"settings": {
+		"cSpell.words": [
+			"heimdall"
+		]
+	}
 }

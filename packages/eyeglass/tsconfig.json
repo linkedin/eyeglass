@@ -25,6 +25,7 @@
         "target": "es5",
         "sourceMap": true,
         "paths": {
+          "*": ["types/*"],
             "node-sass": ["../@types/node-sass"]
         }
     },

@@ -73,7 +73,7 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
   let includePaths = options.includePaths;
   let root = options.eyeglass.root;
 
-  return ImportUtilities.createImporter(function(uri, prev, done) {
+  return ImportUtilities.createImporter("module", function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
     let isRealFile = existsSync(prev);
     // pattern to match moduleName/relativePath

@@ -19,7 +19,7 @@ interface HasAssets {
 const rAssetsImport = /^(?:([^/]+)\/)?assets$/;
 const AssetImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter?: AsyncImporter | Array<AsyncImporter>): AsyncImporter {
 
-  return ImportUtilities.createImporter(function(uri, prev, done) {
+  return ImportUtilities.createImporter("assets", function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
 
     let isRealFile = existsSync(prev);

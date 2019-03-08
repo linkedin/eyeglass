@@ -15,6 +15,7 @@ import { SassImplementation } from "../util/SassImplementation";
 import { Dict, isPresent } from "../util/typescriptUtils";
 import { EyeglassConfig } from "..";
 import { Config } from "../util/Options";
+import heimdall = require("heimdalljs");
 // XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
 // XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
 // eslint-disable-next-line
@@ -77,61 +78,82 @@ export default class EyeglassModules {
   config: Config;
   private _modulePathMap: Dict<EyeglassModule> | undefined;
   constructor(dir: string, config: EyeglassConfig, modules?: Array<ModuleSpecifier>) {
-    this.config = config;
-    let useGlobalModuleCache = config.eyeglass.useGlobalModuleCache;
-    this.issues = {
-      dependencies: {
-        versions: [],
-        missing: []
-      },
-      engine: {
-        missing: [],
-        incompatible: []
+    let timer = heimdall.start("eyeglass:modules");
+    try {
+      this.config = config;
+      let useGlobalModuleCache = config.eyeglass.useGlobalModuleCache;
+      this.issues = {
+        dependencies: {
+          versions: [],
+          missing: []
+        },
+        engine: {
+          missing: [],
+          incompatible: []
+        }
+      };
+
+      this.cache = {
+        access: new SimpleCache(),
+        modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache<EyeglassModule>(),
+        modulePackage: useGlobalModuleCache ? globalModulePackageCache : new SimpleCache<string>(),
+      };
+
+      // find the nearest package.json for the given directory
+      dir = packageUtils.findNearestPackage(path.resolve(dir));
+
+      // resolve the current location into a module tree
+      let moduleTree = this.resolveModule(dir, true)!;
+
+      // if any modules were passed in, add them to the module tree
+      if (modules && modules.length) {
+        let discoverTimer = heimdall.start("eyeglass:modules:discovery");
+        try {
+          moduleTree.dependencies = modules.reduce((dependencies, mod) => {
+            let resolvedMod = new EyeglassModule(merge(mod, {
+              isEyeglassModule: true
+            }), this.discoverModules.bind(this));
+            dependencies[resolvedMod.name] = resolvedMod;
+            return dependencies;
+          }, moduleTree.dependencies);
+        } finally {
+          discoverTimer.stop();
+        }
       }
-    };
 
-    this.cache = {
-      access: new SimpleCache(),
-      modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache<EyeglassModule>(),
-      modulePackage: useGlobalModuleCache ? globalModulePackageCache : new SimpleCache<string>(),
-    };
+      let resolutionTimer = heimdall.start("eyeglass:modules:resolution");
+      try {
+        // convert the tree into a flat collection of deduped modules
+        let collection = this.dedupeModules(flattenModules(moduleTree));
 
-    // find the nearest package.json for the given directory
-    dir = packageUtils.findNearestPackage(path.resolve(dir));
+        // expose the collection
+        this.collection = collection;
+        // convert the collection object into a simple array for easy iteration
+        this.list = Object.keys(collection).map((name) => collection[name]!);
+        // prune and expose the tree
+        this.tree = this.pruneModuleTree(moduleTree);
+        // set the current projects name
+        this.projectName = moduleTree.name;
+        // expose a convenience reference to the eyeglass module itself
+        this.eyeglass = this.find("eyeglass")!;
 
-    // resolve the current location into a module tree
-    let moduleTree = this.resolveModule(dir, true)!;
+        // check for any issues we may have encountered
+        this.checkForIssues();
+      } catch (e) {
+        // typescript needs this catch & throw to convince it that the instance properties are initialized.
+        throw e;
+      } finally {
+        resolutionTimer.stop();
+      }
 
-    // if any modules were passed in, add them to the module tree
-    if (modules && modules.length) {
-      moduleTree.dependencies = modules.reduce((dependencies, mod) => {
-        let resolvedMod = new EyeglassModule(merge(mod, {
-          isEyeglassModule: true
-        }), this.discoverModules.bind(this));
-        dependencies[resolvedMod.name] = resolvedMod;
-        return dependencies;
-      }, moduleTree.dependencies);
+      /* istanbul ignore next - don't test debug */
+      debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
+    } catch (e) {
+      // typescript needs this catch & throw to convince it that the instance properties are initialized.
+      throw e;
+    } finally {
+      timer.stop();
     }
-
-    // convert the tree into a flat collection of deduped modules
-    let collection = this.dedupeModules(flattenModules(moduleTree));
-
-    // expose the collection
-    this.collection = collection;
-    // convert the collection object into a simple array for easy iteration
-    this.list = Object.keys(collection).map((name) => collection[name]!);
-    // prune and expose the tree
-    this.tree = this.pruneModuleTree(moduleTree);
-    // set the current projects name
-    this.projectName = moduleTree.name;
-    // expose a convenience reference to the eyeglass module itself
-    this.eyeglass = this.find("eyeglass")!;
-
-    // check for any issues we may have encountered
-    this.checkForIssues();
-
-    /* istanbul ignore next - don't test debug */
-    debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
   }
 
   /**

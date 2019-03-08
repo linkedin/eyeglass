@@ -7,6 +7,7 @@ import { SassImplementation } from "../util/SassImplementation";
 import { Config } from "../util/Options";
 import { isPresent, Dict } from "../util/typescriptUtils";
 import { ImportedFile } from "./ImporterFactory";
+import heimdall = require("heimdalljs");
 
 type ImportContext = AsyncContext & {eyeglass: {imported: Dict<boolean>}};
 
@@ -29,8 +30,13 @@ export default class ImportUtilities {
       }
     });
   }
-  static createImporter(importer: AsyncImporter): AsyncImporter {
-    return function (uri, prev, done) {
+  static createImporter(name: string, importer: AsyncImporter): AsyncImporter {
+    return function (uri, prev, doneImporting) {
+      let importTimer = heimdall.start(`eyeglass:import:${name}`);
+      let done: typeof doneImporting = (data): void => {
+        importTimer.stop();
+        doneImporting(data);
+      };
       uri = URI.web(uri);
       prev = URI.system(prev);
       importer.call(this, uri, prev, done);

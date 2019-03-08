@@ -7,7 +7,7 @@ import { AsyncImporter } from "node-sass";
 const FSImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter): AsyncImporter {
   let fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;
 
-  return ImportUtilities.createImporter(function(uri, prev, done) {
+  return ImportUtilities.createImporter("fs", function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
     let match = uri.match(fsURI);
     if (match) {

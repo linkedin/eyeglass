@@ -14,6 +14,7 @@ import { SassFunction } from "node-sass";
 import { SassImplementation, helpers as sassHelpers } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
 import { UnsafeDict } from "./util/typescriptUtils";
+import heimdall = require("heimdalljs");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg: PackageJson = require("../package.json");
 
@@ -26,39 +27,46 @@ export default class Eyeglass implements IEyeglass {
   modules: EyeglassModules;
 
   constructor(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
+    let timer = heimdall.start("eyeglass:instantiation");
+    try {
+      // an interface for deprecation warnings
+      this.deprecate = deprecator(options);
 
-    // an interface for deprecation warnings
-    this.deprecate = deprecator(options);
+      this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
+      this.assets = new Assets(this, this.options.eyeglass.engines.sass);
+      this.modules = new EyeglassModules(
+        this.options.eyeglass.root,
+        this.options,
+        this.options.eyeglass.modules,
+      );
 
-    this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
-    this.assets = new Assets(this, this.options.eyeglass.engines.sass);
-    this.modules = new EyeglassModules(
-      this.options.eyeglass.root,
-      this.options,
-      this.options.eyeglass.modules,
-    );
+      fs.mkdirpSync(this.options.eyeglass.cacheDir);
 
-    fs.mkdirpSync(this.options.eyeglass.cacheDir);
+      semverChecker(this, this.options.eyeglass.engines.sass, this.options.eyeglass, Eyeglass.VERSION);
 
-    semverChecker(this, this.options.eyeglass.engines.sass, this.options.eyeglass, Eyeglass.VERSION);
+      checkMissingDependencies.call(this);
 
-    checkMissingDependencies.call(this);
+      // initialize all the modules
+      this.modules.init(this, this.options.eyeglass.engines.sass);
 
-    // initialize all the modules
-    this.modules.init(this, this.options.eyeglass.engines.sass);
+      // add importers and functions
+      addImporters.call(this);
+      addFunctions.call(this);
 
-    // add importers and functions
-    addImporters.call(this);
-    addFunctions.call(this);
+      // deprecated stuff
+      deprecateProperties.call(this, ["enableImportOnce"]);
 
-    // deprecated stuff
-    deprecateProperties.call(this, ["enableImportOnce"]);
-
-    // auto-add asset paths specified via options
-    if (this.options.eyeglass.assets.sources) {
-      for (let assetSource of this.options.eyeglass.assets.sources) {
-        this.assets.addSource(assetSource.directory, assetSource);
+      // auto-add asset paths specified via options
+      if (this.options.eyeglass.assets.sources) {
+        for (let assetSource of this.options.eyeglass.assets.sources) {
+          this.assets.addSource(assetSource.directory, assetSource);
+        }
       }
+    } catch(e) {
+      // typescript needs this catch & throw to convince it that the instance properties are initialized.
+      throw e;
+    } finally {
+      timer.stop();
     }
   }
 
