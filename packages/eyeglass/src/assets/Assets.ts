@@ -220,19 +220,24 @@ export default class Assets implements Resolves, Installs {
 
       let dest = path.join(options.buildDir, uri);
 
-      try {
-        if (options.installWithSymlinks) {
-          fs.mkdirpSync(path.dirname(dest));
+      this.eyeglass.once(`install:${dest}`, () => {
+        try {
+          if (options.installWithSymlinks) {
+            fs.mkdirpSync(path.dirname(dest));
 
-          ensureSymlink(file, dest);
-        } else {
-          // we explicitly use copySync rather than copy to avoid starving system resources
-          fs.copySync(file, dest);
+            ensureSymlink(file, dest);
+          } else {
+            // we explicitly use copySync rather than copy to avoid starving system resources
+            fs.copySync(file, dest);
+          }
+          cb(null, dest);
+        } catch (error) {
+          cb(errorFor(error, `Failed to install asset from ${file}:\n`));
         }
+      }, () => {
         cb(null, dest);
-      } catch (error) {
-        cb(errorFor(error, `Failed to install asset from ${file}:\n`));
-      }
+      });
+
     } else {
       cb(null, file);
     }
