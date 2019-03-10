@@ -25,7 +25,7 @@
       "target": "es5",
       "sourceMap": true,
       "paths": {
-        "node-sass": ["../../eyeglass/@types/node-sass"],
+        "heimdalljs": ["../../eyeglass/src/types/heimdalljs"],
         "*": ["types/*"],
       }
   },

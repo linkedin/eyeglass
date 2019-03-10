@@ -9,7 +9,16 @@ import { isPresent, Dict } from "../util/typescriptUtils";
 import { ImportedFile } from "./ImporterFactory";
 import heimdall = require("heimdalljs");
 
+const TIME_IMPORTS = !!(process.env.EYEGLASS_PERF_DEBUGGING);
+
 type ImportContext = AsyncContext & {eyeglass: {imported: Dict<boolean>}};
+
+class ImportSchema {
+  uri: string;
+  constructor() {
+    this.uri = "";
+  }
+}
 
 export default class ImportUtilities {
   root: string;
@@ -32,9 +41,13 @@ export default class ImportUtilities {
   }
   static createImporter(name: string, importer: AsyncImporter): AsyncImporter {
     return function (uri, prev, doneImporting) {
-      let importTimer = heimdall.start(`eyeglass:import:${name}`);
+      let importTimer: heimdall.Cookie<ImportSchema> | undefined;
+      if (TIME_IMPORTS) {
+        importTimer = heimdall.start(`eyeglass:import:${name}`, ImportSchema);
+        importTimer.stats["uri"] = uri;
+      }
       let done: typeof doneImporting = (data): void => {
-        importTimer.stop();
+        if (importTimer) { importTimer.stop(); }
         doneImporting(data);
       };
       uri = URI.web(uri);

@@ -17,6 +17,7 @@ import copyObject = require("lodash.clonedeep");
 import MergeTrees = require("broccoli-merge-trees");
 import { EventEmitter } from "chained-emitter";
 import DiskCache = require("sync-disk-cache");
+import heimdall = require("heimdalljs");
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
@@ -453,17 +454,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     console.log(action + " " + sassFilename + " (" + location + "): " + message);
   }
 
-  compileTree(srcPath: string, files: Array<string>, destDir: string): Promise<void | Array<void | nodeSass.Result>> {
+  compileTree(srcPath: string, files: Array<string>, destDir: string, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void | Array<void | nodeSass.Result>> {
     switch (files.length) {
       case 0:
         return RSVP.resolve();
       case 1:
-        return RSVP.all(this.compileSassFile(srcPath, files[0], destDir));
+        return RSVP.all(this.compileSassFile(srcPath, files[0], destDir, compilationTimer));
       default: {
-        let numConcurrentCalls = Number(process.env.JOBS) || os.cpus().length;
+        let numConcurrentCalls = Number(process.env.SASS_JOBS) || Number(process.env.JOBS) || os.cpus().length;
 
         let worker = queue.async.asyncify((file: string) => {
-          return RSVP.all(this.compileSassFile(srcPath, file, destDir));
+          return RSVP.all(this.compileSassFile(srcPath, file, destDir, compilationTimer));
         });
 
         return RSVP.resolve(queue(worker, files, numConcurrentCalls));
@@ -471,7 +472,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     }
   }
 
-  compileSassFile(srcPath: string, sassFilename: string, destDir: string): Array<Promise<void | nodeSass.Result>> {
+  compileSassFile(srcPath: string, sassFilename: string, destDir: string, compilationTimer: heimdall.Cookie<SassRenderSchema>): Array<Promise<void | nodeSass.Result>> {
     let sassOptions = copyObject(this.options);
     let fullSassFilename = path.join(srcPath, sassFilename);
     sassOptions.file = fullSassFilename;
@@ -502,7 +503,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
           options: copyObject(resolvedOptions),
         };
         details.options.outFile = details.cssFilename;
-        promises.push(this.compileCssFileMaybe(details));
+        promises.push(this.compileCssFileMaybe(details, compilationTimer));
       }
     );
 
@@ -542,14 +543,14 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @return Promise that resolves to the cached output of the file or the output
    *   of compiling the file
    **/
-  getFromCacheOrCompile(details: CompilationDetails): Promise<void>   {
+  getFromCacheOrCompile(details: CompilationDetails, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void>   {
     let key = this.keyForSourceFile(details.srcPath, details.sassFilename, details.options);
 
     try {
       let cachedDependencies = this.persistentCache!.get(this.dependenciesKey(key));
       if (!cachedDependencies.isCached) {
         let reason = { message: "no dependency data for " + details.sassFilename };
-        return this.handleCacheMiss(details, reason, key);
+        return this.handleCacheMiss(details, reason, key, compilationTimer);
       }
 
       let dependencies: Array<[string, string]> = JSON.parse(cachedDependencies.value);
@@ -557,20 +558,21 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       // check dependency caches
       if (dependencies.some(dep => this.dependencyChanged(details.srcPath, dep))) {
         let reason = { message: "dependency changed" };
-        return this.handleCacheMiss(details, reason, key);
+        return this.handleCacheMiss(details, reason, key, compilationTimer);
       }
 
       let cachedOutput = this.persistentCache!.get(this.outputKey(key));
       if (!cachedOutput.isCached) {
         let reason = { message: "no output data for " + details.sassFilename };
-        return this.handleCacheMiss(details, reason, key);
+        return this.handleCacheMiss(details, reason, key, compilationTimer);
       }
 
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
       let value: [Array<string>, Record<string, string>] = [depFiles, JSON.parse(cachedOutput.value)];
+      compilationTimer.stats.cacheHitCount++;
       return RSVP.resolve(this.handleCacheHit(details, value));
     } catch (error) {
-      return this.handleCacheMiss(details, error, key);
+      return this.handleCacheMiss(details, error, key, compilationTimer);
     }
   }
 
@@ -773,7 +775,8 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   }
 
   /* When the cache misses, we need to compile the file and then populate the cache */
-  handleCacheMiss(details: CompilationDetails, reason: Error | {message: string; stack?: Array<string>}, key: string): Promise<void> {
+  handleCacheMiss(details: CompilationDetails, reason: Error | {message: string; stack?: Array<string>}, key: string, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void> {
+    compilationTimer.stats.cacheMissCount++;
     persistentCacheDebug(
       "Persistent cache miss for %s. Reason: %s",
       details.sassFilename,
@@ -783,7 +786,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     if (reason.stack) {
       persistentCacheDebug("Stacktrace:", reason.stack);
     }
-    return this.compileCssFile(details).then(result => {
+    return this.compileCssFile(details, compilationTimer).then(result => {
       return this.populateCache(key, details, result);
     });
   }
@@ -796,15 +799,15 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @return A promise that resolves when the output files are written
    *   either from cache or by compiling. Rejects on error.
    */
-  compileCssFileMaybe(details: CompilationDetails): Promise<void> | Promise<nodeSass.Result> {
+  compileCssFileMaybe(details: CompilationDetails, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void> | Promise<nodeSass.Result> {
     if (this.persistentCache) {
-      return this.getFromCacheOrCompile(details);
+      return this.getFromCacheOrCompile(details, compilationTimer);
     } else {
-      return this.compileCssFile(details);
+      return this.compileCssFile(details, compilationTimer);
     }
   }
 
-  compileCssFile(details: CompilationDetails): Promise<nodeSass.Result> {
+  compileCssFile(details: CompilationDetails, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<nodeSass.Result> {
     let sass = this.renderer();
 
     let success = this.handleSuccess.bind(this, details);
@@ -821,13 +824,20 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
       this.events.addListener("additional-output", additionalOutputListener);
       this.events.addListener("dependency", dependencyListener);
-
-      return RSVP.resolve(sass(details.options as nodeSass.SyncOptions)) // XXX This cast sucks
+      let sassPromise = sass(details.options as nodeSass.SyncOptions); // XXX This cast sucks
+      return sassPromise 
         .finally(() => {
           this.events.removeListener("dependency", dependencyListener);
           this.events.removeListener("additional-output", additionalOutputListener);
         })
         .then(result => {
+          compilationTimer.stats.nodeSassTime += result.stats.duration;
+          compilationTimer.stats.importCount += result.stats.includedFiles.length;
+          for (let f of result.stats.includedFiles) {
+            if (!f.startsWith("already-imported:")) {
+              compilationTimer.stats.uniqueImportCount++;
+            }
+          }
           debug(`render of ${result.stats.entry} took ${result.stats.duration}`)
           return success(result).then(() => result);
         }, failure);
@@ -977,6 +987,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
     let nextTree: FSTree | null = null;
     let patches = new Array<FSTree.Patch>();
+    let compilationAvoidanceTimer = heimdall.start("eyeglass:broccoli:build:invalidation");
     if (this.hasKnownDependencies()) {
       hotCacheDebug("Has known dependencies");
       nextTree = this.knownDependenciesTree(inputPath);
@@ -1020,6 +1031,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       }
       return false;
     });
+    compilationAvoidanceTimer.stop();
 
     // Cleanup any unneeded output files
     let removed = [];
@@ -1063,7 +1075,10 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     );
     this.events.setMaxListeners(internalListeners + this.maxListeners);
 
-    return this.compileTree(inputPath, treeFiles, outputPath).finally(() => {
+    let compilationTimer = heimdall.start(`eyeglass:broccoli:build:compileTree:${inputPath}`, SassRenderSchema);
+    compilationTimer.stats.numSassFiles = treeFiles.length;
+    return this.compileTree(inputPath, treeFiles, outputPath, compilationTimer).finally(() => {
+      compilationTimer.stop();
       if (!this.currentTree) {
         this.currentTree = this.knownDependenciesTree(inputPath);
       }
@@ -1086,6 +1101,23 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
       throw e;
     });
+  }
+}
+
+class SassRenderSchema {
+  numSassFiles: number;
+  nodeSassTime: number;
+  importCount: number;
+  uniqueImportCount: number;
+  cacheMissCount: number;
+  cacheHitCount: number;
+  constructor() {
+    this.cacheMissCount = 0;
+    this.cacheHitCount = 0;
+    this.numSassFiles = 0;
+    this.nodeSassTime = 0;
+    this.importCount = 0;
+    this.uniqueImportCount = 0;
   }
 }
 

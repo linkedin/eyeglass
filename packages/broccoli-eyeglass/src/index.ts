@@ -13,6 +13,7 @@ import Eyeglass = require("eyeglass");
 import * as sass from "node-sass";
 import hashForDep = require("hash-for-dep");
 import { EyeglassOptions } from "eyeglass/lib/util/Options";
+
 type SassImplementation = typeof sass;
 const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");

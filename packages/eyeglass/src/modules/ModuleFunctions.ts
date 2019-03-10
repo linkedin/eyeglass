@@ -5,6 +5,9 @@ import { SassImplementation } from "../util/SassImplementation";
 import { FunctionDeclarations, SassFunction } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { Dict, UnsafeDict } from "../util/typescriptUtils";
+import heimdall = require("heimdalljs");
+
+const TIME_FN_CALLS = !!(process.env.EYEGLASS_PERF_DEBUGGING);
 const ARGUMENTS_REGEX = /\s*\(.*\)$/;
 const DELIM = "\n\t\u2022 ";
 
@@ -72,5 +75,62 @@ export default function ModuleFunctions(eyeglass: IEyeglass, _sass: SassImplemen
     DELIM,
     Object.keys(functions).join(DELIM)
   );
+  return instrumentFunctionCalls(functions);
+}
+
+class SassFnSchema {
+  [k: string]: {
+    count: number;
+    time: number;
+  };
+}
+
+/**
+ * nanosecond precision timers.
+ */
+function timeNS(): [number, number] {
+  return process.hrtime();
+}
+
+/**
+ * nanosecond precision timer difference.
+ */
+function timeSinceNS(time: [number, number]): number {
+  let result = process.hrtime(time);
+  return result[0] * 1e9 + result[1];
+}
+
+/**
+ * This function conditionally instruments all function calls
+ * with a heimdall monitor.
+ */
+function instrumentFunctionCalls(functions: Record<string, SassFunction>): Record<string, SassFunction> {
+  if (!TIME_FN_CALLS) return functions;
+  if (!heimdall.hasMonitor('sassFns')) {
+    heimdall.registerMonitor('sassFns', SassFnSchema)
+  }
+  for (let fn of Object.keys(functions)) {
+    let realFn = functions[fn] as any;
+    functions[fn] = function(this: any, ...args: Array<any>) {
+      let stats = heimdall.statsFor<SassFnSchema>("sassFns");
+      let startTime = timeNS();
+      if (!stats[fn]) {
+        stats[fn] = {count: 0, time: 0};
+      }
+      stats[fn].count++;
+      if (args.length > 0 && typeof args[args.length - 1] === "function") {
+        let realDone = args[args.length - 1];
+        args[args.length - 1] = (r: any) => {
+          stats[fn].time += timeSinceNS(startTime);
+          realDone(r);
+        }
+      }
+      let result = realFn.call(this, ...args);
+      if (result) {
+        stats[fn].time += timeSinceNS(startTime);
+      }
+      return result;
+    }
+  }
   return functions;
 }
