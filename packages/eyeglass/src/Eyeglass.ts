@@ -15,6 +15,7 @@ import { SassImplementation, helpers as sassHelpers } from "./util/SassImplement
 import { AsyncImporter } from "node-sass";
 import { UnsafeDict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
+import { SimpleCache } from "./util/SimpleCache";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg: PackageJson = require("../package.json");
 
@@ -25,9 +26,11 @@ export default class Eyeglass implements IEyeglass {
   options: Config;
   assets: Assets;
   modules: EyeglassModules;
+  private onceCache: SimpleCache<true>;
 
   constructor(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
     let timer = heimdall.start("eyeglass:instantiation");
+    this.onceCache = new SimpleCache<true>();
     try {
       // an interface for deprecation warnings
       this.deprecate = deprecator(options);
@@ -79,6 +82,23 @@ export default class Eyeglass implements IEyeglass {
   }
   static helpers(sass: SassImplementation): ReturnType<typeof sassHelpers> {
     return sassHelpers(sass);
+  }
+
+  once<R>(key: string, firstTime: () => R): R | undefined;
+  // eslint-disable-next-line no-dupe-class-members
+  once<R>(key: string, firstTime: () => R, otherwise: () => R): R;
+  // eslint-disable-next-line no-dupe-class-members
+  once<R>(key: string, firstTime: () => R, otherwise?: () => R): R | undefined {
+    if (this.onceCache.has(key)) {
+      if (otherwise) {
+        return otherwise();
+      } else {
+        return;
+      }
+    } else {
+      this.onceCache.set(key, true);
+      return firstTime();
+    }
   }
 }
 
