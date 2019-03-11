@@ -1,6 +1,7 @@
 import * as archy from "archy";
 import * as path from "path";
 import * as semver from "semver";
+import { SemVer } from "semver";
 import * as debug from "../util/debug";
 import * as packageUtils from "../util/package";
 import resolve from "../util/resolve";
@@ -20,12 +21,19 @@ import { realpathSync } from "../util/perf";
 // XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
 // eslint-disable-next-line
 const pkg: PackageJson = require("../../package.json");
-const EYEGLASS_VERSION = pkg.version!;
+const EYEGLASS_VERSION = new SemVer(pkg.version!);
 
 export const ROOT_NAME = ":root";
-const BOUNDARY_VERSIONS = ["1.6.0", EYEGLASS_VERSION, "2.9.9", "3.0.0", "3.9.9", "4.0.0"];
+const BOUNDARY_VERSIONS = [
+  new SemVer("1.6.0"),
+  new SemVer(EYEGLASS_VERSION),
+  new SemVer("2.9.9"),
+  new SemVer("3.0.0"),
+  new SemVer("3.9.9"),
+  new SemVer("4.0.0")
+];
 
-type ModuleCollection = Dict<Array<EyeglassModule>>;
+type ModuleCollection = Dict<Set<EyeglassModule>>;
 
 type ModuleMap = Dict<EyeglassModule>;
 
@@ -284,20 +292,35 @@ export default class EyeglassModules {
     */
   private dedupeModules(modules: ModuleCollection): ModuleMap {
     let deduped: ModuleMap = {};
+    let otherVersions = new Array<EyeglassModule>();
     for (let name of Object.keys(modules)) {
-      // first sort our modules by version
-      let versions = modules[name]!.sort((a, b) => semver.rcompare(a.version || "0", b.version || "0"));
+      let secondNewestModule: EyeglassModule | undefined;
+      let newestModule: EyeglassModule | undefined;
+      for (let m of modules[name]!) {
+        if (!newestModule) {
+          newestModule = m
+        } else {
+          if (semver.compare(m.semver, newestModule.semver) > 0) {
+            if (secondNewestModule) { otherVersions.push(m); }
+            secondNewestModule = newestModule;
+            newestModule = m;
+          } else {
+            otherVersions.push(m);
+          }
+        }
+      }
       // In case the app and a dependency have the same name, we discard the app
       // Because they're not the same thing.
-      if (versions.length > 1 && versions[0].isRoot) {
-        versions.shift();
+      if (secondNewestModule && newestModule!.isRoot) {
+        newestModule = secondNewestModule;
+      } else if (secondNewestModule) {
+        otherVersions.push(secondNewestModule);
       }
-      // then take the highest version we found
-      deduped[name] = versions.shift()!;
+      deduped[name] = newestModule;
       // check for any version issues
       this.issues.dependencies.versions.push.apply(
         this.issues.dependencies.versions,
-        getDependencyVersionIssues(versions, deduped[name]!)
+        getDependencyVersionIssues(otherVersions, deduped[name]!)
       );
     }
     return deduped;
@@ -625,12 +648,12 @@ function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {
   // and so it remains in the collection in case de-duplication against a
   // dependency would trigger its removal.
   if (branch.isRoot) {
-    collection[":root"] = [branch];
+    collection[":root"] = new Set([branch]);
   }
   // if the branch itself is a module, add it...
   if (branch.isEyeglassModule || branch.isRoot) {
-    collection[branch.name] = collection[branch.name] || [];
-    collection[branch.name]!.push(branch);
+    collection[branch.name] = collection[branch.name] || new Set<EyeglassModule>();
+    collection[branch.name]!.add(branch);
   }
 
   let dependencies = branch.dependencies;
@@ -665,7 +688,7 @@ function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule:
     }
     // check that the current module version is satisfied by the finalModule version
     // if not, push an error object onto the results
-    if (!semver.satisfies(mod.version || "0", "^" + (finalModule.version || "0"))) {
+    if (!semver.satisfies(mod.semver, "^" + finalModule.semver.version)) {
       return {
         name: mod.name,
         left: mod,

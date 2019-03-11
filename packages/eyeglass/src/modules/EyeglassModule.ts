@@ -9,6 +9,7 @@ import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
 import { Dict, isPresent } from "../util/typescriptUtils";
 import { realpathSync } from "../util/perf";
+import { SemVer } from "semver";
 
 const rInvalidName = /\.(?:sass|s?css)$/;
 const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
@@ -175,6 +176,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
   functions?: FunctionDeclarations;
   /** only present after calling `init()` */
   assets?: AssetsCollection;
+  semver: SemVer;
 
   constructor(
     modArg: ModuleReference | ManualModuleOptions,
@@ -252,6 +254,11 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
 
     // merge the module properties into the instance
     merge(this, mod);
+    if (this.version) {
+      this.semver = new SemVer(this.version);
+    } else {
+      this.semver = new SemVer("0.0.0");
+    }
   }
 
   /**
