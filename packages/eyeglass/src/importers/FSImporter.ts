@@ -1,5 +1,5 @@
 import * as path from "path";
-import { existsSync } from "fs";
+import { existsSync } from "../util/perf";
 import ImportUtilities from "./ImportUtilities";
 import { ImporterFactory } from "./ImporterFactory";
 import { AsyncImporter } from "node-sass";

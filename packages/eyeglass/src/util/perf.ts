@@ -23,3 +23,20 @@ export function realpathSync(path: string): string {
 realpathSync.resetCache = () => {
   realpathCache.reset();
 };
+
+let existsCache = Object.create(null);
+
+export function existsSync(path: string): boolean {
+  let result = existsCache[path]
+  if (result === true || result === false) {
+    return result;
+  } else {
+    result = fs.existsSync(path);
+    existsCache[path] = result;
+    return result;
+  }
+}
+
+existsSync.resetCache = () => {
+  existsCache = Object.create(null);
+}
