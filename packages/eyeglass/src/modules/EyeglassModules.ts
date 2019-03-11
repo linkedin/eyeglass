@@ -42,6 +42,11 @@ type Dependencies = Exclude<PackageJson["dependencies"], undefined>;
 const globalModuleCache = new SimpleCache<EyeglassModule>();
 const globalModulePackageCache = new SimpleCache<string>();
 
+export function resetGlobalCaches() {
+  globalModuleCache.purge();
+  globalModulePackageCache.purge();
+}
+
 interface DependencyVersionIssue {
   name: string;
   left: EyeglassModule;
@@ -106,7 +111,6 @@ export default class EyeglassModules {
         modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache<EyeglassModule>(),
         modulePackage: useGlobalModuleCache ? globalModulePackageCache : new SimpleCache<string>(),
       };
-
       // find the nearest package.json for the given directory
       dir = packageUtils.findNearestPackage(path.resolve(dir));
 

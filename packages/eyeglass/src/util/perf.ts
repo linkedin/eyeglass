@@ -1,6 +1,11 @@
 import * as fs from "fs";
 import LRU = require("lru-cache");
 
+export function resetGlobalCaches(): void {
+  realpathSync.resetCache();
+  existsSync.resetCache();
+}
+
 /* cache real path locations so we don't hit the filesystem
  more than once for the same path every 5 min. We cap this
  cache at ~1MB of memory.*/

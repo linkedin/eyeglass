@@ -1,4 +1,4 @@
-import EyeglassModules from "./modules/EyeglassModules";
+import EyeglassModules, { resetGlobalCaches as resetGlobalModuleCaches } from "./modules/EyeglassModules";
 import ModuleFunctions from "./modules/ModuleFunctions";
 import ModuleImporter from "./importers/ModuleImporter";
 import AssetImporter from "./importers/AssetImporter";
@@ -16,8 +16,14 @@ import { AsyncImporter } from "node-sass";
 import { UnsafeDict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
 import { SimpleCache } from "./util/SimpleCache";
+import { resetGlobalCaches as resetGlobalFSCaches } from "./util/perf";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg: PackageJson = require("../package.json");
+
+export function resetGlobalCaches(): void {
+  resetGlobalModuleCaches();
+  resetGlobalFSCaches();
+}
 
 export default class Eyeglass implements IEyeglass {
   static VERSION = pkg.version!;
