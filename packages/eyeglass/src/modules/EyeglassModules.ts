@@ -1,5 +1,4 @@
 import * as archy from "archy";
-import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import * as debug from "../util/debug";
@@ -16,6 +15,7 @@ import { Dict, isPresent } from "../util/typescriptUtils";
 import { EyeglassConfig } from "..";
 import { Config } from "../util/Options";
 import heimdall = require("heimdalljs");
+import { realpathSync } from "../util/perf";
 // XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
 // XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
 // eslint-disable-next-line
@@ -227,7 +227,7 @@ export default class EyeglassModules {
     // are also only real paths. This means that sass files that are sym-linked
     // into a subdirectory of an eyeglass module will not resolve against that
     // module. (Sym-linking an eyeglass module itself is supported.)
-    let parentLocation: string = fs.realpathSync(location);
+    let parentLocation = realpathSync(location);
     do {
       location = parentLocation;
       let mod = pathMap[location];
@@ -541,7 +541,7 @@ export default class EyeglassModules {
     // if not...
     if (!canAccess) {
       // check for a symlink...
-      let realOrigin = fs.realpathSync(origin);
+      let realOrigin = realpathSync(origin);
       /* istanbul ignore if */
       if (realOrigin !== origin) {
         /* istanbul ignore next */

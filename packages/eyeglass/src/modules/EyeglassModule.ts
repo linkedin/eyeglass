@@ -2,13 +2,13 @@ import * as packageUtils from "../util/package";
 import merge = require("lodash.merge");
 import includes = require("lodash.includes");
 import * as path from "path";
-import * as fs from "fs";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { FunctionDeclarations } from "node-sass";
 import { PackageJson } from "package-json";
 import AssetsCollection from "../assets/AssetsCollection";
 import { Dict, isPresent } from "../util/typescriptUtils";
+import { realpathSync } from "../util/perf";
 
 const rInvalidName = /\.(?:sass|s?css)$/;
 const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
@@ -196,7 +196,7 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
         throw new Error("Could not find a valid package.json at " + mod.path);
       }
 
-      let modulePath = fs.realpathSync(path.dirname(pkg.path));
+      let modulePath = realpathSync(path.dirname(pkg.path));
       mod = merge(
         {
           isEyeglassModule: EyeglassModule.isEyeglassModule(pkg.data),
