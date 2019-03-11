@@ -399,6 +399,9 @@ export default class EyeglassModules {
     let pkg = options.pkg || packageUtils.getPackage(options.dir);
 
     let dependencies: Dependencies = {};
+    if (!(options.isRoot || EyeglassModule.isEyeglassModule(pkg.data))) {
+      return null;
+    }
 
     // if there's package.json contents...
     /* istanbul ignore else - defensive conditional, don't care about else-case */

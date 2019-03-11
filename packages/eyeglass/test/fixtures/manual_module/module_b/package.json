@@ -1,6 +1,7 @@
 {
   "name": "module_b",
   "private": true,
+  "keywords": ["eyeglass-module"],
   "eyeglass": {
     "needs": "*",
     "sassDir": "./"
