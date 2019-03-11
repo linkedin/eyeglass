@@ -219,16 +219,16 @@ describe("eyeglass importer", function () {
       // TODO Shouldn't the file path be relative to `options.root`?
       var basic_modules = testutils.fixtureDirectory("basic_modules");
       var expectedError = `Could not import transitive_module from ${path.resolve("wubwubwub.scss")}: \`transitive_module\` was not found in any of the following locations:
+  ${basic_modules}/_transitive_module.scss
+  ${basic_modules}/transitive_module/_index.scss
   ${basic_modules}/transitive_module.scss
+  ${basic_modules}/transitive_module/index.scss
   ${basic_modules}/transitive_module.sass
   ${basic_modules}/transitive_module.css
-  ${basic_modules}/_transitive_module.scss
   ${basic_modules}/_transitive_module.sass
   ${basic_modules}/_transitive_module.css
-  ${basic_modules}/transitive_module/index.scss
   ${basic_modules}/transitive_module/index.sass
   ${basic_modules}/transitive_module/index.css
-  ${basic_modules}/transitive_module/_index.scss
   ${basic_modules}/transitive_module/_index.sass
   ${basic_modules}/transitive_module/_index.css
 `;
@@ -480,16 +480,16 @@ describe("eyeglass importer", function () {
     };
 
     var expectedError = [
+      "sass/_this-does-not-exist.scss",
+      "sass/this-does-not-exist/_index.scss",
       "sass/this-does-not-exist.scss",
+      "sass/this-does-not-exist/index.scss",
       "sass/this-does-not-exist.sass",
       "sass/this-does-not-exist.css",
-      "sass/_this-does-not-exist.scss",
       "sass/_this-does-not-exist.sass",
       "sass/_this-does-not-exist.css",
-      "sass/this-does-not-exist/index.scss",
       "sass/this-does-not-exist/index.sass",
       "sass/this-does-not-exist/index.css",
-      "sass/this-does-not-exist/_index.scss",
       "sass/this-does-not-exist/_index.sass",
       "sass/this-does-not-exist/_index.css"
     ].reduce(function(msg, location) {

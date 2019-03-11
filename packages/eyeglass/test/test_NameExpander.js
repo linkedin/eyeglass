@@ -10,16 +10,16 @@ describe("NameExpander", function () {
     nameExpander.addLocation(__dirname);
 
     var expectedFiles = adjustPaths([
+      "_test-uri.scss",
+      "test-uri/_index.scss",
       "test-uri.scss",
+      "test-uri/index.scss",
       "test-uri.sass",
       "test-uri.css",
-      "_test-uri.scss",
       "_test-uri.sass",
       "_test-uri.css",
-      "test-uri/index.scss",
       "test-uri/index.sass",
       "test-uri/index.css",
-      "test-uri/_index.scss",
       "test-uri/_index.sass",
       "test-uri/_index.css"
     ]);
@@ -33,8 +33,8 @@ describe("NameExpander", function () {
     nameExpander.addLocation(__dirname);
 
     var expectedFiles = adjustPaths([
+      "_test-uri.css",
       "test-uri.css",
-      "_test-uri.css"
     ]);
 
     assert.deepEqual(setToArray(nameExpander.files), expectedFiles);
@@ -46,8 +46,8 @@ describe("NameExpander", function () {
     nameExpander.addLocation(__dirname);
 
     var expectedFiles = adjustPaths([
+      "_test-uri.scss",
       "test-uri.scss",
-      "_test-uri.scss"
     ]);
 
     assert.deepEqual(setToArray(nameExpander.files), expectedFiles);

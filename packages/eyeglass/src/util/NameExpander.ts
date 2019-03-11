@@ -56,18 +56,24 @@ export class NameExpander {
 
       let path = parsePath(fullLocation);
       let indexPath = getIndexPath(path)
+      this._possibleFiles.add(fileVariant(path, "_", ".scss"));
+      if (indexPath) {
+        this._possibleFiles.add(fileVariant(indexPath, "_", ".scss"));
+      }
+
       this._possibleFiles.add(fileVariant(path, null, ".scss"));
+      if (indexPath) {
+        this._possibleFiles.add(fileVariant(indexPath, null, ".scss"));
+      }
+
       this._possibleFiles.add(fileVariant(path, null, ".sass"));
       this._possibleFiles.add(fileVariant(path, null, ".css"));
-      this._possibleFiles.add(fileVariant(path, "_", ".scss"));
       this._possibleFiles.add(fileVariant(path, "_", ".sass"));
       this._possibleFiles.add(fileVariant(path, "_", ".css"));
 
       if (indexPath) {
-        this._possibleFiles.add(fileVariant(indexPath, null, ".scss"));
         this._possibleFiles.add(fileVariant(indexPath, null, ".sass"));
         this._possibleFiles.add(fileVariant(indexPath, null, ".css"));
-        this._possibleFiles.add(fileVariant(indexPath, "_", ".scss"));
         this._possibleFiles.add(fileVariant(indexPath, "_", ".sass"));
         this._possibleFiles.add(fileVariant(indexPath, "_", ".css"));
       }
