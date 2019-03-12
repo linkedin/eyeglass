@@ -36,7 +36,7 @@ const app = new EmberApp(defaults, {
 
 Given the following layout:
 
-```sh
+```
 app/styles/app.scss
            other.scss
            _shared.scss
@@ -64,7 +64,7 @@ These assets are only considered for top-level addons, stylesheets in `app` dire
 
 Given the following folder structure:
 
-```sh
+```
 my-addon/app/styles/
                    /my-addon.scss
                    /my-other-file.scss
@@ -90,7 +90,7 @@ These assets merged namespaced by the current addons name for all addons.
 
 Given the following folder structure:
 
-```sh
+```
 my-addon/addon/styles/
                      /_shared.scss
                      /my-addon.scss
@@ -121,8 +121,7 @@ const app = new EmberEngine(defaults, {
  
 Given the following folder structure:
 
-```sh
-
+```
 my-engine/
          /app/styles/
                     /my-engine.scss
