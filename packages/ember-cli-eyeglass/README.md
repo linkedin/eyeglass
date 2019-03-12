@@ -136,7 +136,7 @@ my-engine/
 If this is an eager engine:
  
 
-The contents of `my-engine/app/styles/my-engine.scss` will become `dist/assets/eager.css`
+The contents of `my-engine/app/styles/my-engine.scss` will become `dist/assets/my-engine.css`
 The contents of `my-engine/app/styles/my-other-file.scss` will become `dist/assets/my-other-file.css`
 The contents of `my-engine/app/styles/_shared.scss` will only be included if `my-engine.scss` or `my-other-file.scss` explicitly import them.
 
@@ -146,9 +146,9 @@ The contents of `my-engine/addon/styles/_shared.scss` will only be included if `
 
 If this is a lazy engine:
 
-The contents of `my-engine/app/styles/my-engine.scss` will become ???
-The contents of `my-engine/app/styles/my-other-file.scss` will become ???
-The contents of `my-engine/app/styles/_shared.scss` will become ???
+The contents of `my-engine/app/styles/my-engine.scss` will be ignored
+The contents of `my-engine/app/styles/my-other-file.scss` will be ignore
+The contents of `my-engine/app/styles/_shared.scss` will be ignored
 
 The contents of `my-engine/addon/styles/my-addon.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
 The contents of `my-engine/addon/styles/secondary.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
