@@ -188,4 +188,4 @@ const EMBER_CLI_EYEGLASS = {
   }
 };
 
-export default EMBER_CLI_EYEGLASS;
+export = EMBER_CLI_EYEGLASS;

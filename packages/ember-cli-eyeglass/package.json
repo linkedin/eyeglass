@@ -6,7 +6,7 @@
     "doc": "doc",
     "test": "tests"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "prepare": "tsc --build",
     "pretest": "tsc --build",
