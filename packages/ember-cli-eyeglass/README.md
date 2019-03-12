@@ -148,7 +148,7 @@ If this is a lazy engine:
 
 The contents of `my-engine/app/styles/my-engine.scss` will be ignored
 The contents of `my-engine/app/styles/my-other-file.scss` will be ignore
-The contents of `my-engine/app/styles/_shared.scss` will be ignored
+The contents of `my-engine/app/styles/_shared.scss` will be ignored unless imported.
 
 The contents of `my-engine/addon/styles/my-addon.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
 The contents of `my-engine/addon/styles/secondary.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
