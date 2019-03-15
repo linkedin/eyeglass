@@ -47,7 +47,7 @@
     "fs-extra": "^7.0.0",
     "fs-tree-diff": "^1.0.0",
     "glob": "^7.1.2",
-    "hash-for-dep": "^1.2.3",
+    "hash-for-dep": "^1.5.0",
     "heimdalljs": "^0.2.6",
     "json-stable-stringify": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
