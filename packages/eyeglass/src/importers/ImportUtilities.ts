@@ -12,6 +12,7 @@ import heimdall = require("heimdalljs");
 const TIME_IMPORTS = !!(process.env.EYEGLASS_PERF_DEBUGGING);
 
 type ImportContext = AsyncContext & {eyeglass: {imported: Dict<boolean>}};
+type LazyString = () => string;
 
 class ImportSchema {
   uri: string;
@@ -55,7 +56,7 @@ export default class ImportUtilities {
       importer.call(this, uri, prev, done);
     };
   }
-  importOnce(data: {file: string; contents: string}, done: (data: ImportedFile) => void): void {
+  importOnce(data: {file: string; contents: string | LazyString}, done: (data: ImportedFile) => void): void {
     if (this.options.eyeglass.enableImportOnce && this.context.eyeglass.imported[data.file]) {
       // log that we've already imported this file
       /* istanbul ignore next - don't test debug */
@@ -63,7 +64,9 @@ export default class ImportUtilities {
       done({ contents: "", file: "already-imported:" + data.file });
     } else {
       this.context.eyeglass.imported[data.file] = true;
-      done(data);
+      let file = data.file;
+      let contents = typeof data.contents === "function" ? data.contents() : data.contents;
+      done({file, contents});
     }
   }
   fallback(uri: string, prev: string, done: (result: ImporterReturnType) => void, noFallback: (this: ImportContext) => void): void {
