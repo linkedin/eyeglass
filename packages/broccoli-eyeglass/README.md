@@ -196,7 +196,7 @@ environment variable `BROCCOLI_EYEGLASS=forceInvalidateCache`.
 
 The caches will only be invalidated correctly if this broccoli plugin
 knows what files are depended on and output. Sass files and eyeglass
-assets are already tracked. But other files migh be involved in your
+assets are already tracked. But other files might be involved in your
 build, if that is the case, `eyeglassCompiler.events.emit("dependency", absolutePath)`
 must be called during the build. Similarly, if there are
 other files output during compilation, then you must call

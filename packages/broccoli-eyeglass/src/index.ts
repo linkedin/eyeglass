@@ -15,7 +15,6 @@ import hashForDep = require("hash-for-dep");
 import { EyeglassOptions } from "eyeglass/lib/util/Options";
 
 type SassImplementation = typeof sass;
-const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
 const CURRENT_VERSION: string = require(path.join(__dirname, "..", "package.json")).version;
 
@@ -136,29 +135,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
 
     let eyeglass = new Eyeglass(options);
 
-    // set up asset dependency tracking
-    let self = this;
-    let realResolve = eyeglass.assets.resolve;
-
-    eyeglass.assets.resolve = function(filepath, fullUri, cb) {
-      self.events.emit("dependency", filepath).then(() => {
-        realResolve.call(eyeglass.assets, filepath, fullUri, cb);
-      }, cb);
-    };
-
-    let realInstall = eyeglass.assets.install;
-    eyeglass.assets.install = function(file, uri, cb) {
-      realInstall.call(eyeglass.assets, file, uri, (error: unknown, file?: string) => {
-        if (error) {
-          cb(error, file);
-        } else {
-          self.events.emit("additional-output", file).then(() => {
-            cb(null, file);
-          }, cb);
-        }
-      });
-    };
-
     if (this.assetDirectories) {
       for (var i = 0; i < this.assetDirectories.length; i++) {
         eyeglass.assets.addSource(
@@ -175,6 +151,26 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     if (this.configureEyeglass) {
       this.configureEyeglass(eyeglass, options.eyeglass.engines.sass, details);
     }
+
+    // set up asset dependency tracking
+    eyeglass.assets.resolver((filepath, fullUri, realResolve, cb)  => {
+      this.events.emit("dependency", filepath).then(() => {
+        realResolve(filepath, fullUri, cb);
+      }, cb);
+    });
+
+    eyeglass.assets.installer((file, uri, realInstall, cb) => {
+      realInstall(file, uri, (error: unknown, destFile?: string) => {
+        if (error) {
+          cb(error, file);
+        } else {
+          this.events.emit("additional-output", destFile, uri, file).then(() => {
+            cb(null, file);
+          }, cb);
+        }
+      });
+    });
+
     details.options = eyeglass.options;
     details.options.eyeglass.engines.eyeglass = eyeglass;
   }
@@ -200,7 +196,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
       let hash = crypto.createHash("sha1");
       let cachableOptions = stringify(this.cachableOptions(options));
 
-      persistentCacheDebug("cachableOptions are %s", cachableOptions);
       hash.update(cachableOptions);
       hash.update("broccoli-eyeglass@" + EyeglassCompiler.currentVersion());
 
