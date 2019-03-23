@@ -8,6 +8,7 @@ import { unreachable } from "../util/assertions";
 import { ImporterReturnType, AsyncImporter } from "node-sass";
 import { isPresent } from "../util/typescriptUtils";
 import errorFor from "../util/errorFor";
+import { BuildCache } from "../util/Options";
 
 const MODULE_PARSER = /^((?:@[^/]+\/[^/]+)|(?:[^/]+))\/?(.*)/;
 
@@ -18,10 +19,13 @@ type ImportResultCallback =
  * Walks the file list until a match is found. If
  * no matches are found, calls the callback with an error
  */
-function readFirstFile(uri: string, possibleFiles: Set<string>, callback: ImportResultCallback): void {
+function readFirstFile(buildCache: BuildCache, uri: string, possibleFiles: Array<string>, callback: ImportResultCallback): void {
   for (let nextFile of possibleFiles) {
     try {
-      let data = readFileSync(nextFile, "utf8");
+      // We only read from the cache here, we do not set it.
+      // the set will occur for common imports by the calling context
+      let data = buildCache.get(`fs.readFileSync(${nextFile})`)
+      data = data || readFileSync(nextFile, "utf8");
       // if it didn't fail, we found the first file so return it
       callback(null, {
         contents: data.toString(),
@@ -39,8 +43,50 @@ function readFirstFile(uri: string, possibleFiles: Set<string>, callback: Import
   return;
 }
 
+/**
+ * The goal of this cache method is to cache the files that are commonly
+ * imported. If we see the same import lookups more than once we can
+ * assume the import is part of a commonly accessed library and put it into cache.
+ * In many cases, this cache ignores the entry point file to a library from
+ * outside the library because the first files looked for are relative to the 
+ * current file (the exception would be if several fils in the same directory
+ * import the shared import).
+ */
+function readFirstFileCached(buildCache: BuildCache, uri: string, files: Array<string>, callback: ImportResultCallback): void {
+  let readCacheKey = files.join(";");
+  let countKey = `readAbstractFile(${readCacheKey})-count`;
+  let invocationCount = buildCache.get(countKey) as number | undefined;
+  if (typeof invocationCount === "undefined") { invocationCount = 0; }
+  invocationCount += 1;
+  buildCache.set(countKey, invocationCount);
+  if (invocationCount === 1) {
+    readFirstFile(buildCache, uri, files, callback);
+  } else {
+    let fileKey = `readAbstractFile(${readCacheKey})-file`;
+    let file = buildCache.get(fileKey) as string | undefined;
+    let contents: string | undefined;
+    let contentsKey: string | undefined;
+    if (file) {
+      contentsKey = `fs.readFileSync(${file})`;
+      contents = buildCache.get(contentsKey) as string | undefined;
+    }
+    if (file && contents) {
+      callback(null, {file, contents});
+    } else {
+      readFirstFile(buildCache, uri, files, (err, data) => {
+        if (data && !err) {
+          buildCache.set(fileKey, data.file);
+          contentsKey = `fs.readFileSync(${data.file})`;
+          buildCache.set(contentsKey, data.contents);
+        }
+        callback(err, data);
+      });
+    }
+  }
+}
+
 // This is a bootstrap function for calling readFirstFile.
-function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string> | null, moduleName: string | null, callback: ImportResultCallback): void {
+function readAbstractFile(originalUri: string, uri: string, location: string, includePaths: Array<string> | null, moduleName: string | null, buildCache: BuildCache, callback: ImportResultCallback): void {
   // start a name expander to get the names of possible file locations
   let nameExpander = new NameExpander(uri);
 
@@ -60,8 +106,8 @@ function readAbstractFile(originalUri: string, uri: string, location: string, in
     });
   }
 
-
-  readFirstFile(originalUri, nameExpander.files, callback);
+  let files = new Array(...nameExpander.files);
+  readFirstFileCached(buildCache, originalUri, files, callback);
 }
 
 /*
@@ -73,6 +119,7 @@ function readAbstractFile(originalUri: string, uri: string, location: string, in
 const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter): AsyncImporter {
   let includePaths = options.includePaths;
   let root = options.eyeglass.root;
+  let buildCache = options.eyeglass.buildCache;
 
   return ImportUtilities.createImporter("module", function(uri, prev, done) {
     let importUtils = new ImportUtilities(eyeglass, sass, options, fallbackImporter, this);
@@ -136,9 +183,9 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
     function handleRelativeImports(includePaths: Array<string> | null = null): void {
       if (isRealFile) {
         // relative file import, potentially relative to the previous import
-        readAbstractFile(uri, uri, path.dirname(prev), includePaths, null, createHandler());
+        readAbstractFile(uri, uri, path.dirname(prev), includePaths, null, buildCache, createHandler());
       } else {
-        readAbstractFile(uri, uri, root, includePaths, null, createHandler(function(err) {
+        readAbstractFile(uri, uri, root, includePaths, null, buildCache, createHandler(function(err) {
           done(errorFor(err, "Could not import " + uri + " from " + prev));
         }));
       }
@@ -146,7 +193,7 @@ const ModuleImporter: ImporterFactory = function (eyeglass, sass, options, fallb
 
     if (sassDir) {
       // read uri from location. pass no includePaths as this is an eyeglass module
-      readAbstractFile(uri, relativePath, sassDir, null, moduleName, createHandler(
+      readAbstractFile(uri, relativePath, sassDir, null, moduleName, buildCache, createHandler(
         // if it fails to find a module import,
         //  try to import relative to the current location
         // this handles #37

@@ -67,6 +67,11 @@ export interface EyeglassConfig extends Required<EyeglassSpecificOptions<never>>
   engines: Required<Engines>;
 }
 
+export interface BuildCache {
+  get(key: string): number | string | undefined;
+  set(key: string, value: number | string): void;
+}
+
 export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
   /**
    * Where to find assets for the eyeglass project.
@@ -152,6 +157,16 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
    * *   An empty list disables filesystem access (default).
    */
   fsSandbox?: ExtraSandboxTypes | false | Array<string>;
+  /**
+   * The buildCache is provided by the caller to allow eyeglass to cache
+   * information about files including file contents repeated disk access to
+   * common files. The cache can be a Map, or some memory-capped cache like
+   * `lru-cache`. This cache will only have strings or numbers placed into it.
+   *
+   * The cache should be cleared by the caller whenever file changes may have
+   * occurred (usually between builds of a long-running watcher).
+   */
+  buildCache?: BuildCache;
 }
 
 export interface SimpleDeprecatedOptions {
@@ -325,6 +340,8 @@ export function resolveConfig(options: Partial<EyeglassSpecificOptions>): Eyegla
   defaultValue(options, "useGlobalModuleCache", () => true);
   // There's no eyeglass module API changes in eyeglass 2.x so we default to silencing these warnings.
   defaultValue(options, "assertEyeglassCompatibility", () => DEFAULT_EYEGLASS_COMPAT);
+  // Use a simple cache that just lasts for this one file if no buildCache is provided.
+  defaultValue(options, "buildCache", () => new Map());
 
   options.fsSandbox = normalizeFsSandbox(options.fsSandbox, options.root!);
   return options as EyeglassConfig;

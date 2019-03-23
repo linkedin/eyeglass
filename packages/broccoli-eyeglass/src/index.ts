@@ -15,7 +15,6 @@ import hashForDep = require("hash-for-dep");
 import { EyeglassOptions } from "eyeglass/lib/util/Options";
 
 type SassImplementation = typeof sass;
-const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
 const CURRENT_VERSION: string = require(path.join(__dirname, "..", "package.json")).version;
 
@@ -63,7 +62,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
   private relativeAssets: boolean | undefined;
   private assetDirectories: Array<string> | undefined;
   private assetsHttpPrefix: string | undefined;
-  private _assetImportCache: Record<string, string>;
   private _assetImportCacheStats: { hits: number; misses: number };
   private _dependenciesHash: string | undefined;
   constructor(inputTrees: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: BroccoliEyeglassOptions) {
@@ -101,7 +99,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     this.assetsHttpPrefix = assetsHttpPrefix;
     this.events.on("compiling", this.handleNewFile.bind(this));
 
-    this._assetImportCache = Object.create(null);
     this._assetImportCacheStats = {
       hits: 0,
       misses: 0,
@@ -133,31 +130,10 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     options.eyeglass.engines = options.eyeglass.engines || {};
     options.eyeglass.engines.sass = options.eyeglass.engines.sass || sass;
     options.eyeglass.installWithSymlinks = true;
+    options.eyeglass.buildCache = this.buildCache;
 
     let eyeglass = new Eyeglass(options);
 
-    // set up asset dependency tracking
-    let self = this;
-    let realResolve = eyeglass.assets.resolve;
-
-    eyeglass.assets.resolve = function(filepath, fullUri, cb) {
-      self.events.emit("dependency", filepath).then(() => {
-        realResolve.call(eyeglass.assets, filepath, fullUri, cb);
-      }, cb);
-    };
-
-    let realInstall = eyeglass.assets.install;
-    eyeglass.assets.install = function(file, uri, cb) {
-      realInstall.call(eyeglass.assets, file, uri, (error: unknown, file?: string) => {
-        if (error) {
-          cb(error, file);
-        } else {
-          self.events.emit("additional-output", file).then(() => {
-            cb(null, file);
-          }, cb);
-        }
-      });
-    };
 
     if (this.assetDirectories) {
       for (var i = 0; i < this.assetDirectories.length; i++) {
@@ -175,6 +151,26 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     if (this.configureEyeglass) {
       this.configureEyeglass(eyeglass, options.eyeglass.engines.sass, details);
     }
+
+    // set up asset dependency tracking
+    eyeglass.assets.resolver((filepath, fullUri, realResolve, cb)  => {
+      this.events.emit("dependency", filepath).then(() => {
+        realResolve(filepath, fullUri, cb);
+      }, cb);
+    });
+
+    eyeglass.assets.installer((file, uri, realInstall, cb) => {
+      realInstall(file, uri, (error: unknown, destFile?: string) => {
+        if (error) {
+          cb(error, file);
+        } else {
+          this.events.emit("additional-output", destFile, uri, file).then(() => {
+            cb(null, file);
+          }, cb);
+        }
+      });
+    });
+
     details.options = eyeglass.options;
     details.options.eyeglass.engines.eyeglass = eyeglass;
   }
@@ -200,7 +196,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
       let hash = crypto.createHash("sha1");
       let cachableOptions = stringify(this.cachableOptions(options));
 
-      persistentCacheDebug("cachableOptions are %s", cachableOptions);
       hash.update(cachableOptions);
       hash.update("broccoli-eyeglass@" + EyeglassCompiler.currentVersion());
 
@@ -233,14 +228,18 @@ class EyeglassCompiler extends BroccoliSassCompiler {
   // Cache the asset import code that is generated in eyeglass
   cacheAssetImports(key: string, getValue: () => string): string {
     // if this has already been generated, return it from cache
-    if (this._assetImportCache[key] !== undefined) {
+    let assetImportKey = `assetImport(${key})`;
+    let assetImport = this.buildCache.get(assetImportKey) as string | undefined;
+    if (assetImport !== undefined) {
       assetImportCacheDebug("cache hit for key '%s'", key);
       this._assetImportCacheStats.hits += 1;
-      return this._assetImportCache[key];
+      return assetImport;
     }
     assetImportCacheDebug("cache miss for key '%s'", key);
     this._assetImportCacheStats.misses += 1;
-    return (this._assetImportCache[key] = getValue());
+    assetImport = getValue();
+    this.buildCache.set(assetImportKey, assetImport);
+    return assetImport;
   }
 }
 

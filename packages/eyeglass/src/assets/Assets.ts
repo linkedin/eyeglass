@@ -236,9 +236,19 @@ export default class Assets implements Resolves, Installs {
             fs.mkdirpSync(path.dirname(dest));
 
             ensureSymlink(file, dest);
+            debug.assets && debug.assets(
+              "symlinked %s to %s",
+              file,
+              dest
+            );
           } else {
             // we explicitly use copySync rather than copy to avoid starving system resources
             fs.copySync(file, dest);
+            debug.assets && debug.assets(
+              "copied %s to %s",
+              file,
+              dest
+            );
           }
           cb(null, dest);
         } catch (error) {

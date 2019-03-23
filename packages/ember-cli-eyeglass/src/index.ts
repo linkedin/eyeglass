@@ -4,8 +4,14 @@ import findHost from "./findHost";
 import Funnel = require('broccoli-funnel');
 import MergeTrees = require('broccoli-merge-trees');
 import * as path from 'path';
+import * as url from 'url';
 import cloneDeep = require('lodash.clonedeep');
 import defaultsDeep = require('lodash.defaultsdeep');
+import {BroccoliSymbolicLinker} from "./broccoli-ln-s";
+
+const EYEGLASS_INFO_PER_ADDON = new WeakMap<object, EyeglassAddonInfo>();
+const EYEGLASS_INFO_PER_APP = new WeakMap<object, EyeglassAppInfo>();
+const apps = new Array<any>();
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isLazyEngine(addon: any): boolean {
@@ -77,10 +83,72 @@ function localEyeglassAddons(addon): Array<{path: string}> {
   return paths;
 }
 
+interface EyeglassProjectInfo {
+  apps: Array<any>;
+}
+interface EyeglassAddonInfo {
+  name: string;
+  parentPath: string;
+  isApp: boolean;
+  app: any; // is this safe to cache across builds?
+}
+interface EyeglassAppInfo {
+  assets: BroccoliSymbolicLinker;
+  sessionCache: Map<string, string | number>;
+}
+
 const EMBER_CLI_EYEGLASS = {
   name: 'ember-cli-eyeglass',
+  included(parent) {
+    this._super.included.apply(this, arguments);
+    this.initSelf();
+  },
+  initSelf() {
+    if (EYEGLASS_INFO_PER_ADDON.has(this)) return;
+    let app = findHost(this);
+    if (!app) return;
+    let isApp = (this.app === app);
+    let name = app.name;
+    if (!isApp) {
+      let thisName = typeof this.parent.name === "function" ? this.parent.name() : this.parent.name;
+      name = `${name}/${thisName}`
+    }
+    let parentPath = this.parent.root;
+    if (isApp) {
+      apps.push(app);
+      // we create the symlinker in persistent mode because there's not a good
+      // way yet to recreate the symlinks when sass files are cached. I would
+      // worry about it more but it seems like the dist directory is cumulative
+      // across builds anyway.
+      EYEGLASS_INFO_PER_APP.set(app, {
+        sessionCache: new Map(),
+        assets: new BroccoliSymbolicLinker({}, {annotation: app.name, persistentOutput: true})
+      });
+    }
+    let addonInfo = {isApp, name, parentPath, app};
+    EYEGLASS_INFO_PER_ADDON.set(this, addonInfo);
+  },
   postBuild(result) {
     Eyeglass.resetGlobalCaches();
+    for (let app of apps) {
+      let appInfo = EYEGLASS_INFO_PER_APP.get(app);
+      if (appInfo) {
+        appInfo.assets.reset();
+        appInfo.sessionCache.clear();
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("eyeglass app info is missing during postBuild.");
+      }
+    }
+  },
+  postprocessTree(type, tree) {
+    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
+    if (type === "all" && addonInfo.isApp) {
+      let appInfo = EYEGLASS_INFO_PER_APP.get(addonInfo.app);
+      return new MergeTrees([tree, appInfo.assets], {overwrite: true});
+    } else {
+      return tree;
+    }
   },
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
@@ -92,44 +160,19 @@ const EMBER_CLI_EYEGLASS = {
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1) || './';
         let sassDir = inputPath.slice(1) || './';
-
-        let host = findHost(addon);
-        let inApp = (host === addon.app);
-
-        let extracted = this.extractConfig(host, addon);
-
+        let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+        let extracted = this.extractConfig(app, addon);
         extracted.cssDir = cssDir;
         extracted.sassDir = sassDir;
-        const config = this.setupConfig(extracted, {
-          inApp,
-          addon
+        const config = this.setupConfig(extracted);
+
+        let compiler = new EyeglassCompiler(tree, config);
+        compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {
+          this.linkAsset(absolutePathToSource, httpPathToOutput);
         });
-
-        tree = new EyeglassCompiler(tree, config);
-
-        // Ember CLI will ignore any non-CSS files returned in the tree for an
-        // addon. So that non-CSS assets aren't lost, we'll store them in a
-        // separate tree for now and return them in a later hook.
-        if (!inApp) {
-          addon.addonAssetsTree = new Funnel(tree, { include: ['**/*.!(css)'] });
-        }
-
-        return tree;
+        return compiler;
       }
     });
-  },
-
-  treeForPublic(tree) {
-    tree = this._super.treeForPublic(tree);
-
-    // If we're processing an addon and stored some assets for it, add them
-    // to the addon's public tree so they'll be available in the app's build
-    if (this.addonAssetsTree) {
-      tree = tree ? new MergeTrees([tree, this.addonAssetsTree]) : this.addonAssetsTree;
-      this.addonAssetsTree = null;
-    }
-
-    return tree;
   },
 
   extractConfig(host, addon) {
@@ -139,38 +182,64 @@ const EMBER_CLI_EYEGLASS = {
     const addonConfig = isNestedAddon ? cloneDeep(addon.parent.options.eyeglass || {}) : {};
     return defaultsDeep(addonConfig, hostConfig);
   },
-  
-  setupConfig(config, options) {
-    let addon = options.addon;
-    let inApp = options.inApp;
 
-    let parentName = typeof addon.parent.name === 'function' ? addon.parent.name() : addon.parent.name;
+  linkAsset(srcFile: string, destUri: string): string {
+    if (path.posix.isAbsolute(destUri)) {
+      destUri = path.posix.relative("/", destUri);
+    }
 
-    config.annotation = `EyeglassCompiler: ${parentName}`;
+    if (process.platform === "win32") {
+      destUri = url.fileURLToPath(`file://${destUri}`)
+    }
+    let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let {assets} = EYEGLASS_INFO_PER_APP.get(app);
+    return assets.ln_s(srcFile, destUri);
+  },
+
+  setupConfig(config: ConstructorParameters<typeof EyeglassCompiler>[1], options) {
+    let {isApp, app, parentPath} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let {sessionCache} = EYEGLASS_INFO_PER_APP.get(app);
+    config.sessionCache = sessionCache;
+    config.annotation = `EyeglassCompiler(${parentPath})`;
     if (!config.sourceFiles && !config.discover) {
-      config.sourceFiles = [inApp ? 'app.scss' : 'addon.scss'];
+      config.sourceFiles = [isApp ? 'app.scss' : 'addon.scss'];
     }
     config.assets = ['public', 'app'].concat(config.assets || []);
     config.eyeglass = config.eyeglass || {}
-    config.eyeglass.httpRoot = config.eyeglass.httpRoot || config.httpRoot;
+    // XXX We don't set the root anywhere but I'm not sure what might break if we do.
+    // config.eyeglass.root = parentPath;
+    config.eyeglass.httpRoot = config.eyeglass.httpRoot || config["httpRoot"];
+    if (config.persistentCache) {
+      let cacheDir = parentPath.replace(/\//g, "$");
+      config.persistentCache += `/${cacheDir}`;
+    }
 
-    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(addon.parent);
+    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent);
 
     if (config.eyeglass.modules) {
       config.eyeglass.modules =
-        config.eyeglass.modules.concat(localEyeglassAddons(addon.parent));
+        config.eyeglass.modules.concat(localEyeglassAddons(this.parent));
     } else {
-      config.eyeglass.modules = localEyeglassAddons(addon.parent);
+      config.eyeglass.modules = localEyeglassAddons(this.parent);
     }
+    let originalConfigureEyeglass = config.configureEyeglass;
+    config.configureEyeglass = (eyeglass, sass, details) => {
+      eyeglass.assets.installer((file, uri, fallbackInstaller, cb) => {
+        cb(null, this.linkAsset(file, uri))
+      });
+      if (originalConfigureEyeglass) {
+        originalConfigureEyeglass(eyeglass, sass, details);
+      }
+    };
 
     // If building an app, rename app.css to <project>.css per Ember conventions.
     // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
     let originalGenerator = config.optionsGenerator;
-    config.optionsGenerator = function(sassFile, cssFile, sassOptions, compilationCallback) {
-      if (inApp) {
-        cssFile = cssFile.replace(/app\.css$/, `${addon.app.name}.css`);
+    config.optionsGenerator = (sassFile, cssFile, sassOptions, compilationCallback) => {
+      if (isApp) {
+        cssFile = cssFile.replace(/app\.css$/, `${this.app.name}.css`);
       } else {
-        cssFile = cssFile.replace(/addon\.css$/, `${addon.parent.name}.css`);
+        cssFile = cssFile.replace(/addon\.css$/, `${this.parent.name}.css`);
       }
 
       if (originalGenerator) {

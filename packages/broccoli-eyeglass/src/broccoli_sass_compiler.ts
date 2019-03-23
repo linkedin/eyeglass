@@ -22,7 +22,6 @@ import heimdall = require("heimdalljs");
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
 const hotCacheDebug = debugGenerator("broccoli-eyeglass:hot-cache");
-const persistentCacheDebug = debugGenerator("broccoli-eyeglass:persistent-cache");
 
 let sass: typeof nodeSass;
 let renderSass: (options: nodeSass.Options) => Promise<nodeSass.Result>;
@@ -30,6 +29,13 @@ let renderSass: (options: nodeSass.Options) => Promise<nodeSass.Result>;
 type SassPromiseRenderer =
   ((options: nodeSass.Options) => Promise<nodeSass.Result>)
   | ((options: nodeSass.SyncOptions) => Promise<nodeSass.Result>);
+
+interface CachedContents {
+  contents: Record<string, string>;
+  urls: Record<string, string>;
+}
+
+type CachedDependencies = Array<[string, string]>;
 
 function initSass(): void {
   if (!sass) {
@@ -136,6 +142,11 @@ export interface CompilationDetails {
   options: nodeSass.Options;
 }
 
+interface GenericCache {
+  get(key: string): string | number | undefined;
+  set(key: string, value: string | number): void;
+}
+
 export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOptions {
   /**
    * The directory to write css files to. Relative to the build output directory.
@@ -197,6 +208,19 @@ export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOption
    * along with timing information.
    */
   verbose?: boolean;
+  /**
+   * This is a cache that can be provided to cache across multiple instances of
+   * BroccoliSassCompiler. It can be a map, or some other cache store like
+   * like the memory capped lru-cache. Only strings and numbers will be placed
+   * as values in the cache.
+   *
+   * It is the responsibility of the caller to clear the session cache between
+   * calls to build(). Failure to do so will cause inconsistent build output.
+   *
+   * If a session cache is not provided, a short lived cache will be used locally
+   * for a single build's duration of one tree.
+   */
+  sessionCache?: GenericCache;
 }
 
 type OptionsGeneratorCallback = (cssFile: string, options: nodeSass.Options) => void;
@@ -218,7 +242,7 @@ type OptionsGenerator = (sassFile: string, cssFile: string, options: nodeSass.Op
 // sassFile: The sass file being compiled
 // cssFile: The default css file location.
 // cb: This callback must be invoked once for each time you want to compile the
-//     sass file. It must be called synchonously. You can change the output
+//     sass file. It must be called synchronously. You can change the output
 //     filename and options passed to it.
 const defaultOptionsGenerator: OptionsGenerator = (
   _sassFile: string,
@@ -285,10 +309,11 @@ function writeDataToFile(cachedFile: string, outputFile: string, data: Buffer): 
 // * compiler.events.emit("dependency", absolutePath);
 //     marks the file as a dependency for the Sass file being compiled so that future
 //     compiles will invalidate the cache if that file changes.
-// * compiler.events.emit("additional-output", absolutePath);
+// * compiler.events.emit("additional-output", absolutePathToOutput, httpPathToOutput, absolutePathToSource);
 //     marks the file as an additional output for the Sass file being compiled so that future
 //     cached compiles will be able to install or remove them as needed in conjunction with the
-//     sass file.
+//     sass file. Note: the source will not be considered a dependency unless the "dependency" event
+//     is also emitted.
 //
 // You can subscribe to the following events:
 //
@@ -296,10 +321,21 @@ function writeDataToFile(cachedFile: string, outputFile: string, data: Buffer): 
 //       prepare for a compilation to occur with these options. The options
 //       are a unique copy for this compilation. E.g. This can be used to
 //       prime a cache in the options for the compilation.
-//   * compiler.events.on("compiled", function(details, result) { });
+//   * compiler.events.on("compiled", (details, result) => { });
 //       receive notification of a successful compilation.
-//   * compiler.events.on("failed", function(details, error) { });
+//   * compiler.events.on("failed", (details, error) => { });
 //       receive notification of a compilation failure.
+//   * compiler.events.on("stale-external-output", (outputFile) => {})
+//       receive a notification that a file outside of this broccoli output
+//       tree might need to be removed because the only known sass file
+//       in this tree to output it has been deleted.
+//   * compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {})
+//       receive a notification that an additional asset that was created
+//       when the caller fired "additional-output" (see above) needs to be
+//       restored because the sass file that produced it was retrieved from
+//       cache. This is only invoked when the asset was created outside of the
+//       broccoli tree for this addon. If the asset was in the tree, it will
+//       be automatically recreated from the cache.
 //
 //   For all these events, a compilation details object is passed of the
 //   following form:
@@ -320,11 +356,11 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   private colors: any;
   private currentTree: null | FSTree;
   private dependencies: Record<string, Set<string>>;
+  private outputURLs: Record<string, Map<string, string>>;
   private outputs: Record<string, Set<string>>;
 
   protected cssDir: string;
   protected discover: boolean | undefined;
-  protected events: EventEmitter;
   protected fullException: boolean;
   protected maxListeners: number;
   protected options: nodeSass.Options;
@@ -335,6 +371,11 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   protected sourceFiles: Array<string>;
   protected treeName: string | undefined;
   protected verbose: boolean;
+  protected persistentCacheDebug: debugGenerator.Debugger;
+  protected sessionCache: GenericCache | undefined;
+  protected buildCache: GenericCache;
+
+  public events: EventEmitter;
 
   constructor(inputTree: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: BroccoliSassOptions & nodeSass.Options) {
     if (Array.isArray(inputTree)) {
@@ -362,10 +403,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.currentTree = null;
     this.dependencies = {};
     this.outputs = {};
+    this.outputURLs = {}
+
+    this.sessionCache = options.sessionCache;
+    delete options.sessionCache;
+
+    this.buildCache = this.sessionCache || new Map();
 
     if (shouldPersist(process.env, !!options.persistentCache)) {
       this.persistentCache = new DiskCache(options.persistentCache);
     }
+    this.persistentCacheDebug = debugGenerator(`broccoli-eyeglass:persistent-cache:${options.persistentCache || 'disabled'}`);
 
     this.treeName = options.annotation;
     delete options.annotation;
@@ -530,10 +578,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   dependencyChanged(srcDir: string, dep: [string, string]): boolean {
     let file = path.isAbsolute(dep[0]) ? dep[0] : path.join(srcDir, dep[0]);
     let hexDigest = dep[1];
-
-    let hash = this.hashForFile(file);
-    let hd = hash.digest("hex");
-    return hd !== hexDigest;
+    return hexDigest !== this.hashForFile(file);
   }
 
   /* get the cached output for a source file, or compile the file if not in cache
@@ -553,7 +598,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
         return this.handleCacheMiss(details, reason, key, compilationTimer);
       }
 
-      let dependencies: Array<[string, string]> = JSON.parse(cachedDependencies.value);
+      let dependencies: CachedDependencies = JSON.parse(cachedDependencies.value);
 
       // check dependency caches
       if (dependencies.some(dep => this.dependencyChanged(details.srcPath, dep))) {
@@ -568,9 +613,9 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       }
 
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
-      let value: [Array<string>, Record<string, string>] = [depFiles, JSON.parse(cachedOutput.value)];
+      let value: [Array<string>, CachedContents] = [depFiles, JSON.parse(cachedOutput.value)];
       compilationTimer.stats.cacheHitCount++;
-      return RSVP.resolve(this.handleCacheHit(details, value));
+      return RSVP.resolve(this.handleCacheHit(details, value).then(() => {}));
     } catch (error) {
       return this.handleCacheMiss(details, error, key, compilationTimer);
     }
@@ -581,9 +626,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @argument absolutePath The absolute path to the file.
    * @return hash object of the file data
    **/
-  hashForFile(absolutePath: string): crypto.Hash {
-    let data = fs.readFileSync(absolutePath, "UTF8");
-    return crypto.createHash("md5").update(data);
+  hashForFile(absolutePath: string): string {
+    let cacheKey = `hashForFile(${absolutePath})`;
+    let cachedHash = this.buildCache.get(cacheKey);
+    if (cachedHash) {
+      return cachedHash as string;
+    } else {
+      let data = fs.readFileSync(absolutePath, "UTF8");
+      let hash = crypto.createHash("md5").update(data).digest("hex");
+      this.buildCache.set(cacheKey, hash);
+      return hash;
+    }
   }
 
   /* construct a base cache key for a file to be compiled.
@@ -598,7 +651,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   keyForSourceFile(srcDir: string, relativeFilename: string, _options: nodeSass.Options): string {
     let absolutePath = path.join(srcDir, relativeFilename);
     let hash = this.hashForFile(absolutePath);
-    return relativeFilename + "@" + hash.digest("hex");
+    return relativeFilename + "@" + hash;
   }
 
   /* construct a cache key for storing dependency hashes.
@@ -616,17 +669,16 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @return String
    */
   outputKey(key: string): string {
-    return "[[[output of " + key + "]]]";
+    return "[[[output of " + key + "] v2]]";
   }
 
   /* retrieve the files from cache, write them, and populate the hot cache information
    * for rebuilds.
    */
-  handleCacheHit(details: CompilationDetails, inputAndOutputFiles: [Array<string>, Record<string, string>]): void {
-    let inputFiles = inputAndOutputFiles[0];
-    let outputFiles = inputAndOutputFiles[1];
+  handleCacheHit(details: CompilationDetails, inputAndOutputFiles: [Array<string>, CachedContents]): Promise<Array<void>> {
+    let [inputFiles, outputFiles] = inputAndOutputFiles;
 
-    persistentCacheDebug(
+    this.persistentCacheDebug(
       "Persistent cache hit for %s. Writing to: %s",
       details.sassFilename,
       details.fullCssFilename
@@ -644,23 +696,38 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       this.addDependency(details.fullSassFilename, path.resolve(details.srcPath, dep));
     });
 
-    let files = Object.keys(outputFiles);
+    let {contents, urls} = outputFiles;
+    let files = Object.keys(contents);
 
-    persistentCacheDebug(
+    this.persistentCacheDebug(
       "cached output files for %s are: %s",
       details.sassFilename,
       files.join(", ")
     );
 
-    files.map(file => {
-      let data = outputFiles[file];
+    for (let file of files) {
+      let data = contents[file];
       let cachedFile = path.join(this.cachePath!, file);
       let outputFile = path.join(this.outputPath, file);
       // populate the output cache for rebuilds
       this.addOutput(details.fullSassFilename, outputFile);
 
       writeDataToFile(cachedFile, outputFile, Buffer.from(data, "base64"));
-    });
+    }
+    let eventPromises: Array<Promise<any>> = [];
+    let allUrls = Object.keys(urls);
+    if (allUrls.length > 0) {
+      this.persistentCacheDebug(
+        "firing 'cached-asset' for each asset url for %s: %s",
+        details.sassFilename,
+        allUrls.join(", ")
+      );
+    }
+    for (let url of allUrls) {
+      let sourceFile = urls[url];
+      eventPromises.push(this.events.emit("cached-asset", sourceFile, url))
+    }
+    return RSVP.all(eventPromises);
   }
 
   scopedFileName(file: string): string {
@@ -674,6 +741,16 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
   relativize(file: string): string {
     return removePathPrefix(this.inputPaths[0], [file])[0];
+  }
+  isOutputInTree(file: string): boolean {
+    if (path.isAbsolute(file)) {
+      return file.startsWith(this.outputPath);
+    } else {
+      return true;
+    }
+  }
+  relativizeOutput(file: string): string {
+    return removePathPrefix(this.outputPath, [file])[0];
   }
 
   relativizeAll(files: Array<string>): Array<string> {
@@ -692,6 +769,10 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     return this.outputs[this.relativize(file)] || new Set();
   }
 
+  outputURLsFrom(file: string): Map<string, string> {
+    return this.outputURLs[this.relativize(file)] || new Map();
+  }
+
   /**
    * Some filenames returned from importers are not really files
    * on disk. These three prefixes are used in eyeglass.
@@ -708,24 +789,24 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   /* hash all dependencies synchronously and return the files that exist
    * as an array of pairs (filename, hash).
    */
-  hashDependencies(details: CompilationDetails): Array<[string, string]> {
+  hashDependencies(details: CompilationDetails): CachedDependencies {
     let depsWithHashes = new Array<[string, string]>();
 
     this.dependenciesOf(details.fullSassFilename).forEach(f => {
       try {
         if (this.isNotFile(f)) {
-          persistentCacheDebug("Ignoring non-file dependency: %s", f);
+          this.persistentCacheDebug("Ignoring non-file dependency: %s", f);
         } else {
           let h = this.hashForFile(f);
 
           if (f.startsWith(details.srcPath)) {
             f = f.substring(details.srcPath.length + 1);
           }
-          depsWithHashes.push([f, h.digest("hex")]);
+          depsWithHashes.push([f, h]);
         }
       } catch (e) {
         if (typeof e === "object" && e !== null && e.code === "ENOENT") {
-          persistentCacheDebug("Ignoring non-existent file: %s", f);
+          this.persistentCacheDebug("Ignoring non-existent file: %s", f);
         } else {
           throw e;
         }
@@ -739,31 +820,33 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   /* read all output files asynchronously and return the contents
    * as a hash of relative filenames to base64 encoded strings.
    */
-  readOutputs(details: CompilationDetails): Record<string, string> {
-    let reads = new Array<[string, string]>();
+  readOutputs(details: CompilationDetails): CachedContents {
+    let contents: Record<string, string> = {};
+    let urls: Record<string, string> = {};
     let outputs = this.outputsFrom(details.fullSassFilename);
 
-    outputs.forEach(output => reads.push([output, fs.readFileSync(output, "base64")]));
-
-    return reads.reduce((content: Record<string, string>, output) => {
-      let fileName = output[0];
-      let contents = output[1];
-
-      if (fileName.startsWith(details.destDir)) {
-        content[fileName.substring(details.destDir.length + 1)] = contents;
+    for (let output of outputs) {
+      if (this.isOutputInTree(output)) {
+        contents[this.relativizeOutput(output)] = fs.readFileSync(output, "base64");
       } else {
-        persistentCacheDebug(
+        this.persistentCacheDebug(
           "refusing to cache output file found outside the output tree: %s",
-          fileName
+          output
         );
       }
-      return content;
-    }, {});
+    }
+
+    let outputURLs = this.outputURLsFrom(details.fullSassFilename);
+    for (let url of outputURLs.keys()) {
+      urls[url] = outputURLs.get(url)!;
+    }
+
+    return {contents, urls};
   }
 
   /* Writes the dependencies and output contents to the persistent cache */
   populateCache(key: string, details: CompilationDetails, _result: nodeSass.Result): void {
-    persistentCacheDebug("Populating cache for " + key);
+    this.persistentCacheDebug("Populating cache for " + key);
 
     let cache = this.persistentCache!;
 
@@ -777,14 +860,14 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   /* When the cache misses, we need to compile the file and then populate the cache */
   handleCacheMiss(details: CompilationDetails, reason: Error | {message: string; stack?: Array<string>}, key: string, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void> {
     compilationTimer.stats.cacheMissCount++;
-    persistentCacheDebug(
+    this.persistentCacheDebug(
       "Persistent cache miss for %s. Reason: %s",
       details.sassFilename,
       reason.message
     );
     // for errors
     if (reason.stack) {
-      persistentCacheDebug("Stacktrace:", reason.stack);
+      this.persistentCacheDebug("Stacktrace:", reason.stack);
     }
     return this.compileCssFile(details, compilationTimer).then(result => {
       return this.populateCache(key, details, result);
@@ -818,8 +901,21 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
         this.addDependency(details.fullSassFilename, absolutePath);
       };
 
-      let additionalOutputListener = (filename: string): void => {
-        this.addOutput(details.fullSassFilename, filename);
+      let additionalOutputListener = (absolutePathToOutput: string, httpPathToOutput: string | undefined, absolutePathToSource: string | undefined): void => {
+        this.persistentCacheDebug("additional-output %s -> %s -> %s", absolutePathToSource, httpPathToOutput, absolutePathToOutput);
+        if (!this.isOutputInTree(absolutePathToOutput)) {
+          // it's outside this tree, don't cache the output.
+          if (absolutePathToSource && httpPathToOutput) {
+            this.persistentCacheDebug("additional-output is outside tree will cache source & url");
+            // something outside this tree is putting it there, so we need to
+            // let that same thing deal with it again when the warm cache is accessed.
+            // we will track this file from its source location and target url
+            this.addSource(details.fullSassFilename, absolutePathToSource, httpPathToOutput);
+          }
+        } else {
+          this.persistentCacheDebug("additional-output is in tree will cache contents");
+          this.addOutput(details.fullSassFilename, absolutePathToOutput);
+        }
       };
 
       this.events.addListener("additional-output", additionalOutputListener);
@@ -881,6 +977,13 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     return unique(files);
   }
 
+  addSource(sassFilename: string, sourceFilename: string, httpPathToOutput: string): void {
+    sassFilename = this.relativize(sassFilename);
+    this.outputURLs[sassFilename] = this.outputURLs[sassFilename] || new Map<string, string>();
+    let urlMap = this.outputURLs[sassFilename];
+    urlMap.set(httpPathToOutput, sourceFilename);
+  }
+
   addOutput(sassFilename: string, outputFilename: string): void {
     sassFilename = this.relativize(sassFilename);
 
@@ -892,6 +995,9 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.relativizeAll(files).forEach(f => {
       if (this.outputs[f]) {
         delete this.outputs[f];
+      }
+      if (this.outputURLs[f]) {
+        delete this.outputURLs[f];
       }
     });
   }
@@ -978,6 +1084,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.currentTree = null;
     this.dependencies = {};
     this.outputs = {};
+    this.outputURLs = {};
   }
 
   _build(): Promise<void | Array<void | nodeSass.Result>> {
@@ -1046,11 +1153,13 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
     if (removed.length > 0) {
       let outputs = this.outputsFromOnly(removed);
+      // TODO: outputURLsFromOnly(removed)
       outputs.forEach(output => {
         if (output.indexOf(outputPath) === 0) {
           fs.unlinkSync(output);
         } else {
           hotCacheDebug("not removing because outside the outputTree", output);
+          this.events.emit("stale-external-output", output)
         }
       });
       this.clearOutputs(removed);
@@ -1088,9 +1197,13 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   build(): Promise<void | Array<void | nodeSass.Result>> {
     this.buildCount++;
 
-    if (this.buildCount === 1 && process.env.BROCCOLI_EYEGLASS === "forceInvalidateCache") {
-      persistentCacheDebug("clearing cache because forceInvalidateCache was set.");
-      this.persistentCache && this.persistentCache.clear();
+    if (this.buildCount > 1) {
+      this.buildCache = this.sessionCache || new Map();
+    } else {
+      if (process.env.BROCCOLI_EYEGLASS === "forceInvalidateCache") {
+        this.persistentCacheDebug("clearing cache because forceInvalidateCache was set.");
+        this.persistentCache && this.persistentCache.clear();
+      }
     }
 
     return this._build().catch(e => {

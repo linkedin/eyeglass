@@ -1,16 +1,32 @@
 export = SyncDiskCache;
+interface CacheHit {
+  isCached: true;
+  key: string;
+  value: string;
+}
+interface CacheMiss {
+  isCached: false;
+  key: undefined;
+  value: undefined;
+}
+
+interface SyncDiskCacheOptions {
+  location?: string;
+  compression?: 'deflate' | 'deflateRaw' | 'gzip';
+}
+
 declare class SyncDiskCache {
-  constructor(key: any, _?: any);
+  constructor(key?: string, options?: SyncDiskCacheOptions);
   tmpdir: any;
   compression: any;
   key: any;
   root: any;
-  clear(...args: any[]): any;
-  compress(...args: any[]): any;
-  decompress(...args: any[]): any;
-  get(...args: any[]): any;
-  has(...args: any[]): any;
-  pathFor(...args: any[]): any;
-  remove(...args: any[]): any;
-  set(...args: any[]): any;
+  clear(): void;
+  compress(value: string): string;
+  decompress(value: string): string;
+  get(key: string): CacheHit | CacheMiss;
+  has(key: string): boolean;
+  pathFor(key: string): string;
+  remove(key: string): void;
+  set(key: string, value: string): string;
 }
