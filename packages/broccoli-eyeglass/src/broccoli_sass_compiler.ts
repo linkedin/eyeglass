@@ -578,10 +578,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   dependencyChanged(srcDir: string, dep: [string, string]): boolean {
     let file = path.isAbsolute(dep[0]) ? dep[0] : path.join(srcDir, dep[0]);
     let hexDigest = dep[1];
-
-    let hash = this.hashForFile(file);
-    let hd = hash.digest("hex");
-    return hd !== hexDigest;
+    return hexDigest !== this.hashForFile(file);
   }
 
   /* get the cached output for a source file, or compile the file if not in cache
@@ -629,9 +626,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @argument absolutePath The absolute path to the file.
    * @return hash object of the file data
    **/
-  hashForFile(absolutePath: string): crypto.Hash {
-    let data = fs.readFileSync(absolutePath, "UTF8");
-    return crypto.createHash("md5").update(data);
+  hashForFile(absolutePath: string): string {
+    let cacheKey = `hashForFile(${absolutePath})`;
+    let cachedHash = this.buildCache.get(cacheKey);
+    if (cachedHash) {
+      return cachedHash as string;
+    } else {
+      let data = fs.readFileSync(absolutePath, "UTF8");
+      let hash = crypto.createHash("md5").update(data).digest("hex");
+      this.buildCache.set(cacheKey, hash);
+      return hash;
+    }
   }
 
   /* construct a base cache key for a file to be compiled.
@@ -646,7 +651,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   keyForSourceFile(srcDir: string, relativeFilename: string, _options: nodeSass.Options): string {
     let absolutePath = path.join(srcDir, relativeFilename);
     let hash = this.hashForFile(absolutePath);
-    return relativeFilename + "@" + hash.digest("hex");
+    return relativeFilename + "@" + hash;
   }
 
   /* construct a cache key for storing dependency hashes.
@@ -797,7 +802,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
           if (f.startsWith(details.srcPath)) {
             f = f.substring(details.srcPath.length + 1);
           }
-          depsWithHashes.push([f, h.digest("hex")]);
+          depsWithHashes.push([f, h]);
         }
       } catch (e) {
         if (typeof e === "object" && e !== null && e.code === "ENOENT") {
