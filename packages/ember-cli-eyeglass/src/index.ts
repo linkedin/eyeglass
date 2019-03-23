@@ -9,6 +9,10 @@ import cloneDeep = require('lodash.clonedeep');
 import defaultsDeep = require('lodash.defaultsdeep');
 import {BroccoliSymbolicLinker} from "./broccoli-ln-s";
 
+const EYEGLASS_INFO_PER_ADDON = new WeakMap<object, EyeglassAddonInfo>();
+const EYEGLASS_INFO_PER_APP = new WeakMap<object, EyeglassAppInfo>();
+const apps = new Array<any>();
+
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isLazyEngine(addon: any): boolean {
   if (addon.lazyLoading === true) {
@@ -79,49 +83,69 @@ function localEyeglassAddons(addon): Array<{path: string}> {
   return paths;
 }
 
-interface EyeglassAddon {
-  _eyeglass: {
-    isApp: boolean;
-    app: {
-      name: string;
-      _eyeglass: {
-        assets: BroccoliSymbolicLinker;
-      };
-    };
-  };
-  [stuff: string]: any;
+interface EyeglassProjectInfo {
+  apps: Array<any>;
+}
+interface EyeglassAddonInfo {
+  name: string;
+  parentPath: string;
+  isApp: boolean;
+  app: any; // is this safe to cache across builds?
+}
+interface EyeglassAppInfo {
+  assets: BroccoliSymbolicLinker;
+  sessionCache: Map<string, string | number>;
 }
 
 const EMBER_CLI_EYEGLASS = {
   name: 'ember-cli-eyeglass',
   included(parent) {
     this._super.included.apply(this, arguments);
+    this.initSelf();
+  },
+  initSelf() {
+    if (EYEGLASS_INFO_PER_ADDON.has(this)) return;
     let app = findHost(this);
+    if (!app) return;
     let isApp = (this.app === app);
     let name = app.name;
     if (!isApp) {
       let thisName = typeof this.parent.name === "function" ? this.parent.name() : this.parent.name;
       name = `${name}/${thisName}`
     }
-    // we create the symlinker in persistent mode because there's not a good way
-    // yet to recreate the symlinks when sass files are cached.
-    // I would worry about it more but it seems like the dist directory is cumulative across builds anyway.
-    app._eyeglass = app._eyeglass || {assets: new BroccoliSymbolicLinker({}, {annotation: app.name, persistentOutput: true})};
-    this._eyeglass = {app, isApp, name};
-  },
-
-  postBuild(result) {
-    if (this._eyeglass) {
-      this._eyeglass.app._eyeglass.assets.reset();
-    } else {
-    // eslint-disable-next-line no-console
-      console.warn("eyeglass addon info is missing during postBuild. Cannot invalidate asset links.");
+    let parentPath = this.parent.root;
+    if (isApp) {
+      apps.push(app);
+      // we create the symlinker in persistent mode because there's not a good
+      // way yet to recreate the symlinks when sass files are cached. I would
+      // worry about it more but it seems like the dist directory is cumulative
+      // across builds anyway.
+      EYEGLASS_INFO_PER_APP.set(app, {
+        sessionCache: new Map(),
+        assets: new BroccoliSymbolicLinker({}, {annotation: app.name, persistentOutput: true})
+      });
     }
+    let addonInfo = {isApp, name, parentPath, app};
+    EYEGLASS_INFO_PER_ADDON.set(this, addonInfo);
+  },
+  postBuild(result) {
     Eyeglass.resetGlobalCaches();
+    for (let app of apps) {
+      let appInfo = EYEGLASS_INFO_PER_APP.get(app);
+      if (appInfo) {
+        appInfo.assets.reset();
+        appInfo.sessionCache.clear();
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("eyeglass app info is missing during postBuild.");
+      }
+    }
   },
   postprocessTree(type, tree) {
-    if (type === "all" && this._eyeglass.isApp) {
-      return new MergeTrees([tree, this._eyeglass.app._eyeglass.assets], {overwrite: true});
+    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
+    if (type === "all" && addonInfo.isApp) {
+      let appInfo = EYEGLASS_INFO_PER_APP.get(addonInfo.app);
+      return new MergeTrees([tree, appInfo.assets], {overwrite: true});
     } else {
       return tree;
     }
@@ -136,12 +160,8 @@ const EMBER_CLI_EYEGLASS = {
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1) || './';
         let sassDir = inputPath.slice(1) || './';
-
-        let host = findHost(addon);
-        let inApp = (host === addon.app);
-
-        let extracted = this.extractConfig(host, addon);
-
+        let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+        let extracted = this.extractConfig(app, addon);
         extracted.cssDir = cssDir;
         extracted.sassDir = sassDir;
         const config = this.setupConfig(extracted);
@@ -163,7 +183,7 @@ const EMBER_CLI_EYEGLASS = {
     return defaultsDeep(addonConfig, hostConfig);
   },
 
-  linkAsset(this: EyeglassAddon, srcFile: string, destUri: string): string {
+  linkAsset(srcFile: string, destUri: string): string {
     if (path.posix.isAbsolute(destUri)) {
       destUri = path.posix.relative("/", destUri);
     }
@@ -171,21 +191,25 @@ const EMBER_CLI_EYEGLASS = {
     if (process.platform === "win32") {
       destUri = url.fileURLToPath(`file://${destUri}`)
     }
-    return this._eyeglass.app._eyeglass.assets.ln_s(srcFile, destUri);
+    let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let {assets} = EYEGLASS_INFO_PER_APP.get(app);
+    return assets.ln_s(srcFile, destUri);
   },
   
   setupConfig(config: ConstructorParameters<typeof EyeglassCompiler>[1], options) {
-
-    config.annotation = `EyeglassCompiler(${this._eyeglass.name})`;
+    let {isApp, app, name} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let {sessionCache} = EYEGLASS_INFO_PER_APP.get(app);
+    config.sessionCache = sessionCache;
+    config.annotation = `EyeglassCompiler(${name})`;
     if (!config.sourceFiles && !config.discover) {
-      config.sourceFiles = [this._eyeglass.isApp ? 'app.scss' : 'addon.scss'];
+      config.sourceFiles = [isApp ? 'app.scss' : 'addon.scss'];
     }
     config.assets = ['public', 'app'].concat(config.assets || []);
     config.eyeglass = config.eyeglass || {}
     config.eyeglass.httpRoot = config.eyeglass.httpRoot || config["httpRoot"];
     if (config.persistentCache) {
-      config.persistentCache += `-${this._eyeglass.name}`
-      if (this._eyeglass.isApp) {
+      config.persistentCache += `-${name}`
+      if (isApp) {
         // If we don't scope this a cache reset of the app deletes the addon caches
         config.persistentCache += "/app";
       }
@@ -213,7 +237,7 @@ const EMBER_CLI_EYEGLASS = {
     // Otherwise, we're building an addon, so rename addon.css to <name-of-addon>.css.
     let originalGenerator = config.optionsGenerator;
     config.optionsGenerator = (sassFile, cssFile, sassOptions, compilationCallback) => {
-      if (this._eyeglass.isApp) {
+      if (isApp) {
         cssFile = cssFile.replace(/app\.css$/, `${this.app.name}.css`);
       } else {
         cssFile = cssFile.replace(/addon\.css$/, `${this.parent.name}.css`);
