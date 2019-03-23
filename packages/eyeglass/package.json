@@ -1,7 +1,7 @@
 {
   "name": "eyeglass",
   "description": "Sass modules for npm.",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "author": {
     "name": "The eyeglass team and contributors",
     "url": "https://github.com/linkedin/eyeglass/graphs/contributors"
