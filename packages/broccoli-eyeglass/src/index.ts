@@ -132,6 +132,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     options.eyeglass.engines = options.eyeglass.engines || {};
     options.eyeglass.engines.sass = options.eyeglass.engines.sass || sass;
     options.eyeglass.installWithSymlinks = true;
+    options.eyeglass.buildCache = this.buildCache;
 
     let eyeglass = new Eyeglass(options);
 
