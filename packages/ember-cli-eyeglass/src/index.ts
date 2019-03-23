@@ -206,6 +206,8 @@ const EMBER_CLI_EYEGLASS = {
     }
     config.assets = ['public', 'app'].concat(config.assets || []);
     config.eyeglass = config.eyeglass || {}
+    // XXX We don't set the root anywhere but I'm not sure what might break if we do.
+    // config.eyeglass.root = parentPath;
     config.eyeglass.httpRoot = config.eyeglass.httpRoot || config["httpRoot"];
     if (config.persistentCache) {
       let cacheDir = parentPath.replace(/\//g, "$");
