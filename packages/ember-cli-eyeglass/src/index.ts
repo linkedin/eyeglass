@@ -197,10 +197,10 @@ const EMBER_CLI_EYEGLASS = {
   },
   
   setupConfig(config: ConstructorParameters<typeof EyeglassCompiler>[1], options) {
-    let {isApp, app, name} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let {isApp, app, parentPath} = EYEGLASS_INFO_PER_ADDON.get(this);
     let {sessionCache} = EYEGLASS_INFO_PER_APP.get(app);
     config.sessionCache = sessionCache;
-    config.annotation = `EyeglassCompiler(${name})`;
+    config.annotation = `EyeglassCompiler(${parentPath})`;
     if (!config.sourceFiles && !config.discover) {
       config.sourceFiles = [isApp ? 'app.scss' : 'addon.scss'];
     }
@@ -208,11 +208,8 @@ const EMBER_CLI_EYEGLASS = {
     config.eyeglass = config.eyeglass || {}
     config.eyeglass.httpRoot = config.eyeglass.httpRoot || config["httpRoot"];
     if (config.persistentCache) {
-      config.persistentCache += `-${name}`
-      if (isApp) {
-        // If we don't scope this a cache reset of the app deletes the addon caches
-        config.persistentCache += "/app";
-      }
+      let cacheDir = parentPath.replace(/\//g, "$");
+      config.persistentCache += `/${cacheDir}`;
     }
 
     config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent);
