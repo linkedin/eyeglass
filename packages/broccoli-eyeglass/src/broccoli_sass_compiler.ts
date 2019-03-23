@@ -142,6 +142,11 @@ export interface CompilationDetails {
   options: nodeSass.Options;
 }
 
+interface GenericCache {
+  get(key: string): string | number | undefined;
+  set(key: string, value: string | number): void;
+}
+
 export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOptions {
   /**
    * The directory to write css files to. Relative to the build output directory.
@@ -203,6 +208,19 @@ export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOption
    * along with timing information.
    */
   verbose?: boolean;
+  /**
+   * This is a cache that can be provided to cache across multiple instances of
+   * BroccoliSassCompiler. It can be a map, or some other cache store like
+   * like the memory capped lru-cache. Only strings and numbers will be placed
+   * as values in the cache.
+   *
+   * It is the responsibility of the caller to clear the session cache between
+   * calls to build(). Failure to do so will cause inconsistent build output.
+   *
+   * If a session cache is not provided, a short lived cache will be used locally
+   * for a single build's duration of one tree.
+   */
+  sessionCache?: GenericCache;
 }
 
 type OptionsGeneratorCallback = (cssFile: string, options: nodeSass.Options) => void;
@@ -224,7 +242,7 @@ type OptionsGenerator = (sassFile: string, cssFile: string, options: nodeSass.Op
 // sassFile: The sass file being compiled
 // cssFile: The default css file location.
 // cb: This callback must be invoked once for each time you want to compile the
-//     sass file. It must be called synchonously. You can change the output
+//     sass file. It must be called synchronously. You can change the output
 //     filename and options passed to it.
 const defaultOptionsGenerator: OptionsGenerator = (
   _sassFile: string,
@@ -354,6 +372,8 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   protected treeName: string | undefined;
   protected verbose: boolean;
   protected persistentCacheDebug: debugGenerator.Debugger;
+  protected sessionCache: GenericCache | undefined;
+  protected buildCache: GenericCache;
 
   public events: EventEmitter;
 
@@ -384,6 +404,11 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.dependencies = {};
     this.outputs = {};
     this.outputURLs = {}
+
+    this.sessionCache = options.sessionCache;
+    delete options.sessionCache;
+
+    this.buildCache = this.sessionCache || new Map();
 
     if (shouldPersist(process.env, !!options.persistentCache)) {
       this.persistentCache = new DiskCache(options.persistentCache);
@@ -1167,9 +1192,13 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   build(): Promise<void | Array<void | nodeSass.Result>> {
     this.buildCount++;
 
-    if (this.buildCount === 1 && process.env.BROCCOLI_EYEGLASS === "forceInvalidateCache") {
-      this.persistentCacheDebug("clearing cache because forceInvalidateCache was set.");
-      this.persistentCache && this.persistentCache.clear();
+    if (this.buildCount > 1) {
+      this.buildCache = this.sessionCache || new Map();
+    } else {
+      if (process.env.BROCCOLI_EYEGLASS === "forceInvalidateCache") {
+        this.persistentCacheDebug("clearing cache because forceInvalidateCache was set.");
+        this.persistentCache && this.persistentCache.clear();
+      }
     }
 
     return this._build().catch(e => {
