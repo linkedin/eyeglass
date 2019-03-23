@@ -223,7 +223,7 @@ describe("EyeglassCompiler", function() {
         let path = modules.path();
         modules.copy(FIXTURES.path("manualModule"));
         input.copy(FIXTURES.path("usesManualModule/input"));
-        
+
         let optimizer = new EyeglassCompiler(input.path(), {
           cssDir: ".",
           fullException: true,
@@ -1361,14 +1361,19 @@ describe("EyeglassCompiler", function() {
         output = createBuilder(compiler);
 
         // cache should start empty
-        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 0);
+        assert.strictEqual(compiler.buildCache.size, 0);
 
         yield output.build();
 
         assertEqualDirs(output.path(), expectedOutput);
 
-        // cache should have one entry
-        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 1);
+        let assetsCached = 0;
+        for (let k of compiler.buildCache.keys()) {
+          if (k.startsWith("assetImport(")) {
+            assetsCached += 1;
+          }
+        }
+        assert.strictEqual(assetsCached, 1);
         // first file should be a miss, 2nd should return from cache
         assert.strictEqual(compiler._assetImportCacheStats.misses, 1);
         assert.strictEqual(compiler._assetImportCacheStats.hits, 1);
@@ -1422,13 +1427,19 @@ describe("EyeglassCompiler", function() {
         output = createBuilder(compiler);
 
         // cache should start empty
-        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 0);
+        assert.strictEqual(compiler.buildCache.size, 0);
 
         yield output.build();
 
         assertEqualDirs(output.path(), expectedOutput);
         // cache should have one entry
-        assert.strictEqual(Object.keys(compiler._assetImportCache).length, 1);
+        let assetsCached = 0;
+        for (let k of compiler.buildCache.keys()) {
+          if (k.startsWith("assetImport(")) {
+            assetsCached += 1;
+          }
+        }
+        assert.strictEqual(assetsCached, 1);
         // first file should be a miss, 2nd should return from cache
         assert.strictEqual(compiler._assetImportCacheStats.misses, 1);
         assert.strictEqual(compiler._assetImportCacheStats.hits, 1);

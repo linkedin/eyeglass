@@ -195,7 +195,7 @@ const EMBER_CLI_EYEGLASS = {
     let {assets} = EYEGLASS_INFO_PER_APP.get(app);
     return assets.ln_s(srcFile, destUri);
   },
-  
+
   setupConfig(config: ConstructorParameters<typeof EyeglassCompiler>[1], options) {
     let {isApp, app, parentPath} = EYEGLASS_INFO_PER_ADDON.get(this);
     let {sessionCache} = EYEGLASS_INFO_PER_APP.get(app);

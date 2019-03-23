@@ -62,7 +62,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
   private relativeAssets: boolean | undefined;
   private assetDirectories: Array<string> | undefined;
   private assetsHttpPrefix: string | undefined;
-  private _assetImportCache: Record<string, string>;
   private _assetImportCacheStats: { hits: number; misses: number };
   private _dependenciesHash: string | undefined;
   constructor(inputTrees: BroccoliPlugin.BroccoliNode | Array<BroccoliPlugin.BroccoliNode>, options: BroccoliEyeglassOptions) {
@@ -100,7 +99,6 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     this.assetsHttpPrefix = assetsHttpPrefix;
     this.events.on("compiling", this.handleNewFile.bind(this));
 
-    this._assetImportCache = Object.create(null);
     this._assetImportCacheStats = {
       hits: 0,
       misses: 0,
@@ -135,6 +133,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     options.eyeglass.buildCache = this.buildCache;
 
     let eyeglass = new Eyeglass(options);
+
 
     if (this.assetDirectories) {
       for (var i = 0; i < this.assetDirectories.length; i++) {
@@ -229,14 +228,18 @@ class EyeglassCompiler extends BroccoliSassCompiler {
   // Cache the asset import code that is generated in eyeglass
   cacheAssetImports(key: string, getValue: () => string): string {
     // if this has already been generated, return it from cache
-    if (this._assetImportCache[key] !== undefined) {
+    let assetImportKey = `assetImport(${key})`;
+    let assetImport = this.buildCache.get(assetImportKey) as string | undefined;
+    if (assetImport !== undefined) {
       assetImportCacheDebug("cache hit for key '%s'", key);
       this._assetImportCacheStats.hits += 1;
-      return this._assetImportCache[key];
+      return assetImport;
     }
     assetImportCacheDebug("cache miss for key '%s'", key);
     this._assetImportCacheStats.misses += 1;
-    return (this._assetImportCache[key] = getValue());
+    assetImport = getValue();
+    this.buildCache.set(assetImportKey, assetImport);
+    return assetImport;
   }
 }
 
