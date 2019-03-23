@@ -1,4 +1,5 @@
 import EyeglassCompiler = require('broccoli-eyeglass');
+import Eyeglass = require('eyeglass');
 import findHost from "./findHost";
 import Funnel = require('broccoli-funnel');
 import MergeTrees = require('broccoli-merge-trees');
@@ -78,6 +79,9 @@ function localEyeglassAddons(addon): Array<{path: string}> {
 
 const EMBER_CLI_EYEGLASS = {
   name: 'ember-cli-eyeglass',
+  postBuild(result) {
+    Eyeglass.resetGlobalCaches();
+  },
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
 
@@ -91,14 +95,6 @@ const EMBER_CLI_EYEGLASS = {
 
         let host = findHost(addon);
         let inApp = (host === addon.app);
-
-        if (path.posix.join(sassDir, '/**/*') === '**/*') {
-          // limit to only files in the sass directory,
-          // but don't bother funneling if we just want everything anyways e.g. **/*
-          tree = new Funnel(tree, {
-            include: [ path.join(sassDir, '/**/*') ]
-          });
-        }
 
         let extracted = this.extractConfig(host, addon);
 

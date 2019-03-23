@@ -8,6 +8,7 @@ import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
 import * as nodeSass from "node-sass";
 import { unreachable } from "../util/assertions";
 import { EyeglassFunctions } from "./EyeglassFunctions";
+import { realpathSync } from "../util/perf";
 
 function pathInSandboxDir(fsPath: string, sandboxDir: string): boolean {
   if (path.relative(sandboxDir, fsPath).match(/^\.\./)) {
@@ -166,7 +167,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
             done(sass.types.Error(err.message));
           } else {
             try {
-              let realpath = fs.realpathSync(filename);
+              let realpath = realpathSync(filename);
 
               done(
                 sassUtils.castToSass({

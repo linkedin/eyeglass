@@ -1,4 +1,5 @@
-import {readFileSync, existsSync} from "fs";
+import {readFileSync} from "fs";
+import { existsSync } from "../util/perf";
 import * as path from "path";
 import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";

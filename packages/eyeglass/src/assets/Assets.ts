@@ -4,7 +4,7 @@ import * as path from "path";
 import { IEyeglass } from "../IEyeglass";
 import * as debug from "../util/debug";
 import { AssetSourceOptions } from "../util/Options";
-import { isType, SassImplementation, SassTypeError } from "../util/SassImplementation";
+import { isType, SassImplementation, SassTypeError, isSassMap, isSassString } from "../util/SassImplementation";
 import * as sass from "node-sass";
 import { URI } from "../util/URI";
 
@@ -40,7 +40,6 @@ interface Installs {
 export default class Assets implements Resolves, Installs {
   // need types for sass utils
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sassUtils: any;
   eyeglass: IEyeglass;
   /**
    * Assets declared by the application.
@@ -52,8 +51,9 @@ export default class Assets implements Resolves, Installs {
   moduleCollections: Array<AssetsCollection>;
   AssetCollection: () => AssetsCollection;
   AssetPathEntry: (src: string, options: AssetSourceOptions) => AssetsSource;
-  constructor(eyeglass: IEyeglass, sass: SassImplementation) {
-    this.sassUtils = require("node-sass-utils")(sass);
+  sassImpl: typeof sass;
+  constructor(eyeglass: IEyeglass, sassImpl: SassImplementation) {
+    this.sassImpl = sassImpl;
     this.eyeglass = eyeglass;
     // create a master collection
     this.collection = new AssetsCollection(eyeglass.options);
@@ -132,18 +132,28 @@ export default class Assets implements Resolves, Installs {
 
     // normalize the uri and resolve it
 
-    let data = this.resolveAssetDefaults($assetsMap, uri.getPath());
-    if (data) {
-      let filepath = URI.restore(data.coerce.get("filepath"));
+    let $data = this.resolveAssetDefaults($assetsMap, uri.getPath());
+    if ($data) {
+      let filepath: string | undefined;
+      let assetUri: string | undefined;
+      for (let i = 0; i < $data.getLength(); i++) {
+        let k = ($data.getKey(i) as sass.types.String).getValue();
+        let v = ($data.getValue(i) as sass.types.String).getValue();
+        if (k === "filepath") {
+          filepath = v;
+        } else if (k === "uri") {
+          assetUri = v;
+        }
+      }
 
       // create the URI
       let fullUri = URI.join(
         options.httpRoot,
         options.assets.httpPrefix,
-        data.coerce.get("uri")
+        assetUri
       );
 
-      assets.resolve(filepath, fullUri, function(error, assetInfo) {
+      assets.resolve(filepath!, fullUri, function(error, assetInfo) {
         if (error || !isPresent(assetInfo)) {
           cb(errorFor(error, "Unable to resolve asset"));
         } else {
@@ -163,7 +173,7 @@ export default class Assets implements Resolves, Installs {
             uri.addQuery(assetInfo.query);
           }
 
-          assets.install(filepath, assetInfo.path, function(error, file) {
+          assets.install(filepath!, assetInfo.path, function(error, file) {
             if (error) {
               cb(errorFor(error, "Unable to install asset"));
             } else {
@@ -220,19 +230,24 @@ export default class Assets implements Resolves, Installs {
 
       let dest = path.join(options.buildDir, uri);
 
-      try {
-        if (options.installWithSymlinks) {
-          fs.mkdirpSync(path.dirname(dest));
+      this.eyeglass.once(`install:${dest}`, () => {
+        try {
+          if (options.installWithSymlinks) {
+            fs.mkdirpSync(path.dirname(dest));
 
-          ensureSymlink(file, dest);
-        } else {
-          // we explicitly use copySync rather than copy to avoid starving system resources
-          fs.copySync(file, dest);
+            ensureSymlink(file, dest);
+          } else {
+            // we explicitly use copySync rather than copy to avoid starving system resources
+            fs.copySync(file, dest);
+          }
+          cb(null, dest);
+        } catch (error) {
+          cb(errorFor(error, `Failed to install asset from ${file}:\n`));
         }
+      }, () => {
         cb(null, dest);
-      } catch (error) {
-        cb(errorFor(error, `Failed to install asset from ${file}:\n`));
-      }
+      });
+
     } else {
       cb(null, file);
     }
@@ -247,32 +262,62 @@ export default class Assets implements Resolves, Installs {
       installer(assetFile, assetUri, oldInstaller, cb);
     };
   }
+
   // need types for sass utils
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private resolveAssetDefaults(registeredAssetsMap: sass.types.Map, relativePath: string): any {
-    registeredAssetsMap = this.sassUtils.handleEmptyMap(registeredAssetsMap);
-    this.sassUtils.assertType(registeredAssetsMap, "map");
+  private resolveAssetDefaults($registeredAssetsMap: sass.types.Map, relativePath: string): sass.types.Map | undefined {
 
-    let registeredAssets = this.sassUtils.castToJs(registeredAssetsMap);
+    let appAssets: sass.types.Map | undefined;
+    let moduleAssets: sass.types.Map | undefined;
+    let moduleName: string | undefined, moduleRelativePath: string | undefined;
+    let slashAt = relativePath.indexOf("/");
+    if (slashAt > 0) {
+      moduleName = relativePath.substring(0,slashAt);
+      moduleRelativePath = relativePath.substring(slashAt + 1)
+    }
 
-    let appAssets = registeredAssets.coerce.get(null);
-
-    if (appAssets) {
-      // XXX sassUtils.assertType(appAssets, "map");
-      let appAsset = appAssets.coerce.get(relativePath);
-      if (appAsset) {
-        return appAsset;
+    let size = $registeredAssetsMap.getLength();
+    for (let i = 0; i < size; i++) {
+      let k = $registeredAssetsMap.getKey(i);
+      if (k === this.sassImpl.NULL) {
+        let v = $registeredAssetsMap.getValue(i);
+        if (isSassMap(this.sassImpl, v)) {
+          appAssets = v;
+        }
+      } else if (isSassString(this.sassImpl, k) && k.getValue() === moduleName) {
+        let v = $registeredAssetsMap.getValue(i);
+        if (isSassMap(this.sassImpl, v)) {
+          moduleAssets = v;
+        }
       }
     }
 
-    let segments = relativePath.split("/");
-    let moduleName = segments.shift();
-    let moduleRelativePath = segments.join("/");
-    let moduleAssets = registeredAssets.coerce.get(moduleName);
-    if (moduleAssets) {
-      // XXX sassUtils.assertType(moduleAssets, "map");
-      return moduleAssets.coerce.get(moduleRelativePath);
+    if (appAssets) {
+      let size = appAssets.getLength();
+      for (let i = 0; i < size; i++) {
+        let k = appAssets.getKey(i);
+        if (isSassString(this.sassImpl, k) && k.getValue() === relativePath) {
+          let v = appAssets.getValue(i);
+          if (isSassMap(this.sassImpl, v)) {
+            return v;
+          }
+        }
+      }
     }
+
+    if (moduleAssets) {
+      let size = moduleAssets.getLength();
+      for (let i = 0; i < size; i++) {
+        let k = moduleAssets.getKey(i);
+        if (isSassString(this.sassImpl, k) && k.getValue() === moduleRelativePath) {
+          let v = moduleAssets.getValue(i);
+          if (isSassMap(this.sassImpl, v)) {
+            return v;
+          }
+        }
+      }
+    }
+    return;
   }
 }
 

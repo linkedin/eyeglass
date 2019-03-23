@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync } from '../util/perf';
 import { PackageJson } from 'package-json';
 import * as path from 'path';
 
