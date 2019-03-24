@@ -1,3 +1,25 @@
+# 5.1.0
+
+**Performance Enhancements**: this release has a number of performance
+enhancements in it. Some you get for free, others require you to
+
+* `sessionCache` option - This option allows broccoli to use an external
+  cache for compiling several broccoli trees. File information is stored
+  in these caches, so it should be cleared between builds.
+* `additional-output` event - This event now accepts additional arguments
+  that allow additional output that is outside of the broccoli tree to
+  participate in the persistent cache restoration process.
+  `ember-cli-eyeglass` uses this to avoid repeatedly writing the same
+  files during `asset-uri()` calls which results in considerable savings for
+  files that are referenced frequently.
+* `stale-external-output` event - This new event is fired when a file
+  that was output external to the broccoli tree is possibly stale and
+  in need of deletion.
+* `cached-asset` event - This new event is fired when a file that was output
+  external to the broccoli tree needs to be restored from cache. The new
+  arguments received from `additional-output` are returned to it so the file
+  can be recreated.
+
 # 5.0.2
 
 * This release adds heimdall metrics collection for performance analysis.

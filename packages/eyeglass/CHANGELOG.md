@@ -1,3 +1,24 @@
+# 2.3.0
+
+**Performance Enhancements:** This release addresses a number of performance
+bottlenecks in eyeglass that are especially noticeable when using eyeglass at
+scale. Please note that many of these fixes require you to pass new options
+to eyeglass in order to access them.
+
+* Some functions are optimized globally now by using a process-level cache.
+  If your builds are very frequent with a long-running eyeglass process, you
+  will want to call `Eyeglass.resetGlobalCaches()` between builds to ensure
+  the build is consistent. If you are using eyeglass with ember-cli-eyeglass
+  this is done automatically for you.
+* `buildCache` option - A new option to eyeglass allows you to pass a cache
+  to eyeglass where it will store information about and contents of files to
+  avoid hitting the disk too often for frequently accessed files. The simplest
+  cache is an ES2015 `Map` object. For large builds, something like
+  [lru-cache](https://github.com/isaacs/node-lru-cache) may be a better choice.
+  The buildCache store should be cleared between builds runs. If you are
+  using eyeglass with ember-cli-eyeglass this option is passed automatically
+  for you.
+
 # 2.2.2
 
 * This release adds heimdall metrics collection for performance analysis.

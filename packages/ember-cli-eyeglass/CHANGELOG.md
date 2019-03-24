@@ -1,3 +1,14 @@
+# 6.1.0
+
+**Performance Enhancements**: this release has a number of performance
+enhancements in it for builds at scale.
+
+* The persistent cache will now properly avoid cache collisions in engines and
+  addons that have files of the same name when those adddons don't set their
+  own value for persistentCache.
+* asset installation to urls that are outside of a lazy engine's path will
+  now work as intended.
+
 # 6.0.2
 
 * This release adds heimdall metrics collection for performance analysis.
