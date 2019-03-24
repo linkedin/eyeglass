@@ -1,3 +1,8 @@
+# 6.0.2
+
+* This release adds heimdall metrics collection for performance analysis.
+* Depends on `broccoli-eyeglass@5.0.2` and `eyeglass@2.2.2`.
+
 # 6.0.1
 
 * Depends on `broccoli-eyeglass@5.0.1` and `eyeglass@2.2.1`. Fixes an issue with using system tmp directories.

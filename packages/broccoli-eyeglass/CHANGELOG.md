@@ -1,3 +1,8 @@
+# 5.0.2
+
+* This release adds heimdall metrics collection for performance analysis.
+* Depends on `eyeglass@2.2.2` or greater.
+
 # 5.0.1
 
 * Picks up a change in eyeglass that makes it work better in broccoli-based projects.
