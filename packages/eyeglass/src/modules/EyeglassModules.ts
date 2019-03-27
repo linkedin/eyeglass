@@ -305,11 +305,18 @@ export default class EyeglassModules {
           newestModule = m
         } else {
           if (semver.compare(m.semver, newestModule.semver) > 0) {
-            if (secondNewestModule) { otherVersions.push(m); }
+            if (secondNewestModule) { otherVersions.push(secondNewestModule); }
             secondNewestModule = newestModule;
             newestModule = m;
           } else {
-            otherVersions.push(m);
+            if (secondNewestModule && semver.compare(m.semver, secondNewestModule.semver) > 0) {
+              otherVersions.push(secondNewestModule);
+              secondNewestModule = m;
+            } else if (secondNewestModule) {
+              otherVersions.push(m);
+            } else {
+              secondNewestModule = m;
+            }
           }
         }
       }
