@@ -11,11 +11,13 @@ import stringify = require("json-stable-stringify");
 import debugGenerator = require("debug");
 import Eyeglass = require("eyeglass");
 import * as sass from "node-sass";
-import hashForDep = require("hash-for-dep");
+import dependencyTree = require("dependency-tree");
 import { EyeglassOptions } from "eyeglass/lib/util/Options";
+import EyeglassModule from "eyeglass/lib/modules/EyeglassModule";
 
 type SassImplementation = typeof sass;
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
+const dependencyDebug = debugGenerator("broccoli-eyeglass:file-dependencies")
 const CURRENT_VERSION: string = require(path.join(__dirname, "..", "package.json")).version;
 
 function httpJoin(...args: Array<string>): string {
@@ -191,12 +193,8 @@ class EyeglassCompiler extends BroccoliSassCompiler {
 
   dependenciesHash(_srcDir: string, _relativeFilename: string, options: Eyeglass.EyeglassOptions): string {
     if (!this._dependenciesHash) {
-      let eyeglass = new Eyeglass(options); // options
-      // let eyeglass: Eyeglass = options.eyeglass!.engines!.eyeglass
+      let eyeglass = new Eyeglass(options);
       let hash = crypto.createHash("sha1");
-      let cachableOptions = stringify(this.cachableOptions(options));
-
-      hash.update(cachableOptions);
       hash.update("broccoli-eyeglass@" + EyeglassCompiler.currentVersion());
 
       let egModules = sortby(eyeglass.modules.list, m => m.name);
@@ -204,7 +202,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
       egModules.forEach(mod => {
         let name: string = mod.name;
         if (mod.inDevelopment || mod.eyeglass.inDevelopment) {
-          let depHash: string = hashForDep(mod.path);
+          let depHash: string = this.hashForJs(mod);
           hash.update(name + "@" + depHash);
         } else {
           let version: string = mod.version || "<unversioned>";
@@ -220,9 +218,10 @@ class EyeglassCompiler extends BroccoliSassCompiler {
 
   keyForSourceFile(srcDir: string, relativeFilename: string, options: Eyeglass.EyeglassOptions): string {
     let key = super.keyForSourceFile(srcDir, relativeFilename, options);
+    let optsString = stringify(this.cachableOptions(options));
     let dependencies = this.dependenciesHash(srcDir, relativeFilename, options);
 
-    return key + "+" + dependencies;
+    return key + "+" + optsString + "+" + dependencies;
   }
 
   // Cache the asset import code that is generated in eyeglass
@@ -240,6 +239,28 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     assetImport = getValue();
     this.buildCache.set(assetImportKey, assetImport);
     return assetImport;
+  }
+
+  hashForJs(mod: EyeglassModule): string {
+    let jsPath = mod.mainPath;
+    if (!jsPath) {
+      return ""
+    }
+    let cacheKey = `hashForJs(${jsPath})`;
+    let cachedHash = this.buildCache.get(cacheKey) as string;
+    if (cachedHash) {
+      return cachedHash;
+    }
+    let files = dependencyTree.toList({filename: jsPath, directory: path.dirname(jsPath)});
+    dependencyDebug(`${jsPath} => \n\t${files.join("\n\t")}`);
+    let hash = crypto.createHash("sha1");
+    for (let file of files) {
+      hash.update(file);
+      hash.update(this.fileKey(file));
+    }
+    let result = hash.digest("base64");
+    this.buildCache.set(cacheKey, result);
+    return result;
   }
 }
 

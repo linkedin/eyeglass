@@ -1235,7 +1235,6 @@ describe("EyeglassCompiler", function() {
           "project.css": ".foo {\n  content: changed-foo; }\n",
         };
 
-        require("hash-for-dep")._resetCache();
         delete require.cache[fs.realpathSync(eyeglassModule.path("eyeglass-exports.js"))];
         delete require.cache[fs.realpathSync(eyeglassModule.path("lib/foo.js"))];
 
@@ -1328,7 +1327,6 @@ describe("EyeglassCompiler", function() {
           "project.css": ".foo {\n  content: changed-foo; }\n",
         };
 
-        require("hash-for-dep")._resetCache();
         delete require.cache[fs.realpathSync(eyeglassModule.path("eyeglass-exports.js"))];
         delete require.cache[fs.realpathSync(eyeglassModule.path("lib/foo.js"))];
 

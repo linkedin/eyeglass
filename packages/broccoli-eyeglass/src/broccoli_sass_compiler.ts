@@ -1,7 +1,6 @@
 "use strict";
 import debugGenerator = require("debug");
 import * as path from "path";
-import crypto = require("crypto");
 import fs = require("fs-extra");
 import RSVP = require("rsvp");
 import mkdirp = require("mkdirp");
@@ -18,6 +17,7 @@ import MergeTrees = require("broccoli-merge-trees");
 import { EventEmitter } from "chained-emitter";
 import DiskCache = require("sync-disk-cache");
 import heimdall = require("heimdalljs");
+import {statSync, realpathSync} from "fs";
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
@@ -627,17 +627,25 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @return hash object of the file data
    **/
   hashForFile(absolutePath: string): string {
-    let cacheKey = `hashForFile(${absolutePath})`;
-    let cachedHash = this.buildCache.get(cacheKey);
-    if (cachedHash) {
-      return cachedHash as string;
-    } else {
-      let data = fs.readFileSync(absolutePath, "UTF8");
-      let hash = crypto.createHash("md5").update(data).digest("hex");
-      this.buildCache.set(cacheKey, hash);
-      return hash;
-    }
+    return this.fileKey(absolutePath);
   }
+
+  /* compute a key for a file that will change if the file has changed. */
+  fileKey(file: string, isRealPath = false): string {
+    let cachedKeyKey = `fileKey(${file})`;
+    let cachedKey = this.buildCache.get(cachedKeyKey) as string;
+    if (cachedKey) { return cachedKey; }
+    let stat = statSync(file);
+    let key;
+    if (!isRealPath && stat.isSymbolicLink) {
+      key = this.fileKey(realpathSync(file), true);
+    } else {
+      key = `${stat.mtimeMs}:${stat.size}:${stat.mode}`;
+    }
+    this.buildCache.set(cachedKeyKey, key);
+    return key;
+  }
+
 
   /* construct a base cache key for a file to be compiled.
    *
@@ -645,8 +653,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
    * @argument relativeFilename The filename relative to the srcDir that is being compiled.
    * @argument options The compilation options.
    *
-   * @return Promise that resolves to the cache key for the file or rejects if
-   *         it can't read the file.
+   * @return The cache key for the file
    **/
   keyForSourceFile(srcDir: string, relativeFilename: string, _options: nodeSass.Options): string {
     let absolutePath = path.join(srcDir, relativeFilename);
