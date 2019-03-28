@@ -631,16 +631,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   }
 
   /* compute a key for a file that will change if the file has changed. */
-  fileKey(file: string, isRealPath = false): string {
+  fileKey(file: string): string {
     let cachedKeyKey = `fileKey(${file})`;
     let cachedKey = this.buildCache.get(cachedKeyKey) as string;
     if (cachedKey) { return cachedKey; }
-    let stat = statSync(file);
     let key;
-    if (!isRealPath && stat.isSymbolicLink) {
-      key = this.fileKey(realpathSync(file), true);
-    } else {
-      key = `${stat.mtimeMs}:${stat.size}:${stat.mode}`;
+    try {
+      let stat = statSync(file);
+      key = `${mtimeMs(stat)}:${stat.size}:${stat.mode}`;
+      this.buildCache.set(cachedKeyKey, key);
+    } catch (_) {
+      key = `0:0:0`;
     }
     this.buildCache.set(cachedKeyKey, key);
     return key;
@@ -1242,3 +1243,12 @@ class SassRenderSchema {
 }
 
 module.exports.shouldPersist = shouldPersist;
+
+/* shim for fs.Stats.mtimeMS which was introduced in node 8. */
+function mtimeMs(stat: fs.Stats): number {
+  if (stat.mtimeMs) {
+    return stat.mtimeMs;
+  } else {
+    return stat.mtime.valueOf();
+  }
+}
