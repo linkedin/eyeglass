@@ -17,7 +17,7 @@ import MergeTrees = require("broccoli-merge-trees");
 import { EventEmitter } from "chained-emitter";
 import DiskCache = require("sync-disk-cache");
 import heimdall = require("heimdalljs");
-import {statSync, realpathSync} from "fs";
+import {statSync} from "fs";
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
