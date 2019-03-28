@@ -1,3 +1,12 @@
+# 5.1.1
+
+* Changes how persistent cache invalidation is performed for eyeglass modules
+  that are marked as `inDevelopment`. Eyeglass modules that doubled as
+  application code would end up invalidating the sass file cache very
+  frequently and unnecessarily. Instead of considering all JS in the addon
+  and its dependencies, now only a minimal set of javascript files that are
+  known to be involved with Sass compilation are considered.
+
 # 5.1.0
 
 **Performance Enhancements**: this release has a number of performance

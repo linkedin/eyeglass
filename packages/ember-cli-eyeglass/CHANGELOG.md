@@ -1,3 +1,8 @@
+# 6.1.1
+
+* Upgrades broccoli-eyeglass to `5.1.1`.
+* Some code cleanup.
+
 # 6.1.0
 
 **Performance Enhancements**: this release has a number of performance

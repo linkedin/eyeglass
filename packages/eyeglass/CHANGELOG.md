@@ -1,3 +1,8 @@
+# 2.3.1
+
+* Fixes a bug in eyeglass module resolutions that only occurred in the rare
+  case that an app's name collides with a eyeglass module's name.
+
 # 2.3.0
 
 **Performance Enhancements:** This release addresses a number of performance
