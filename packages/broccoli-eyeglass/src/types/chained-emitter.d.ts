@@ -2,7 +2,7 @@ export class EventEmitter {
   constructor(conf?: any);
   newListener: any;
   addListener(type: any, listener: any): any;
-  emit(...args: any[]): any;
+  emit(...args: any[]): Promise<any>;
   listeners(type: any): any;
   listenersAny(): any;
   many(event: any, ttl: any, fn: any): any;

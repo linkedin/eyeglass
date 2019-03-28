@@ -98,7 +98,7 @@ interface EyeglassAppInfo {
 }
 
 const EMBER_CLI_EYEGLASS = {
-  name: 'ember-cli-eyeglass',
+  name: require("../package.json").name,
   included(parent) {
     this._super.included.apply(this, arguments);
     this.initSelf();
@@ -132,13 +132,8 @@ const EMBER_CLI_EYEGLASS = {
     Eyeglass.resetGlobalCaches();
     for (let app of apps) {
       let appInfo = EYEGLASS_INFO_PER_APP.get(app);
-      if (appInfo) {
-        appInfo.assets.reset();
-        appInfo.sessionCache.clear();
-      } else {
-        // eslint-disable-next-line no-console
-        console.warn("eyeglass app info is missing during postBuild.");
-      }
+      appInfo.assets.reset();
+      appInfo.sessionCache.clear();
     }
   },
   postprocessTree(type, tree) {

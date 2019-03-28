@@ -22,7 +22,7 @@ interface Resolution {
   query?: string;
 }
 
-type ResolverCallback = (error: unknown, result: Resolution | undefined) => unknown;
+type ResolverCallback = (error: unknown, result?: Resolution) => unknown;
 type Resolver = (assetFile: string, assetUri: string, cb: ResolverCallback) => void;
 type WrappedResolver = (assetFile: string, assetUri: string, fallback: Resolver, cb: ResolverCallback) => void;
 

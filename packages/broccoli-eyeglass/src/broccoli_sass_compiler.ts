@@ -118,11 +118,11 @@ export interface CompilationDetails {
   /**
    * The path of the sass file being compiled (relative to srcPath).
    */
-  sassFilename: string; 
+  sassFilename: string;
   /**
    * The absolute path of the Sass file.
    */
-  fullSassFilename: string; 
+  fullSassFilename: string;
   /**
    * The directory where compiled css files are being written.
    */
@@ -161,21 +161,21 @@ export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOption
   discover?: boolean;
   /**
    * The directory to look for scss files to compile. Defaults to tree root.
-   * 
+   *
    */
   sassDir?: string;
 
   /**
    * Force sass rendering to use node-sass's synchronous rendering.
    * Defaults to * `false`.
-   * 
+   *
    */
   renderSync?: boolean;
   /**
    * Array of file names or glob patterns (relative to the sass directory) that
    * should be compiled. Note that file names must include the file extension
    * (unlike @import in Sass). E.g.: ['application.scss']
-   * 
+   *
    */
   sourceFiles?: Array<string>;
 
@@ -191,7 +191,7 @@ export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOption
    * compiler needs. Defaults to 10. Note: do not set
    * eyeglassCompiler.events.setMaxListeners() yourself as eyeglass has its own
    * listeners it uses internally.
-   * 
+   *
    */
   maxListeners?: number;
 
@@ -921,7 +921,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       this.events.addListener("additional-output", additionalOutputListener);
       this.events.addListener("dependency", dependencyListener);
       let sassPromise = sass(details.options as nodeSass.SyncOptions); // XXX This cast sucks
-      return sassPromise 
+      return sassPromise
         .finally(() => {
           this.events.removeListener("dependency", dependencyListener);
           this.events.removeListener("additional-output", additionalOutputListener);
@@ -937,7 +937,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
           debug(`render of ${result.stats.entry} took ${result.stats.duration}`)
           return success(result).then(() => result);
         }, failure);
-    });
+    }) as Promise<nodeSass.Result>;
   }
 
   handleSuccess(details: CompilationDetails, result: nodeSass.Result): Promise<void> {
