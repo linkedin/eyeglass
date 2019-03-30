@@ -149,6 +149,10 @@ const EMBER_CLI_EYEGLASS = {
       appInfo.sessionCache.clear();
     }
   },
+  buildError(_error) {
+    debugBuild("Build Failed.");
+    this._resetCaches();
+  },
   postprocessTree(type, tree) {
     let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
     if (type === "all" && addonInfo.isApp) {
