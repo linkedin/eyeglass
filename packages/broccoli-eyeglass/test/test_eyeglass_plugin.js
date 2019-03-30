@@ -1045,6 +1045,103 @@ describe("EyeglassCompiler", function() {
     );
 
     it(
+      "handles a dependency file being deleted.",
+      co.wrap(function*() {
+        input.write({
+          "project.scss": '/* This is the main file. */\n@import "related";',
+          "_related.scss": "/* This is related to something. */",
+        });
+
+        let expectedOutput = {
+          "project.css": "/* This is the main file. */\n/* This is related to something. */\n",
+        };
+
+        let compiledFiles = [];
+        builders = warmBuilders(
+          2,
+          input.path(),
+          {
+            cssDir: ".",
+            persistentCache: "test",
+          },
+          details => {
+            compiledFiles.push(details.fullSassFilename);
+          }
+        );
+
+        yield builders[0].build();
+
+        assertEqualDirs(builders[0].path(), expectedOutput);
+        assert.strictEqual(1, compiledFiles.length);
+        compiledFiles.length = 0;
+
+        input.write({
+          "project.scss": "/* This is the main file. */",
+        });
+        input
+
+        expectedOutput = {
+          "project.css": "/* This is the main file. */\n",
+          "_related.scss": null,
+        };
+
+        yield builders[1].build();
+
+        assert.notStrictEqual(builders[0].path(), builders[1].path());
+        assert.strictEqual(compiledFiles.length, 1);
+        assertEqualDirs(builders[1].path(), expectedOutput);
+      })
+    );
+
+    it(
+      "handles a dependency file being deleted while watching.",
+      co.wrap(function*() {
+        input.write({
+          "project.scss": '/* This is the main file. */\n@import "related";',
+          "_related.scss": "/* This is related to something. */",
+        });
+
+        let expectedOutput = {
+          "project.css": "/* This is the main file. */\n/* This is related to something. */\n",
+        };
+
+        let compiledFiles = [];
+        builders = warmBuilders(
+          1,
+          input.path(),
+          {
+            cssDir: ".",
+            persistentCache: "test",
+          },
+          details => {
+            compiledFiles.push(details.fullSassFilename);
+          }
+        );
+
+        yield builders[0].build();
+
+        assertEqualDirs(builders[0].path(), expectedOutput);
+        assert.strictEqual(1, compiledFiles.length);
+        compiledFiles.length = 0;
+
+        input.write({
+          "project.scss": "/* This is the main file. */",
+          "_related.scss": null,
+        });
+
+        expectedOutput = {
+          "project.css": "/* This is the main file. */\n",
+        };
+
+
+        yield builders[0].build();
+
+        assert.strictEqual(compiledFiles.length, 1);
+        assertEqualDirs(builders[0].path(), expectedOutput);
+      })
+    );
+
+    it(
       "restored side-effect outputs when cached.",
       co.wrap(function*() {
         input.write({
