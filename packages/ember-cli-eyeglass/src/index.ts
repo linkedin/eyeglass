@@ -8,6 +8,12 @@ import * as url from 'url';
 import cloneDeep = require('lodash.clonedeep');
 import defaultsDeep = require('lodash.defaultsdeep');
 import {BroccoliSymbolicLinker} from "./broccoli-ln-s";
+import debugGenerator = require("debug");
+
+const debug = debugGenerator("ember-cli-eyeglass");
+const debugSetup = debug.extend("setup");
+const debugBuild = debug.extend("build");
+const debugCache = debug.extend("cache");
 
 const EYEGLASS_INFO_PER_ADDON = new WeakMap<object, EyeglassAddonInfo>();
 const EYEGLASS_INFO_PER_APP = new WeakMap<object, EyeglassAppInfo>();
@@ -114,6 +120,7 @@ const EMBER_CLI_EYEGLASS = {
       name = `${name}/${thisName}`
     }
     let parentPath = this.parent.root;
+    debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
       apps.push(app);
       // we create the symlinker in persistent mode because there's not a good
@@ -128,17 +135,24 @@ const EMBER_CLI_EYEGLASS = {
     let addonInfo = {isApp, name, parentPath, app};
     EYEGLASS_INFO_PER_ADDON.set(this, addonInfo);
   },
-  postBuild(result) {
+  postBuild(_result) {
+    debugBuild("Build Succeeded.");
+    this._resetCaches();
+  },
+  _resetCaches() {
+    debugCache("clearing eyeglass global cache");
     Eyeglass.resetGlobalCaches();
     for (let app of apps) {
       let appInfo = EYEGLASS_INFO_PER_APP.get(app);
       appInfo.assets.reset();
+      debugCache("clearing %d cached items from the eyeglass build cache for %s", appInfo.sessionCache.size, app.name);
       appInfo.sessionCache.clear();
     }
   },
   postprocessTree(type, tree) {
     let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
     if (type === "all" && addonInfo.isApp) {
+      debugBuild("Merging eyeglass asset tree with the '%s' tree", type);
       let appInfo = EYEGLASS_INFO_PER_APP.get(addonInfo.app);
       return new MergeTrees([tree, appInfo.assets], {overwrite: true});
     } else {
@@ -163,6 +177,7 @@ const EMBER_CLI_EYEGLASS = {
 
         let compiler = new EyeglassCompiler(tree, config);
         compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {
+          debugBuild("will symlink %s to %s", absolutePathToSource, httpPathToOutput);
           this.linkAsset(absolutePathToSource, httpPathToOutput);
         });
         return compiler;
