@@ -1,3 +1,7 @@
+# 5.2.0
+
+* Upgrades `eyeglass` to `2.4.0`.
+
 # 5.1.1
 
 * Changes how persistent cache invalidation is performed for eyeglass modules
