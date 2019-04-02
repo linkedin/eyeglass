@@ -127,6 +127,21 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
    */
   strictModuleVersions?: boolean | "warn";
   /**
+   * Default to false.
+   *
+   * Whether to disable the strict dependency check that ensures
+   * that Sass files in an eyeglass eyeglass module can only import sass files
+   * from the eyeglass modules that it depends on directly.
+   *
+   * When true, a Sass file will be able to import from any eyeglass
+   * module that is found in the module tree.
+   *
+   * This is not recommended, but may be necessary when working with manually
+   * declared modules which currently lack a well-defined mechanism for
+   * declaring dependencies on other manual modules.
+   */
+  disableStrictDependencyCheck?: boolean;
+  /**
    * When strictModuleVersions checking is enabled,
    * this asserts that the modules installed are compatible with the
    * version of eyeglass specified, in contradiction to those module's

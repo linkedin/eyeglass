@@ -206,6 +206,19 @@ describe("eyeglass importer", function () {
     testutils.assertCompiles(options, expected, done);
   });
 
+  it("lets you import transitive sass files when strict module checks are disabled", function (done) {
+    var options = {
+      file: "wubwubwub.scss",
+      data: '@import "transitive_module";',
+      eyeglass: {
+        disableStrictDependencyCheck: true,
+        root: testutils.fixtureDirectory("basic_modules")
+      }
+    };
+    var expected = ".transitive_module {\n  hello: world; }\n";
+    testutils.assertCompiles(options, expected, done);
+  });
+
   it("does not let you import transitive sass files", function (done) {
     testutils.assertStderr(function(checkStderr) {
       var options = {

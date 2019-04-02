@@ -188,14 +188,13 @@ export default class EyeglassModules {
   access(name: string, origin: string): EyeglassModule | null {
     let mod = this.find(name);
 
-    // if we have a module, ensure that we can access it from the origin
-    if (mod && !this.canAccessModule(name, origin)) {
+    // if the module exists and we can access the module from the origin
+    if (mod && this.canAccessModule(name, origin)) {
+      return mod;
+    } else {
       // if not, return null
       return null;
     }
-
-    // otherwise, return the module reference
-    return mod!;
   }
 
   /**
@@ -561,14 +560,25 @@ export default class EyeglassModules {
           }
         });
 
-        /* istanbul ignore next - don't test debug */
-        debug.importer(
-          "%s can%s be imported from %s",
-          name,
-          (canAccess ? "" : "not"),
-          origin
-        );
-        return canAccess;
+        // If strict dependency checks are disabled, just return the true.
+        if (!canAccess && this.config.eyeglass.disableStrictDependencyCheck) {
+          debug.warning(
+            "Overriding strict dependency check for %s from %s",
+            name,
+            origin
+          );
+          return true;
+        } else {
+          /* istanbul ignore next - don't test debug */
+          debug.importer(
+            "%s can%s be imported from %s",
+            name,
+            (canAccess ? "" : "not"),
+            origin
+          );
+          return canAccess;
+        }
+
       });
     };
 
