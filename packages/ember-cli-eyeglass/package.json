@@ -84,6 +84,9 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.defaultsdeep": "^4.6.0"
   },
+  "peerDependencies": {
+    "ember-cli": "^3.5.0"
+  },
   "files": [
     "lib",
     "src",
