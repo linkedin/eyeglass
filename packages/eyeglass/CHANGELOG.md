@@ -1,3 +1,12 @@
+# 2.4.0
+
+* Adds option `disableStrictDependencyCheck` - which allows eyeglass modules to
+  import sass files from eyeglass modules anywhere in the dependency tree. This
+  is not recommended, but sometimes with manual module declarations or peer
+  dependencies it makes sense.
+* Properly lists 'heimdalljs' as a runtime dependency instead of a
+  dev dependency.
+
 # 2.3.1
 
 * Fixes a bug in eyeglass module resolutions that only occurred in the rare
