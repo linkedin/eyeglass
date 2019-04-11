@@ -4,8 +4,6 @@ import { URI } from "../util/URI";
 import { Config, AssetSourceOptions } from "../util/Options";
 import { SassImplementation } from "../util/SassImplementation";
 
-let assetRegisterTmpl = "@include asset-register(${namespace}, ${name}, ${sourcePath}, ${uri});\n";
-
 export default class AssetsCollection {
   options: Config;
   sass: SassImplementation;
@@ -37,26 +35,29 @@ export default class AssetsCollection {
     // builds the scss to register all the assets
     // this will look something like...
     //  @import "eyeglass/assets";
-    //  @include asset-register(
-    //    "namespace",
-    //    "path/to/foo.png",
-    //    "/absolute/namespace/path/to/foo.png",
-    //    "namespace/path/to/foo.png"
+    //  @include asset-register-all("namespace",
+    //    "path/to/foo.png": (
+    //      filepath: "/absolute/namespace/path/to/foo.png",
+    //      uri: "namespace/path/to/foo.png"
+    //    ),
     //  );
-    return this.sources.reduce((importStr, source) => {
+    let contents = [
+      '@import "eyeglass/assets";',
+    ];
+    for (let source of this.sources) {
       // get the assets for the entry
       let assets = source.getAssets(name);
       let namespace = (stringUtils.quoteJS(this.sass, assets.namespace) || "null");
-      // reduce the assets into a `asset-register` calls
-      return importStr + assets.files.reduce((registerStr, asset) => {
-        return registerStr + stringUtils.tmpl(this.sass, assetRegisterTmpl, {
-          namespace: namespace,
-          name: URI.sass(this.sass, asset.name),
-          sourcePath: URI.sass(this.sass, asset.sourcePath),
-          uri: URI.sass(this.sass, asset.uri)
-        });
-      }, "");
-    }, '@import "eyeglass/assets";\n');
+      contents.push(`@include asset-register-all(${namespace}, (`)
+      for (let asset of assets.files) {
+        let url = URI.sass(this.sass, asset.name);
+        let uri = URI.sass(this.sass, asset.uri);
+        let filepath = URI.sass(this.sass, asset.sourcePath);
+        contents.push(`  ${url}: (filepath: ${filepath}, uri: ${uri}),`)
+      }
+      contents.push("));")
+    }
+    return contents.join("\n");
   }
 
   /**
