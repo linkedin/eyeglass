@@ -357,6 +357,8 @@ export function resolveConfig(options: Partial<EyeglassSpecificOptions>): Eyegla
   defaultValue(options, "assertEyeglassCompatibility", () => DEFAULT_EYEGLASS_COMPAT);
   // Use a simple cache that just lasts for this one file if no buildCache is provided.
   defaultValue(options, "buildCache", () => new Map());
+  // Strict dependency checks are enabled by default.
+  defaultValue(options, "disableStrictDependencyCheck", () => false);
 
   options.fsSandbox = normalizeFsSandbox(options.fsSandbox, options.root!);
   return options as EyeglassConfig;
