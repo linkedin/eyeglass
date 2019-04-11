@@ -14,6 +14,7 @@ const debug = debugGenerator("ember-cli-eyeglass");
 const debugSetup = debug.extend("setup");
 const debugBuild = debug.extend("build");
 const debugCache = debug.extend("cache");
+const debugAssets = debug.extend("assets");
 
 const EYEGLASS_INFO_PER_ADDON = new WeakMap<object, EyeglassAddonInfo>();
 const EYEGLASS_INFO_PER_APP = new WeakMap<object, EyeglassAppInfo>();
@@ -207,6 +208,7 @@ const EMBER_CLI_EYEGLASS = {
     }
     let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
     let {assets} = EYEGLASS_INFO_PER_APP.get(app);
+    debugAssets("Will link asset %s to %s", srcFile, destUri);
     return assets.ln_s(srcFile, destUri);
   },
 
