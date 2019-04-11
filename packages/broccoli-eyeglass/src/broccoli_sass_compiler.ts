@@ -430,7 +430,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     this.fullException = options.fullException || false;
     delete options.fullException;
 
-    this.verbose = options.verbose || false;
+    this.verbose = options.verbose || debugGenerator.enabled("broccoli-eyeglass:results") || debugGenerator.enabled("eyeglass:results");
     delete options.verbose;
 
     this.renderSync = options.renderSync || false;
