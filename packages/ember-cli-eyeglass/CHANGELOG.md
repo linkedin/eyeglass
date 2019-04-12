@@ -1,3 +1,9 @@
+# 6.4.0
+
+* Upgrades broccoli-eyeglass to `5.4.0` which provides
+  better sass compilation concurrency on machines with greater than 4 physical cores.
+* Provides better error handling when older versions of ember-cli cause compilation errors.
+
 # 6.3.0
 
 * Upgrades broccoli-eyeglass to `5.3.0`.

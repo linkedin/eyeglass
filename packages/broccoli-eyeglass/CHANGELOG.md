@@ -1,3 +1,7 @@
+# 5.4.0
+
+* Respect `UV_THREADPOOL_SIZE` if it is set, and if it is not set, set it to take better advantage of concurrency features of `node-sass`. The `SASS_JOBS` environment variable can be used specify the concurrency of sass compilation. By default broccoli-eyeglass will set `UV_THREADPOOL_SIZE` to the number of real cores in a machine and use all of those threads for Sass compilation. `UV_THREADPOOL_SIZE` is not set unless it would be greater than the default value of 4. See [this PR](https://github.com/linkedin/eyeglass/pull/233) for more information.
+
 # 5.3.0
 
 * Upgrades `eyeglass` to `2.4.1`.
