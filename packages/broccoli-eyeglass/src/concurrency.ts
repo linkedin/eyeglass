@@ -6,9 +6,12 @@ const concurrencyDebug = debugGenerator("broccoli-eyeglass:concurrency");
 export const DEFAULT_CONCURRENCY = Number(process.env.SASS_JOBS) || Number(process.env.JOBS) || 4;
 
 export function determineOptimalConcurrency(): Promise<number> {
-  let sassConcurrency = Number(process.env.SASS_JOBS) || Number(process.env.JOBS) || undefined;
   let threadpoolSize = Number(process.env.UV_THREADPOOL_SIZE) || undefined;
-  if (sassConcurrency) {
+  let sassConcurrency = Number(process.env.SASS_JOBS) || Number(process.env.JOBS) || undefined;
+  if (process.env.SASS_JOBS === "auto") {
+    concurrencyDebug( "SASS_JOBS=auto. Ignoring JOBS setting.");
+    sassConcurrency = undefined;
+  } else if (sassConcurrency) {
     concurrencyDebug(
       "%d concurrent sass jobs have been requested.",
       sassConcurrency);
@@ -83,9 +86,10 @@ export function determineOptimalConcurrency(): Promise<number> {
         sassConcurrency);
       process.env.UV_THREADPOOL_SIZE = sassConcurrency.toString();
     } else {
-      concurrencyDebug(
-        "Leaving UV_THREADPOOL_SIZE unset (the default is 4). " +
-        "Sass will not use all available threads.");
+      concurrencyDebug("Leaving UV_THREADPOOL_SIZE unset (the default is 4).");
+      if (sassConcurrency < 4) {
+        concurrencyDebug("Sass will not use all available threads.");
+      }
     }
     return sassConcurrency;
   });
