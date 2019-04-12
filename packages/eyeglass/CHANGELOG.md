@@ -1,3 +1,8 @@
+# 2.4.1
+
+* Performance optimization for asset import and registration for modules with a
+  large number of assets.
+
 # 2.4.0
 
 * Adds option `disableStrictDependencyCheck` - which allows eyeglass modules to

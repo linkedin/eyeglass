@@ -1,6 +1,10 @@
+# 6.3.0
+
+* Upgrades broccoli-eyeglass to `5.3.0`.
+
 # 6.2.0
 
-* Upgrades broccoli-eyeglass to `5.1.1`.
+* Upgrades broccoli-eyeglass to `5.2.0`.
 * Adds a peerDependency on `ember-cli@^3.5.0` which was
   an implicit peerDependency since `6.1.0`.
 

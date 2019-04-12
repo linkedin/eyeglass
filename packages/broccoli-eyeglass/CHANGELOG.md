@@ -1,3 +1,8 @@
+# 5.3.0
+
+* Upgrades `eyeglass` to `2.4.1`.
+* Setting `DEBUG=broccoli-eyeglass:results` will enable verbose output.
+
 # 5.2.0
 
 * Upgrades `eyeglass` to `2.4.0`.

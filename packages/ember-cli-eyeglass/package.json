@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-eyeglass",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "Use eyeglass and node-sass to compile Sass files.",
   "directories": {
     "doc": "doc",
@@ -75,7 +75,7 @@
     "broccoli"
   ],
   "dependencies": {
-    "broccoli-eyeglass": "^5.2.0",
+    "broccoli-eyeglass": "^5.3.0",
     "broccoli-funnel": "^2.0.1",
     "broccoli-merge-trees": "^3.0.0",
     "broccoli-plugin": "^1.3.1",
