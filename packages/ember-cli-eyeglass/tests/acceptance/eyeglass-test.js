@@ -39,7 +39,7 @@ module('Acceptance | eyeglass', function(hooks) {
   // See issues:
   //   * https://github.com/sass-eyeglass/ember-cli-eyeglass/pull/50
   //   * https://github.com/sass-eyeglass/ember-cli-eyeglass/issues/52
-  skip('visiting /eager', async function(assert) {
+  test('visiting /eager', async function(assert) {
     await visit('/eager');
 
     assert.equal(currentURL(), '/eager');
@@ -51,7 +51,7 @@ module('Acceptance | eyeglass', function(hooks) {
 
     let imageUrl = eagerAddonStyle.backgroundImage.substring(5, eagerAddonStyle.backgroundImage.length - 2);
     assert.contains("http://", imageUrl);
-    assert.contains("/eager/assets/img/test.jpg", imageUrl);
+    assert.contains("/assets/img/test.jpg", imageUrl);
     try {
       let response = await fetch(imageUrl);
       assert.equal(response.ok, true, `Background image ${imageUrl} returned ${response.status}`);
