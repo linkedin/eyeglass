@@ -18,6 +18,13 @@ $eg-registered-assets: () !default;
 
   @return $uri;
 }
+@function eyeglass-normalize-assets($assets) {
+  @if function-exists(-eyeglass-normalize-assets) {
+    @return -eyeglass-normalize-assets($assets);
+  }
+
+  @return $assets;
+}
 // Registers many assets for a module at once.
 // @param $module string The name of the module to which these assets belong.
 // @param $url the source url of the asset. This is what is passed to asset-url().
@@ -54,10 +61,15 @@ $eg-registered-assets: () !default;
 // @param $assets map<string => map> maps source urls to the asset information
 //   as described in the docs for `$eg-registered-assets` above.
 @function asset-register-all($module, $assets) {
-  // iterate through the given assets and register
-  @each $key, $asset in $assets {
-    $trash: asset-register($module, $key, map-get($asset, filepath), map-get($asset, uri));
+  $assets: eyeglass-normalize-assets($assets);
+  $mod-assets: map-get($eg-registered-assets, $module);
+  @if ($mod-assets) {
+    $mod-assets: map-merge($mod-assets, $assets);
   }
+  @else {
+    $mod-assets: $assets;
+  }
+  $eg-registered-assets: map-merge($eg-registered-assets, ($module: $mod-assets)) !global;
   @return null;
 }
 
