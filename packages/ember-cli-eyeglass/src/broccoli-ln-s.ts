@@ -9,7 +9,7 @@ const ensureSymlink: EnsureSymlinkSync = require("ensure-symlink");
 /**
  * An object where the keys are the files that will be created in the tree and
  * the values are the source files.
- * 
+ *
  * @interface FileMap
  */
 interface FileMap {
@@ -21,7 +21,7 @@ type BroccoliSymbolicLinkerOptions =
 
 /**
  * Creates symlinks to the source files specified.
- * 
+ *
  *  BroccoliSymbolicLinker
  */
 export class BroccoliSymbolicLinker extends BroccoliPlugin {
@@ -50,6 +50,9 @@ export class BroccoliSymbolicLinker extends BroccoliPlugin {
   // eslint-disable-next-line @typescript-eslint/camelcase
   ln_s(src: string, dest: string): string {
     this.files[dest] = src;
+    if (!this.outputPath) {
+       throw new Error("outputPath is not eagerly defined. Please upgrade ember-cli to at least version 3.5.")
+    }
     return path.join(this.outputPath, dest);
   }
   /**

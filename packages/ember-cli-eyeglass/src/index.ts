@@ -183,7 +183,11 @@ const EMBER_CLI_EYEGLASS = {
         let compiler = new EyeglassCompiler(tree, config);
         compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {
           debugBuild("will symlink %s to %s", absolutePathToSource, httpPathToOutput);
-          this.linkAsset(absolutePathToSource, httpPathToOutput);
+          try {
+            this.linkAsset(absolutePathToSource, httpPathToOutput);
+          } catch (e) {
+            // pass this only happens with a cache after downgrading ember-cli.
+          }
         });
         return compiler;
       }
@@ -241,7 +245,11 @@ const EMBER_CLI_EYEGLASS = {
     let originalConfigureEyeglass = config.configureEyeglass;
     config.configureEyeglass = (eyeglass, sass, details) => {
       eyeglass.assets.installer((file, uri, fallbackInstaller, cb) => {
-        cb(null, this.linkAsset(file, uri))
+        try {
+          cb(null, this.linkAsset(file, uri))
+        } catch (e) {
+          cb(e);
+        }
       });
       if (originalConfigureEyeglass) {
         originalConfigureEyeglass(eyeglass, sass, details);
