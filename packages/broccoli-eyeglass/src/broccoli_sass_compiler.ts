@@ -8,7 +8,6 @@ import BroccoliPlugin = require("broccoli-plugin");
 import glob = require("glob");
 import FSTree = require("fs-tree-diff");
 import walkSync = require("walk-sync");
-import os = require("os");
 import queue = require("async-promise-queue");
 import ensureSymlink = require("ensure-symlink");
 import * as nodeSass from "node-sass";
@@ -18,10 +17,14 @@ import { EventEmitter } from "chained-emitter";
 import DiskCache = require("sync-disk-cache");
 import heimdall = require("heimdalljs");
 import {statSync} from "fs";
+import {determineOptimalConcurrency} from "./concurrency";
+
+const concurrency = determineOptimalConcurrency();
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
 const hotCacheDebug = debugGenerator("broccoli-eyeglass:hot-cache");
+const concurrencyDebug = debug.extend("concurrency");
 
 let sass: typeof nodeSass;
 let renderSass: (options: nodeSass.Options) => Promise<nodeSass.Result>;
@@ -509,13 +512,13 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       case 1:
         return RSVP.all(this.compileSassFile(srcPath, files[0], destDir, compilationTimer));
       default: {
-        let numConcurrentCalls = Number(process.env.SASS_JOBS) || Number(process.env.JOBS) || os.cpus().length;
-
         let worker = queue.async.asyncify((file: string) => {
           return RSVP.all(this.compileSassFile(srcPath, file, destDir, compilationTimer));
         });
-
-        return RSVP.resolve(queue(worker, files, numConcurrentCalls));
+        return concurrency.then(numConcurrentCalls => {
+          concurrencyDebug("Compiling files with a worker queue of size %d", numConcurrentCalls);
+          return RSVP.resolve(queue(worker, files, numConcurrentCalls));
+        })
       }
     }
   }
