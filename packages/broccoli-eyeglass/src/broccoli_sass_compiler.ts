@@ -19,7 +19,7 @@ import heimdall = require("heimdalljs");
 import {statSync} from "fs";
 import {determineOptimalConcurrency} from "./concurrency";
 
-const concurrency = determineOptimalConcurrency();
+const concurrency = RSVP.resolve(determineOptimalConcurrency());
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
