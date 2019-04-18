@@ -1,3 +1,7 @@
+# 6.4.1
+
+* Handle older versions of broccoli/ember-cli without an error.
+
 # 6.4.0
 
 * Upgrades broccoli-eyeglass to `5.4.0` which provides
