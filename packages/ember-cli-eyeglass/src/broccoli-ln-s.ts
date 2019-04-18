@@ -1,6 +1,7 @@
 import BroccoliPlugin = require("broccoli-plugin");
 import path = require("path");
 import * as fs from "fs-extra";
+import tmp = require("tmp");
 
 type EnsureSymlinkSync = (srcFile: string, destLink: string) => void;
 /* eslint-disable-next-line @typescript-eslint/no-var-requires */
@@ -26,6 +27,7 @@ type BroccoliSymbolicLinkerOptions =
  */
 export class BroccoliSymbolicLinker extends BroccoliPlugin {
   files: FileMap;
+  fakeOutputPath: string | undefined;
   constructor(fileMap?: FileMap | undefined, options: BroccoliSymbolicLinkerOptions = {}) {
     let pluginOpts: BroccoliPlugin.BroccoliPluginOptions = {needsCache: false};
     Object.assign(pluginOpts, options);
@@ -50,10 +52,12 @@ export class BroccoliSymbolicLinker extends BroccoliPlugin {
   // eslint-disable-next-line @typescript-eslint/camelcase
   ln_s(src: string, dest: string): string {
     this.files[dest] = src;
-    if (!this.outputPath) {
-       throw new Error("outputPath is not eagerly defined. Please upgrade ember-cli to at least version 3.5.")
+    let tartgetDir = this.outputPath;
+    if (!tartgetDir) {
+      this.fakeOutputPath = this.fakeOutputPath || tmp.dirSync().name;
+      tartgetDir = this.fakeOutputPath;
     }
-    return path.join(this.outputPath, dest);
+    return path.join(tartgetDir, dest);
   }
   /**
    * Returns the number of symlinks that will be created.
