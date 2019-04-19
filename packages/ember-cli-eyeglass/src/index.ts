@@ -9,6 +9,7 @@ import cloneDeep = require('lodash.clonedeep');
 import defaultsDeep = require('lodash.defaultsdeep');
 import {BroccoliSymbolicLinker} from "./broccoli-ln-s";
 import debugGenerator = require("debug");
+import { URL } from 'url';
 
 const debug = debugGenerator("ember-cli-eyeglass");
 const debugSetup = debug.extend("setup");
@@ -42,7 +43,7 @@ function getDefaultAssetHttpPrefix(parent: any): string {
   while (current.parent) {
     if (isLazyEngine(current)) {
       // only lazy engines will inline their assets in the engines-dist folder
-      return `/engines-dist/${current.name}/assets`;
+      return `engines-dist/${current.name}/assets`;
     }
     current = current.parent;
   }
@@ -174,17 +175,18 @@ const EMBER_CLI_EYEGLASS = {
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1) || './';
         let sassDir = inputPath.slice(1) || './';
-        let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+        let {app, name} = EYEGLASS_INFO_PER_ADDON.get(this);
         let extracted = this.extractConfig(app, addon);
         extracted.cssDir = cssDir;
         extracted.sassDir = sassDir;
         const config = this.setupConfig(extracted);
-
+        debugSetup("Broccoli Configuration for %s: %O", name, config)
+        let httpRoot = config.eyeglass && config.eyeglass.httpRoot || "/";
         let compiler = new EyeglassCompiler(tree, config);
         compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {
           debugBuild("will symlink %s to %s", absolutePathToSource, httpPathToOutput);
           try {
-            this.linkAsset(absolutePathToSource, httpPathToOutput);
+            this.linkAsset(absolutePathToSource, httpRoot, httpPathToOutput);
           } catch (e) {
             // pass this only happens with a cache after downgrading ember-cli.
           }
@@ -202,18 +204,23 @@ const EMBER_CLI_EYEGLASS = {
     return defaultsDeep(addonConfig, hostConfig);
   },
 
-  linkAsset(srcFile: string, destUri: string): string {
-    if (path.posix.isAbsolute(destUri)) {
-      destUri = path.posix.relative("/", destUri);
-    }
+  linkAsset(srcFile: string, httpRoot: string, destUri: string): string {
+    let rootPath = httpRoot.startsWith("/") ? httpRoot.substring(1) : httpRoot;
+    let destPath = destUri.startsWith("/") ? destUri.substring(1) : destUri;
 
     if (process.platform === "win32") {
-      destUri = url.fileURLToPath(`file://${destUri}`)
+      destPath = convertURLToPath(destPath);
+      rootPath = convertURLToPath(rootPath);
+    }
+
+    if (destPath.startsWith(rootPath)) {
+      destPath = path.relative(rootPath, destPath);
     }
     let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
     let {assets} = EYEGLASS_INFO_PER_APP.get(app);
-    debugAssets("Will link asset %s to %s", srcFile, destUri);
-    return assets.ln_s(srcFile, destUri);
+    debugAssets("Will link asset %s to %s to expose it at %s relative to %s",
+      srcFile, destPath, destUri, httpRoot);
+    return assets.ln_s(srcFile, destPath);
   },
 
   setupConfig(config: ConstructorParameters<typeof EyeglassCompiler>[1], options) {
@@ -246,7 +253,7 @@ const EMBER_CLI_EYEGLASS = {
     config.configureEyeglass = (eyeglass, sass, details) => {
       eyeglass.assets.installer((file, uri, fallbackInstaller, cb) => {
         try {
-          cb(null, this.linkAsset(file, uri))
+          cb(null, this.linkAsset(file, eyeglass.options.eyeglass.httpRoot || "/", uri))
         } catch (e) {
           cb(e);
         }
@@ -277,4 +284,7 @@ const EMBER_CLI_EYEGLASS = {
   }
 };
 
+function convertURLToPath(fragment: string): string {
+  return (new URL(`file://${fragment}`)).pathname;
+}
 export = EMBER_CLI_EYEGLASS;
