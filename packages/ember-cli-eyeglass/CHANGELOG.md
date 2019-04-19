@@ -1,3 +1,8 @@
+# 6.4.2
+
+* Bug Fix: Install assets into the correct directory when httpRoot
+  is set.
+
 # 6.4.1
 
 * Handle older versions of broccoli/ember-cli without an error.
