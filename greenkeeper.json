@@ -1,0 +1,14 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "packages/broccoli-eyeglass/examples/example-1/package.json",
+        "packages/broccoli-eyeglass/examples/example-2/package.json",
+        "packages/broccoli-eyeglass/package.json",
+        "packages/ember-cli-eyeglass/package.json",
+        "packages/eyeglass/package.json"
+      ]
+    }
+  }
+}
