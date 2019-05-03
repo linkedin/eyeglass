@@ -1,5 +1,7 @@
 # Welcome to the Eyeglass Monorepo
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/linkedin/eyeglass.svg)](https://greenkeeper.io/)
+
 Eyeglass provides a way to distribute Sass files and their associated assets and javascript extensions via npm such that any build system can be adapted to automatically expose those Sass files to Sass's `@import` directive by just installing the code. If the imported files have references to images or other assets, those will be delivered to the fully-built application with the correct urls.
 
 This monorepo provides:
