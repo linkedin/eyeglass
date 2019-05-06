@@ -74,7 +74,7 @@ class Entry {
   basePath: string;
   mode: number;
   size: number;
-  mtime: Date;
+  mtime: number | Date;
   constructor(path: string) {
     let stats = fs.statSync(path);
     this.relativePath = path;
@@ -1086,7 +1086,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   knownDependenciesTree(inputPath: string): FSTree {
     let entries = walkSync.entries(inputPath);
     absolutizeEntries(entries);
-    let tree = FSTreeFromEntries(entries);
+    let tree = FSTreeFromEntries<FSTree.Entry>(entries);
     tree.addEntries(this.knownDependencies(), { sortAndExpand: true });
     return tree;
   }
@@ -1104,7 +1104,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     let currentTree = this.currentTree;
 
     let nextTree: FSTree | null = null;
-    let patches = new Array<FSTree.Patch>();
+    let patches = new Array<FSTree.Operation>();
     let compilationAvoidanceTimer = heimdall.start("eyeglass:broccoli:build:invalidation");
     if (this.hasKnownDependencies()) {
       hotCacheDebug("Has known dependencies");
@@ -1134,10 +1134,12 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       hotCacheDebug("dependencies are", deps);
       for (var p = 0; p < patches.length; p++) {
         let entry = patches[p][2];
-        hotCacheDebug("looking for", entry.relativePath);
-        if (deps.has(entry.relativePath)) {
-          hotCacheDebug("building because", entry.relativePath, "is used by", f);
-          return true;
+        if (entry) {
+          hotCacheDebug("looking for", entry.relativePath);
+          if (deps.has(entry.relativePath)) {
+            hotCacheDebug("building because", entry.relativePath, "is used by", f);
+            return true;
+          }
         }
       }
 
@@ -1156,8 +1158,10 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     for (var p = 0; p < patches.length; p++) {
       if (patches[p][0] === "unlink") {
         let entry = patches[p][2];
-        if (entry.relativePath.indexOf(inputPath) === 0) {
-          removed.push(entry.relativePath);
+        if (entry) {
+          if (entry.relativePath.indexOf(inputPath) === 0) {
+            removed.push(entry.relativePath);
+          }
         }
       }
     }

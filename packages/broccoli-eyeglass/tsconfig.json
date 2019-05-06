@@ -3,7 +3,7 @@
       "forceConsistentCasingInFileNames": true,
       "rootDir": "src",
       "baseUrl": "src",
-      "composite": true,
+      "composite": false, // https://github.com/Microsoft/TypeScript/issues/31181
       "downlevelIteration": true,
       "moduleResolution": "node",
       "outDir": "./lib",
