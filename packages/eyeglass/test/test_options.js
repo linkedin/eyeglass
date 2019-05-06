@@ -92,7 +92,8 @@ describe("options", function() {
           ignoreDeprecations: semver.inc(VERSION, "minor")
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
+      console.dir(Eyeglass);
+      var eyeglass = new Eyeglass(options);
       /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr("");
@@ -111,7 +112,7 @@ describe("options", function() {
           ignoreDeprecations: "0.7.1"
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
+      var eyeglass = new Eyeglass(options);
       /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr([
@@ -148,8 +149,6 @@ describe("options", function() {
         "      }",
         "    }",
         "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
         "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
         "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
       ].join("\n"));
@@ -168,7 +167,7 @@ describe("options", function() {
           ignoreDeprecations: false
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
+      var eyeglass = new Eyeglass(options);
       /* eslint no-unused-vars:0 */
       var sassopts = eyeglass.sassOptions();
       checkStderr([
@@ -206,8 +205,6 @@ describe("options", function() {
         "    }",
         "  });",
         "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
         "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
       ].join("\n"));
       done();
@@ -215,28 +212,6 @@ describe("options", function() {
   });
 
   describe("deprecated interface", function() {
-    it("should support `new Eyeglass.Eyeglass` with warning", function(done) {
-      testutils.assertStderr(function(checkStderr) {
-        var eyeglass = new Eyeglass.Eyeglass();
-        checkStderr(
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`\n"
-        );
-        done();
-      });
-    });
-
-    it("should support `Eyeglass.decorate` with warning", function(done) {
-      testutils.assertStderr(function(checkStderr) {
-        var eyeglass = Eyeglass.decorate();
-        checkStderr(
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "`require('eyeglass').decorate` is deprecated. Instead, use `require('eyeglass')`\n"
-        );
-        done();
-      });
-    });
-
     it("should support `#sassOptions` method with warning", function(done) {
       testutils.assertStderr(function(checkStderr) {
         var eyeglass = new Eyeglass();

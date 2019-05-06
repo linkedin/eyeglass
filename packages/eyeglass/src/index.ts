@@ -1,20 +1,7 @@
 import { Options as Opts, Config } from "./util/Options";
-import { IEyeglass } from "./IEyeglass";
 import { SassImplementation } from "./util/SassImplementation";
 import EyeglassImpl, { resetGlobalCaches } from "./Eyeglass";
 /* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations, no-redeclare */
-
-function deprecateMethodWarning(this: IEyeglass, method: string): void {
-  this.deprecate("0.8.0", "0.9.0",
-    "`require('eyeglass')." + method + "` is deprecated. " +
-    "Instead, use `require('eyeglass')`"
-  );
-}
-
-interface DeprecatedFunctions {
-  Eyeglass(options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl;
-  decorate(options: Opts, deprecatedNodeSassArg?: SassImplementation): Config;
-}
 
 interface AdditionalFunctions {
   resetGlobalCaches(): void;
@@ -22,7 +9,6 @@ interface AdditionalFunctions {
 
 type PublicConstructor =
   typeof EyeglassImpl
-  & DeprecatedFunctions
   & AdditionalFunctions
   & ((options: Opts, deprecatedNodeSassArg?: SassImplementation) => Config);
 
@@ -43,16 +29,6 @@ function newOrOptions(): PublicConstructor {
   __Eyeglass.helpers = EyeglassImpl.helpers;
   Object.assign(__Eyeglass, {
     resetGlobalCaches,
-    Eyeglass(options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl {
-      let eyeglass = new EyeglassImpl(options, deprecatedNodeSassArg);
-      deprecateMethodWarning.call(eyeglass, "Eyeglass");
-      return eyeglass;
-    },
-    decorate(options: Opts, deprecatedNodeSassArg?: SassImplementation): Config {
-      let eyeglass = new EyeglassImpl(options, deprecatedNodeSassArg);
-      deprecateMethodWarning.call(eyeglass, "decorate");
-      return eyeglass.options;
-    },
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return __Eyeglass as any; // we have to cast through any otherwise typescript thinks this function doesn't implement the full API of EyeglassImpl.
