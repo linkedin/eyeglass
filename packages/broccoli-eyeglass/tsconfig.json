@@ -22,7 +22,8 @@
       "lib": [
           "es6"
       ],
-      "target": "es5",
+      "target": "es6",
+      "module": "commonjs",
       "sourceMap": true,
       "paths": {
         "heimdalljs": ["../../eyeglass/src/types/heimdalljs"],

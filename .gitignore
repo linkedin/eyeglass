@@ -34,3 +34,4 @@ node_modules/
 
 # test file to gitignore
 *.gitignore.png
+tsconfig.tsbuildinfo

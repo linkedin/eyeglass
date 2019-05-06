@@ -3,7 +3,7 @@
       "forceConsistentCasingInFileNames": true,
       "rootDir": "src",
       "baseUrl": "src",
-      "composite": true,
+      "composite": false, // https://github.com/Microsoft/TypeScript/issues/31181
       "downlevelIteration": true,
       "moduleResolution": "node",
       "outDir": "./lib",
@@ -14,7 +14,8 @@
       "lib": [
           "es6"
       ],
-      "target": "es5",
+      "target": "es6",
+      "module": "commonjs",
       "sourceMap": true,
       "paths": {
         "node-sass": ["../../eyeglass/@types/node-sass"],
@@ -33,8 +34,9 @@
       "./src/**/*"
   ],
   "references": [
-    {"path": "../eyeglass"},
-    {"path": "../broccoli-eyeglass"}
+    // https://github.com/Microsoft/TypeScript/issues/31181
+    //{"path": "../broccoli-eyeglass"},
+    {"path": "../eyeglass"}
   ]
 
 }

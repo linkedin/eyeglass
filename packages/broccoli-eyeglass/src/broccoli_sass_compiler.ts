@@ -21,7 +21,6 @@ import {determineOptimalConcurrency} from "./concurrency";
 
 const concurrency = RSVP.resolve(determineOptimalConcurrency());
 
-const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
 const hotCacheDebug = debugGenerator("broccoli-eyeglass:hot-cache");
 const concurrencyDebug = debug.extend("concurrency");
@@ -1086,7 +1085,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   knownDependenciesTree(inputPath: string): FSTree {
     let entries = walkSync.entries(inputPath);
     absolutizeEntries(entries);
-    let tree = FSTreeFromEntries<FSTree.Entry>(entries);
+    let tree = FSTree.fromEntries<FSTree.Entry>(entries);
     tree.addEntries(this.knownDependencies(), { sortAndExpand: true });
     return tree;
   }

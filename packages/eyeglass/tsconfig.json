@@ -6,6 +6,7 @@
         "composite": true,
         "downlevelIteration": true,
         "moduleResolution": "node",
+        "module": "commonjs",
         "outDir": "./lib",
         "noImplicitAny": true,
         "noImplicitReturns": true,
@@ -22,7 +23,7 @@
         "lib": [
             "es6"
         ],
-        "target": "es5",
+        "target": "es6",
         "sourceMap": true,
         "paths": {
           "*": ["types/*"],
