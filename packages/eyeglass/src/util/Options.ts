@@ -288,8 +288,8 @@ function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & 
         "  }",
         "});"
       ].join("\n  "));
-
-      eyeglassOptions[option] = sassOptions[option];
+      let v = <any>sassOptions[option];
+      eyeglassOptions[option] = v;
       delete sassOptions[option];
     }
   });

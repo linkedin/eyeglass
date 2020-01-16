@@ -1,8 +1,10 @@
 import { existsSync } from '../util/perf';
-import { PackageJson } from 'package-json';
+import packageJson = require('package-json');
 import * as path from 'path';
 
 import { URI } from './URI';
+
+type PackageJson = packageJson.FullVersion;
 
 let PACKAGE_JSON = "package.json";
 export function getPackageData<ExtraPackageData = never>(pkgPath: string): null | (PackageJson & ExtraPackageData) {

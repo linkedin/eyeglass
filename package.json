@@ -13,8 +13,8 @@
     "test": "lerna run test",
     "postinstall": "lerna bootstrap"
   },
-  "toolchain": {
-    "node": "10.6.0",
+  "volta": {
+    "node": "10.13.0",
     "yarn": "1.14.0"
   }
 }

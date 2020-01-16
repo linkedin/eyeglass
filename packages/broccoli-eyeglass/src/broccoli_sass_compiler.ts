@@ -1024,8 +1024,8 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   outputsFromOnly(inputs: Array<string>): Set<string> {
     inputs = this.relativizeAll(inputs);
 
-    let otherOutputs = new Set();
-    let onlyOutputs = new Set();
+    let otherOutputs = new Set<string>();
+    let onlyOutputs = new Set<string>();
     let allInputs = Object.keys(this.outputs);
 
     for (let i = 0; i < allInputs.length; i++) {

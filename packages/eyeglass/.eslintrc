@@ -12,7 +12,8 @@
   ],
   "rules": {
     "indent": "off",
-    "@typescript-eslint/array-type": ["error", "generic"],
+    "prefer-const": "off",
+    "@typescript-eslint/array-type": ["error", {default: "generic"}],
     "@typescript-eslint/indent": ["error", 2],
     "@typescript-eslint/restrict-plus-operands": "error",
     "@typescript-eslint/explicit-member-accessibility": "off",

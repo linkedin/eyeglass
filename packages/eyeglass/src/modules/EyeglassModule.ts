@@ -5,11 +5,13 @@ import * as path from "path";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { FunctionDeclarations } from "node-sass";
-import { PackageJson } from "package-json";
+import packageJson = require("package-json");
 import AssetsCollection from "../assets/AssetsCollection";
 import { Dict, isPresent } from "../util/typescriptUtils";
 import { realpathSync } from "../util/perf";
 import { SemVer } from "semver";
+
+type PackageJson = packageJson.FullVersion;
 
 const rInvalidName = /\.(?:sass|s?css)$/;
 const EYEGLASS_KEYWORD: "eyeglass-module" = "eyeglass-module";
@@ -70,7 +72,7 @@ export interface ManualModuleOptions {
    */
   main?: EyeglassModuleMain | null;
   /**
-   * If a main function is provided this path to the 
+   * If a main function is provided this path to the
    * filename where it is defined should be provided
    * for better error messages in some situations.
    */

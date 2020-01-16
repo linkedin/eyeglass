@@ -9,7 +9,7 @@ import { SimpleCache } from "../util/SimpleCache";
 import { URI } from "../util/URI";
 import EyeglassModule, { ModuleSpecifier, DiscoverOptions } from "./EyeglassModule";
 import merge = require("lodash.merge");
-import { PackageJson } from "package-json";
+import packageJson = require("package-json");
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Dict, isPresent } from "../util/typescriptUtils";
@@ -17,6 +17,9 @@ import { EyeglassConfig } from "..";
 import { Config } from "../util/Options";
 import heimdall = require("heimdalljs");
 import { realpathSync } from "../util/perf";
+
+type PackageJson = packageJson.FullVersion;
+
 // XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
 // XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
 // eslint-disable-next-line

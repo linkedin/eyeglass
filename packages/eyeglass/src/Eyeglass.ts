@@ -9,7 +9,7 @@ import deprecator, { DeprecateFn } from "./util/deprecator";
 import semverChecker from "./util/semverChecker";
 import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
-import {PackageJson} from "package-json";
+import packageJson = require("package-json");
 import { SassFunction } from "node-sass";
 import { SassImplementation, helpers as sassHelpers } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
@@ -17,8 +17,9 @@ import { UnsafeDict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
 import { SimpleCache } from "./util/SimpleCache";
 import { resetGlobalCaches as resetGlobalFSCaches } from "./util/perf";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg: PackageJson = require("../package.json");
+const pkg: packageJson.AbbreviatedVersion = require("../package.json");
 
 export function resetGlobalCaches(): void {
   resetGlobalModuleCaches();
@@ -174,7 +175,8 @@ function deprecateProperties(this: IEyeglass, properties: Array<keyof SimpleDepr
           "\n    }" +
           "\n  });"
         );
-        this.options.eyeglass[prop] = value;
+        let eyeglassOpts: {[name: string]: EyeglassConfig[typeof prop]} = <any>this.options.eyeglass;
+        eyeglassOpts[prop] = value;
       }
     });
   }
