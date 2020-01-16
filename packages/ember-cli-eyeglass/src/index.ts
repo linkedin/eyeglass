@@ -17,9 +17,42 @@ const debugBuild = debug.extend("build");
 const debugCache = debug.extend("cache");
 const debugAssets = debug.extend("assets");
 
-const EYEGLASS_INFO_PER_ADDON = new WeakMap<object, EyeglassAddonInfo>();
-const EYEGLASS_INFO_PER_APP = new WeakMap<object, EyeglassAppInfo>();
-const apps = new Array<any>();
+interface EyeglassProjectInfo {
+  apps: Array<any>;
+}
+interface EyeglassAddonInfo {
+  name: string;
+  parentPath: string;
+  isApp: boolean;
+  app: any;
+}
+
+interface EyeglassAppInfo {
+  assets: BroccoliSymbolicLinker;
+  sessionCache: Map<string, string | number>;
+}
+
+interface GlobalEyeglassData {
+  infoPerAddon: WeakMap<object, EyeglassAddonInfo>;
+  infoPerApp: WeakMap<object, EyeglassAppInfo>;
+  projectInfo: EyeglassProjectInfo;
+}
+
+const g: typeof global & {EYEGLASS?: GlobalEyeglassData} = global;
+
+if (!g.EYEGLASS) {
+  g.EYEGLASS = {
+    infoPerAddon: new WeakMap(),
+    infoPerApp: new WeakMap(),
+    projectInfo: {
+      apps: []
+    }
+  }
+}
+
+const EYEGLASS_INFO_PER_ADDON = g.EYEGLASS.infoPerAddon;
+const EYEGLASS_INFO_PER_APP = g.EYEGLASS.infoPerApp;
+const APPS = g.EYEGLASS.projectInfo.apps;
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isLazyEngine(addon: any): boolean {
@@ -91,20 +124,6 @@ function localEyeglassAddons(addon): Array<{path: string}> {
   return paths;
 }
 
-interface EyeglassProjectInfo {
-  apps: Array<any>;
-}
-interface EyeglassAddonInfo {
-  name: string;
-  parentPath: string;
-  isApp: boolean;
-  app: any; // is this safe to cache across builds?
-}
-interface EyeglassAppInfo {
-  assets: BroccoliSymbolicLinker;
-  sessionCache: Map<string, string | number>;
-}
-
 const EMBER_CLI_EYEGLASS = {
   name: require("../package.json").name,
   included(parent) {
@@ -124,7 +143,7 @@ const EMBER_CLI_EYEGLASS = {
     let parentPath = this.parent.root;
     debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
-      apps.push(app);
+      APPS.push(app);
       // we create the symlinker in persistent mode because there's not a good
       // way yet to recreate the symlinks when sass files are cached. I would
       // worry about it more but it seems like the dist directory is cumulative
@@ -144,7 +163,7 @@ const EMBER_CLI_EYEGLASS = {
   _resetCaches() {
     debugCache("clearing eyeglass global cache");
     Eyeglass.resetGlobalCaches();
-    for (let app of apps) {
+    for (let app of APPS) {
       let appInfo = EYEGLASS_INFO_PER_APP.get(app);
       appInfo.assets.reset();
       debugCache("clearing %d cached items from the eyeglass build cache for %s", appInfo.sessionCache.size, app.name);
