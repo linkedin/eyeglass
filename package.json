@@ -6,7 +6,8 @@
     "yarn": "^1.9.4"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "private-packages/*"
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
@@ -14,7 +15,7 @@
     "postinstall": "lerna bootstrap"
   },
   "volta": {
-    "node": "10.13.0",
-    "yarn": "1.14.0"
+    "node": "10.18.1",
+    "yarn": "1.21.1"
   }
 }

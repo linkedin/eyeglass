@@ -10,13 +10,12 @@
   "scripts": {
     "prepare": "tsc --build",
     "pretest": "tsc --build",
-    "build": "ember build",
+    "build": "yarn prepare",
     "lint": "eslint --ext ts --format visualstudio .",
     "lintfix": "eslint --ext ts --fix .",
-    "start": "ember serve",
-    "test": "ember test",
-    "test:node": "mocha node-tests/**/*-test.js",
-    "test:all": "ember try:each"
+    "start": "cd ../../private-packages/eyeglass-test-app/ && yarn start",
+    "test": "yarn test:node && cd ../../private-packages/eyeglass-test-app/ && yarn test:acceptance",
+    "test:node": "mocha node-tests/**/*-test.js"
   },
   "repository": {
     "type": "git",
@@ -33,36 +32,11 @@
     "@types/node": "^10.7.0",
     "@typescript-eslint/eslint-plugin": "^2.16.0",
     "@typescript-eslint/parser": "^2.16.0",
-    "babel-eslint": "^10.0.1",
     "broccoli-stew": "^2.0.0",
     "chai": "^4.1.2",
-    "eager": "file:./tests/dummy/lib/eager/",
-    "ember-cli": "^3.8.1",
-    "ember-cli-app-version": "^3.1.0",
-    "ember-cli-babel": "^6.16.0",
-    "ember-cli-dependency-checker": "^3.0.0",
-    "ember-cli-htmlbars": "^3.0.1",
-    "ember-cli-htmlbars-inline-precompile": "^2.1.0",
-    "ember-cli-inject-live-reload": "^2.0.1",
-    "ember-cli-qunit": "^4.4.0",
-    "ember-cli-shims": "^1.2.0",
-    "ember-cli-sri": "^2.1.0",
-    "ember-disable-prototype-extensions": "^1.1.2",
-    "ember-engines": "^0.5.26",
-    "ember-export-application-global": "^2.0.0",
-    "ember-load-initializers": "^2.0.0",
-    "ember-resolver": "^5.1.1",
-    "ember-source": "^3.3.0",
-    "ember-source-channel-url": "^1.1.0",
-    "ember-try": "^1.1.0",
     "eslint": "^5.12.1",
-    "eslint-plugin-ember": "^6.2.0",
-    "eslint-plugin-node": "^8.0.1",
     "eyeglass": "^2.2.0",
-    "lazy": "file:./tests/dummy/lib/lazy/",
-    "loader.js": "^4.0.1",
     "mocha": "^5.2.0",
-    "qunit-dom": "^0.7.1",
     "typescript": "~3.7.0"
   },
   "keywords": [
@@ -94,7 +68,8 @@
     "NOTICE",
     "*.md"
   ],
-  "ember-addon": {
-    "configPath": "tests/dummy/config"
+  "volta": {
+    "node": "10.18.1",
+    "yarn": "1.21.1"
   }
 }

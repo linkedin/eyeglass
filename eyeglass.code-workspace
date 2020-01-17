@@ -8,6 +8,15 @@
 		},
 		{
 			"path": "packages/ember-cli-eyeglass"
+		},
+		{
+			"path": "private-packages/eager-test-addon"
+		},
+		{
+			"path": "private-packages/eyeglass-test-app"
+		},
+		{
+			"path": "private-packages/lazy-test-addon"
 		}
 	],
 	"settings": {

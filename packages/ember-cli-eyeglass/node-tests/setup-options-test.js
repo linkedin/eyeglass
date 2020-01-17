@@ -7,7 +7,7 @@ describe('setupConfig', function() {
   describe('inApp: true', function() {
     const inApp = true;
 
-    it('basic', function() {
+    it.skip('basic', function() {
       const config = {
         httpRoot: 'the-root'
       };
@@ -41,7 +41,7 @@ describe('setupConfig', function() {
     });
 
 
-    it('localEyeglassAddons', function() {
+    it.skip('localEyeglassAddons', function() {
       const config = {
         httpRoot: 'the-root'
       };
@@ -80,7 +80,7 @@ describe('setupConfig', function() {
     });
 
 
-    it('localEyeglassAddons merge', function() {
+    it.skip('localEyeglassAddons merge', function() {
       const config = {
         eyeglass: {
           modules: [
@@ -132,7 +132,7 @@ describe('setupConfig', function() {
     });
 
 
-    it('kitchenSink', function() {
+    it.skip('kitchenSink', function() {
       const config = {
         httpRoot: 'the-root',
         assetsHttpPrefix: 'some-other-prefix',
