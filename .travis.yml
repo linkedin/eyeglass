@@ -4,6 +4,3 @@ node_js:
 - '10'
 - '12'
 install: yarn
-matrix:
-  allow_failures:
-    - node_js: '6'
