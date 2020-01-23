@@ -1,3 +1,11 @@
+# 6.4.3
+
+* Node versions 6 and 11 are now deprecated and will be removed in
+  eyeglass 3.0.0 (ember-cli-eyeglass 7.0.0). While the code should still
+  work on node 6, our testing infrastructure in CI no longer runs on node
+  6, so our policy for node 6 support going forward will be that we will
+  fix regressions if they occur.
+
 # 6.4.2
 
 * Bug Fix: Install assets into the correct directory when httpRoot

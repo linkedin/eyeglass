@@ -1,3 +1,11 @@
+# 5.4.1
+
+* Node versions 6 and 11 are now deprecated and will be removed in
+  Eyeglass 3.0.0 (broccoli-eyeglass 6.0.0). While the code should still
+  work on node 6, our testing infrastructure in CI no longer runs on node
+  6, so our policy for node 6 support going forward will be that we will
+  fix regressions if they occur.
+
 # 5.4.0
 
 * Respect `UV_THREADPOOL_SIZE` if it is set, and if it is not set, set it to take better advantage of concurrency features of `node-sass`. The `SASS_JOBS` environment variable can be used specify the concurrency of sass compilation. By default broccoli-eyeglass will set `UV_THREADPOOL_SIZE` to the number of real cores in a machine and use all of those threads for Sass compilation. `UV_THREADPOOL_SIZE` is not set unless it would be greater than the default value of 4. See [this PR](https://github.com/linkedin/eyeglass/pull/233) for more information.
