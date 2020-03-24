@@ -39,7 +39,7 @@ describe("utilities", function () {
 
       assert(versionIssues.length, "discovery found errors");
       assert.equal(versionIssues[0].name, "conflict_module");
-      assert.notEqual(versionIssues[0].left.version, versionIssues[0].right.version);
+      assert.notEqual(versionIssues[0].requested.version, versionIssues[0].resolved.version);
     });
 
   it("loads a package.json for an eyeglass module", function (done) {

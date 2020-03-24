@@ -265,7 +265,10 @@ export default class EyeglassModules {
     *
     * @returns {String} the module hierarchy
     */
-  getGraph(tree: ModuleBranch): string {
+  getGraph(tree?: ModuleBranch): string {
+    if (!tree) {
+      tree = this.tree;
+    }
     let hierarchy = getHierarchy(tree);
     hierarchy.label = this.getDecoratedRootName();
     return archy(hierarchy);

@@ -3,10 +3,10 @@
     "versions": [
       {
         "name": "module_b",
-        "left": {
+        "requested": {
           "version": "1.0.0"
         },
-        "right": {
+        "resolved": {
           "version": "2.0.0"
         }
       }
