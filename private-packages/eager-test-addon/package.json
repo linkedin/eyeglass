@@ -1,14 +1,14 @@
 {
   "private": true,
   "name": "eager-test-addon",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "keywords": [
     "ember-addon",
     "ember-engine"
   ],
   "dependencies": {
     "ember-cli-babel": "^7.13.0",
-    "ember-cli-eyeglass": "^6.4.3",
+    "ember-cli-eyeglass": "^6.5.0",
     "ember-cli-htmlbars": "^4.2.2"
   },
   "ember-addon": {
