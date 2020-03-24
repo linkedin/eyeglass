@@ -128,8 +128,14 @@ const VERSION_WARNINGS_ISSUED: Dict<boolean> = {};
 function checkDependencyConflicts(this: IEyeglass): void {
   let conflicts = this.modules.issues.dependencies.versions;
   let strictMode = this.options.eyeglass.strictModuleVersions;
+  let deprecatedWarn = false;
   if (typeof strictMode === "undefined") {
     strictMode = "warn";
+  }
+  // XXX Remove prior to next major release.
+  if (strictMode === true) {
+    strictMode = "warn";
+    deprecatedWarn = true;
   }
   for (let conflict of conflicts) {
     let message = `Version conflict for eyeglass module '${conflict.name}': ${conflict.requested.version} was requested but it was globally resolved to ${conflict.resolved.version}.`;
@@ -138,6 +144,9 @@ function checkDependencyConflicts(this: IEyeglass): void {
     } else if (strictMode === "warn") {
       if (!VERSION_WARNINGS_ISSUED[message]) {
         console.error(`WARNING: ${message}`);
+        if (deprecatedWarn) {
+          console.error("WARNING: Because strictModuleVersions is true, the previous warning will become an error in the next major release. Consider setting strictModuleVersions to 'warn' for now.");
+        }
         VERSION_WARNINGS_ISSUED[message] = true;
       }
     } else if (strictMode === true) {
