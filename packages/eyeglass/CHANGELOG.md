@@ -1,3 +1,12 @@
+# 2.5.0
+
+* Node version 8 is now deprecated. Support for node 6, 8, and 11 will be
+  removed in the `3.0.0` release.
+* Eyeglass will now emit warnings if the same eyeglass module is found in the
+  node module tree at different major versions. For projects with
+  `strictModuleVersions` set to `true`, those warnings will become errors in the
+  `3.0.0` release.
+
 # 2.4.2
 
 * Node versions 6 and 11 are now deprecated and will be removed in

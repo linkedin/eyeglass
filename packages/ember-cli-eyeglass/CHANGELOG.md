@@ -1,3 +1,8 @@
+# 6.5.0
+
+* Updates Eyeglass to version 2.5.0
+* Node version 8 is now deprecated and will be removed in Eyeglass 3.0.0.
+
 # 6.4.3
 
 * Node versions 6 and 11 are now deprecated and will be removed in
