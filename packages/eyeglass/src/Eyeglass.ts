@@ -13,10 +13,13 @@ import packageJson = require("package-json");
 import { SassFunction } from "node-sass";
 import { SassImplementation, helpers as sassHelpers } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
-import { UnsafeDict } from "./util/typescriptUtils";
+import { UnsafeDict, Dict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
 import { SimpleCache } from "./util/SimpleCache";
 import { resetGlobalCaches as resetGlobalFSCaches } from "./util/perf";
+import * as debugGenerator from "debug";
+
+const debug = debugGenerator("eyeglass:initialization");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg: packageJson.AbbreviatedVersion = require("../package.json");
@@ -64,6 +67,8 @@ export default class Eyeglass implements IEyeglass {
       semverChecker(this, this.options.eyeglass.engines.sass, this.options.eyeglass, Eyeglass.VERSION);
 
       checkMissingDependencies.call(this);
+
+      checkDependencyConflicts.call(this);
 
       // initialize all the modules
       this.modules.init(this, this.options.eyeglass.engines.sass);
@@ -114,6 +119,29 @@ export default class Eyeglass implements IEyeglass {
     } else {
       this.onceCache.set(key, true);
       return firstTime();
+    }
+  }
+}
+
+const VERSION_WARNINGS_ISSUED: Dict<boolean> = {};
+
+function checkDependencyConflicts(this: IEyeglass): void {
+  let conflicts = this.modules.issues.dependencies.versions;
+  let strictMode = this.options.eyeglass.strictModuleVersions;
+  if (typeof strictMode === "undefined") {
+    strictMode = "warn";
+  }
+  for (let conflict of conflicts) {
+    let message = `Version conflict for eyeglass module '${conflict.name}': ${conflict.requested.version} was requested but it was globally resolved to ${conflict.resolved.version}.`;
+    if (strictMode === false) {
+      debug(message);
+    } else if (strictMode === "warn") {
+      if (!VERSION_WARNINGS_ISSUED[message]) {
+        console.error(`WARNING: ${message}`);
+        VERSION_WARNINGS_ISSUED[message] = true;
+      }
+    } else if (strictMode === true) {
+      throw new Error(message);
     }
   }
 }

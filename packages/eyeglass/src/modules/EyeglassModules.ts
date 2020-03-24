@@ -52,8 +52,14 @@ export function resetGlobalCaches() {
 
 interface DependencyVersionIssue {
   name: string;
-  left: EyeglassModule;
-  right: EyeglassModule;
+  requested: {
+    module: EyeglassModule;
+    version: string;
+  }
+  resolved: {
+    module: EyeglassModule;
+    version: string;
+  }
 }
 
 interface ModuleBranch {
@@ -138,6 +144,7 @@ export default class EyeglassModules {
 
       let resolutionTimer = heimdall.start("eyeglass:modules:resolution");
       try {
+        debug.modules && debug.modules("discovered modules\n\t" + this.getGraph(moduleTree).replace(/\n/g, "\n\t"));
         // convert the tree into a flat collection of deduped modules
         let collection = this.dedupeModules(flattenModules(moduleTree));
 
@@ -162,7 +169,7 @@ export default class EyeglassModules {
       }
 
       /* istanbul ignore next - don't test debug */
-      debug.modules && debug.modules("discovered modules\n\t" + this.getGraph().replace(/\n/g, "\n\t"));
+      debug.modules && debug.modules("resolved modules\n\t" + this.getGraph(this.tree).replace(/\n/g, "\n\t"));
     } catch (e) {
       // typescript needs this catch & throw to convince it that the instance properties are initialized.
       throw e;
@@ -258,8 +265,8 @@ export default class EyeglassModules {
     *
     * @returns {String} the module hierarchy
     */
-  getGraph(): string {
-    let hierarchy = getHierarchy(this.tree);
+  getGraph(tree: ModuleBranch): string {
+    let hierarchy = getHierarchy(tree);
     hierarchy.label = this.getDecoratedRootName();
     return archy(hierarchy);
   }
@@ -298,8 +305,8 @@ export default class EyeglassModules {
     */
   private dedupeModules(modules: ModuleCollection): ModuleMap {
     let deduped: ModuleMap = {};
-    let otherVersions = new Array<EyeglassModule>();
     for (let name of Object.keys(modules)) {
+      let otherVersions = new Array<EyeglassModule>();
       let secondNewestModule: EyeglassModule | undefined;
       let newestModule: EyeglassModule | undefined;
       for (let m of modules[name]!) {
@@ -307,7 +314,9 @@ export default class EyeglassModules {
           newestModule = m
         } else {
           if (semver.compare(m.semver, newestModule.semver) > 0) {
-            if (secondNewestModule) { otherVersions.push(secondNewestModule); }
+            if (secondNewestModule) {
+              otherVersions.push(secondNewestModule);
+            }
             secondNewestModule = newestModule;
             newestModule = m;
           } else {
@@ -330,6 +339,7 @@ export default class EyeglassModules {
         otherVersions.push(secondNewestModule);
       }
       deduped[name] = newestModule;
+
       // check for any version issues
       this.issues.dependencies.versions.push.apply(
         this.issues.dependencies.versions,
@@ -700,23 +710,32 @@ function flattenModules(branch: EyeglassModule, collection: ModuleCollection = {
   */
 function getDependencyVersionIssues(modules: Array<EyeglassModule>, finalModule: EyeglassModule): Array<DependencyVersionIssue> {
   return modules.map(function(mod) {
+    let satisfied = semver.satisfies(finalModule.semver.version, "^" + mod.semver);
     // if the versions are not identical, log it
     if (mod.version !== finalModule.version) {
       /* istanbul ignore next - don't test debug */
       debug.modules && debug.modules(
-        "asked for %s@%s but using %s",
+        "asked for %s@%s but using %s@%s which %s a conflict",
         mod.name,
         mod.version,
-        finalModule.version
+        finalModule.name,
+        finalModule.version,
+        satisfied ? "is not" : "is",
       );
     }
     // check that the current module version is satisfied by the finalModule version
     // if not, push an error object onto the results
-    if (!semver.satisfies(mod.semver, "^" + finalModule.semver.version)) {
+    if (!satisfied) {
       return {
         name: mod.name,
-        left: mod,
-        right: finalModule
+        requested: {
+          module: mod,
+          version: mod.semver.toString(),
+        },
+        resolved: {
+          module: finalModule,
+          version: finalModule.semver.toString(),
+        }
       };
     } else {
       return;
