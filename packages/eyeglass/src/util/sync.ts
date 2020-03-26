@@ -17,7 +17,6 @@
  */
 "use strict";
 
-import * as deasync from "deasync";
 import { Dict } from "./typescriptUtils";
 
 type ASynchronousFunction = (...args: Array<unknown>) => void;
@@ -56,11 +55,17 @@ const makeSync = function(fn: ASynchronousFunction): SynchronousFunction {
       return result;
     }
 
-    while (result === undefined) {
-      deasync.runLoopOnce();
-    }
+    try {
+      const deasync = require('deasync');
 
-    return result;
+      while (result === undefined) {
+        deasync.runLoopOnce();
+      }
+
+      return result;
+    } catch(ex) {
+      throw new Error('deasync is required to make async functions synchronous');
+    }
   };
 };
 
@@ -75,4 +80,3 @@ function all(obj: Dict<ASynchronousFunction>): Dict<SynchronousFunction> {
 const sync: Sync = Object.assign(makeSync, { all });
 
 export default sync;
-

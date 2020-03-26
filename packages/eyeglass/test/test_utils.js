@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert");
+var proxyquire = require('proxyquire');
 var stringUtils = require("../lib/util/strings");
 var unquote = stringUtils.unquote;
 var unquoteJS = stringUtils.unquoteJS;
@@ -84,6 +85,25 @@ describe("utilities", function () {
     var resultB = syncFnB();
     assert.equal(resultA, expected, "handles async functions with callbacks");
     assert.equal(resultB, expected, "handles sync functions without callbacks");
+  });
+
+  it("should throw when async function is tried to turn synchronous without having deasync installed", function(done) {
+    var syncWithoutDeasync = proxyquire("../lib/util/sync", { deasync: null }).default;
+
+    function asyncFunction(cb) {
+      process.nextTick(function () {
+        cb('hello');
+      });
+    }
+
+    try {
+      var syncFnA = syncWithoutDeasync(asyncFunction);
+      var resultA = syncFnA();
+    } catch(ex) {
+      assert.equal(ex.message, 'deasync is required to make async functions synchronous');
+
+      done();
+    }
   });
 
   it("quote handles Sass strings", function (done) {
