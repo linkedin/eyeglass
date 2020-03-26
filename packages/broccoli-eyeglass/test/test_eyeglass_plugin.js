@@ -14,6 +14,7 @@ const fs = require("fs");
 const rimraf = require("rimraf");
 const glob = require("glob");
 const EyeglassCompiler = require("../lib/index");
+const resetGlobalEyeglassCaches = require("eyeglass").resetGlobalCaches;
 const SyncDiskCache = require("sync-disk-cache");
 const walkSync = require("walk-sync");
 const os = require("os");
@@ -87,6 +88,7 @@ describe("EyeglassCompiler", function() {
     } else {
       delete process.env.CI;
     }
+    resetGlobalEyeglassCaches();
   });
 
   function assertEqualDirs(actualDir, _expectedDir) {
@@ -1334,6 +1336,7 @@ describe("EyeglassCompiler", function() {
 
         delete require.cache[fs.realpathSync(eyeglassModule.path("eyeglass-exports.js"))];
         delete require.cache[fs.realpathSync(eyeglassModule.path("lib/foo.js"))];
+        resetGlobalEyeglassCaches();
 
         yield builders[1].build();
 
@@ -1426,6 +1429,7 @@ describe("EyeglassCompiler", function() {
 
         delete require.cache[fs.realpathSync(eyeglassModule.path("eyeglass-exports.js"))];
         delete require.cache[fs.realpathSync(eyeglassModule.path("lib/foo.js"))];
+        resetGlobalEyeglassCaches();
 
         yield builders[1].build();
 

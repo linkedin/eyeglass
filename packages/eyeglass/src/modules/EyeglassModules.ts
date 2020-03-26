@@ -7,7 +7,7 @@ import * as packageUtils from "../util/package";
 import resolve from "../util/resolve";
 import { SimpleCache } from "../util/SimpleCache";
 import { URI } from "../util/URI";
-import EyeglassModule, { ModuleSpecifier, DiscoverOptions } from "./EyeglassModule";
+import EyeglassModule, { ModuleSpecifier, DiscoverOptions, isModuleReference } from "./EyeglassModule";
 import merge = require("lodash.merge");
 import packageJson = require("package-json");
 import { IEyeglass } from "../IEyeglass";
@@ -130,13 +130,24 @@ export default class EyeglassModules {
       if (modules && modules.length) {
         let discoverTimer = heimdall.start("eyeglass:modules:discovery");
         try {
-          moduleTree.dependencies = modules.reduce((dependencies, mod) => {
+          for (let mod of modules) {
+            if (isModuleReference(mod)) {
+              if (moduleTree.hasModulePath(mod.path)) {
+                // If we already have this module in the module tree, skip it.
+                debug.modules(`Eyeglass module ${mod.path} is already in the module tree. Skipping...`);
+                continue;
+              }
+            }
             let resolvedMod = new EyeglassModule(merge(mod, {
               isEyeglassModule: true
             }), this.discoverModules.bind(this));
-            dependencies[resolvedMod.name] = resolvedMod;
-            return dependencies;
-          }, moduleTree.dependencies);
+            // If we already have a direct dependency on a module with this name, skip it.
+            if (!moduleTree.dependencies[resolvedMod.name]) {
+              moduleTree.dependencies[resolvedMod.name] = resolvedMod;
+            } else {
+              debug.modules(`Eyeglass module ${resolvedMod.name} is already a dependency. Skipping...`);
+            }
+          }
         } finally {
           discoverTimer.stop();
         }
