@@ -1,3 +1,12 @@
+# 3.0.0
+
+*Breaking Changes:*
+
+* The `deasync` library is no longer a direct dependency of Eyeglass. It is now
+  an optional dependency. Applications that use `sass.renderSync()` might need
+  to install the `deasync` library if they use eyeglass modules that publish
+  asynchronous sass functions.
+
 # 2.5.0
 
 * Node version 8 is now deprecated. Support for node 6, 8, and 11 will be
