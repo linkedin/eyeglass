@@ -29,8 +29,6 @@ export function resetGlobalCaches(): void {
   resetGlobalFSCaches();
 }
 
-let node_version_deprecation_warning_processed = false;
-
 export default class Eyeglass implements IEyeglass {
   static VERSION = pkg.version!;
 
@@ -54,13 +52,6 @@ export default class Eyeglass implements IEyeglass {
         this.options,
         this.options.eyeglass.modules,
       );
-
-      if (!node_version_deprecation_warning_processed) {
-        if (process.version.startsWith("v6") || process.version.startsWith("v11")) {
-          this.deprecate("2.4.2", "3.0.0", `Support for node v6 and node v11.`);
-        }
-        node_version_deprecation_warning_processed = true;
-      }
 
       fs.mkdirpSync(this.options.eyeglass.cacheDir);
 

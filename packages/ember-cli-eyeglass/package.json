@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/linkedin/eyeglass/tree/master/packages/ember-cli-eyeglass#readme",
   "engines": {
-    "node": "^6.* || 8.* || >= 10.*"
+    "node": "10.* || >= 12.*"
   },
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "license": "Apache-2.0",
