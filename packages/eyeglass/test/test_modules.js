@@ -44,31 +44,33 @@ function assertSubset(obj1, obj2) {
 }
 
 describe("EyeglassModules", function () {
+  function testFixture(testDir, config, modules) {
+    var modules;
+    var err;
+    config = config || {};
+    config.eyeglass = config.eyeglass || {};
+    if (typeof config.eyeglass.assertEyeglassCompatibility === "undefined") {
+      config.eyeglass.assertEyeglassCompatibility = DEFAULT_EYEGLASS_COMPAT;
+    }
+    try {
+      modules = new EyeglassModules(testDir, config, modules);
+    } catch (e) {
+      err = e;
+    }
+
+    var expectations = glob.sync(path.join(testDir, "expected.*"));
+    expectations.forEach(function (expectationFile) {
+      var testType = path.extname(expectationFile).replace(/^\./, "");
+      var expectationFn = TESTS[testType];
+      var expectationContents = fs.readFileSync(expectationFile).toString();
+      expectationFn(modules, err, expectationContents);
+    });
+  }
+
   fixtures.forEach(function(testDir) {
     var testName = path.basename(testDir);
     it(testName, function() {
-      var modules;
-      var err;
-      var config;
-
-      try {
-        config = {
-          eyeglass: {
-            assertEyeglassCompatibility: DEFAULT_EYEGLASS_COMPAT
-          }
-        }
-        modules = new EyeglassModules(testDir, config);
-      } catch (e) {
-        err = e;
-      }
-
-      var expectations = glob.sync(path.join(testDir, "expected.*"));
-      expectations.forEach(function(expectationFile) {
-        var testType = path.extname(expectationFile).replace(/^\./, "");
-        var expectationFn = TESTS[testType];
-        var expectationContents = fs.readFileSync(expectationFile).toString();
-        expectationFn(modules, err, expectationContents);
-      });
+      testFixture(testDir);
     });
   });
 
@@ -116,5 +118,20 @@ describe("EyeglassModules", function () {
       checkStderr("");
       testutils.assertCompilationError(options, expectedError, done);
     });
+  });
+  it("ignores a manual dependency already in the tree", function() {
+    var rootDir = testutils.fixtureDirectory("EyeglassModules/has_conflicting_versions");
+    var depInTree =
+      testutils.fixtureDirectory("EyeglassModules/has_conflicting_versions/node_modules/module_a/node_modules/module_b");
+    var modules = [ {path: depInTree} ];
+    testFixture(
+      rootDir,
+      {
+        eyeglass: {
+          modules: modules
+        }
+      },
+      modules
+    );
   });
 });

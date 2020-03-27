@@ -157,8 +157,8 @@ interface IEyeglassModule {
   sassDir?: string;
 }
 
-function isModuleReference(mod: {path?: string}): mod is ModuleReference {
-  return typeof mod === "object" && !! mod["path"];
+export function isModuleReference(mod: unknown): mod is ModuleReference {
+  return typeof mod === "object" && mod !== null && typeof (<ModuleReference>mod).path === "string";
 }
 
 export default class EyeglassModule implements IEyeglassModule, EyeglassModuleExports {
@@ -281,6 +281,20 @@ export default class EyeglassModule implements IEyeglassModule, EyeglassModuleEx
     */
   static isEyeglassModule(pkg: PackageJson | undefined | null): boolean {
     return !!(isPresent(pkg) && includes(pkg.keywords, EYEGLASS_KEYWORD));
+  }
+
+  hasModulePath(path: string): boolean {
+    if (this.path === path) {
+      return true;
+    }
+    let keys = this.dependencies ? Object.keys(this.dependencies) : [];
+    for (let depKey of keys) {
+      let dep = this.dependencies[depKey];
+      if (dep instanceof EyeglassModule && dep.hasModulePath(path)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
