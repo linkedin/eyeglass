@@ -6,6 +6,8 @@
   an optional dependency. Applications that use `sass.renderSync()` might need
   to install the `deasync` library if they use eyeglass modules that publish
   asynchronous sass functions.
+* Manually specified modules no longer take precedence over modules discovered
+  via node package dependencies. [More Information](https://github.com/linkedin/eyeglass/commit/9d9500abd90414ea9bec7c60465f2bdd42e496ef).
 
 # 2.5.0
 
