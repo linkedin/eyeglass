@@ -4,7 +4,6 @@
       "rootDir": "src",
       "baseUrl": "src",
       "composite": true,
-      "downlevelIteration": true,
       "moduleResolution": "node",
       "outDir": "./lib",
       "noImplicitAny": true,
@@ -20,9 +19,9 @@
       "noUnusedLocals": true,
       "noUnusedParameters": true,
       "lib": [
-          "es6"
+          "es2018"
       ],
-      "target": "es5",
+      "target": "es2018",
       "sourceMap": true,
       "paths": {
         "heimdalljs": ["../../eyeglass/src/types/heimdalljs"],

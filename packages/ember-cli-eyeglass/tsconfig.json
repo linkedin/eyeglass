@@ -4,7 +4,6 @@
       "rootDir": "src",
       "baseUrl": "src",
       "composite": true,
-      "downlevelIteration": true,
       "moduleResolution": "node",
       "outDir": "./lib",
       "alwaysStrict": true,
@@ -12,9 +11,9 @@
       "declaration": true,
       "declarationMap": true,
       "lib": [
-          "es6"
+          "es2018"
       ],
-      "target": "es5",
+      "target": "es2018",
       "sourceMap": true,
       "paths": {
         "node-sass": ["../../eyeglass/@types/node-sass"],
