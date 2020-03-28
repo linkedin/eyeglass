@@ -7,6 +7,9 @@ export interface ImportedFile {
   contents: string;
   file: string;
 }
+export type ImportContents = { contents: string; file?: string; };
+export type ImportReference = { file: string; };
+export type ImporterResult = ImportContents | ImportReference | Error | null;
 
 export type ImporterFactory = (
   eyeglass: IEyeglass,

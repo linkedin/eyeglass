@@ -7,11 +7,10 @@ var testutils = require("./testutils");
 
 var eyeglass = require("../lib");
 
-describe.only("function loading", function () {
+describe("function loading", function () {
   testutils.withEachSass(function (sass, sassName, sassTestUtils) {
     describe(`with ${sassName}`, function () {
       let nodeOnly = sassName === "node-sass" ? it : it.skip;
-      let dartOnly = sassName === "dart-sass" ? it : it.skip;
       it("should discover sass functions", function (done) {
         var options = {
           data: "#hello { greeting: hello(Chris); }\n" +

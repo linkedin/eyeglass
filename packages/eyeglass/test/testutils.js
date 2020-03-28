@@ -11,8 +11,12 @@ var fs = require("fs");
 function utils(sass) {
   function sassOptions(options) {
     if (typeof options.options === "object") {
-      return options.options;
+      let opts = options.options;
+      // for dart-sass compatibility
+      opts.outputStyle = opts.outputStyle || "expanded";
+      return opts;
     } else {
+      // for dart-sass compatibility
       options.outputStyle = options.outputStyle || "expanded";
       options.eyeglass = options.eyeglass || {};
       options.eyeglass.engines = options.eyeglass.engines || {};
@@ -38,17 +42,11 @@ function utils(sass) {
   }
 
   function assertCompilationError(options, expectedError, done) {
-    var testutils = this;
     compile(options, function (err, result) {
       assert(!result, result ? "Should not have compiled to: " + result.css : "");
       assert(err);
       if (typeof expectedError == "object" && expectedError.message) {
-        var matchData = err.message.match(/error in C function ([^:]+): (.*)$/m);
-        if (matchData) {
-          assert.equal(matchData[2], expectedError.message);
-        } else {
-          assert.equal(err.message, expectedError.message);
-        }
+        assert(err.message.includes(expectedError.message), `\`${err.message}\` does not include \`${expectedError.message}\``)
       } else {
         testutils.assertMultilineEqual(err.message, expectedError);
       }
@@ -81,7 +79,7 @@ function utils(sass) {
 const nodeSassTestUtils = utils(nodeSass);
 const dartSassTestUtils = utils(dartSass);
 
-module.exports = {
+const testutils = {
   withEachSass: function(cb) {
     cb(nodeSass, "node-sass", nodeSassTestUtils);
     cb(dartSass, "dart-sass", dartSassTestUtils);
@@ -119,3 +117,5 @@ module.exports = {
     assert(fs.existsSync(filename));
   }
 };
+
+module.exports = testutils;

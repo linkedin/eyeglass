@@ -37,7 +37,7 @@ export function inspect(sass: SassImplementation, value: SassValue): string {
   } else if (isSassColor(sass, value)) {
     return `rgba(${value.getR()}, ${value.getG()}, ${value.getB()}, ${value.getA()})`
   } else if (isSassBoolean(sass, value)) {
-    if (value === sass.TRUE) {
+    if (value === sass.types. Boolean.TRUE) {
       return `true`;
     } else {
       return `false`;
@@ -88,7 +88,7 @@ export function isSassBoolean(sass: SassImplementation, value: unknown): value i
   return value instanceof sass.types.Boolean;
 }
 export function isSassNull(sass: SassImplementation, value: unknown): value is SassNull {
-  return value === sass.NULL;
+  return value === sass.types.Null.NULL;
 }
 export function isSassList(sass: SassImplementation, value: unknown): value is SassList {
   return value instanceof sass.types.List;
@@ -166,7 +166,7 @@ export function isType<Name extends SassTypeName>(
 }
 
 export function typeError(sass: SassImplementation, expected: SassTypeName, actual: SassTypeName | SassValue): SassError {
-  return sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
+  return new sass.types.Error(`Expected ${expected}, got ${typeof actual === "string" ? actual : typeName(sass, actual)}${typeof actual === "string" ? "" : `: ${inspect(sass, actual)}`}`);
 }
 
 export class SassTypeError extends Error {

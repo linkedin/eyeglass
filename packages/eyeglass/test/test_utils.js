@@ -121,22 +121,22 @@ describe("utilities", function () {
     const they = it;
     const helpers = Eyeglass.helpers(sass);
     they("have a type guard for null", () => {
-      assert.ok(helpers.isNull(sass.NULL));
+      assert.ok(helpers.isNull(sass.types.Null.NULL));
       assert.ok(!helpers.isNull(null));
     });
     they("have a type guard for booleans", () => {
-      assert(helpers.isBoolean(sass.TRUE));
-      assert(helpers.isBoolean(sass.FALSE));
-      assert(!helpers.isBoolean(sass.NULL));
+      assert(helpers.isBoolean(sass.types. Boolean.TRUE));
+      assert(helpers.isBoolean(sass.types. Boolean.FALSE));
+      assert(!helpers.isBoolean(sass.types.Null.NULL));
     });
     they("have a type guard for colors", () => {
       assert(helpers.isColor(sass.types.Color(0x000000FF)));
-      assert(!helpers.isColor(sass.NULL));
+      assert(!helpers.isColor(sass.types.Null.NULL));
     });
 
     they("have a type guard for numbers", () => {
       assert(helpers.isNumber(sass.types.Number(5, "px")));
-      assert(!helpers.isNumber(sass.NULL));
+      assert(!helpers.isNumber(sass.types.Null.NULL));
     });
     they("have a type guard for maps", () => {
       assert(helpers.isMap(sass.types.Map(0)));
@@ -153,7 +153,7 @@ describe("utilities", function () {
     });
     they("have a type guard for errors", () => {
       assert(helpers.isError(sass.types.Error("wtf")));
-      assert(!helpers.isError(sass.NULL));
+      assert(!helpers.isError(sass.types.Null.NULL));
     });
   });
 });

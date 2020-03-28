@@ -268,7 +268,7 @@ export default class Assets implements Resolves, Installs {
     let size = $registeredAssetsMap.getLength();
     for (let i = 0; i < size; i++) {
       let k = $registeredAssetsMap.getKey(i);
-      if (k === this.sassImpl.NULL) {
+      if (k === this.sassImpl.types.Null.NULL) {
         let v = $registeredAssetsMap.getValue(i);
         if (isSassMap(this.sassImpl, v)) {
           appAssets = v;

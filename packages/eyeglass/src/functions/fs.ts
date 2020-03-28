@@ -110,9 +110,9 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       let absolutePath = fsAbsolutePath.getValue();
       if (inSandbox(absolutePath)) {
         if (existsSync(absolutePath)) {
-          done(sass.TRUE);
+          done(sass.types. Boolean.TRUE);
         } else {
-          done(sass.FALSE);
+          done(sass.types. Boolean.FALSE);
         }
       } else {
         done(accessViolation(absolutePath));

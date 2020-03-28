@@ -346,7 +346,7 @@ describe("eyeglass importer", function () {
     var importerMissCalled = false;
     var importerMiss = function(uri, prev, cb) {
      importerMissCalled = true;
-     cb(sass.NULL);
+     cb(sass.types.Null.NULL);
     };
 
     var importerHit = function(uri, prev, cb) {
