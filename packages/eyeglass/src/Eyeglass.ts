@@ -85,13 +85,6 @@ export default class Eyeglass implements IEyeglass {
     }
   }
 
-  // export deprecated interfaces for back-compat
-  sassOptions(this: IEyeglass): Config {
-    this.deprecate("0.8.0", "0.9.0",
-      "#sassOptions() is deprecated. Instead, you should access the sass options on #options"
-    );
-    return this.options;
-  }
   static helpers(sass: SassImplementation): ReturnType<typeof sassHelpers> {
     return sassHelpers(sass);
   }

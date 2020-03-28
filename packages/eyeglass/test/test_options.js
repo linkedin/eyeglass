@@ -135,19 +135,6 @@ describe("options", function() {
 
   describe("deprecated interface", function() {
 
-    it("should support `#sassOptions` method with warning", function(done) {
-      testutils.assertStderr(function(checkStderr) {
-        var eyeglass = new Eyeglass();
-        /* eslint no-unused-vars:0 */
-        var options = eyeglass.sassOptions();
-        checkStderr(
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
-        );
-        done();
-      });
-    });
-
     it("should warn on eyeglass options not in namespace", function(done) {
       function expectedOptionsWarning(option) {
         return [

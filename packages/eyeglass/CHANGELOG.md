@@ -11,6 +11,7 @@
 * The following deprecated properties have been removed:
   * `require('eyeglass').Eyeglass`. Instead you should do: `const Eyeglass = require('eyeglass'); new Eyeglass(sassOptions);`
   * `const decorate = require('eyeglass').decorate` - Instead you should do `const decorate = require('eyeglass'); const decoratedOpts = decorate(sassOptions)`.
+  * `(new require('eyeglass').Eyeglass()).sassOptions()` - Instead you should do `const Eyeglass = require('eyeglass'); let eyeglass = new Eyeglass(sassOptions); eyeglass.options`.
 
 # 2.5.0
 
