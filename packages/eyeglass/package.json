@@ -76,7 +76,7 @@
     "should": "^13.2.3",
     "source-map-support": "^0.5.10",
     "ts-node": "^7.0.1",
-    "typescript": "~3.7.0"
+    "typescript": "~3.8.0"
   },
   "files": [
     "lib",
