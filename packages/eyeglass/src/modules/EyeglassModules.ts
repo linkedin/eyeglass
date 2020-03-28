@@ -9,7 +9,7 @@ import { SimpleCache } from "../util/SimpleCache";
 import { URI } from "../util/URI";
 import EyeglassModule, { ModuleSpecifier, DiscoverOptions, isModuleReference } from "./EyeglassModule";
 import merge from "lodash.merge";
-import packageJson = require("package-json");
+import * as packageJson from "package-json";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
 import { Dict, isPresent } from "../util/typescriptUtils";
@@ -17,14 +17,11 @@ import { EyeglassConfig } from "..";
 import { Config } from "../util/Options";
 import heimdall = require("heimdalljs");
 import { realpathSync } from "../util/perf";
+import eyeglassVersion from "../util/version";
 
 type PackageJson = packageJson.FullVersion;
 
-// XXX For some weird reason importing ../Eyeglass to use the static VERSION constant doesn't work.
-// XXX I get undefined from importing Eyeglass instead of the class I'm expecting.
-// eslint-disable-next-line
-const pkg: PackageJson = require("../../package.json");
-const EYEGLASS_VERSION = new SemVer(pkg.version!);
+const EYEGLASS_VERSION = eyeglassVersion.semver
 
 export const ROOT_NAME = ":root";
 const BOUNDARY_VERSIONS = [
