@@ -184,7 +184,7 @@ export interface EyeglassSpecificOptions<ExtraSandboxTypes = true | string> {
   buildCache?: BuildCache;
 }
 
-export interface SimpleDeprecatedOptions {
+export interface ForbiddenOptions {
   /** @deprecated Since 0.8. */
   root?: string;
   /** @deprecated Since 0.8 */
@@ -197,7 +197,7 @@ export interface SimpleDeprecatedOptions {
   strictModuleVersions?: boolean;
 }
 
-export interface DeprecatedOptions extends SimpleDeprecatedOptions {
+export interface ForbiddenAssetOptions {
   /** @deprecated Since 0.8 */
   assetsHttpPrefix?: string;
   /** @deprecated Since 0.8 */
@@ -208,7 +208,7 @@ export interface EyeglassOptions {
   eyeglass?: EyeglassSpecificOptions;
   assetsCache?: (cacheKey: string, lazyValue: () => string) => void;
 }
-export type Options = (SassOptions & EyeglassOptions) | (DeprecatedOptions & SassOptions & EyeglassOptions) ;
+export type Options = (SassOptions & EyeglassOptions);
 export type Config = SassOptions & {
   eyeglass: EyeglassConfig;
   assetsCache?: (cacheKey: string, lazyValue: () => string) => string;
@@ -273,13 +273,12 @@ function includePathsFromEnv(): Array<string> {
   return normalizeIncludePaths(process.env.SASS_PATH, process.cwd());
 }
 
-function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & SassOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn): void {
+function forbidEyeglassOptionsFromSassOptions(sassOptions: ForbiddenOptions & SassOptions, eyeglassOptions: EyeglassSpecificOptions): void {
   // migrates the following properties from sassOptions to eyeglassOptions
-  const toMigrate: Array<keyof SimpleDeprecatedOptions> = [ "root", "cacheDir", "buildDir", "httpRoot", "strictModuleVersions" ];
-  toMigrate.forEach(function(option) {
+  const forbiddenOptions: Array<keyof ForbiddenOptions> = [ "root", "cacheDir", "buildDir", "httpRoot", "strictModuleVersions" ];
+  forbiddenOptions.forEach(function(option) {
     if (eyeglassOptions[option] === undefined && sassOptions[option] !== undefined) {
-      deprecate("0.8.0", "0.9.0", [
-        "`" + option + "` should be passed into the eyeglass options rather than the sass options:",
+      throw new Error(["`" + option + "` must be passed into the eyeglass options rather than the sass options:",
         "var options = eyeglass({",
         "  /* sassOptions */",
         "  ...",
@@ -288,25 +287,20 @@ function migrateEyeglassOptionsFromSassOptions(sassOptions: DeprecatedOptions & 
         "  }",
         "});"
       ].join("\n  "));
-      let v = <any>sassOptions[option];
-      eyeglassOptions[option] = v;
-      delete sassOptions[option];
     }
   });
 }
 
-function migrateAssetOption<FromOpt extends "assetsHttpPrefix" | "assetsRelativeTo">(
-  sassOptions: DeprecatedOptions,
+function forbidAssetOption<FromOpt extends "assetsHttpPrefix" | "assetsRelativeTo">(
+  sassOptions: ForbiddenAssetOptions,
   eyeglassOptions: EyeglassSpecificOptions,
-  deprecate: DeprecateFn,
   fromOption: FromOpt,
   toOption: typeof fromOption extends "assetsHttpPrefix" ? "httpPrefix" : "relativeTo"
 ): void {
   if ((eyeglassOptions.assets === undefined ||
     (eyeglassOptions.assets && eyeglassOptions.assets[toOption] === undefined)) &&
     sassOptions[fromOption] !== undefined) {
-    deprecate("0.8.0", "0.9.0", [
-      `\`${fromOption }\` has been renamed to \`${toOption}\` and should be passed into the eyeglass asset options rather than the sass options:`,
+    throw new Error([`\`${fromOption }\` has been renamed to \`${toOption}\` and must be passed into the eyeglass asset options rather than the sass options:`,
       "var options = eyeglass({",
       "  /* sassOptions */",
       "  ...",
@@ -317,19 +311,13 @@ function migrateAssetOption<FromOpt extends "assetsHttpPrefix" | "assetsRelative
       "  }",
       "});"
     ].join("\n  "));
-
-    if (eyeglassOptions.assets === undefined) {
-      eyeglassOptions.assets = {};
-    }
-    eyeglassOptions.assets[toOption] = sassOptions[fromOption];
-    delete sassOptions[fromOption];
   }
 }
 
-function migrateAssetOptionsFromSassOptions(sassOptions: DeprecatedOptions, eyeglassOptions: EyeglassSpecificOptions, deprecate: DeprecateFn): void {
-  // migrates the following properties from sassOptions to eyeglassOptions
-  migrateAssetOption(sassOptions, eyeglassOptions, deprecate, "assetsHttpPrefix", "httpPrefix");
-  migrateAssetOption(sassOptions, eyeglassOptions, deprecate, "assetsRelativeTo", "relativeTo");
+function forbidAssetOptionsFromSassOptions(sassOptions: SassOptions & ForbiddenAssetOptions, eyeglassOptions: EyeglassSpecificOptions): void {
+  // errors on the following legacy properties if passed into sassOptions instead of eyeglassOptions
+  forbidAssetOption(sassOptions, eyeglassOptions, "assetsHttpPrefix", "httpPrefix");
+  forbidAssetOption(sassOptions, eyeglassOptions, "assetsRelativeTo", "relativeTo");
 }
 
 function defaultSassOptions(options: SassOptions): SassOptions {
@@ -407,7 +395,7 @@ function normalizeSassOptions(sassOptions: SassOptions, eyeglassOptions: Eyeglas
   return Object.assign(sassOptions, {eyeglass: eyeglassOptions});
 }
 
-const DEPRECATED_OPTIONS = new Set<keyof DeprecatedOptions>([
+const FORBIDDEN_OPTIONS = new Set<keyof (ForbiddenAssetOptions & ForbiddenOptions)>([
   "root",
   "httpRoot",
   "cacheDir",
@@ -417,9 +405,9 @@ const DEPRECATED_OPTIONS = new Set<keyof DeprecatedOptions>([
   "assetsRelativeTo",
 ]);
 
-function hasDeprecatedOptions(options: Options): options is DeprecatedOptions & SassOptions {
+function hasForbiddenOptions(options: Options): options is ForbiddenAssetOptions & SassOptions {
   for (let key in options) {
-    if ((DEPRECATED_OPTIONS as Set<string>).has(key)) {
+    if ((FORBIDDEN_OPTIONS as Set<string>).has(key)) {
       return true;
     }
   }
@@ -446,10 +434,10 @@ function getSassOptions(
     process.env.EYEGLASS_NORMALIZE_PATHS = `${eyeglassOptions.normalizePaths}`;
   }
 
-  if (hasDeprecatedOptions(sassOptions)) {
-    // migrate eyeglassOptions off of the sassOptions
-    migrateEyeglassOptionsFromSassOptions(sassOptions, eyeglassOptions, deprecate);
-    migrateAssetOptionsFromSassOptions(sassOptions, eyeglassOptions, deprecate);
+  if (hasForbiddenOptions(sassOptions)) {
+    // forbid legacy eyeglassOptions within sassOptions
+    forbidEyeglassOptionsFromSassOptions(sassOptions, eyeglassOptions);
+    forbidAssetOptionsFromSassOptions(sassOptions, eyeglassOptions);
   }
 
   defaultSassOptions(sassOptions);

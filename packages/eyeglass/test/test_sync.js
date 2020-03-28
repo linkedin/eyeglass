@@ -8,7 +8,7 @@ describe("synchronous rendering", function () {
    var pkg = require(path.resolve(__dirname, "../package.json"));
    var eyeglassVersion = pkg.version;
    var options = {
-     root: testutils.fixtureDirectory("function_modules"),
+     eyeglass: {root: testutils.fixtureDirectory("function_modules")},
      data: "/* Eyeglass version is #{eyeglass-version()} */ .test { a: read('a'); }"
    };
    var expectedOutput = "/* Eyeglass version is " + eyeglassVersion + " */\n" +

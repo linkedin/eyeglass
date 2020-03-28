@@ -3,7 +3,7 @@ import ModuleFunctions from "./modules/ModuleFunctions";
 import ModuleImporter from "./importers/ModuleImporter";
 import AssetImporter from "./importers/AssetImporter";
 import FSImporter from "./importers/FSImporter";
-import Options, {Options as Opts, Config, SimpleDeprecatedOptions, EyeglassConfig} from "./util/Options";
+import Options, {Options as Opts, Config, ForbiddenOptions, EyeglassConfig} from "./util/Options";
 import Assets from "./assets/Assets";
 import deprecator, { DeprecateFn } from "./util/deprecator";
 import semverChecker from "./util/semverChecker";
@@ -174,7 +174,7 @@ function addFunctions(this: IEyeglass): void {
   );
 }
 
-function deprecateProperties(this: IEyeglass, properties: Array<keyof SimpleDeprecatedOptions | "enableImportOnce">): void {
+function deprecateProperties(this: IEyeglass, properties: Array<keyof ForbiddenOptions | "enableImportOnce">): void {
   for (let prop of properties) {
     Object.defineProperty(this, prop, {
       get: function(this: IEyeglass) {
@@ -182,7 +182,7 @@ function deprecateProperties(this: IEyeglass, properties: Array<keyof SimpleDepr
           "The property `" + prop + "` should no longer be accessed directly on eyeglass. " +
           "Instead, you'll find the value on `eyeglass.options.eyeglass." + prop + "`"
         );
-        return this.options.eyeglass[prop as keyof SimpleDeprecatedOptions];
+        return this.options.eyeglass[prop as keyof ForbiddenOptions];
       },
       set: function(this: IEyeglass, value: EyeglassConfig[typeof prop]) {
         this.deprecate("0.8.0", "0.9.0",

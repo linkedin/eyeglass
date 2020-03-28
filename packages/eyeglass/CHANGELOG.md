@@ -12,6 +12,14 @@
   * `require('eyeglass').Eyeglass`. Instead you should do: `const Eyeglass = require('eyeglass'); new Eyeglass(sassOptions);`
   * `const decorate = require('eyeglass').decorate` - Instead you should do `const decorate = require('eyeglass'); const decoratedOpts = decorate(sassOptions)`.
   * `(new require('eyeglass').Eyeglass()).sassOptions()` - Instead you should do `const Eyeglass = require('eyeglass'); let eyeglass = new Eyeglass(sassOptions); eyeglass.options`.
+* The following deprecated options will now cause an error:
+  * `root` - Use `eyeglass.root` instead.
+  * `httpRoot` - Use `eyeglass.httpRoot` instead.
+  * `cacheDir` - Use `eyeglass.cacheDir` instead.
+  * `buildDir` - Use `eyeglass.buildDir` instead.
+  * `strictModuleVersions` - Use `eyeglass.strictModuleVersions` instead.
+  * `assetsHttpPrefix` - Use `eyeglass.assets.httpPrefix` instead.
+  * `assetsRelativeTo` - Use `eyeglass.assets.relativeTo` instead.
 
 # 2.5.0
 
