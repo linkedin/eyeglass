@@ -86,5 +86,9 @@
     "LICENSE",
     "NOTICE",
     "CHANGELOG.md"
-  ]
+  ],
+  "volta": {
+    "node": "10.18.1",
+    "yarn": "1.21.1"
+  }
 }
