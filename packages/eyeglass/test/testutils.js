@@ -1,70 +1,93 @@
 "use strict";
 
 var eyeglass = require("../lib");
-var sass = require("node-sass");
+var nodeSass = require("node-sass");
+var dartSass = require("sass");
 var path = require("path");
 var assert = require("assert");
 var capture = require("./capture");
 var fs = require("fs");
 
-module.exports = {
-  fixtureDirectory: function(subpath) {
-    return path.join(__dirname, "fixtures", subpath);
-  },
-  assertCompilesSync: function(options, expectedOutput) {
+function utils(sass) {
+  function sassOptions(options) {
+    if (typeof options.options === "object") {
+      return options.options;
+    } else {
+      options.outputStyle = options.outputStyle || "expanded";
+      options.eyeglass = options.eyeglass || {};
+      options.eyeglass.engines = options.eyeglass.engines || {};
+      options.eyeglass.engines.sass = options.eyeglass.engines.sass || sass;
+      return eyeglass(options);
+    }
+  }
+  function assertCompilesSync(options, expectedOutput) {
     try {
-      var result = this.compileSync(options);
-      assert.equal(expectedOutput, result.css.toString());
+      var result = compileSync(options);
+      assert.equal(result.css.toString().trim(), expectedOutput.trim());
     } catch (err) {
       assert(!err, err.toString());
     }
-  },
-  assertCompiles: function(options, expectedOutput, done) {
-    this.compile(options, function(err, result) {
+  }
+
+  function assertCompiles(options, expectedOutput, done) {
+    compile(options, function (err, result) {
       assert(!err, err && err.message);
-      assert.equal(expectedOutput, result.css.toString());
+      assert.equal(result.css.toString().trim(), expectedOutput.trim());
       done();
     });
-  },
-  assertCompilationError: function(options, expectedError, done) {
+  }
+
+  function assertCompilationError(options, expectedError, done) {
     var testutils = this;
-    this.compile(options, function(err, result) {
+    compile(options, function (err, result) {
       assert(!result, result ? "Should not have compiled to: " + result.css : "");
       assert(err);
       if (typeof expectedError == "object" && expectedError.message) {
         var matchData = err.message.match(/error in C function ([^:]+): (.*)$/m);
         if (matchData) {
-          assert.equal(expectedError.message, matchData[2]);
+          assert.equal(matchData[2], expectedError.message);
         } else {
-          assert.equal(expectedError.message, err.message);
+          assert.equal(err.message, expectedError.message);
         }
       } else {
         testutils.assertMultilineEqual(err.message, expectedError);
       }
       done();
     });
-  },
-  compile: function(options, cb) {
+  }
+  function compile(options, cb) {
     try {
-      var sassOpts = this.sassOptions(options);
+      var sassOpts = sassOptions(options);
       sass.render(sassOpts, cb);
     } catch (err) {
       // console.log(err, err.stack.split("\n"));
       cb(err, null);
     }
+  }
+  function compileSync(options) {
+    return sass.renderSync(sassOptions(options));
+  }
+
+  return {
+    sassOptions,
+    assertCompiles,
+    assertCompilesSync,
+    assertCompilationError,
+    compile,
+    compileSync,
+  };
+}
+
+const nodeSassTestUtils = utils(nodeSass);
+const dartSassTestUtils = utils(dartSass);
+
+module.exports = {
+  withEachSass: function(cb) {
+    cb(nodeSass, "node-sass", nodeSassTestUtils);
+    cb(dartSass, "dart-sass", dartSassTestUtils);
   },
-  compileSync: function(options) {
-    return sass.renderSync(this.sassOptions(options));
-  },
-  sassOptions: function(options) {
-    if (typeof options.options === "object") {
-      return options.options;
-    }
-    if (typeof options.sassOptions === "function") {
-      return options.sassOptions();
-    } else {
-      return eyeglass(options);
-    }
+  fixtureDirectory: function(subpath) {
+    return path.join(__dirname, "fixtures", subpath);
   },
   assertStdout: function(work, check) {
     this.assertCapture(work, "stdout", check);

@@ -14,9 +14,9 @@ const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImple
       let mod = eyeglass.modules.find(name);
 
       if (mod) {
-        return sass.types.String(mod.version || "unversioned");
+        return new sass.types.String(mod.version || "unversioned");
       } else {
-        return sass.types.Null();
+        return sass.types.Null.NULL;
       }
     }
   };
