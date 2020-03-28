@@ -9,7 +9,6 @@ import * as sass from "node-sass";
 import { URI } from "../util/URI";
 
 import AssetsCollection from "./AssetsCollection";
-import AssetsSource from "./AssetsSource";
 import { isPresent } from "../util/typescriptUtils";
 import errorFor from "../util/errorFor";
 
@@ -49,8 +48,6 @@ export default class Assets implements Resolves, Installs {
    * Assets declared by eyeglass modules.
    */
   moduleCollections: Array<AssetsCollection>;
-  AssetCollection: () => AssetsCollection;
-  AssetPathEntry: (src: string, options: AssetSourceOptions) => AssetsSource;
   sassImpl: typeof sass;
   constructor(eyeglass: IEyeglass, sassImpl: SassImplementation) {
     this.sassImpl = sassImpl;
@@ -59,24 +56,6 @@ export default class Assets implements Resolves, Installs {
     this.collection = new AssetsCollection(eyeglass.options);
     // and keep a list of module collections
     this.moduleCollections = [];
-
-    // Expose these temporarily for back-compat reasons
-    function deprecate(method: string): void {
-      eyeglass.deprecate("0.8.3", "0.9.0", [
-        "The assets." + method + " interface will be removed from the public API.",
-        "If you currently use this method, please open an issue at",
-        "https://github.com/sass-eyeglass/eyeglass/issues/ so we can",
-        "understand and accommodate your use case"
-      ].join(" "));
-    }
-    this.AssetCollection = function () {
-      deprecate("AssetCollection");
-      return new AssetsCollection(eyeglass.options);
-    };
-    this.AssetPathEntry = function (src: string, options: AssetSourceOptions) {
-      deprecate("AssetPathEntry");
-      return new AssetsSource(src, options);
-    };
   }
 
   /**

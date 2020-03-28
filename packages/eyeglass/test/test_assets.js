@@ -1003,36 +1003,6 @@ describe("assets", function () {
         });
       });
 
-      // @deprecated
-      describe("deprecated APIs", function() {
-        ["AssetPathEntry", "AssetCollection"].forEach(function(method) {
-          it("should warn when using deprecated " + method, function(done) {
-            var rootDir = testutils.fixtureDirectory("app_assets");
-            var eyeglass = new Eyeglass({
-              eyeglass: {
-                root: rootDir,
-                installWithSymlinks: installWithSymlinks
-              }
-            });
-            var Method = eyeglass.assets[method];
-            testutils.assertStderr(function(checkStderr) {
-              var result = new Method(rootDir, {
-                pattern: "images/**/*"
-              });
-              assert(result);
-              checkStderr([
-                "[eyeglass:deprecation] (deprecated in 0.8.3, will be removed in 0.9.0)",
-                "The assets." + method + " interface will be removed from the public API.",
-                "If you currently use this method, please open an issue at",
-                "https://github.com/sass-eyeglass/eyeglass/issues/ so we can",
-                "understand and accommodate your use case\n"
-              ].join(" "));
-              done();
-            });
-          });
-        });
-      });
-
       describe("cache keys", function() {
         var rootDir = testutils.fixtureDirectory("app_assets");
         var rootDir2 = testutils.fixtureDirectory("app_assets_odd_names");

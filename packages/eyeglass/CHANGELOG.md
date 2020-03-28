@@ -16,6 +16,8 @@
     error. Instead pass it to Eyeglass via the `eyeglass.engines.sass` option.
   * Reading or writing to `Eyeglass#enableImportOnce` will now throw an error.
     Instead access it via the option: `eyeglass.enableImportOnce`.
+  * `eyeglass.assets.AssetCollection` - Use `eyeglass.assets.export()` instead.
+  * `eyeglass.assets.AssetPathEntry` - Use `eyeglass.assets.addSource()` instead.
 * The following deprecated options will now cause an error:
   * `root` - Use `eyeglass.root` instead.
   * `httpRoot` - Use `eyeglass.httpRoot` instead.
