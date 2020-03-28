@@ -8,6 +8,9 @@
   asynchronous sass functions.
 * Manually specified modules no longer take precedence over modules discovered
   via node package dependencies. [More Information](https://github.com/linkedin/eyeglass/commit/9d9500abd90414ea9bec7c60465f2bdd42e496ef).
+* The following deprecated properties have been removed:
+  * `require('eyeglass').Eyeglass`. Instead you should do: `const Eyeglass = require('eyeglass'); new Eyeglass(sassOptions);`
+  * `const decorate = require('eyeglass').decorate` - Instead you should do `const decorate = require('eyeglass'); const decoratedOpts = decorate(sassOptions)`.
 
 # 2.5.0
 

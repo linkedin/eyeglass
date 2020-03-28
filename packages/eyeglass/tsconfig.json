@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "module": "CommonJS",
+        "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "rootDir": "src",
         "baseUrl": "src",

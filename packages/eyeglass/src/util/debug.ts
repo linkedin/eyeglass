@@ -1,4 +1,4 @@
-import * as debug from "debug";
+import debug from "debug";
 
 export const importer = debug("eyeglass:importer");
 export const modules = debug("eyeglass:modules");

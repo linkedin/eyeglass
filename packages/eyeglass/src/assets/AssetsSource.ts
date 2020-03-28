@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
-import merge = require("lodash.merge") ;
+import merge from "lodash.merge";
 import { URI } from "../util/URI";
 import { AssetSourceOptions } from "../util/Options";
-import * as stringify from "json-stable-stringify";
+import stringify from "json-stable-stringify";
 
 export interface DiscoveredAssets {
   namespace: string | undefined;

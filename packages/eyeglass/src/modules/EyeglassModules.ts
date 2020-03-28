@@ -1,4 +1,4 @@
-import * as archy from "archy";
+import archy from "archy";
 import * as path from "path";
 import * as semver from "semver";
 import { SemVer } from "semver";
@@ -8,7 +8,7 @@ import resolve from "../util/resolve";
 import { SimpleCache } from "../util/SimpleCache";
 import { URI } from "../util/URI";
 import EyeglassModule, { ModuleSpecifier, DiscoverOptions, isModuleReference } from "./EyeglassModule";
-import merge = require("lodash.merge");
+import merge from "lodash.merge";
 import packageJson = require("package-json");
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";

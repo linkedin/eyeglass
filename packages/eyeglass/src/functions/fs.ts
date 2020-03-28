@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { existsSync } from "fs";
 import * as path from "path";
-import * as glob from "glob";
+import glob from "glob";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
 import { SassFunctionCallback, FunctionDeclarations } from "node-sass";

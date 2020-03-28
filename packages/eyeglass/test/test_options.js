@@ -1,6 +1,7 @@
 "use strict";
 
-var Eyeglass = require("../lib");
+var Deprecator = require("../lib/util/deprecator").Deprecator;
+var Eyeglass = require("../");
 var VERSION = Eyeglass.VERSION;
 var assert = require("assert");
 var testutils = require("./testutils");
@@ -89,153 +90,50 @@ describe("options", function() {
       var options = {
         root: rootDir,
         eyeglass: {
-          ignoreDeprecations: semver.inc(VERSION, "minor")
+          ignoreDeprecations: "1.5.0"
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
-      /* eslint no-unused-vars:0 */
-      var sassopts = eyeglass.sassOptions();
+      let deprecator = new Deprecator(options);
+      deprecator.deprecate("1.4.0", "20.0.0", "testing deprecator");
       checkStderr("");
       done();
     });
   });
 
-  it("should enable deprecation warnings via an option", function(done) {
+  it("should still get new deprecation warnings if ignoreDeprecations is set to an older version.", function(done) {
     testutils.assertStderr(function(checkStderr) {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         root: rootDir,
-        assetsHttpPrefix: "foo",
-        assetsRelativeTo: "/styles/main.css",
         eyeglass: {
-          ignoreDeprecations: "0.7.1"
+          ignoreDeprecations: "1.5.0"
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
-      /* eslint no-unused-vars:0 */
-      var sassopts = eyeglass.sassOptions();
-      checkStderr([
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `root` " +
-        "should be passed into the eyeglass options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      root: ...",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`assetsHttpPrefix` has been renamed to `httpPrefix` and should be passed into " +
-        "the eyeglass asset options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      assets: {",
-        "        httpPrefix: ...",
-        "      }",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`assetsRelativeTo` has been renamed to `relativeTo` and should be passed into " +
-        "the eyeglass asset options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      assets: {",
-        "        relativeTo: ...",
-        "      }",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
-      ].join("\n"));
+      let deprecator = new Deprecator(options);
+      deprecator.deprecate("2.0.0", "20.0.0", "this deprecation is expected");
+      checkStderr("[eyeglass:deprecation] (deprecated in 2.0.0, will be removed in 20.0.0) this deprecation is expected\n");
       done();
     });
   });
 
-  it("should use default verion of `0.0.0` if `ignoreDeprecations: false`", function(done) {
+  it("should get all deprecation warnings if ignoreDeprecations is set to false.", function(done) {
     testutils.assertStderr(function(checkStderr) {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         root: rootDir,
-        assetsHttpPrefix: "foo",
-        assetsRelativeTo: "/styles/main.css",
         eyeglass: {
           ignoreDeprecations: false
         }
       };
-      var eyeglass = new Eyeglass.Eyeglass(options);
-      /* eslint no-unused-vars:0 */
-      var sassopts = eyeglass.sassOptions();
-      checkStderr([
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) `root` " +
-        "should be passed into the eyeglass options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      root: ...",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`assetsHttpPrefix` has been renamed to `httpPrefix` and should be passed into " +
-        "the eyeglass asset options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      assets: {",
-        "        httpPrefix: ...",
-        "      }",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`assetsRelativeTo` has been renamed to `relativeTo` and should be passed into " +
-        "the eyeglass asset options rather than the sass options:",
-        "  var options = eyeglass({",
-        "    /* sassOptions */",
-        "    ...",
-        "    eyeglass: {",
-        "      assets: {",
-        "        relativeTo: ...",
-        "      }",
-        "    }",
-        "  });",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`",
-        "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-        "#sassOptions() is deprecated. Instead, you should access the sass options on #options\n"
-      ].join("\n"));
+      let deprecator = new Deprecator(options);
+      deprecator.deprecate("0.0.1", "20.0.0", "this deprecation is expected");
+      checkStderr("[eyeglass:deprecation] (deprecated in 0.0.1, will be removed in 20.0.0) this deprecation is expected\n");
       done();
     });
   });
 
-  describe("deprecated interface", function() {
-    it("should support `new Eyeglass.Eyeglass` with warning", function(done) {
-      testutils.assertStderr(function(checkStderr) {
-        var eyeglass = new Eyeglass.Eyeglass();
-        checkStderr(
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "`require('eyeglass').Eyeglass` is deprecated. Instead, use `require('eyeglass')`\n"
-        );
-        done();
-      });
-    });
 
-    it("should support `Eyeglass.decorate` with warning", function(done) {
-      testutils.assertStderr(function(checkStderr) {
-        var eyeglass = Eyeglass.decorate();
-        checkStderr(
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "`require('eyeglass').decorate` is deprecated. Instead, use `require('eyeglass')`\n"
-        );
-        done();
-      });
-    });
+  describe("deprecated interface", function() {
 
     it("should support `#sassOptions` method with warning", function(done) {
       testutils.assertStderr(function(checkStderr) {

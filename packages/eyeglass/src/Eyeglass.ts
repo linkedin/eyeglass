@@ -9,7 +9,7 @@ import deprecator, { DeprecateFn } from "./util/deprecator";
 import semverChecker from "./util/semverChecker";
 import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
-import packageJson = require("package-json");
+import * as packageJson from "package-json";
 import { SassFunction } from "node-sass";
 import { SassImplementation, helpers as sassHelpers } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
@@ -17,7 +17,7 @@ import { UnsafeDict, Dict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
 import { SimpleCache } from "./util/SimpleCache";
 import { resetGlobalCaches as resetGlobalFSCaches } from "./util/perf";
-import * as debugGenerator from "debug";
+import debugGenerator from "debug";
 
 const debug = debugGenerator("eyeglass:initialization");
 
