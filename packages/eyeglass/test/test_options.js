@@ -186,13 +186,15 @@ describe("options", function() {
       done();
     });
 
-    it("should warn when setting deprecated property directly on instance", function(done) {
-      testutils.assertStderr(function(checkStderr) {
+    it("should error when setting deprecated property directly on instance", function(done) {
+      let errorThrown = true;
+      try {
         var eyeglass = new Eyeglass();
         eyeglass.enableImportOnce = false;
-        checkStderr([
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "The property `enableImportOnce` should no longer be set directly on eyeglass. " +
+        errorThrown = false;
+      } catch (e) {
+        assert.equal(e.message, [
+          "The property `enableImportOnce` may no longer be set directly on eyeglass. " +
           "Instead, you should pass this as an option to eyeglass:",
           "  var options = eyeglass({",
           "    /* sassOptions */",
@@ -201,22 +203,26 @@ describe("options", function() {
           "      enableImportOnce: ...",
           "    }",
           "  });"
-        ].join("\n") + "\n");
-        done();
-      });
+        ].join("\n"));
+      }
+      assert(errorThrown, "Expected error was not thrown.")
+      done();
     });
 
-    it("should warn when getting deprecated property directly on instance", function(done) {
-      testutils.assertStderr(function(checkStderr) {
+    it("should error when getting deprecated property directly on instance", function(done) {
+      let errorThrown = true;
+      try{
         var eyeglass = new Eyeglass();
         var isEnabled = eyeglass.enableImportOnce;
-        checkStderr([
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "The property `enableImportOnce` should no longer be accessed directly on eyeglass. " +
+        errorThrown = false;
+      } catch (e) {
+        assert.equal(e.message, [
+          "The property `enableImportOnce` may no longer be accessed directly on eyeglass. " +
           "Instead, you'll find the value on `eyeglass.options.eyeglass.enableImportOnce`"
-        ].join("\n") + "\n");
-        done();
-      });
+        ].join("\n"));
+      }
+      assert(errorThrown, "Expected error was not thrown.")
+      done();
     });
 
     it("should error when passing sass engine as argument", function(done) {

@@ -71,8 +71,7 @@ export default class Eyeglass implements IEyeglass {
       addImporters.call(this);
       addFunctions.call(this);
 
-      // deprecated stuff
-      deprecateProperties.call(this, ["enableImportOnce"]);
+      forbidProperties.call(this, ["enableImportOnce"]);
 
       // auto-add asset paths specified via options
       if (this.options.eyeglass.assets.sources) {
@@ -196,19 +195,18 @@ function addFunctions(this: IEyeglass): void {
   );
 }
 
-function deprecateProperties(this: IEyeglass, properties: Array<keyof ForbiddenOptions | "enableImportOnce">): void {
+function forbidProperties(this: IEyeglass, properties: Array<keyof ForbiddenOptions | "enableImportOnce">): void {
   for (let prop of properties) {
     Object.defineProperty(this, prop, {
       get: function(this: IEyeglass) {
-        this.deprecate("0.8.0", "0.9.0",
-          "The property `" + prop + "` should no longer be accessed directly on eyeglass. " +
+        throw new Error(
+          "The property `" + prop + "` may no longer be accessed directly on eyeglass. " +
           "Instead, you'll find the value on `eyeglass.options.eyeglass." + prop + "`"
         );
-        return this.options.eyeglass[prop as keyof ForbiddenOptions];
       },
-      set: function(this: IEyeglass, value: EyeglassConfig[typeof prop]) {
-        this.deprecate("0.8.0", "0.9.0",
-          "The property `" + prop + "` should no longer be set directly on eyeglass. " +
+      set: function(this: IEyeglass, _value: EyeglassConfig[typeof prop]) {
+        throw new Error(
+          "The property `" + prop + "` may no longer be set directly on eyeglass. " +
           "Instead, you should pass this as an option to eyeglass:" +
           "\n  var options = eyeglass({" +
           "\n    /* sassOptions */" +
@@ -218,8 +216,6 @@ function deprecateProperties(this: IEyeglass, properties: Array<keyof ForbiddenO
           "\n    }" +
           "\n  });"
         );
-        let eyeglassOpts: {[name: string]: EyeglassConfig[typeof prop]} = <any>this.options.eyeglass;
-        eyeglassOpts[prop] = value;
       }
     });
   }

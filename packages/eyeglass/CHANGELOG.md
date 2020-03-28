@@ -14,6 +14,8 @@
   * `(new require('eyeglass').Eyeglass()).sassOptions()` - Instead you should do `const Eyeglass = require('eyeglass'); let eyeglass = new Eyeglass(sassOptions); eyeglass.options`.
   * Passing the node-sass engine to Eyeglass as an argument will now raise an
     error. Instead pass it to Eyeglass via the `eyeglass.engines.sass` option.
+  * Reading or writing to `Eyeglass#enableImportOnce` will now throw an error.
+    Instead access it via the option: `eyeglass.enableImportOnce`.
 * The following deprecated options will now cause an error:
   * `root` - Use `eyeglass.root` instead.
   * `httpRoot` - Use `eyeglass.httpRoot` instead.
