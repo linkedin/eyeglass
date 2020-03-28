@@ -1,7 +1,7 @@
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, typeError, isType, isSassList, isSassError } from "../util/SassImplementation";
-import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as nodeSass from "node-sass";
+import type { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import type * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { isPresent } from "../util/typescriptUtils";
 import { errorMessageFor } from "../util/errorFor";

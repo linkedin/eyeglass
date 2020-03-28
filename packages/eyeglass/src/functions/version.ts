@@ -1,6 +1,6 @@
 import * as stringUtils from "../util/strings";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
-import * as nodeSass from "node-sass";
+import type * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { IEyeglass } from "../IEyeglass";
 

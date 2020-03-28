@@ -6,7 +6,7 @@ import { ModuleSpecifier } from "../modules/EyeglassModule";
 import { Options as SassOptions, SassImplementation } from "./SassImplementation";
 import { URI } from "./URI";
 import merge = require("lodash.merge");
-import { Importer, FunctionDeclarations } from "node-sass";
+import type { Importer, FunctionDeclarations } from "node-sass";
 
 export const DEFAULT_EYEGLASS_COMPAT = "^2.0";
 
@@ -299,6 +299,20 @@ function defaultSassOptions(options: SassOptions): SassOptions {
   return options;
 }
 
+function requireSass(): SassImplementation {
+  let sass: SassImplementation;
+  try {
+    sass = require("node-sass")
+  } catch (e) {
+    try {
+      sass = require("sass");
+    } catch (e) {
+      throw new Error("A sass engine was not provided and neither `sass` nor `node-sass` were found in the current project.")
+    }
+  }
+  return sass;
+}
+
 export function resolveConfig(options: Partial<EyeglassSpecificOptions>): EyeglassConfig {
   // default root dir
   defaultValue(options, "root", () => process.cwd());
@@ -306,7 +320,7 @@ export function resolveConfig(options: Partial<EyeglassSpecificOptions>): Eyegla
   defaultValue(options, "cacheDir", () => path.join(options.root!, ".eyeglass_cache"));
   // default engines
   defaultValue(options, "engines", () => {return {};});
-  defaultValue(options.engines!, "sass", () => require("node-sass"))
+  defaultValue(options.engines!, "sass", () => requireSass());
   // default assets
   defaultValue(options, "assets", () => {return {};});
   // default httpRoot

@@ -1,5 +1,5 @@
 import { SassImplementation, isSassString, inspect as inspectSass } from "./SassImplementation";
-import * as sass from "node-sass";
+import type * as sass from "node-sass";
 import { inspect } from "util";
 import { Dict } from "./typescriptUtils";
 

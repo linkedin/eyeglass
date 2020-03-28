@@ -1,6 +1,6 @@
-import * as sass from "node-sass";
+import type * as sass from "node-sass";
 import { unreachable } from "./assertions";
-export { Options } from "node-sass";
+export type { Options } from "node-sass";
 
 type SassValue = sass.types.Value;
 type SassString = sass.types.String;

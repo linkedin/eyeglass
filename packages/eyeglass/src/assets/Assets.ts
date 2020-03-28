@@ -5,7 +5,7 @@ import { IEyeglass } from "../IEyeglass";
 import * as debug from "../util/debug";
 import { AssetSourceOptions } from "../util/Options";
 import { isType, SassImplementation, SassTypeError, isSassMap, isSassString } from "../util/SassImplementation";
-import * as sass from "node-sass";
+import type * as sass from "node-sass";
 import { URI } from "../util/URI";
 
 import AssetsCollection from "./AssetsCollection";

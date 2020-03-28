@@ -4,7 +4,7 @@ import includes = require("lodash.includes");
 import * as path from "path";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation } from "../util/SassImplementation";
-import { FunctionDeclarations } from "node-sass";
+import type { FunctionDeclarations } from "node-sass";
 import packageJson = require("package-json");
 import AssetsCollection from "../assets/AssetsCollection";
 import { Dict, isPresent } from "../util/typescriptUtils";

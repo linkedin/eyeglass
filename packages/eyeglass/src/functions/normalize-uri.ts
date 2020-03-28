@@ -1,8 +1,8 @@
 import { URI } from  "../util/URI";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, isSassString, typeError, isSassMap } from "../util/SassImplementation";
-import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as nodeSass from "node-sass";
+import type { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import type * as nodeSass from "node-sass";
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
 const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
@@ -28,8 +28,8 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
   };
 
   if (IS_WINDOWS || process.env.EYEGLASS_NORMALIZE_PATHS) {
-    let $web = nodeSass.types.String("web");
-    let $system = nodeSass.types.String("system");
+    let $web = sass.types.String("web");
+    let $system = sass.types.String("system");
     let egNormalizeUri = function($uri: nodeSass.types.Value, $type: nodeSass.types.Value): nodeSass.types.String {
       if (!isSassString(sass, $type)) {
         throw typeError(sass, "string", $type);

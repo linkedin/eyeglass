@@ -5,7 +5,7 @@ import { NameExpander } from "../util/NameExpander";
 import ImportUtilities from "./ImportUtilities";
 import { ImporterFactory, ImportedFile } from "./ImporterFactory";
 import { unreachable } from "../util/assertions";
-import { ImporterReturnType, AsyncImporter } from "node-sass";
+import type { ImporterReturnType, AsyncImporter } from "node-sass";
 import { isPresent } from "../util/typescriptUtils";
 import errorFor from "../util/errorFor";
 import { BuildCache } from "../util/Options";
@@ -48,7 +48,7 @@ function readFirstFile(buildCache: BuildCache, uri: string, possibleFiles: Array
  * imported. If we see the same import lookups more than once we can
  * assume the import is part of a commonly accessed library and put it into cache.
  * In many cases, this cache ignores the entry point file to a library from
- * outside the library because the first files looked for are relative to the 
+ * outside the library because the first files looked for are relative to the
  * current file (the exception would be if several fils in the same directory
  * import the shared import).
  */
