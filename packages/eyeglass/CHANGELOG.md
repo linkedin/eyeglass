@@ -8,10 +8,12 @@
   asynchronous sass functions.
 * Manually specified modules no longer take precedence over modules discovered
   via node package dependencies. [More Information](https://github.com/linkedin/eyeglass/commit/9d9500abd90414ea9bec7c60465f2bdd42e496ef).
-* The following deprecated properties have been removed:
+* The following deprecated APIs have been removed:
   * `require('eyeglass').Eyeglass`. Instead you should do: `const Eyeglass = require('eyeglass'); new Eyeglass(sassOptions);`
   * `const decorate = require('eyeglass').decorate` - Instead you should do `const decorate = require('eyeglass'); const decoratedOpts = decorate(sassOptions)`.
   * `(new require('eyeglass').Eyeglass()).sassOptions()` - Instead you should do `const Eyeglass = require('eyeglass'); let eyeglass = new Eyeglass(sassOptions); eyeglass.options`.
+  * Passing the node-sass engine to Eyeglass as an argument will now raise an
+    error. Instead pass it to Eyeglass via the `eyeglass.engines.sass` option.
 * The following deprecated options will now cause an error:
   * `root` - Use `eyeglass.root` instead.
   * `httpRoot` - Use `eyeglass.httpRoot` instead.

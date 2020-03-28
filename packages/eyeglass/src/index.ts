@@ -1,6 +1,5 @@
 import { Options as Opts, Config } from "./util/Options";
-import { SassImplementation } from "./util/SassImplementation";
-import EyeglassImpl, { resetGlobalCaches } from "./Eyeglass";
+import EyeglassImpl, { resetGlobalCaches, _forbidNodeSassArg } from "./Eyeglass";
 /* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations, no-redeclare */
 
 interface AdditionalFunctions {
@@ -10,13 +9,16 @@ interface AdditionalFunctions {
 type PublicConstructor =
   typeof EyeglassImpl
   & AdditionalFunctions
-  & ((options: Opts, deprecatedNodeSassArg?: SassImplementation) => Config);
+  & ((options: Opts) => Config);
 
 // This is how we convince typescript that there's an object that is
 // both a constructor and a function that returns options.
 function newOrOptions(): PublicConstructor {
-  const __Eyeglass = function (this: undefined | object, options: Opts, deprecatedNodeSassArg?: SassImplementation): EyeglassImpl | Config {
-    let instance = new EyeglassImpl(options, deprecatedNodeSassArg);
+  const __Eyeglass = function (this: undefined | object, options: Opts): EyeglassImpl | Config {
+    if (arguments.length === 2) {
+      _forbidNodeSassArg(arguments[1]);
+    }
+    let instance = new EyeglassImpl(options);
     if (this) {
       // the implicit this object is thrown away :engineer-shrugging:
       return instance;

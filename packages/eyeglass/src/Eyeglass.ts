@@ -11,7 +11,7 @@ import * as fs from "fs-extra";
 import { IEyeglass } from "./IEyeglass";
 import * as packageJson from "package-json";
 import { SassFunction } from "node-sass";
-import { SassImplementation, helpers as sassHelpers } from "./util/SassImplementation";
+import { SassImplementation, helpers as sassHelpers, isSassImplementation } from "./util/SassImplementation";
 import { AsyncImporter } from "node-sass";
 import { UnsafeDict, Dict } from "./util/typescriptUtils";
 import heimdall = require("heimdalljs");
@@ -38,14 +38,17 @@ export default class Eyeglass implements IEyeglass {
   modules: EyeglassModules;
   private onceCache: SimpleCache<true>;
 
-  constructor(options: Opts, deprecatedNodeSassArg?: SassImplementation) {
+  constructor(options: Opts) {
+    if (arguments.length === 2) {
+      _forbidNodeSassArg(arguments[1]);
+    }
     let timer = heimdall.start("eyeglass:instantiation");
     this.onceCache = new SimpleCache<true>();
     try {
       // an interface for deprecation warnings
       this.deprecate = deprecator(options);
 
-      this.options = new Options(options, this.deprecate, deprecatedNodeSassArg);
+      this.options = new Options(options);
       this.assets = new Assets(this, this.options.eyeglass.engines.sass);
       this.modules = new EyeglassModules(
         this.options.eyeglass.root,
@@ -106,6 +109,25 @@ export default class Eyeglass implements IEyeglass {
     }
   }
 }
+
+export function _forbidNodeSassArg(arg: unknown): Pick<EyeglassConfig, "engines"> | void {
+  if (isSassImplementation(arg)) {
+    // throw an error
+    throw new Error([
+      "You may no longer pass `sass` directly to Eyeglass. Instead pass it as an option:",
+      "var options = eyeglass({",
+      "  /* sassOptions */",
+      "  ...",
+      "  eyeglass: {",
+      "    engines: {",
+      "      sass: require('node-sass')",
+      "    }",
+      "  }",
+      "});"
+    ].join("\n  "));
+  }
+}
+
 
 const VERSION_WARNINGS_ISSUED: Dict<boolean> = {};
 

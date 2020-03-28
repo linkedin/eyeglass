@@ -3,8 +3,7 @@
 import { IOptions as GlobOptions } from "glob";
 import * as path from "path";
 import { ModuleSpecifier } from "../modules/EyeglassModule";
-import { DeprecateFn } from "./deprecator";
-import { isSassImplementation, Options as SassOptions, SassImplementation } from "./SassImplementation";
+import { Options as SassOptions, SassImplementation } from "./SassImplementation";
 import { URI } from "./URI";
 import merge = require("lodash.merge");
 import { Importer, FunctionDeclarations } from "node-sass";
@@ -237,35 +236,10 @@ export default class implements Config {
   eyeglass: EyeglassConfig;
   assetsCache?: (cacheKey: string, lazyValue: () => string) => string;
 
-  constructor(...args: [Options, DeprecateFn, SassImplementation | undefined]) {
-    let config = getSassOptions(...args)
+  constructor(options: Options) {
+    let config = getSassOptions(options)
     this.eyeglass = config.eyeglass; // this makes the compiler happy.
     merge(this, config);
-  }
-}
-
-function eyeglassOptionsFromNodeSassArg(arg: SassImplementation | undefined, deprecate: DeprecateFn): Pick<EyeglassConfig, "engines"> | void {
-  if (isSassImplementation(arg)) {
-    // throw a deprecation warning
-    deprecate("0.8.0", "0.9.0", [
-      "You should no longer pass `sass` directly to Eyeglass. Instead pass it as an option:",
-      "var options = eyeglass({",
-      "  /* sassOptions */",
-      "  ...",
-      "  eyeglass: {",
-      "    engines: {",
-      "      sass: require('node-sass')",
-      "    }",
-      "  }",
-      "});"
-    ].join("\n  "));
-
-    // and convert it the correct format
-    return {
-      engines: {
-        sass: arg
-      }
-    };
   }
 }
 
@@ -416,15 +390,9 @@ function hasForbiddenOptions(options: Options): options is ForbiddenAssetOptions
 
 function getSassOptions(
   options: Options | undefined,
-  deprecate: DeprecateFn,
-  sassArg: SassImplementation | undefined
 ): Config {
   let sassOptions: Options = options || {};
-  // we used to support passing `node-sass` as the second argument to eyeglass,
-  //  this should now be an options object
-  // if the eyeglassOptions looks like node-sass, convert it into an object
-  // this can be removed when we fully deprecate this support
-  let eyeglassOptions: EyeglassSpecificOptions =  merge({}, eyeglassOptionsFromNodeSassArg(sassArg, deprecate));
+  let eyeglassOptions: EyeglassSpecificOptions = {};
   merge(eyeglassOptions, sassOptions.eyeglass);
 
   // determine whether or not we should normalize URI path separators

@@ -2,7 +2,6 @@
 
 var Deprecator = require("../lib/util/deprecator").Deprecator;
 var Eyeglass = require("../");
-var VERSION = Eyeglass.VERSION;
 var assert = require("assert");
 var testutils = require("./testutils");
 var path = require("path");
@@ -135,7 +134,7 @@ describe("options", function() {
 
   describe("deprecated interface", function() {
 
-    it("should warn on eyeglass options not in namespace", function(done) {
+    it("should error on eyeglass options not in namespace", function(done) {
       function forbiddenOptionErrorMessage(option) {
         return [
           "`" + option + "` must be passed into the eyeglass options rather than the sass options:",
@@ -220,12 +219,14 @@ describe("options", function() {
       });
     });
 
-    it("should warn when passing sass engine as argument", function(done) {
-      testutils.assertStderr(function(checkStderr) {
+    it("should error when passing sass engine as argument", function(done) {
+      let errorThrown = true;
+      try {
         var eyeglass = new Eyeglass({}, require("node-sass"));
-        checkStderr([
-          "[eyeglass:deprecation] (deprecated in 0.8.0, will be removed in 0.9.0) " +
-          "You should no longer pass `sass` directly to Eyeglass. Instead pass it as an option:",
+        errorThrown = !eyeglass;
+      } catch(e) {
+        assert.equal(e.message, [
+          "You may no longer pass `sass` directly to Eyeglass. Instead pass it as an option:",
           "  var options = eyeglass({",
           "    /* sassOptions */",
           "    ...",
@@ -235,9 +236,10 @@ describe("options", function() {
           "      }",
           "    }",
           "  });"
-        ].join("\n") + "\n");
-        done();
-      });
+        ].join("\n"))
+      }
+      assert(errorThrown, "Expected error was not thrown.")
+      done();
     });
   });
 });
