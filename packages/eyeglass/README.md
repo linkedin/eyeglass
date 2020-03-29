@@ -516,7 +516,7 @@ module.exports = function(eyeglass, sass) {
   return {
     functions: {
       "greetings-hello($name: 'World')": function(name, done) {
-        done(sass.types.String("Hello, " + name.getValue()));
+        done(new sass.types.String("Hello, " + name.getValue()));
       }
     }
   }
