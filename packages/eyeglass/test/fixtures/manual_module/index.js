@@ -12,7 +12,7 @@ module.exports = {
 
       functions: {
         "manual-hello()": function(done) {
-          done(sass.types.String('"Hello World!"'));
+          done(new sass.types.String('"Hello World!"'));
         }
       }
     };

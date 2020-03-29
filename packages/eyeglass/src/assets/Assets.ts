@@ -5,7 +5,7 @@ import { IEyeglass } from "../IEyeglass";
 import * as debug from "../util/debug";
 import { AssetSourceOptions } from "../util/Options";
 import { isType, SassImplementation, SassTypeError, isSassMap, isSassString } from "../util/SassImplementation";
-import * as sass from "node-sass";
+import type * as sass from "node-sass";
 import { URI } from "../util/URI";
 
 import AssetsCollection from "./AssetsCollection";
@@ -268,7 +268,7 @@ export default class Assets implements Resolves, Installs {
     let size = $registeredAssetsMap.getLength();
     for (let i = 0; i < size; i++) {
       let k = $registeredAssetsMap.getKey(i);
-      if (k === this.sassImpl.NULL) {
+      if (k === this.sassImpl.types.Null.NULL) {
         let v = $registeredAssetsMap.getValue(i);
         if (isSassMap(this.sassImpl, v)) {
           appAssets = v;

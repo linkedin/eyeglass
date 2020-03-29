@@ -111,5 +111,5 @@ $eg-registered-assets: () !default;
     $url: if($module, $module + "/" + $url, $url);
     $asset-urls: append($asset-urls, quote($url), comma);
   }
-  @return $asset-urls;
+  @return if(length($asset-urls) == 0, null, $asset-urls);
 }

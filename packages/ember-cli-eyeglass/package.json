@@ -37,7 +37,7 @@
     "eslint": "^5.12.1",
     "eyeglass": "^2.5.0",
     "mocha": "^5.2.0",
-    "typescript": "~3.7.0"
+    "typescript": "~3.8.0"
   },
   "keywords": [
     "ember-addon",

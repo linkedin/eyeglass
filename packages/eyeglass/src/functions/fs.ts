@@ -4,8 +4,8 @@ import * as path from "path";
 import glob from "glob";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
-import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as nodeSass from "node-sass";
+import type { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import type * as nodeSass from "node-sass";
 import { unreachable } from "../util/assertions";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { realpathSync } from "../util/perf";
@@ -22,7 +22,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
   let sassUtils = require("node-sass-utils")(sass);
 
   function accessViolation(location: string): nodeSass.types.Error {
-    return sass.types.Error("Security violation: Cannot access " + location);
+    return new sass.types.Error("Security violation: Cannot access " + location);
   }
 
   function inSandbox(fsPath: string): boolean {
@@ -93,15 +93,15 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         if (expandedPath) {
           segments.unshift(expandedPath);
           let resolved = path.resolve.apply(null, segments);
-          done(sass.types.String(resolved));
+          done(new sass.types.String(resolved));
         } else {
-          done(sass.types.Error(`No path is registered for ${pathId}`));
+          done(new sass.types.Error(`No path is registered for ${pathId}`));
         }
       },
     "eyeglass-fs-join($segments...)": function(segments: nodeSass.types.Value, done: SassFunctionCallback) {
       let jsSegments = sassUtils.castToJs(segments);
       let joined = path.join.apply(null, jsSegments);
-      done(sass.types.String(joined));
+      done(new sass.types.String(joined));
     },
     "eyeglass-fs-exists($absolute-path)": function(fsAbsolutePath: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, fsAbsolutePath)) {
@@ -110,16 +110,16 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
       let absolutePath = fsAbsolutePath.getValue();
       if (inSandbox(absolutePath)) {
         if (existsSync(absolutePath)) {
-          done(sass.TRUE);
+          done(sass.types.Boolean.TRUE);
         } else {
-          done(sass.FALSE);
+          done(sass.types.Boolean.FALSE);
         }
       } else {
         done(accessViolation(absolutePath));
       }
     },
     "eyeglass-fs-path-separator()": function(done: SassFunctionCallback) {
-      done(sass.types.String(path.sep));
+      done(new sass.types.String(path.sep));
     },
     "eyeglass-fs-list-files($directory, $glob: '*')": function($directory: nodeSass.types.Value, $globPattern: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $directory)) {
@@ -164,7 +164,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         fs.stat(filename, function(err, stats) {
           /* istanbul ignore if - we do not need to simulate an fs error here */
           if (err) {
-            done(sass.types.Error(err.message));
+            done(new sass.types.Error(err.message));
           } else {
             try {
               let realpath = realpathSync(filename);
@@ -181,7 +181,7 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
               );
             } catch (e) {
               /* istanbul ignore next - we do not need to simulate an fs error here */
-              done(sass.types.Error(e.message));
+              done(new sass.types.Error(e.message));
             }
           }
         });
@@ -199,9 +199,9 @@ const fsFunctions: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassI
         fs.readFile(filename, function(err, contents) {
           /* istanbul ignore if - we do not need to simulate an fs error here */
           if (err) {
-            done(sass.types.Error(err.message));
+            done(new sass.types.Error(err.message));
           } else {
-            done(sass.types.String(contents.toString()));
+            done(new sass.types.String(contents.toString()));
           }
         });
       } else {

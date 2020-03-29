@@ -2,7 +2,7 @@ import * as path from "path";
 import { existsSync } from "../util/perf";
 import ImportUtilities from "./ImportUtilities";
 import { ImporterFactory } from "./ImporterFactory";
-import { AsyncImporter } from "node-sass";
+import type { AsyncImporter } from "node-sass";
 
 const FSImporter: ImporterFactory = function (eyeglass, sass, options, fallbackImporter): AsyncImporter {
   let fsURI = /^fs\(([-_a-zA-Z][-_a-zA-Z0-9]+)\)$/;

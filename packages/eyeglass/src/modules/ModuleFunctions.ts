@@ -2,7 +2,7 @@ import syncFn from "../util/sync";
 import * as debug from "../util/debug";
 import merge = require("lodash.merge");
 import { SassImplementation } from "../util/SassImplementation";
-import { FunctionDeclarations, SassFunction } from "node-sass";
+import type { FunctionDeclarations, SassFunction } from "node-sass";
 import { IEyeglass } from "../IEyeglass";
 import { Dict, UnsafeDict } from "../util/typescriptUtils";
 import heimdall = require("heimdalljs");

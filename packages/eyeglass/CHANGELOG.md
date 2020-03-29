@@ -1,11 +1,28 @@
 # 3.0.0
 
-*Breaking Changes:*
+## New Features
 
-* The `deasync` library is no longer a direct dependency of Eyeglass. It is now
-  an optional dependency. Applications that use `sass.renderSync()` might need
-  to install the `deasync` library if they use eyeglass modules that publish
-  asynchronous sass functions.
+* Eyeglass now works with the pure javascript version of `dart-sass`, which is
+  reference implementation of the Sass language. This allows users of Eyeglass
+  to use the latest and greatest language features of Sass and to avoid libraries
+  that use native extensions.
+
+  To use: Add `sass` as a dependency of your project. Eyeglass will
+  automatically use dart sass when `node-sass` isn't installed. If, for some
+  reason you need to have both installed, just set the
+  `eyeglass.engines.sass` option to the value returned by `require('sass')`.
+
+## Breaking Changes
+
+* `node-sass` is no longer a direct dependency of Eyeglass. Applications using
+  Eyeglass must now install the sass implementation and version that they
+  prefer. Eyeglass will attempt to require both `node-sass` and `sass` unless
+  a sass engine is explicitly passed as an option. In the case where both are
+  installed, `node-sass` is used.
+* The `deasync` library is no longer a direct dependency of Eyeglass.
+  Applications that use `sass.renderSync()` might need to install the
+  `deasync` library if they use eyeglass modules that publish asynchronous
+  sass functions.
 * Manually specified modules no longer take precedence over modules discovered
   via node package dependencies. [More Information](https://github.com/linkedin/eyeglass/commit/9d9500abd90414ea9bec7c60465f2bdd42e496ef).
 * The following deprecated APIs have been removed:

@@ -1,7 +1,7 @@
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, typeError, isType, isSassList, isSassError } from "../util/SassImplementation";
-import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as nodeSass from "node-sass";
+import type { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import type * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { isPresent } from "../util/typescriptUtils";
 import { errorMessageFor } from "../util/errorFor";
@@ -15,7 +15,7 @@ function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
         return done(typeError(sass, "map", $assets));
       }
       if (isSassList(sass, $assets)) {
-        $assetMap = sass.types.Map(0);
+        $assetMap = new sass.types.Map(0);
       } else {
         $assetMap = $assets;
       }
@@ -25,12 +25,12 @@ function(eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
           if (isSassError(sass, error)) {
             result = error;
           } else if (isPresent(error)) {
-            result = sass.types.Error(errorMessageFor(error));
+            result = new sass.types.Error(errorMessageFor(error));
           } else {
-            result = sass.types.Error("[internal error] A uri was not returned");
+            result = new sass.types.Error("[internal error] A uri was not returned");
           }
         } else {
-          result = sass.types.String(assetUri);
+          result = new sass.types.String(assetUri);
         }
         done(result);
       });

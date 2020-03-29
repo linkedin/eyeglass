@@ -38,7 +38,7 @@ Currently, the `eyeglass` section contains the following properties:
 
   * **needs**: A semantic version string. This defines the version of eyeglass you are compatible with. When developing, you can set the string to `"*"`, but before releasing the module to the public, you'll probably want to set it to a minimum compatible version. We usually recommend people take the Major + Minor approach, much like npm. This means if eyeglass is currently `1.0.6`, you can put a `^` in front and write your `needs` as `^1.0.6`. This means you'll work with eyeglass versions 1.0.6 and newer, but not versions so new that APIs you depend on are broken.
   * **exports**: An optional string. When you already have a `main` property (common for existing npm projects) and you just want to add support for eyeglass, you can specify an alternate property here.  Eyeglass will look for `eyeglass.exports` before checking `main`, so that we always include the right thing. This property can be set to `false` which will cause the `main` of the project to be ignored -- in
-this case, the `sassDir` property must be set. 
+this case, the `sassDir` property must be set.
   * *sassDir*: Optional. A relative path to the directory containing your sass files. When omittied, this should be specified as part of eyeglass exports.
 
 # eyeglass-exports.js
@@ -77,7 +77,7 @@ It's easier to explain with an example.
 ```js
   functions: {
     'hello($name: "World")': function(name, done) {
-      done(sass.types.String("Hello, " + name.getValue() + "!"));
+      done(new sass.types.String("Hello, " + name.getValue() + "!"));
     }
   }
 ```
@@ -94,7 +94,7 @@ The **callback** associated with the function takes **N** arguments, where "N" w
 The **sass.types** collection comes from that second argument in our `module.exports` function.
 
 ```js
-done(sass.types.String("Hello, " + name.getValue() + "!"));
+done(new sass.types.String("Hello, " + name.getValue() + "!"));
 ```
 
 * **sass.types.TYPE**: All things we pass back to `node-sass` have a `TYPE`. This tells Sass what we're dealing with, and also allows for cool Sass features like applying math to px/em/rem and having it _just work_. A full list is in the [node-sass documentation](https://github.com/sass/node-sass#functions--v300---experimental), but the three most common are `sass.types.Number(amount, unit)`, `sass.types.String(value)`, and `sass.types.Color(red, green, blue, alpha)`. If you don't want to return anything, you can return `sass.types.Null()`.

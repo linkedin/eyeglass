@@ -1,6 +1,6 @@
 import * as stringUtils from "../util/strings";
 import { SassImplementation, isSassString, typeError } from "../util/SassImplementation";
-import * as nodeSass from "node-sass";
+import type * as nodeSass from "node-sass";
 import { EyeglassFunctions } from "./EyeglassFunctions";
 import { IEyeglass } from "../IEyeglass";
 
@@ -14,9 +14,9 @@ const version: EyeglassFunctions = function(eyeglass: IEyeglass, sass: SassImple
       let mod = eyeglass.modules.find(name);
 
       if (mod) {
-        return sass.types.String(mod.version || "unversioned");
+        return new sass.types.String(mod.version || "unversioned");
       } else {
-        return sass.types.Null();
+        return sass.types.Null.NULL;
       }
     }
   };

@@ -1,8 +1,8 @@
 import { URI } from  "../util/URI";
 import { IEyeglass } from "../IEyeglass";
 import { SassImplementation, isSassString, typeError, isSassMap } from "../util/SassImplementation";
-import { SassFunctionCallback, FunctionDeclarations } from "node-sass";
-import * as nodeSass from "node-sass";
+import type { SassFunctionCallback, FunctionDeclarations } from "node-sass";
+import type * as nodeSass from "node-sass";
 const IS_WINDOWS = /win32/.test(require("os").platform());
 
 const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): FunctionDeclarations {
@@ -14,7 +14,7 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
       let uri = $uri.getValue();
       // decorate the uri
       uri = URI.preserve(uri);
-      done(sass.types.String(uri));
+      done(new sass.types.String(uri));
     },
     "eyeglass-uri-restore($uri)": function($uri: nodeSass.types.Value, done: SassFunctionCallback) {
       if (!isSassString(sass, $uri)) {
@@ -23,13 +23,13 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
       let uri = $uri.getValue();
       // restore the uri
       uri = URI.restore(uri);
-      done(sass.types.String(uri));
+      done(new sass.types.String(uri));
     }
   };
 
   if (IS_WINDOWS || process.env.EYEGLASS_NORMALIZE_PATHS) {
-    let $web = nodeSass.types.String("web");
-    let $system = nodeSass.types.String("system");
+    let $web = new sass.types.String("web");
+    let $system = new sass.types.String("system");
     let egNormalizeUri = function($uri: nodeSass.types.Value, $type: nodeSass.types.Value): nodeSass.types.String {
       if (!isSassString(sass, $type)) {
         throw typeError(sass, "string", $type);
@@ -41,7 +41,7 @@ const normalizeURI = function(_eyeglass: IEyeglass, sass: SassImplementation): F
       let uri = $uri.getValue();
       // normalize the uri for the given type
       uri = URI[type](uri);
-      return sass.types.String(uri);
+      return new sass.types.String(uri);
     };
     methods["-eyeglass-normalize-uri($uri, $type: web)"] = function($uri: nodeSass.types.Value, $type: nodeSass.types.Value, done: SassFunctionCallback) {
       try {
