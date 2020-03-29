@@ -1,3 +1,12 @@
+# 6.0.0
+
+* Updates Eyeglass to version 3.0.0. The 3.0 release of eyeglass now supports
+  dart-sass and contains a number of breaking changes. At a minimum, for
+  continuity, your project will need to install `node-sass` and ensure that
+  you are on, at least, node 10.
+
+  Please read the [Eyeglass CHANGELOG](../eyeglass/CHANGELOG.md).
+
 # 5.5.0
 
 * Updates Eyeglass to version 2.5.0
