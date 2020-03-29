@@ -7,13 +7,13 @@ var testutils = require("./testutils");
 var path = require("path");
 var semver = require("semver");
 
-describe("options", function() {
-  beforeEach(function(done) {
+describe("options", function () {
+  beforeEach(function (done) {
     process.env.SASS_PATH = "";
     done();
   });
 
-  it("should wrap options when not an instance", function(done) {
+  it("should wrap options when not an instance", function (done) {
     var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
     /* eslint new-cap:0 */
     var options = Eyeglass({
@@ -26,9 +26,9 @@ describe("options", function() {
     done();
   });
 
-  it("should not contain a circular reference to itself", function(done) {
+  it("should not contain a circular reference to itself", function (done) {
     var rootDir = testutils.fixtureDirectory("app_with_malformed_module");
-    var options = {eyeglass: {root: rootDir}};
+    var options = { eyeglass: { root: rootDir } };
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.options;
     assert(sassopts.eyeglass);
@@ -36,11 +36,11 @@ describe("options", function() {
     done();
   });
 
-  it("uses the SASS_PATH environment variable as a default for includePaths", function(done) {
+  it("uses the SASS_PATH environment variable as a default for includePaths", function (done) {
     process.env.SASS_PATH = ["foo", "bar", "baz"].join(path.delimiter);
 
     var rootDir = testutils.fixtureDirectory("basic_modules");
-    var options = {eyeglass: {root: rootDir}};
+    var options = { eyeglass: { root: rootDir } };
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.options;
     assert.equal(sassopts.includePaths[0], path.resolve(process.cwd(), "foo"));
@@ -49,42 +49,32 @@ describe("options", function() {
     done();
   });
 
-  it("defaults includePaths to empty array", function(done) {
+  it("defaults includePaths to empty array", function (done) {
     assert.equal(process.env.SASS_PATH, "");
     var rootDir = testutils.fixtureDirectory("basic_modules");
-    var options = {eyeglass: {root: rootDir}};
+    var options = { eyeglass: { root: rootDir } };
     var eyeglass = new Eyeglass(options);
     var sassopts = eyeglass.options;
     assert.equal(sassopts.includePaths.length, 0);
     done();
   });
 
-  it("works with the indented syntax", function(done) {
-    var rootDir = testutils.fixtureDirectory("basic_modules");
-    var data = ".foo\n  bar: baz";
-    var options = {indentedSyntax: true, data: data, eyeglass: {root: rootDir}};
-    var eyeglass = new Eyeglass(options);
-    var expectedOutput = ".foo {\n  bar: baz; }\n";
-
-    testutils.assertCompiles(eyeglass.options, expectedOutput, done);
-  });
-
   it("should normalize includePaths", function () {
     var includePaths = ["path/one", "path/two", "path/three"];
     var rootDir = testutils.fixtureDirectory("app_assets");
     var eyeglass = new Eyeglass({
-      eyeglass: {root: rootDir},
+      eyeglass: { root: rootDir },
       includePaths: includePaths.join(path.delimiter)
     });
     var sassopts = eyeglass.options;
     assert(sassopts);
-    assert.deepEqual(sassopts.includePaths, includePaths.map(function(p){
+    assert.deepEqual(sassopts.includePaths, includePaths.map(function (p) {
       return path.resolve(rootDir, p);
     }));
   });
 
-  it("should disable deprecation warnings via an option", function(done) {
-    testutils.assertStderr(function(checkStderr) {
+  it("should disable deprecation warnings via an option", function (done) {
+    testutils.assertStderr(function (checkStderr) {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         eyeglass: {
@@ -99,8 +89,8 @@ describe("options", function() {
     });
   });
 
-  it("should still get new deprecation warnings if ignoreDeprecations is set to an older version.", function(done) {
-    testutils.assertStderr(function(checkStderr) {
+  it("should still get new deprecation warnings if ignoreDeprecations is set to an older version.", function (done) {
+    testutils.assertStderr(function (checkStderr) {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         eyeglass: {
@@ -115,8 +105,8 @@ describe("options", function() {
     });
   });
 
-  it("should get all deprecation warnings if ignoreDeprecations is set to false.", function(done) {
-    testutils.assertStderr(function(checkStderr) {
+  it("should get all deprecation warnings if ignoreDeprecations is set to false.", function (done) {
+    testutils.assertStderr(function (checkStderr) {
       var rootDir = testutils.fixtureDirectory("basic_modules");
       var options = {
         eyeglass: {
@@ -132,9 +122,9 @@ describe("options", function() {
   });
 
 
-  describe("deprecated interface", function() {
+  describe("deprecated interface", function () {
 
-    it("should error on eyeglass options not in namespace", function(done) {
+    it("should error on eyeglass options not in namespace", function (done) {
       function forbiddenOptionErrorMessage(option) {
         return [
           "`" + option + "` must be passed into the eyeglass options rather than the sass options:",
@@ -164,13 +154,13 @@ describe("options", function() {
       }
 
       let forbiddenOptions = [
-        { options: { root: __dirname }, message: forbiddenOptionErrorMessage("root")},
-        { options: { cacheDir: ".cache" }, message: forbiddenOptionErrorMessage("cacheDir")},
-        { options: { buildDir: "dist" }, message: forbiddenOptionErrorMessage("buildDir")},
-        { options: { httpRoot: "root" }, message: forbiddenOptionErrorMessage("httpRoot")},
-        { options: { strictModuleVersions: true}, message: forbiddenOptionErrorMessage("strictModuleVersions")},
-        { options: { assetsHttpPrefix: "prefix" }, message: forbiddenAssetOptionErrorMessage("assetsHttpPrefix", "httpPrefix")},
-        { options: { assetsRelativeTo: "relative" }, message: forbiddenAssetOptionErrorMessage("assetsRelativeTo", "relativeTo")},
+        { options: { root: __dirname }, message: forbiddenOptionErrorMessage("root") },
+        { options: { cacheDir: ".cache" }, message: forbiddenOptionErrorMessage("cacheDir") },
+        { options: { buildDir: "dist" }, message: forbiddenOptionErrorMessage("buildDir") },
+        { options: { httpRoot: "root" }, message: forbiddenOptionErrorMessage("httpRoot") },
+        { options: { strictModuleVersions: true }, message: forbiddenOptionErrorMessage("strictModuleVersions") },
+        { options: { assetsHttpPrefix: "prefix" }, message: forbiddenAssetOptionErrorMessage("assetsHttpPrefix", "httpPrefix") },
+        { options: { assetsRelativeTo: "relative" }, message: forbiddenAssetOptionErrorMessage("assetsRelativeTo", "relativeTo") },
       ];
 
       for (let forbidden of forbiddenOptions) {
@@ -186,7 +176,7 @@ describe("options", function() {
       done();
     });
 
-    it("should error when setting deprecated property directly on instance", function(done) {
+    it("should error when setting deprecated property directly on instance", function (done) {
       let errorThrown = true;
       try {
         var eyeglass = new Eyeglass();
@@ -209,9 +199,9 @@ describe("options", function() {
       done();
     });
 
-    it("should error when getting deprecated property directly on instance", function(done) {
+    it("should error when getting deprecated property directly on instance", function (done) {
       let errorThrown = true;
-      try{
+      try {
         var eyeglass = new Eyeglass();
         var isEnabled = eyeglass.enableImportOnce;
         errorThrown = false;
@@ -225,12 +215,12 @@ describe("options", function() {
       done();
     });
 
-    it("should error when passing sass engine as argument", function(done) {
+    it("should error when passing sass engine as argument", function (done) {
       let errorThrown = true;
       try {
         var eyeglass = new Eyeglass({}, require("node-sass"));
         errorThrown = !eyeglass;
-      } catch(e) {
+      } catch (e) {
         assert.equal(e.message, [
           "You may no longer pass `sass` directly to Eyeglass. Instead pass it as an option:",
           "  var options = eyeglass({",
@@ -246,6 +236,20 @@ describe("options", function() {
       }
       assert(errorThrown, "Expected error was not thrown.")
       done();
+    });
+  });
+
+  testutils.withEachSass(function (sass, sassName, sassTestUtils) {
+    describe(`with ${sassName}`, function () {
+      it("works with the indented syntax", function (done) {
+        var rootDir = testutils.fixtureDirectory("basic_modules");
+        var data = ".foo\n  bar: baz";
+        var options = { indentedSyntax: true, data: data, eyeglass: { root: rootDir } };
+        var eyeglass = new Eyeglass(options);
+        var expectedOutput = ".foo {\n  bar: baz;\n}\n";
+
+        sassTestUtils.assertCompiles(eyeglass.options, expectedOutput, done);
+      });
     });
   });
 });

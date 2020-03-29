@@ -67,63 +67,19 @@ describe("EyeglassModules", function () {
     });
   }
 
-  fixtures.forEach(function(testDir) {
+  fixtures.forEach(function (testDir) {
     var testName = path.basename(testDir);
-    it(testName, function() {
+    it(testName, function () {
       testFixture(testDir);
     });
   });
 
-  it("handles symlinked node modules", function(done) {
-    var fixtureDir = path.join(__dirname, "fixtures", "symlinked_modules");
-    var symlinkPath = path.join(fixtureDir, "project", "node_modules", "mymodule");
-    var modulePath = path.join(fixtureDir, "mymodule");
-    fs.symlinkSync(modulePath, symlinkPath, "dir");
 
-    var opts = {
-      data: '@import "mymodule"; @import "shared_dep";',
-      eyeglass: {
-        root: path.join(fixtureDir, "project")
-      }
-    };
-
-    var expected = ".shared {\n" +
-                   "  float: upside-down;\n" +
-                   "  version: 1.2.0; }\n" +
-                   "\n" +
-                   ".mymodule {\n" +
-                   "  color: red; }\n";
-
-    testutils.assertCompiles(opts, expected, function() {
-      fs.unlinkSync(symlinkPath);
-      done();
-    });
-
-  });
-
-  it("throws when an invalid module path is provided", function(done) {
-    var rootDir = testutils.fixtureDirectory("simple_module");
-    var invalidPath = testutils.fixtureDirectory("does_not_exist");
-    var expectedError = "Could not find a valid package.json at " + invalidPath;
-    var options = {
-      data: "// should not compile",
-      eyeglass: {
-        root: rootDir,
-        modules: [{
-          path: invalidPath
-        }]
-      }
-    };
-    testutils.assertStderr(function(checkStderr) {
-      checkStderr("");
-      testutils.assertCompilationError(options, expectedError, done);
-    });
-  });
-  it("ignores a manual dependency already in the tree", function() {
+  it("ignores a manual dependency already in the tree", function () {
     var rootDir = testutils.fixtureDirectory("EyeglassModules/has_conflicting_versions");
     var depInTree =
       testutils.fixtureDirectory("EyeglassModules/has_conflicting_versions/node_modules/module_a/node_modules/module_b");
-    var modules = [ {path: depInTree} ];
+    var modules = [{ path: depInTree }];
     testFixture(
       rootDir,
       {
@@ -133,5 +89,55 @@ describe("EyeglassModules", function () {
       },
       modules
     );
+  });
+
+  testutils.withEachSass(function (sass, sassName, sassTestUtils) {
+    describe(`with ${sassName}`, function () {
+      it("throws when an invalid module path is provided", function (done) {
+        var rootDir = testutils.fixtureDirectory("simple_module");
+        var invalidPath = testutils.fixtureDirectory("does_not_exist");
+        var expectedError = "Could not find a valid package.json at " + invalidPath;
+        var options = {
+          data: "// should not compile",
+          eyeglass: {
+            root: rootDir,
+            modules: [{
+              path: invalidPath
+            }]
+          }
+        };
+        testutils.assertStderr(function (checkStderr) {
+          checkStderr("");
+          sassTestUtils.assertCompilationError(options, expectedError, done);
+        });
+      });
+
+      it("handles symlinked node modules", function (done) {
+        var fixtureDir = path.join(__dirname, "fixtures", "symlinked_modules");
+        var symlinkPath = path.join(fixtureDir, "project", "node_modules", "mymodule");
+        var modulePath = path.join(fixtureDir, "mymodule");
+        fs.symlinkSync(modulePath, symlinkPath, "dir");
+
+        var opts = {
+          data: '@import "mymodule"; @import "shared_dep";',
+          eyeglass: {
+            root: path.join(fixtureDir, "project")
+          }
+        };
+
+        var expected = ".shared {\n" +
+          "  float: upside-down;\n" +
+          "  version: 1.2.0;\n}\n" +
+          "\n" +
+          ".mymodule {\n" +
+          "  color: red;\n}\n";
+
+        sassTestUtils.assertCompiles(opts, expected, function () {
+          fs.unlinkSync(symlinkPath);
+          done();
+        });
+
+      });
+    });
   });
 });
