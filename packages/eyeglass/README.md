@@ -4,13 +4,28 @@
 
 ## Getting some npm in your Sass
 
-eyeglass is a node-sass ([github](https://github.com/sass/node-sass)) extension manager built on top of npm. Using eyeglass, you can bring the power of node modules to your Sass files.
+Eyeglass is a sass ([github](https://github.com/sass/sass)) extension manager built on top of npm. Using eyeglass, you can bring the power of node modules to your Sass files.
+
+Eyeglass works with [`node-sass`](https://github.com/sass/node-sass) as well as [`dart-sass`](https://github.com/sass/dart-sass). Eyeglass has no direct dependency on a sass implementation and it will use whichever sass implementation that you have installed in your project. If necessary, you can pass a sass implementation to eyeglass using the `eyeglass.engines.sass` option.
 
 # Installing eyeglass
 
 ```
-# for programatic functionality
-npm install eyeglass --save-dev
+npm install --save-dev eyeglass
+```
+
+Additionally, you must install a compatible Sass implementation.
+
+If you want to use `node-sass`:
+
+```
+npm install --save-dev node-sass
+```
+
+If you want to use `dart-sass`:
+
+```
+npm install --save-dev sass
 ```
 
 # Adding eyeglass modules to your project
@@ -19,8 +34,8 @@ eyeglass modules are regular npm modules. Install them into your project just li
 `npm install my_eyeglass_module --save-dev`
 
 Once installed via npm, an eyeglass module can:
-* Provide stylesheets that you can import with special node_module syntax.
-* Add additional custom functions to Sass that are written in javascript.
+* Make stylesheets in the npm module accessible to the project via Sass's `@import` or `@use` directives.
+* Expose custom functions and importers written in javascript to the Sass compiler.
 
 If your build-tool is [eyeglass-aware](#building-sass-files-with-eyeglass-support), you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
