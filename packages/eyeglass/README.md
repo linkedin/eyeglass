@@ -28,6 +28,15 @@ If you want to use `dart-sass`:
 npm install --save-dev sass
 ```
 
+Additionally, if you use `sass.renderSync()` and have eyeglass modules that export
+functions that are asynchronous, you should also add the `deasync` library to your project:
+
+```
+npm install --save-dev deasync
+```
+
+*Note: If your project uses `yarn`, the above commands should replace `npm install --save-dev` with `yarn add --dev`.*
+
 # Adding eyeglass modules to your project
 eyeglass modules are regular npm modules. Install them into your project just like any other item.
 
@@ -39,14 +48,34 @@ Once installed via npm, an eyeglass module can:
 
 If your build-tool is [eyeglass-aware](#building-sass-files-with-eyeglass-support), you can reference the eyeglass module with standard Sass import syntax: `@import "my_eyeglass_module/file";`. The `my_eyeglass_module` will be resolved to the correct directory in your node modules, and the file will then resolve using the standard import rules for Sass.
 
+## Transitive dependencies
+
+Eyeglass modules can depend on other eyeglass modules. By default Eyeglass will
+only allow modules with a direct dependency on another eyeglass module to import
+files from that module.
+
+Setting `eyeglass.disableStrictDependencyCheck` to `true` will
+allow any module in the dependency tree to be imported from any other file in
+the dependency tree (note: setting this option is discouraged and should not be
+necessary in most situations).
+
+Unlike node, Sass has a global namespace. There are situations where npm will
+happily install multiple instances of the same node package within the package
+hierarchy, even spanning major versions. Eyeglass always creates a global
+resolution of all the different versions of an eyeglass module by picking the
+instance with the highest version. If multiple major versions of the same
+package are found, eyeglass will warn you by default. If you set `eyeglass.strictModuleVersions` to `true`, eyeglass will produce a hard error. If you
+set `eyeglass.strictModuleVersions` to `false` it will silently ignore these
+version conflicts (this is not recommended).
+
 ## Manually adding modules
 
 Eyeglass will transitively auto-discover npm installed modules that are listed in
-your `package.json` files. Just using `npm link` is not enough to use
-modules on your local filesystem. If that isn't sufficient, you can use
-the `eyeglass.modules` config option to specify a path to your npm
-module or to even declare an eyeglass module for a project that doesn't
-declare itself to be one.
+your `package.json` files. (Just using `npm link` is not enough to use
+modules on your local filesystem). In some cases, you might need to use an eyeglass
+module that isn't distributed as an npm package, or adapt a sass library that
+doesn't expose itself as an eyeglass module. In these situation, you can manually
+add modules to your project.
 
 To add modules that are not part of the npm ecosystem, you can manually
 add modules via the eyeglass options:
@@ -115,7 +144,7 @@ eyeglass({
 });
 ```
 
-Alternatively, you can programmatically purge the global cache using `eyeglass.modules.cache.modules.purge()`.
+You can programmatically purge the global caches in Eyeglass using `Eyeglass.resetGlobalCaches()`.
 
 # Working with assets
 
