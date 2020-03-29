@@ -5,7 +5,6 @@ var Eyeglass = require("../");
 var assert = require("assert");
 var testutils = require("./testutils");
 var path = require("path");
-var semver = require("semver");
 
 describe("options", function () {
   beforeEach(function (done) {

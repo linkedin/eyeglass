@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require("path");
-var sass = require("node-sass");
 var testutils = require("./testutils");
 var Eyeglass = require("../lib");
 

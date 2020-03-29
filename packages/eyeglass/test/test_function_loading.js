@@ -1,11 +1,7 @@
 "use strict";
 
-var assert = require("assert");
-const nodeSass = require("node-sass");
-const dartSass = require("sass");
 var testutils = require("./testutils");
 
-var eyeglass = require("../lib");
 
 describe("function loading", function () {
   testutils.withEachSass(function (sass, sassName, sassTestUtils) {

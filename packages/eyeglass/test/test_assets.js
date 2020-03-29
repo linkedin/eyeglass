@@ -1,6 +1,5 @@
 "use strict";
 
-var sass = require("node-sass");
 var path = require("path");
 var testutils = require("./testutils");
 var assert = require("assert");
