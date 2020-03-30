@@ -1,7 +1,7 @@
 {
   "name": "broccoli-eyeglass",
   "description": "Sass compiler for Broccoli with Eyeglass Integration",
-  "version": "5.5.0",
+  "version": "6.0.0",
   "author": "Chris Eppstein <chris@eppsteins.net>",
   "main": "lib/index.js",
   "license": "Apache-2.0",
@@ -44,7 +44,7 @@
     "debug": "^4.1.0",
     "dependency-tree": "^7.0.2",
     "ensure-symlink": "^1.0.2",
-    "eyeglass": "^2.5.0",
+    "eyeglass": "^3.0.0",
     "fs-extra": "^7.0.0",
     "fs-tree-diff": "^1.0.0",
     "glob": "^7.1.2",
