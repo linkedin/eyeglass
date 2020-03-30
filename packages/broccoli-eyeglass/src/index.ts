@@ -1,8 +1,7 @@
 "use strict";
 
-import { BroccoliSassOptions, CompilationDetails } from "./broccoli_sass_compiler";
+import BroccoliSassCompiler, { BroccoliSassOptions, CompilationDetails, SassImplementation } from "./broccoli_sass_compiler";
 import BroccoliPlugin = require("broccoli-plugin");
-import BroccoliSassCompiler from "./broccoli_sass_compiler";
 import crypto = require("crypto");
 import merge = require("lodash.merge");
 import path = require("path");
@@ -10,12 +9,10 @@ import sortby = require("lodash.sortby");
 import stringify = require("json-stable-stringify");
 import debugGenerator = require("debug");
 import Eyeglass = require("eyeglass");
-import * as sass from "node-sass";
 import dependencyTree = require("dependency-tree");
 import { EyeglassOptions } from "eyeglass/lib/util/Options";
 import EyeglassModule from "eyeglass/lib/modules/EyeglassModule";
 
-type SassImplementation = typeof sass;
 const assetImportCacheDebug = debugGenerator("broccoli-eyeglass:asset-import-cache");
 const dependencyDebug = debugGenerator("broccoli-eyeglass:file-dependencies")
 const CURRENT_VERSION: string = require(path.join(__dirname, "..", "package.json")).version;
@@ -59,7 +56,6 @@ type BroccoliEyeglassOptions = BroccoliSassOptions & EyeglassOptions & {
 };
 
 class EyeglassCompiler extends BroccoliSassCompiler {
-
   private configureEyeglass: ((eyeglass: Eyeglass, sass: SassImplementation, details: CompilationDetails) => unknown) | undefined;
   private relativeAssets: boolean | undefined;
   private assetDirectories: Array<string> | undefined;
@@ -130,7 +126,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
 
     options.eyeglass.buildDir = details.destDir;
     options.eyeglass.engines = options.eyeglass.engines || {};
-    options.eyeglass.engines.sass = options.eyeglass.engines.sass || sass;
+    options.eyeglass.engines.sass = this.sass;
     options.eyeglass.installWithSymlinks = true;
     options.eyeglass.buildCache = this.buildCache;
 
@@ -151,7 +147,7 @@ class EyeglassCompiler extends BroccoliSassCompiler {
     }
 
     if (this.configureEyeglass) {
-      this.configureEyeglass(eyeglass, options.eyeglass.engines.sass, details);
+      this.configureEyeglass(eyeglass, this.sass, details);
     }
 
     // set up asset dependency tracking

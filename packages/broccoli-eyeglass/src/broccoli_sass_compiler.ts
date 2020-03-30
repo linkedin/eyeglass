@@ -2,7 +2,6 @@
 import debugGenerator = require("debug");
 import * as path from "path";
 import fs = require("fs-extra");
-import RSVP = require("rsvp");
 import mkdirp = require("mkdirp");
 import BroccoliPlugin = require("broccoli-plugin");
 import glob = require("glob");
@@ -10,7 +9,7 @@ import FSTree = require("fs-tree-diff");
 import walkSync = require("walk-sync");
 import queue = require("async-promise-queue");
 import ensureSymlink = require("ensure-symlink");
-import * as nodeSass from "node-sass";
+import type * as nodeSass from "node-sass";
 import copyObject = require("lodash.clonedeep");
 import MergeTrees = require("broccoli-merge-trees");
 import { EventEmitter } from "chained-emitter";
@@ -19,19 +18,27 @@ import heimdall = require("heimdalljs");
 import {statSync} from "fs";
 import {determineOptimalConcurrency} from "./concurrency";
 
-const concurrency = RSVP.resolve(determineOptimalConcurrency());
+const concurrency = Promise.resolve(determineOptimalConcurrency());
 
 const FSTreeFromEntries = FSTree.fromEntries;
 const debug = debugGenerator("broccoli-eyeglass");
 const hotCacheDebug = debugGenerator("broccoli-eyeglass:hot-cache");
 const concurrencyDebug = debug.extend("concurrency");
 
-let sass: typeof nodeSass;
-let renderSass: (options: nodeSass.Options) => Promise<nodeSass.Result>;
+export type SassImplementation = typeof nodeSass;
 
-type SassPromiseRenderer =
-  ((options: nodeSass.Options) => Promise<nodeSass.Result>)
-  | ((options: nodeSass.SyncOptions) => Promise<nodeSass.Result>);
+function findSass(sass: SassImplementation | undefined): SassImplementation {
+  if (sass) return sass;
+  try {
+    return require("node-sass")
+  } catch (e) {
+    try {
+      return require("sass");
+    } catch (e) {
+      throw new Error("A sass engine was not provided and neither `sass` nor `node-sass` were found in the current project.")
+    }
+  }
+}
 
 interface CachedContents {
   contents: Record<string, string>;
@@ -39,14 +46,6 @@ interface CachedContents {
 }
 
 type CachedDependencies = Array<[string, string]>;
-
-function initSass(): void {
-  if (!sass) {
-    sass = nodeSass;
-    // Standard async rendering for node-sass.
-    renderSass = RSVP.denodeify(sass.render);
-  }
-}
 
 function absolutizeEntries(entries: Array<Entry>): void {
   // We make everything absolute because relative path comparisons don't work for us.
@@ -91,11 +90,6 @@ class Entry {
 
 function unique(array: Array<string>): Array<string> {
   return new Array(...new Set(array));
-}
-
-// This promise runs sass synchronously
-function renderSassSync(options: nodeSass.SyncOptions): Promise<nodeSass.Result> {
-  return RSVP.resolve(sass.renderSync(options));
 }
 
 function removePathPrefix(prefix: string, fileNames: Array<string>): Array<string> {
@@ -151,6 +145,18 @@ interface GenericCache {
 }
 
 export interface BroccoliSassOptions extends BroccoliPlugin.BroccoliPluginOptions {
+  /**
+   * Provide engines to this plugin and descendants of this plugin.
+   */
+  engines?: {
+    /**
+     * The sass compiler to be used by this plugin.
+     * If not provided, this plugin will attempt to require 'node-sass' and
+     * then 'sass' (in that order, using the first one that it finds).
+     */
+    sass?: typeof nodeSass;
+    [engine: string]: unknown;
+  };
   /**
    * The directory to write css files to. Relative to the build output directory.
    */
@@ -377,6 +383,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   protected persistentCacheDebug: debugGenerator.Debugger;
   protected sessionCache: GenericCache | undefined;
   protected buildCache: GenericCache;
+  protected sass: typeof nodeSass;
 
   public events: EventEmitter;
 
@@ -398,6 +405,8 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     options = options || {};
     options.persistentOutput = true;
     super([inputTree], options);
+
+    this.sass = findSass(options.engines?.sass);
 
     this.buildCount = 0;
 
@@ -482,6 +491,33 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     });
   }
 
+  /**
+   * Wraps the node-style async render method with a promise.
+   */
+  renderSassAsync(options: nodeSass.Options): Promise<nodeSass.Result> {
+    return new Promise((resolve, reject) => {
+      this.sass.render(options, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  /**
+   * Wraps the sync render method with a promise that is either immediately
+   * resolved or rejected.
+   */
+  renderSassSync(options: nodeSass.SyncOptions): Promise<nodeSass.Result> {
+    try {
+      return Promise.resolve(this.sass.renderSync(options));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
   logCompilationSuccess(details: CompilationDetails, result: nodeSass.Result): void {
     let timeInSeconds = result.stats.duration / 1000.0;
     if (timeInSeconds === 0) {
@@ -508,16 +544,16 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   compileTree(srcPath: string, files: Array<string>, destDir: string, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<void | Array<void | nodeSass.Result>> {
     switch (files.length) {
       case 0:
-        return RSVP.resolve();
+        return Promise.resolve();
       case 1:
-        return RSVP.all(this.compileSassFile(srcPath, files[0], destDir, compilationTimer));
+        return Promise.all(this.compileSassFile(srcPath, files[0], destDir, compilationTimer));
       default: {
         let worker = queue.async.asyncify((file: string) => {
-          return RSVP.all(this.compileSassFile(srcPath, file, destDir, compilationTimer));
+          return Promise.all(this.compileSassFile(srcPath, file, destDir, compilationTimer));
         });
         return concurrency.then(numConcurrentCalls => {
           concurrencyDebug("Compiling files with a worker queue of size %d", numConcurrentCalls);
-          return RSVP.resolve(queue(worker, files, numConcurrentCalls));
+          return Promise.resolve(queue(worker, files, numConcurrentCalls));
         })
       }
     }
@@ -561,12 +597,11 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     return promises;
   }
 
-  renderer(): SassPromiseRenderer {
-    initSass();
+  render(options: nodeSass.Options | nodeSass.SyncOptions): Promise<nodeSass.Result> {
     if (this.renderSync) {
-      return renderSassSync;
+      return this.renderSassSync(<nodeSass.SyncOptions>options); // XXX This cast sucks
     } else {
-      return renderSass;
+      return this.renderSassAsync(<nodeSass.Options>options); // This cast isn't strictly necessary
     }
   }
 
@@ -618,7 +653,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       let depFiles = dependencies.map(depAndHash => depAndHash[0]);
       let value: [Array<string>, CachedContents] = [depFiles, JSON.parse(cachedOutput.value)];
       compilationTimer.stats.cacheHitCount++;
-      return RSVP.resolve(this.handleCacheHit(details, value).then(() => {}));
+      return Promise.resolve(this.handleCacheHit(details, value).then(() => {}));
     } catch (error) {
       return this.handleCacheMiss(details, error, key, compilationTimer);
     }
@@ -738,7 +773,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       let sourceFile = urls[url];
       eventPromises.push(this.events.emit("cached-asset", sourceFile, url))
     }
-    return RSVP.all(eventPromises);
+    return Promise.all(eventPromises);
   }
 
   scopedFileName(file: string): string {
@@ -902,8 +937,6 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
   }
 
   compileCssFile(details: CompilationDetails, compilationTimer: heimdall.Cookie<SassRenderSchema>): Promise<nodeSass.Result> {
-    let sass = this.renderer();
-
     let success = this.handleSuccess.bind(this, details);
     let failure = this.handleFailure.bind(this, details);
 
@@ -931,8 +964,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
 
       this.events.addListener("additional-output", additionalOutputListener);
       this.events.addListener("dependency", dependencyListener);
-      let sassPromise = sass(details.options as nodeSass.SyncOptions); // XXX This cast sucks
-      return sassPromise
+      return this.render(details.options)
         .finally(() => {
           this.events.removeListener("dependency", dependencyListener);
           this.events.removeListener("additional-output", additionalOutputListener);
@@ -948,7 +980,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
           debug(`render of ${result.stats.entry} took ${result.stats.duration}`)
           return success(result).then(() => result);
         }, failure);
-    }) as Promise<nodeSass.Result>;
+    });
   }
 
   handleSuccess(details: CompilationDetails, result: nodeSass.Result): Promise<void> {
@@ -960,7 +992,7 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     return this.events.emit("compiled", details, result);
   }
 
-  handleFailure(details: CompilationDetails, error: nodeSass.SassError | null): Promise<void> {
+  handleFailure(details: CompilationDetails, error: nodeSass.SassError | null): Promise<nodeSass.Result> {
     let failed = this.events.emit("failed", details, error);
     return failed.then(() => {
       if (typeof error === "object" && error !== null) {
