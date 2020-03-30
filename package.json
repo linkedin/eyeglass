@@ -3,7 +3,7 @@
   "private": true,
   "devDependencies": {
     "lerna": "^3.3.0",
-    "yarn": "^1.9.4"
+    "yarn": "1.21.1"
   },
   "workspaces": [
     "packages/*",
