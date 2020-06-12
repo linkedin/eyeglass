@@ -86,6 +86,7 @@ export default class EyeglassModules {
   };
   cache: {
     access: SimpleCache<boolean>;
+    compatibility: SimpleCache<boolean>;
     modules: SimpleCache<EyeglassModule | undefined>;
     modulePackage: SimpleCache<string | undefined>;
   };
@@ -114,6 +115,7 @@ export default class EyeglassModules {
 
       this.cache = {
         access: new SimpleCache(),
+        compatibility: new SimpleCache(),
         modules: useGlobalModuleCache ? globalModuleCache : new SimpleCache<EyeglassModule>(),
         modulePackage: useGlobalModuleCache ? globalModulePackageCache : new SimpleCache<string>(),
       };
@@ -387,21 +389,24 @@ export default class EyeglassModules {
     });
   }
   private isCompatibleWithThisEyeglass(needs: string): boolean {
-    let assertCompatSpec = this.config.eyeglass.assertEyeglassCompatibility;
-    // If we don't have a forced compat version just check against the module
-    if (!assertCompatSpec) {
-      return semver.satisfies(EYEGLASS_VERSION, needs);
-    }
+    let cacheKey = needs;
+    return this.cache.compatibility.getOrElse(cacheKey, () => {
+      let assertCompatSpec = this.config.eyeglass.assertEyeglassCompatibility;
+      // If we don't have a forced compat version just check against the module
+      if (!assertCompatSpec) {
+        return semver.satisfies(EYEGLASS_VERSION, needs);
+      }
 
-    // We only use the forced compat version if it is functionally higher than
-    // the module's needed version
-    let minModule = semver.minSatisfying(BOUNDARY_VERSIONS, needs);
-    let minCompat = semver.minSatisfying(BOUNDARY_VERSIONS, assertCompatSpec);
-    if (minModule === null || minCompat === null || semver.gt(minModule, minCompat)) {
-      return semver.satisfies(EYEGLASS_VERSION, needs)
-    } else {
-      return semver.satisfies(EYEGLASS_VERSION, `${assertCompatSpec} || ${needs}`)
-    }
+      // We only use the forced compat version if it is functionally higher than
+      // the module's needed version
+      let minModule = semver.minSatisfying(BOUNDARY_VERSIONS, needs);
+      let minCompat = semver.minSatisfying(BOUNDARY_VERSIONS, assertCompatSpec);
+      if (minModule === null || minCompat === null || semver.gt(minModule, minCompat)) {
+        return semver.satisfies(EYEGLASS_VERSION, needs)
+      } else {
+        return semver.satisfies(EYEGLASS_VERSION, `${assertCompatSpec} || ${needs}`)
+      }
+    });
   }
 
   /**
