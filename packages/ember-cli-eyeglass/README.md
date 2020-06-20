@@ -14,7 +14,7 @@ Then rename all your `.css` files so they have the `.scss` extension.
 In your application's ember-cli-build.js the key `"eyeglass"` can be
 set to an options object that will be passed to broccoli-eyeglass. For
 details on the options available, please read the [broccoli-eyeglass
-options documentation](https://github.com/sass-eyeglass/broccoli-eyeglass#options).
+options documentation](https://github.com/linkedin/eyeglass/tree/master/packages/broccoli-eyeglass#options).
 
 ### Apps
 
