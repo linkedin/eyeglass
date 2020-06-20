@@ -1,3 +1,6 @@
+# 5.5.1
+* Updates eyeglass to version 2.5.1.
+
 # 5.5.0
 
 * Updates Eyeglass to version 2.5.0

@@ -1,3 +1,7 @@
+# 6.5.1
+* Updates `eyeglass` to version `2.5.1`.
+* Updates `broccoli-eyeglass` to version `5.5.1`.
+
 # 6.5.0
 
 * Updates Eyeglass to version 2.5.0

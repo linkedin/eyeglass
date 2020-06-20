@@ -1,3 +1,6 @@
+# 2.5.1
+* Performance optimizations. Contributed by @mikrostew.
+
 # 2.5.0
 
 * Node version 8 is now deprecated. Support for node 6, 8, and 11 will be
