@@ -84,7 +84,7 @@ describe("semver checking", function () {
           data: "#hello { greeting: hello(Chris); }",
           eyeglass: {
             modules: [
-              { path: testutils.fixtureDirectory("built_for_eyeglass_v3") }
+              { path: testutils.fixtureDirectory("built_for_eyeglass_v4") }
             ],
           }
         };
