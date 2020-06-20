@@ -150,7 +150,10 @@ export class URI {
     * @returns  {String} the normalized URI
     */
   static system(uri: string): string {
-    return (new URI(uri)).getPath(path.sep);
+    // convert the path separator to standard system paths
+    let pathname = convertSeparator(uri, path.sep);
+    // then normalize the path
+    return path.normalize(pathname);
   }
 
   /**
