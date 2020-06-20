@@ -1,3 +1,7 @@
+# 3.0.1
+
+* Performance optimizations. Contributed by @mikrostew.
+
 # 3.0.0
 
 ## New Features
@@ -43,6 +47,10 @@
   * `strictModuleVersions` - Use `eyeglass.strictModuleVersions` instead.
   * `assetsHttpPrefix` - Use `eyeglass.assets.httpPrefix` instead.
   * `assetsRelativeTo` - Use `eyeglass.assets.relativeTo` instead.
+
+# 2.5.1
+
+* Performance optimizations. Contributed by @mikrostew.
 
 # 2.5.0
 

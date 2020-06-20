@@ -1,3 +1,7 @@
+# 6.0.1
+
+* Updates eyeglass to version 3.0.1.
+
 # 6.0.0
 
 * Updates Eyeglass to version 3.0.0. The 3.0 release of eyeglass now supports
@@ -6,6 +10,10 @@
   you are on, at least, node 10.
 
   Please read the [Eyeglass CHANGELOG](../eyeglass/CHANGELOG.md).
+
+# 5.5.1
+
+* Updates eyeglass to version 2.5.1.
 
 # 5.5.0
 

@@ -1,3 +1,8 @@
+# 7.0.1
+
+* Updates `eyeglass` to version `3.0.1`.
+* Updates `broccoli-eyeglass` to version `6.0.1`.
+
 # 7.0.0
 
 * Updates Eyeglass to version 3.0.0. The 3.0 release of eyeglass now supports
@@ -6,6 +11,10 @@
   you are on, at least, node 10.
 
   Please read the [Eyeglass CHANGELOG](../eyeglass/CHANGELOG.md).
+
+# 6.5.1
+* Updates `eyeglass` to version `2.5.1`.
+* Updates `broccoli-eyeglass` to version `5.5.1`.
 
 # 6.5.0
 
