@@ -110,4 +110,10 @@ module('Acceptance | eyeglass', function(hooks) {
     let text = await fetch('/engines-dist/lazy-test-addon/assets/engine.css').then(req => req.text());
     assert.contains('.lazy', text);
   });
+
+  test('/assets/unprocessed.css exists', async function(assert) {
+    let text = await (await fetch('/assets/unprocessed.css')).text();
+
+    assert.contains('.styled-by-css', text);
+  });
 });

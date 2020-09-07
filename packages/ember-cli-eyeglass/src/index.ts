@@ -1,7 +1,7 @@
 import EyeglassCompiler = require('broccoli-eyeglass');
 import Eyeglass = require('eyeglass');
 import findHost from "./findHost";
-import Funnel = require('broccoli-funnel');
+import funnel = require('broccoli-funnel');
 import MergeTrees = require('broccoli-merge-trees');
 import * as path from 'path';
 import * as url from 'url';
@@ -9,6 +9,7 @@ import cloneDeep = require('lodash.clonedeep');
 import defaultsDeep = require('lodash.defaultsdeep');
 import {BroccoliSymbolicLinker} from "./broccoli-ln-s";
 import debugGenerator = require("debug");
+import BroccoliDebug = require("broccoli-debug");
 import { URL } from 'url';
 
 const debug = debugGenerator("ember-cli-eyeglass");
@@ -194,7 +195,8 @@ const EMBER_CLI_EYEGLASS = {
         // These start with a slash and that messes things up.
         let cssDir = outputPath.slice(1) || './';
         let sassDir = inputPath.slice(1) || './';
-        let {app, name} = EYEGLASS_INFO_PER_ADDON.get(this);
+        let {app, name, isApp} = EYEGLASS_INFO_PER_ADDON.get(this);
+        tree = new BroccoliDebug(tree, `ember-cli-eyeglass:${name}:input`);
         let extracted = this.extractConfig(app, addon);
         extracted.cssDir = cssDir;
         extracted.sassDir = sassDir;
@@ -210,7 +212,15 @@ const EMBER_CLI_EYEGLASS = {
             // pass this only happens with a cache after downgrading ember-cli.
           }
         });
-        return compiler;
+        let withoutSassFiles = funnel(tree, {
+          srcDir: isApp ? 'app/styles' : undefined,
+          destDir: isApp ? 'assets' : undefined,
+          exclude: ['**/*.s{a,c}ss'],
+        });
+        let result = new MergeTrees([withoutSassFiles, compiler], {
+          overwrite: true
+        });
+        return new BroccoliDebug(result, `ember-cli-eyeglass:${name}:output`);
       }
     });
   },
