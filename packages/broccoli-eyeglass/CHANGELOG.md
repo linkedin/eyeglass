@@ -1,3 +1,16 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [6.0.2](https://github.com/linkedin/eyeglass/compare/broccoli-eyeglass@6.0.1...broccoli-eyeglass@6.0.2) (2020-09-07)
+
+**Note:** Version bump only for package broccoli-eyeglass
+
+
+
+
+
 # 6.0.1
 
 * Updates eyeglass to version 3.0.1.
