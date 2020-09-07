@@ -49,6 +49,7 @@
     "broccoli"
   ],
   "dependencies": {
+    "broccoli-debug": "^0.6.5",
     "broccoli-eyeglass": "^6.0.1",
     "broccoli-funnel": "^2.0.1",
     "broccoli-merge-trees": "^3.0.0",

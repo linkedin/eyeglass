@@ -1,5 +1,4 @@
-export = index;
-declare class index {
+declare class Funnel {
   constructor(inputNode: any, _options: any);
   destDir: any;
   count: any;
@@ -16,3 +15,10 @@ declare class index {
   read(readTree: any): any;
   shouldLinkRoots(): any;
 }
+
+export = funnel;
+declare function funnel(inputNode: any, options: any): Funnel;
+declare namespace funnel {
+  const Funnel: Funnel;
+}
+
