@@ -3,7 +3,7 @@
   "private": true,
   "devDependencies": {
     "lerna": "^3.3.0",
-    "yarn": "1.22.0"
+    "yarn": "1.22.5"
   },
   "workspaces": [
     "packages/*",
@@ -16,6 +16,6 @@
   },
   "volta": {
     "node": "10.18.1",
-    "yarn": "1.21.1"
+    "yarn": "1.22.5"
   }
 }
