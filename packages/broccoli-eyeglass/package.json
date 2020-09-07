@@ -90,7 +90,7 @@
     "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
     "typescript": "~3.8.0",
-    "yarn": "1.21.1"
+    "yarn": "1.22.0"
   },
   "volta": {
     "node": "10.18.1",
