@@ -19,6 +19,7 @@ const debugCache = debug.extend("cache");
 const debugAssets = debug.extend("assets");
 
 interface EyeglassProjectInfo {
+  usingEmbroider: boolean;
   apps: Array<any>;
 }
 interface EyeglassAddonInfo {
@@ -26,10 +27,10 @@ interface EyeglassAddonInfo {
   parentPath: string;
   isApp: boolean;
   app: any;
+  assets: BroccoliSymbolicLinker;
 }
 
 interface EyeglassAppInfo {
-  assets: BroccoliSymbolicLinker;
   sessionCache: Map<string, string | number>;
 }
 
@@ -46,7 +47,8 @@ if (!g.EYEGLASS) {
     infoPerAddon: new WeakMap(),
     infoPerApp: new WeakMap(),
     projectInfo: {
-      apps: []
+      apps: [],
+      usingEmbroider: false,
     }
   }
 }
@@ -65,6 +67,18 @@ function isLazyEngine(addon: any): boolean {
     return true;
   }
   return false;
+}
+
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isUsingEmbroider(app: any): boolean {
+  let pkg = app.project.pkg;
+  let dependencies = pkg.dependencies || {};
+  let devDependencies = pkg.devDependencies || {};
+  return !!(dependencies["@embroider/core"] || devDependencies["@embroider/core"]);
+}
+
+function embroiderEnabled(): boolean {
+  return g.EYEGLASS.projectInfo.usingEmbroider;
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,6 +158,7 @@ const EMBER_CLI_EYEGLASS = {
     let parentPath = this.parent.root;
     debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
+      g.EYEGLASS.projectInfo.usingEmbroider = isUsingEmbroider(app);
       APPS.push(app);
       // we create the symlinker in persistent mode because there's not a good
       // way yet to recreate the symlinks when sass files are cached. I would
@@ -151,10 +166,18 @@ const EMBER_CLI_EYEGLASS = {
       // across builds anyway.
       EYEGLASS_INFO_PER_APP.set(app, {
         sessionCache: new Map(),
-        assets: new BroccoliSymbolicLinker({}, {annotation: app.name, persistentOutput: true})
       });
     }
-    let addonInfo = {isApp, name, parentPath, app};
+    let addonInfo = {
+      isApp,
+      name,
+      parentPath,
+      app,
+      assets: new BroccoliSymbolicLinker({}, {
+        annotation: `Eyeglass Assets for ${app.name}/${name}`,
+        persistentOutput: true,
+      }),
+    };
     EYEGLASS_INFO_PER_ADDON.set(this, addonInfo);
   },
   postBuild(_result) {
@@ -166,7 +189,6 @@ const EMBER_CLI_EYEGLASS = {
     Eyeglass.resetGlobalCaches();
     for (let app of APPS) {
       let appInfo = EYEGLASS_INFO_PER_APP.get(app);
-      appInfo.assets.reset();
       debugCache("clearing %d cached items from the eyeglass build cache for %s", appInfo.sessionCache.size, app.name);
       appInfo.sessionCache.clear();
     }
@@ -174,16 +196,6 @@ const EMBER_CLI_EYEGLASS = {
   buildError(_error) {
     debugBuild("Build Failed.");
     this._resetCaches();
-  },
-  postprocessTree(type, tree) {
-    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
-    if (type === "all" && addonInfo.isApp) {
-      debugBuild("Merging eyeglass asset tree with the '%s' tree", type);
-      let appInfo = EYEGLASS_INFO_PER_APP.get(addonInfo.app);
-      return new MergeTrees([tree, appInfo.assets], {overwrite: true});
-    } else {
-      return tree;
-    }
   },
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
@@ -203,6 +215,7 @@ const EMBER_CLI_EYEGLASS = {
         const config = this.setupConfig(extracted);
         debugSetup("Broccoli Configuration for %s: %O", name, config)
         let httpRoot = config.eyeglass && config.eyeglass.httpRoot || "/";
+        let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
         let compiler = new EyeglassCompiler(tree, config);
         compiler.events.on("cached-asset", (absolutePathToSource, httpPathToOutput) => {
           debugBuild("will symlink %s to %s", absolutePathToSource, httpPathToOutput);
@@ -212,17 +225,38 @@ const EMBER_CLI_EYEGLASS = {
             // pass this only happens with a cache after downgrading ember-cli.
           }
         });
+        compiler.events.on("build", () => {
+          addonInfo.assets.reset();
+        });
         let withoutSassFiles = funnel(tree, {
           srcDir: isApp ? 'app/styles' : undefined,
           destDir: isApp ? 'assets' : undefined,
           exclude: ['**/*.s{a,c}ss'],
+          allowEmpty: true,
         });
-        let result = new MergeTrees([withoutSassFiles, compiler], {
+        let trees: Array<ReturnType<typeof funnel> | EyeglassCompiler | BroccoliSymbolicLinker> = [withoutSassFiles, compiler];
+        if (embroiderEnabled()) {
+          trees.push(addonInfo.assets);
+        }
+        let result = new MergeTrees(trees, {
           overwrite: true
         });
         return new BroccoliDebug(result, `ember-cli-eyeglass:${name}:output`);
       }
     });
+  },
+
+  treeForPublic(tree) {
+    if (embroiderEnabled()) {
+      // assets are returned from the preprocessor tree when embroider is enabled.
+      return tree;
+    }
+    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
+    if (tree) {
+      return new MergeTrees([tree, addonInfo.assets]);
+    } else {
+      return addonInfo.assets;
+    }
   },
 
   extractConfig(host, addon) {
@@ -245,8 +279,7 @@ const EMBER_CLI_EYEGLASS = {
     if (destPath.startsWith(rootPath)) {
       destPath = path.relative(rootPath, destPath);
     }
-    let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
-    let {assets} = EYEGLASS_INFO_PER_APP.get(app);
+    let {assets} = EYEGLASS_INFO_PER_ADDON.get(this);
     debugAssets("Will link asset %s to %s to expose it at %s relative to %s",
       srcFile, destPath, destUri, httpRoot);
     return assets.ln_s(srcFile, destPath);
