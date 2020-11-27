@@ -13831,9 +13831,9 @@ sync-disk-cache@^1.3.2, sync-disk-cache@^1.3.3:
     username-sync "^1.0.2"
 
 systeminformation@^4.1.4:
-  version "4.26.9"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.26.9.tgz#ecc725a162c0c7d8d48226f97637a5f590042ffd"
-  integrity sha512-69MTIX9j//wnteJzQWuGL6FiMxlfS3wTWyhROI6pNUaQALYqJb3W9VtLVcEcKFOjO1vrGRgilJVFzJeRRi//Pg==
+  version "4.30.5"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.30.5.tgz#2219c305c8be56a2cfa527a5519c45bc81d4916c"
+  integrity sha512-aYWs8yttl8ePpr6VOQ/Ak8cznuc9L/NQODVhbOKhInX73ZMLvV2BS86Mzr7LLfmUteVFR36CTDNQgiJgRqq+SQ==
 
 table@^5.2.3:
   version "5.4.6"
