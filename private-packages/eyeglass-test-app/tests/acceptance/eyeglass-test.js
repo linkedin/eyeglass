@@ -77,7 +77,7 @@ module('Acceptance | eyeglass', function(hooks) {
 
     const lazyStyle = self.getComputedStyle(document.querySelector('.lazy'));
 
-    assert.contains('/engines-dist/lazy-test-addon/assets/img/test.svg', lazyStyle.borderImage);
+    assert.contains('/engines-dist/lazy-test-addon/assets/img/test.svg', lazyStyle.backgroundImage);
   });
 
   test('/assets/eyeglass-test-app.css', async function(assert) {

@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "private-packages/lazy-test-addon"
+		},
+		{
+			"path": "private-packages/eyeglass-embroider-app"
 		}
 	],
 	"settings": {

@@ -2,5 +2,9 @@
 
 .eager-addon {
   color: blue;
-  background-image: asset-url('img/test.jpg')
+  height: 200px;
+  background-image: asset-url('img/test.jpg');
+  background-size: contain;
+  background-position-y: 10px;
+  background-repeat: no-repeat;
 }

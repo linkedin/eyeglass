@@ -92,6 +92,8 @@ function getDefaultAssetHttpPrefix(parent: any): string {
     if (isLazyEngine(current)) {
       // only lazy engines will inline their assets in the engines-dist folder
       return `engines-dist/${current.name}/assets`;
+    } else if (isEngine(current)) {
+      return `${current.name}/assets`;
     }
     current = current.parent;
   }
@@ -173,6 +175,7 @@ const EMBER_CLI_EYEGLASS = {
       name,
       parentPath,
       app,
+      isEngine: isEngine(this.parent),
       assets: new BroccoliSymbolicLinker({}, {
         annotation: `Eyeglass Assets for ${app.name}/${name}`,
         persistentOutput: true,
@@ -229,7 +232,7 @@ const EMBER_CLI_EYEGLASS = {
           addonInfo.assets.reset();
         });
         let withoutSassFiles = funnel(tree, {
-          srcDir: isApp ? 'app/styles' : undefined,
+          srcDir: (isApp && !embroiderEnabled()) ? 'app/styles' : undefined,
           destDir: isApp ? 'assets' : undefined,
           exclude: ['**/*.s{a,c}ss'],
           allowEmpty: true,
@@ -345,6 +348,11 @@ const EMBER_CLI_EYEGLASS = {
     return config;
   }
 };
+
+function isEngine(appOrAddon: any): boolean {
+  let keywords: Array<string> = appOrAddon._packageInfo.pkg.keywords || new Array<string>();
+  return keywords.includes("ember-engine");
+}
 
 function convertURLToPath(fragment: string): string {
   return (new URL(`file://${fragment}`)).pathname;
