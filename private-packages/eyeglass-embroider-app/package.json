@@ -62,5 +62,9 @@
   "volta": {
     "node": "10.18.1",
     "yarn": "1.21.1"
+  },
+  "dependencies": {
+    "@embroider/router": "^0.34.0",
+    "ember-engines": "^0.8.8"
   }
 }

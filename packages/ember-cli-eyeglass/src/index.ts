@@ -89,7 +89,7 @@ function getDefaultAssetHttpPrefix(parent: any): string {
   let current = parent;
 
   while (current.parent) {
-    if (isLazyEngine(current)) {
+    if (isLazyEngine(current) && !embroiderEnabled()) {
       // only lazy engines will inline their assets in the engines-dist folder
       return `engines-dist/${current.name}/assets`;
     } else if (isEngine(current)) {

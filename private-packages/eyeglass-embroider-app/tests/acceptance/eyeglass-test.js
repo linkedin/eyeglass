@@ -70,14 +70,14 @@ module('Acceptance | eyeglass', function(hooks) {
     assert.equal(eagerStyle.backgroundColor, 'rgb(0, 0, 255)', '.lazy#backgroundColor');
   });
 
-  test('lazy asset-url points to engines-dist', async function(assert) {
+  test('lazy asset-url points to the engine\'s public files location', async function(assert) {
     await visit('/lazy');
 
     assert.equal(currentURL(), '/lazy');
 
     const lazyStyle = self.getComputedStyle(document.querySelector('.lazy'));
 
-    assert.contains('/engines-dist/lazy-test-addon/assets/img/test.svg', lazyStyle.borderImage);
+    assert.contains('/lazy-test-addon/assets/img/test.svg', lazyStyle.backgroundImage);
   });
 
   test('/assets/eyeglass-embroider-app.css', async function(assert) {
@@ -104,11 +104,6 @@ module('Acceptance | eyeglass', function(hooks) {
     let text = await fetch('/assets/eager.css').then(req => req.text());
 
     assert.contains('.eager', text);
-  });
-
-  test('/engines-dist/lazy-test-addon/assets/engine.css', async function(assert) {
-    let text = await fetch('/engines-dist/lazy-test-addon/assets/engine.css').then(req => req.text());
-    assert.contains('.lazy', text);
   });
 
   test('/assets/unprocessed.css exists', async function(assert) {
