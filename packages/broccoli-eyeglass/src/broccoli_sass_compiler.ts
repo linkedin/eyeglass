@@ -345,6 +345,9 @@ function writeDataToFile(cachedFile: string, outputFile: string, data: Buffer): 
 //       cache. This is only invoked when the asset was created outside of the
 //       broccoli tree for this addon. If the asset was in the tree, it will
 //       be automatically recreated from the cache.
+//   * compiler.events.on("build", (buildCount) => {})
+//       Receive an event that a new build is about to start. The number of
+//       builds done prior to this build is passed as an argument.
 //
 //   For all these events, a compilation details object is passed of the
 //   following form:
@@ -353,7 +356,7 @@ function writeDataToFile(cachedFile: string, outputFile: string, data: Buffer): 
 //     srcPath: /* Source directory containing the sassFilename */,
 //     sassFilename: /* Sass file relative to the srcPath */,
 //     fullSassFilename: /* Fully expanded and resolved sass filename. */,
-//     destDir: /* The location cssfiles are being written (a tmp dir) */,
+//     destDir: /* The location css files are being written (a tmp dir) */,
 //     cssFilename: /* The css filename relation to the output directory */,
 //     fullCssFilename: /* Fully expanded and resolved css filename */,
 //     options: /* The options used for this compile */
@@ -1237,7 +1240,8 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
     });
   }
 
-  build(): Promise<void | Array<void | nodeSass.Result>> {
+  async build(): Promise<void | Array<void | nodeSass.Result>> {
+    await this.events.emit("build", this.buildCount);
     this.buildCount++;
 
     if (this.buildCount > 1) {
@@ -1249,14 +1253,17 @@ export default class BroccoliSassCompiler extends BroccoliPlugin {
       }
     }
 
-    return this._build().catch(e => {
+    try {
+      await this._build();
+    } catch (e) {
       this._reset();
 
       fs.removeSync(this.outputPath);
       fs.mkdirpSync(this.outputPath);
 
       throw e;
-    });
+    }
+    return;
   }
 }
 

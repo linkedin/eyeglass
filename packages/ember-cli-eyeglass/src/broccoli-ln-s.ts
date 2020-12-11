@@ -51,6 +51,7 @@ export class BroccoliSymbolicLinker extends BroccoliPlugin {
    */
   // eslint-disable-next-line @typescript-eslint/camelcase
   ln_s(src: string, dest: string): string {
+    // console.log(`will link ${src} to ${dest}`);
     this.files[dest] = src;
     let tartgetDir = this.outputPath;
     if (!tartgetDir) {

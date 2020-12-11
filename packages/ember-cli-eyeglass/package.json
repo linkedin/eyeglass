@@ -14,7 +14,7 @@
     "lint": "eslint --ext ts --format visualstudio .",
     "lintfix": "eslint --ext ts --fix .",
     "start": "cd ../../private-packages/eyeglass-test-app/ && yarn start",
-    "test": "yarn test:node && cd ../../private-packages/eyeglass-test-app/ && yarn test:acceptance",
+    "test": "yarn test:node && cd ../../private-packages/eyeglass-test-app/ && yarn test:acceptance && cd ../eyeglass-embroider-app/ && yarn test:acceptance",
     "test:node": "mocha node-tests/**/*-test.js"
   },
   "repository": {
