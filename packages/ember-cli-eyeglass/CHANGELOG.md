@@ -5,10 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [7.0.3](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.0.2...ember-cli-eyeglass@7.0.3) (2020-12-11)
 
-**Note:** Version bump only for package ember-cli-eyeglass
+# Features
 
-
-
+* Provides support for [Embroider](https://github.com/embroider-build/embroider) (ember-cli's next-generation build infrastructure).
 
 
 ## [7.0.2](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.0.1...ember-cli-eyeglass@7.0.2) (2020-09-07)
