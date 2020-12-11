@@ -1,14 +1,14 @@
 {
   "private": true,
   "name": "lazy-test-addon",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "keywords": [
     "ember-addon",
     "ember-engine"
   ],
   "dependencies": {
     "ember-cli-babel": "^7.20.5",
-    "ember-cli-eyeglass": "^7.0.2",
+    "ember-cli-eyeglass": "^7.0.3",
     "ember-cli-htmlbars": "^4.3.1"
   },
   "ember-addon": {
