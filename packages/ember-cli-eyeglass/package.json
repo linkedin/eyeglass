@@ -73,5 +73,10 @@
   "volta": {
     "node": "10.18.1",
     "yarn": "1.22.5"
+  },
+  "ember-addon": {
+    "after": [
+      "ember-css-modules"
+    ]
   }
 }
