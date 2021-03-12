@@ -238,28 +238,13 @@ const EMBER_CLI_EYEGLASS = {
           allowEmpty: true,
         });
         let trees: Array<ReturnType<typeof funnel> | EyeglassCompiler | BroccoliSymbolicLinker> = [withoutSassFiles, compiler];
-        if (embroiderEnabled()) {
-          trees.push(addonInfo.assets);
-        }
+        trees.push(addonInfo.assets);
         let result = new MergeTrees(trees, {
           overwrite: true
         });
         return new BroccoliDebug(result, `ember-cli-eyeglass:${name}:output`);
       }
     });
-  },
-
-  treeForPublic(tree) {
-    if (embroiderEnabled()) {
-      // assets are returned from the preprocessor tree when embroider is enabled.
-      return tree;
-    }
-    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
-    if (tree) {
-      return new MergeTrees([tree, addonInfo.assets]);
-    } else {
-      return addonInfo.assets;
-    }
   },
 
   extractConfig(host, addon) {
