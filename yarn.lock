@@ -15806,10 +15806,10 @@ sync-disk-cache@^2.0.0:
     rimraf "^3.0.0"
     username-sync "^1.0.2"
 
-systeminformation@^4.1.4:
-  version "4.26.9"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.26.9.tgz#ecc725a162c0c7d8d48226f97637a5f590042ffd"
-  integrity sha512-69MTIX9j//wnteJzQWuGL6FiMxlfS3wTWyhROI6pNUaQALYqJb3W9VtLVcEcKFOjO1vrGRgilJVFzJeRRi//Pg==
+systeminformation@^5.3.1:
+  version "5.6.2"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.2.tgz#41980e6e523eaff09febc3f7e114c4fa0fa239dd"
+  integrity sha512-B+xKaftatny2HGt9RS9Pk7Rc2Ja5zvb9rRZEiG7mcnQF4KcP68RZz4Ff+V0iVwkqfSVJ/3CIvkG+an/PWwXvbg==
 
 table@^5.2.3:
   version "5.4.6"
