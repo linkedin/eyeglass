@@ -571,7 +571,11 @@ export default class EyeglassModules {
       // find the nearest package for the origin
       let mod = this.findByPath(origin);
       if (!mod) {
-        throw new Error(`No module found containing '${origin}'.`)
+        if (this.config.eyeglass.disableStrictDependencyCheck) {
+          return true;
+        } else {
+          throw new Error(`No module found containing '${origin}'.`)
+        }
       }
       let modulePath = mod.path;
       let cacheKey = modulePath + "!" + origin;
