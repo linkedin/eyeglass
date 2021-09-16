@@ -79,7 +79,7 @@ function isUsingEmbroider(app: any): boolean {
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
 function embroiderEnabled(config: any): boolean {
-  return typeof config.embroiderEnabled !== 'undefined' ? config.embroiderEnabled : g.EYEGLASS.projectInfo.usingEmbroider;
+  return config.embroiderEnabled ?? g.EYEGLASS.projectInfo.usingEmbroider;
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
