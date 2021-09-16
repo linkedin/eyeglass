@@ -77,19 +77,20 @@ function isUsingEmbroider(app: any): boolean {
   return !!(dependencies["@embroider/core"] || devDependencies["@embroider/core"]);
 }
 
-function embroiderEnabled(): boolean {
-  return g.EYEGLASS.projectInfo.usingEmbroider;
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+function embroiderEnabled(config: any): boolean {
+  return typeof config.embroiderEnabled !== 'undefined' ? config.embroiderEnabled : g.EYEGLASS.projectInfo.usingEmbroider;
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getDefaultAssetHttpPrefix(parent: any): string {
+function getDefaultAssetHttpPrefix(parent: any, config: any): string {
   // the default http prefix differs between Ember app and lazy Ember engine
   // iterate over the parent's chain and look for a lazy engine or there are
   // no more parents, which means we've reached the Ember app project
   let current = parent;
 
   while (current.parent) {
-    if (isLazyEngine(current) && !embroiderEnabled()) {
+    if (isLazyEngine(current) && !embroiderEnabled(config)) {
       // only lazy engines will inline their assets in the engines-dist folder
       return `engines-dist/${current.name}/assets`;
     } else if (isEngine(current)) {
@@ -232,7 +233,7 @@ const EMBER_CLI_EYEGLASS = {
           addonInfo.assets.reset();
         });
         let withoutSassFiles = funnel(tree, {
-          srcDir: (isApp && !embroiderEnabled()) ? 'app/styles' : undefined,
+          srcDir: (isApp && !embroiderEnabled(config)) ? 'app/styles' : undefined,
           destDir: isApp ? 'assets' : undefined,
           exclude: ['**/*.s{a,c}ss'],
           allowEmpty: true,
@@ -291,7 +292,7 @@ const EMBER_CLI_EYEGLASS = {
       config.persistentCache += `/${cacheDir}`;
     }
 
-    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent);
+    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent, config);
 
     if (config.eyeglass.modules) {
       config.eyeglass.modules =

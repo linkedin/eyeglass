@@ -69,7 +69,7 @@ my-addon/app/styles/
                    /my-addon.scss
                    /my-other-file.scss
                    /_a-partial.scss
-                      
+
 ```
 
 * `my-addon/app/styles` - The non-partial `scss` files will become independent css files in the built output.
@@ -94,7 +94,7 @@ Given the following folder structure:
 my-addon/addon/styles/
                      /_shared.scss
                      /my-addon.scss
-                     /secondary.scss             
+                     /secondary.scss
 ```
 
 The contents of `my-addon/addon/styles/my-addon.scss` will be added to `assets/vendor.css`.
@@ -118,7 +118,7 @@ const app = new EmberEngine(defaults, {
   }
 });
 ```
- 
+
 Given the following folder structure:
 
 ```
@@ -130,11 +130,11 @@ my-engine/
          /addon/styles/
                       /_shared.scss
                       /my-engine.scss
-                      /secondary.scss             
+                      /secondary.scss
 ```
 
 If this is an eager engine:
- 
+
 
 The contents of `my-engine/app/styles/my-engine.scss` will become `dist/assets/my-engine.css`
 The contents of `my-engine/app/styles/my-other-file.scss` will become `dist/assets/my-other-file.css`
@@ -154,6 +154,35 @@ The contents of `my-engine/addon/styles/my-addon.scss` will be added to `dist/en
 The contents of `my-engine/addon/styles/secondary.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
 The contents of `my-engine/addon/styles/_shared.scss` will only be included if `my-addon.scss` or `secondary.scss` explicitly import them.
 
+### Embroider Support
+
+This addon works with Embroider builds as well as classic Ember CLI builds. By default, the addon will determine if your app is using Embroider by checking for the presence of `@embroider/core` in the `dependencies` or `devDependencies` listed in `package.json`.
+
+If you have added code to `ember-cli-build.js` that _conditionally_ uses Embroider to build your application, you can provide the `embroiderEnabled` configuration option to declare to `ember-cli-eyeglass` whether you are using Embroider for this build.
+
+```javascript
+const USE_EMBROIDER = false;
+
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    eyeglass: {
+      discover: true,
+      /**
+       * Should be a boolean, true if using Embroider, false otherwise.
+       */
+      embroiderEnabled: USE_EMBROIDER,
+    }
+  });
+
+  if (USE_EMBROIDER) {
+    return require('@embroider/compat').compatBuild(app, Webpack);
+  }
+
+  return app.toTree();
+};
+```
+
+This configuration option is specific to `ember-cli-eyeglass` and must be set if using conditional builds. If not, you may get build errors as additional files could end up in the Broccoli tree that shouldn't be present.
 
 ## Building
 
