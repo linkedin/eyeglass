@@ -4,7 +4,10 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
-    eyeglass: { discover: true }
+    eyeglass: { discover: true },
+    'ember-cli-terser': {
+      enabled: true,
+    }
   });
 
   // Use `app.import` to add additional libraries to the generated

@@ -5,7 +5,13 @@ const { Webpack } = require('@embroider/webpack');
 
 module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
-    eyeglass: { discover: true }
+    eyeglass: {
+      discover: true,
+      embroiderEnabled: true,
+    },
+    'ember-cli-terser': {
+      enabled: true,
+    }
   });
 
   // Use `app.import` to add additional libraries to the generated

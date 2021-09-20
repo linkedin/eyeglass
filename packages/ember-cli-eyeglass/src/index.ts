@@ -19,7 +19,6 @@ const debugCache = debug.extend("cache");
 const debugAssets = debug.extend("assets");
 
 interface EyeglassProjectInfo {
-  usingEmbroider: boolean;
   apps: Array<any>;
 }
 interface EyeglassAddonInfo {
@@ -48,7 +47,6 @@ if (!g.EYEGLASS) {
     infoPerApp: new WeakMap(),
     projectInfo: {
       apps: [],
-      usingEmbroider: false,
     }
   }
 }
@@ -70,16 +68,8 @@ function isLazyEngine(addon: any): boolean {
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function hasEmbroiderDependency(app: any): boolean {
-  let pkg = app.project.pkg;
-  let dependencies = pkg.dependencies || {};
-  let devDependencies = pkg.devDependencies || {};
-  return !!(dependencies["@embroider/core"] || devDependencies["@embroider/core"]);
-}
-
-//eslint-disable-next-line @typescript-eslint/no-explicit-any
 function embroiderEnabled(config: any): boolean {
-  return config.embroiderEnabled ?? g.EYEGLASS.projectInfo.usingEmbroider;
+  return config.embroiderEnabled ?? false;
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,7 +151,6 @@ const EMBER_CLI_EYEGLASS = {
     let parentPath = this.parent.root;
     debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
-      g.EYEGLASS.projectInfo.usingEmbroider = hasEmbroiderDependency(app);
       APPS.push(app);
       // we create the symlinker in persistent mode because there's not a good
       // way yet to recreate the symlinks when sass files are cached. I would
