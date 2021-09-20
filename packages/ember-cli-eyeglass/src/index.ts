@@ -70,7 +70,7 @@ function isLazyEngine(addon: any): boolean {
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isUsingEmbroider(app: any): boolean {
+function hasEmbroiderDependency(app: any): boolean {
   let pkg = app.project.pkg;
   let dependencies = pkg.dependencies || {};
   let devDependencies = pkg.devDependencies || {};
@@ -161,7 +161,7 @@ const EMBER_CLI_EYEGLASS = {
     let parentPath = this.parent.root;
     debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
-      g.EYEGLASS.projectInfo.usingEmbroider = isUsingEmbroider(app);
+      g.EYEGLASS.projectInfo.usingEmbroider = hasEmbroiderDependency(app);
       APPS.push(app);
       // we create the symlinker in persistent mode because there's not a good
       // way yet to recreate the symlinks when sass files are cached. I would
