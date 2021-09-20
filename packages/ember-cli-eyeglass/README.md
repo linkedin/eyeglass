@@ -167,9 +167,12 @@ module.exports = function(defaults) {
   let app = new EmberApp(defaults, {
     eyeglass: {
       discover: true,
-      /**
-       * Should be a boolean, true if using Embroider, false otherwise.
-       */
+      // Signals to ember-cli-eyeglass if Embroider is being used with
+      // this build. If omitted, ember-cli-eyeglass will determine if
+      // Embroider is present based on your declared dependencies in
+      // your app's package.json.
+      //
+      // Should be a boolean: true if using Embroider, false otherwise.
       embroiderEnabled: USE_EMBROIDER,
     }
   });
