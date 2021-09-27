@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+
+## [7.1.0](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.0.3...ember-cli-eyeglass@7.1.0) (2021-09-27)
+
+# Bugfix
+
+* Move from automatic, to manual detection of [Embroider](https://github.com/embroider-build/embroider) (ember-cli's next-generation build infrastructure).
+
+
 ## [7.0.3](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.0.2...ember-cli-eyeglass@7.0.3) (2020-12-11)
 
 # Features
