@@ -16,17 +16,25 @@ set to an options object that will be passed to broccoli-eyeglass. For
 details on the options available, please read the [broccoli-eyeglass
 options documentation](https://github.com/linkedin/eyeglass/tree/master/packages/broccoli-eyeglass#options).
 
+In addition to the options supported by `broccoli-eyeglass`, this addon
+accepts an additional option, `embroiderEnabled`. You must set this
+option to `true` if your app is built using Embroider, or it may fail
+to build correctly.
+
 ### Apps
 
 ```js
 // path/to/app/ember-cli-build.js
 const app = new EmberApp(defaults, {
   eyeglass: {
-    /* Enable discovery of Sass files to compile.
-       All files not beginning with an underscore will be compiled. */
+    // Enable discovery of Sass files to compile.
+    // All files not beginning with an underscore will be compiled.
     discover: true,
-     /* apply other broccoli-eyeglass options here */
-     /* apply node-sass options here */
+    // Signals to ember-cli-eyeglass if Embroider is being used with
+    // this build. Should be true if using Embroider.
+    embroiderEnabled: false,
+    // apply other broccoli-eyeglass options here
+    // apply node-sass options here
     eyeglass: {
       /* eyeglass options */
     }
@@ -69,7 +77,7 @@ my-addon/app/styles/
                    /my-addon.scss
                    /my-other-file.scss
                    /_a-partial.scss
-                      
+
 ```
 
 * `my-addon/app/styles` - The non-partial `scss` files will become independent css files in the built output.
@@ -94,7 +102,7 @@ Given the following folder structure:
 my-addon/addon/styles/
                      /_shared.scss
                      /my-addon.scss
-                     /secondary.scss             
+                     /secondary.scss
 ```
 
 The contents of `my-addon/addon/styles/my-addon.scss` will be added to `assets/vendor.css`.
@@ -118,7 +126,7 @@ const app = new EmberEngine(defaults, {
   }
 });
 ```
- 
+
 Given the following folder structure:
 
 ```
@@ -130,11 +138,11 @@ my-engine/
          /addon/styles/
                       /_shared.scss
                       /my-engine.scss
-                      /secondary.scss             
+                      /secondary.scss
 ```
 
 If this is an eager engine:
- 
+
 
 The contents of `my-engine/app/styles/my-engine.scss` will become `dist/assets/my-engine.css`
 The contents of `my-engine/app/styles/my-other-file.scss` will become `dist/assets/my-other-file.css`
@@ -153,7 +161,6 @@ The contents of `my-engine/app/styles/_shared.scss` will be ignored unless impor
 The contents of `my-engine/addon/styles/my-addon.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
 The contents of `my-engine/addon/styles/secondary.scss` will be added to `dist/engine-dist/my-engine/assets/engine.css`
 The contents of `my-engine/addon/styles/_shared.scss` will only be included if `my-addon.scss` or `secondary.scss` explicitly import them.
-
 
 ## Building
 

@@ -19,7 +19,6 @@ const debugCache = debug.extend("cache");
 const debugAssets = debug.extend("assets");
 
 interface EyeglassProjectInfo {
-  usingEmbroider: boolean;
   apps: Array<any>;
 }
 interface EyeglassAddonInfo {
@@ -48,7 +47,6 @@ if (!g.EYEGLASS) {
     infoPerApp: new WeakMap(),
     projectInfo: {
       apps: [],
-      usingEmbroider: false,
     }
   }
 }
@@ -70,26 +68,19 @@ function isLazyEngine(addon: any): boolean {
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isUsingEmbroider(app: any): boolean {
-  let pkg = app.project.pkg;
-  let dependencies = pkg.dependencies || {};
-  let devDependencies = pkg.devDependencies || {};
-  return !!(dependencies["@embroider/core"] || devDependencies["@embroider/core"]);
-}
-
-function embroiderEnabled(): boolean {
-  return g.EYEGLASS.projectInfo.usingEmbroider;
+function embroiderEnabled(config: any): boolean {
+  return config.embroiderEnabled ?? false;
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getDefaultAssetHttpPrefix(parent: any): string {
+function getDefaultAssetHttpPrefix(parent: any, config: any): string {
   // the default http prefix differs between Ember app and lazy Ember engine
   // iterate over the parent's chain and look for a lazy engine or there are
   // no more parents, which means we've reached the Ember app project
   let current = parent;
 
   while (current.parent) {
-    if (isLazyEngine(current) && !embroiderEnabled()) {
+    if (isLazyEngine(current) && !embroiderEnabled(config)) {
       // only lazy engines will inline their assets in the engines-dist folder
       return `engines-dist/${current.name}/assets`;
     } else if (isEngine(current)) {
@@ -160,7 +151,6 @@ const EMBER_CLI_EYEGLASS = {
     let parentPath = this.parent.root;
     debugSetup("Initializing %s with eyeglass support for %s at %s", isApp ? "app" : "addon", name, parentPath);
     if (isApp) {
-      g.EYEGLASS.projectInfo.usingEmbroider = isUsingEmbroider(app);
       APPS.push(app);
       // we create the symlinker in persistent mode because there's not a good
       // way yet to recreate the symlinks when sass files are cached. I would
@@ -232,7 +222,7 @@ const EMBER_CLI_EYEGLASS = {
           addonInfo.assets.reset();
         });
         let withoutSassFiles = funnel(tree, {
-          srcDir: (isApp && !embroiderEnabled()) ? 'app/styles' : undefined,
+          srcDir: (isApp && !embroiderEnabled(config)) ? 'app/styles' : undefined,
           destDir: isApp ? 'assets' : undefined,
           exclude: ['**/*.s{a,c}ss'],
           allowEmpty: true,
@@ -291,7 +281,7 @@ const EMBER_CLI_EYEGLASS = {
       config.persistentCache += `/${cacheDir}`;
     }
 
-    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent);
+    config.assetsHttpPrefix = config.assetsHttpPrefix || getDefaultAssetHttpPrefix(this.parent, config);
 
     if (config.eyeglass.modules) {
       config.eyeglass.modules =
