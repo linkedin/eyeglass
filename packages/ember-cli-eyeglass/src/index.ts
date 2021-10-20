@@ -26,10 +26,11 @@ interface EyeglassAddonInfo {
   parentPath: string;
   isApp: boolean;
   app: any;
-  assets: BroccoliSymbolicLinker;
+  assets?: BroccoliSymbolicLinker;
 }
 
 interface EyeglassAppInfo {
+  assets?: BroccoliSymbolicLinker;
   sessionCache: Map<string, string | number>;
 }
 
@@ -158,6 +159,7 @@ const EMBER_CLI_EYEGLASS = {
       // across builds anyway.
       EYEGLASS_INFO_PER_APP.set(app, {
         sessionCache: new Map(),
+        assets: new BroccoliSymbolicLinker({}, {annotation: app.name, persistentOutput: true})
       });
     }
     let addonInfo = {
@@ -182,6 +184,9 @@ const EMBER_CLI_EYEGLASS = {
     Eyeglass.resetGlobalCaches();
     for (let app of APPS) {
       let appInfo = EYEGLASS_INFO_PER_APP.get(app);
+      let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
+      let extracted = this.extractConfig(addonInfo.app, this);
+      if (!embroiderEnabled(extracted)) { appInfo.assets.reset(); }
       debugCache("clearing %d cached items from the eyeglass build cache for %s", appInfo.sessionCache.size, app.name);
       appInfo.sessionCache.clear();
     }
@@ -189,6 +194,25 @@ const EMBER_CLI_EYEGLASS = {
   buildError(_error) {
     debugBuild("Build Failed.");
     this._resetCaches();
+  },
+  postprocessTree(type, tree) {
+    let addon = this;
+    let addonInfo = EYEGLASS_INFO_PER_ADDON.get(this);
+    let extracted = this.extractConfig(addonInfo.app, addon);
+    // This code is intended only for classic ember builds.
+    // (There's no "all" postprocess tree in embroider.)
+    // Skip this entirely for embroider builds (we'll include
+    // assets on a per-addon basis in the CSS tree).
+    if (embroiderEnabled(extracted)) {
+      return tree;
+    }
+    if (type === "all" && addonInfo.isApp) {
+      debugBuild("Merging eyeglass asset tree with the '%s' tree", type);
+      let appInfo = EYEGLASS_INFO_PER_APP.get(addonInfo.app);
+      return new MergeTrees([tree, appInfo.assets], {overwrite: true});
+    } else {
+      return tree;
+    }
   },
   setupPreprocessorRegistry(type, registry) {
     let addon = this;
@@ -218,9 +242,11 @@ const EMBER_CLI_EYEGLASS = {
             // pass this only happens with a cache after downgrading ember-cli.
           }
         });
-        compiler.events.on("build", () => {
-          addonInfo.assets.reset();
-        });
+        if (embroiderEnabled(config)) {
+          compiler.events.on("build", () => {
+            addonInfo.assets.reset();
+          });
+        }
         let withoutSassFiles = funnel(tree, {
           srcDir: (isApp && !embroiderEnabled(config)) ? 'app/styles' : undefined,
           destDir: isApp ? 'assets' : undefined,
@@ -228,7 +254,11 @@ const EMBER_CLI_EYEGLASS = {
           allowEmpty: true,
         });
         let trees: Array<ReturnType<typeof funnel> | EyeglassCompiler | BroccoliSymbolicLinker> = [withoutSassFiles, compiler];
-        trees.push(addonInfo.assets);
+        if (embroiderEnabled(config)) {
+          // Push the addon assets tree on to this build only if we're using embroider.
+          // (For classic builds, the postprocess tree will handle this.)
+          trees.push(addonInfo.assets);
+        }
         let result = new MergeTrees(trees, {
           overwrite: true
         });
@@ -245,7 +275,7 @@ const EMBER_CLI_EYEGLASS = {
     return defaultsDeep(addonConfig, hostConfig);
   },
 
-  linkAsset(srcFile: string, httpRoot: string, destUri: string): string {
+  linkAsset(srcFile: string, httpRoot: string, destUri: string, config: any): string {
     let rootPath = httpRoot.startsWith("/") ? httpRoot.substring(1) : httpRoot;
     let destPath = destUri.startsWith("/") ? destUri.substring(1) : destUri;
 
@@ -257,7 +287,13 @@ const EMBER_CLI_EYEGLASS = {
     if (destPath.startsWith(rootPath)) {
       destPath = path.relative(rootPath, destPath);
     }
-    let {assets} = EYEGLASS_INFO_PER_ADDON.get(this);
+    let assets;
+    if (embroiderEnabled(config)) {
+      assets = EYEGLASS_INFO_PER_ADDON.get(this).assets;
+    } else {
+      let {app} = EYEGLASS_INFO_PER_ADDON.get(this);
+      assets = EYEGLASS_INFO_PER_APP.get(app).assets;
+    }
     debugAssets("Will link asset %s to %s to expose it at %s relative to %s",
       srcFile, destPath, destUri, httpRoot);
     return assets.ln_s(srcFile, destPath);
@@ -293,7 +329,7 @@ const EMBER_CLI_EYEGLASS = {
     config.configureEyeglass = (eyeglass, sass, details) => {
       eyeglass.assets.installer((file, uri, fallbackInstaller, cb) => {
         try {
-          cb(null, this.linkAsset(file, eyeglass.options.eyeglass.httpRoot || "/", uri))
+          cb(null, this.linkAsset(file, eyeglass.options.eyeglass.httpRoot || "/", uri, config))
         } catch (e) {
           cb(e);
         }
