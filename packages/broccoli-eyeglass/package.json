@@ -86,7 +86,7 @@
     "eslint-plugin-prettier": "^3.0.0",
     "fixturify": "^0.3.4",
     "mocha": "^5.2.0",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
     "typescript": "~3.8.0",
