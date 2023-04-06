@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.1.1](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.1.0...ember-cli-eyeglass@7.1.1) (2023-04-06)
+
+# Bugfix
+
+* Use previous asset bundling code if classic.
 
 ## [7.1.0](https://github.com/linkedin/eyeglass/compare/ember-cli-eyeglass@7.0.3...ember-cli-eyeglass@7.1.0) (2021-09-27)
 
